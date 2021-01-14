@@ -1,11 +1,17 @@
-use std::{collections::binary_heap::Iter, fmt};
+use std::fmt;
 
-use bytes::{BufMut, Bytes, BytesMut};
+use bytes::{BufMut, BytesMut};
+use kafka_connector_derive::FromBytes;
+use kafka_connector_derive::ToBytes;
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
-use kafka_connector_derive::KafkaSerialize;
-use kafka_connector_derive::KafkaDeserialize;
+
+macro_rules! log {
+    ($($y:expr),+) => {
+        // println!($($y),+);
+    };
+}
 
 #[tokio::main]
 pub async fn main() -> anyhow::Result<()> {
@@ -18,7 +24,7 @@ pub async fn main() -> anyhow::Result<()> {
 
     let mut buffer = BytesMut::with_capacity(4096);
 
-    let req = ApiVersionsRequest::new(1,"my-client".to_string());
+    let req = ApiVersionsRequest::new(1, "my-client".to_string());
     req.serialize(&mut buffer);
     let len = buffer.len() as i32;
     stream.write_all(&len.to_be_bytes()).await?;
@@ -28,18 +34,15 @@ pub async fn main() -> anyhow::Result<()> {
     println!("Read {} bytes: {:?}", read, size);
     let cap = i32::from_be_bytes(size);
     println!("Message size: {}", cap);
-    let mut buf2 =vec![0;cap as usize];
-    let read = stream.read_exact(&mut buf2).await?;
+    let mut buf2 = vec![0; cap as usize];
+    let _ = stream.read_exact(&mut buf2).await?;
     let mut x = buf2.iter().copied();
-    let metadata =KafkaResponseS::<ApiVersionsResponse>::deserialize(&mut x);
-    println!("ApiVersions: {:#?}",metadata);
-
-
+    let metadata = KafkaResponseS::<ApiVersionsResponse>::deserialize(&mut x);
+    println!("ApiVersions: {:#?}", metadata);
 
     let req = MetadataRequest::new(2, "my-client".to_string(), topics);
     req.serialize(&mut buffer);
 
-    // ~ send the prepared buffer
     println!("Before write");
     let len = buffer.len() as i32;
     println!("Writing len {:?}", len.to_be_bytes());
@@ -48,71 +51,53 @@ pub async fn main() -> anyhow::Result<()> {
     println!("Writing buff {:?}", buffer);
     stream.write_all(&buffer).await?;
     println!("Before read");
-    // match __send_request(conn, req) {
-    //     Ok(_) => return __get_response::<protocol::MetadataResponse>(conn),
-    //     Err(e) => debug!(
-    //         "fetch_metadata: failed to request metadata from {}: {}",
-    //         host, e
-    //     ),
-    // }
     let mut size: [u8; 4] = [0, 0, 0, 0];
     let read = stream.read_exact(&mut size).await?;
     println!("Read {} bytes: {:?}", read, size);
 
     let cap = i32::from_be_bytes(size);
     println!("Message size: {}", cap);
-    // let mut buf2 = BytesMut::with_capacity(cap as usize);
-    let mut buf2 = vec![0;cap as usize];
-    let read = stream.read_exact(&mut buf2).await?;
-    // let buf2 = Bytes::copy_from_slice(&buf2);
-    // println!("Read {} bytes: {:?}", read, buf2);
-    println!("A");
+    let mut buf2 = vec![0; cap as usize];
+    let _ = stream.read_exact(&mut buf2).await?;
     let mut x = buf2.iter().copied();
-    println!("B");
-    let metadata =KafkaResponseS::<MetadataResponse>::deserialize(&mut x);
-    println!("Metadata: {:#?}",metadata);
+    let metadata = KafkaResponseS::<MetadataResponse>::deserialize(&mut x);
+    println!("Metadata: {:#?}", metadata);
 
     Ok(())
 }
 
-
-
-
-
-pub trait KafkaRequest {
-    fn serialize(&self,buf:&mut BytesMut);
+pub trait ToBytes {
+    fn serialize(&self, buf: &mut BytesMut);
 }
-impl KafkaRequest for str {
+impl ToBytes for str {
     fn serialize(&self, buf: &mut BytesMut) {
         buf.put_i16(self.len() as i16);
         buf.put_slice(&self.as_bytes());
     }
 }
-impl KafkaRequest for String {
+impl ToBytes for String {
     fn serialize(&self, buf: &mut BytesMut) {
         buf.put_i16(self.len() as i16);
         buf.put_slice(&self.as_bytes());
     }
 }
-impl KafkaRequest for i16 {
+impl ToBytes for i16 {
     fn serialize(&self, buf: &mut BytesMut) {
         buf.put_i16(self.clone());
     }
 }
-impl KafkaRequest for i32 {
+impl ToBytes for i32 {
     fn serialize(&self, buf: &mut BytesMut) {
         buf.put_i32(self.clone());
     }
 }
-impl<T> KafkaRequest for Vec<T> {
+impl<T> ToBytes for Vec<T> {
     fn serialize(&self, buf: &mut BytesMut) {
         buf.put_i32(self.len() as i32);
     }
 }
 
-
-
-#[derive(Debug,KafkaSerialize)]
+#[derive(Debug, ToBytes)]
 pub struct HeaderRequest {
     pub api_key: i16,
     pub api_version: i16,
@@ -135,19 +120,19 @@ impl HeaderRequest {
         }
     }
 }
-impl HeaderRequest {
-    fn encode(&self, buf: &mut BufMut) {
-        buf.put_i16(self.api_key);
-        buf.put_i16(self.api_version);
-        buf.put_i32(self.correlation_id);
-        buf.put_i16(self.client_id.len() as i16);
-        buf.put_slice(&self.client_id.as_bytes());
-    }
-}
+// impl HeaderRequest {
+//     fn encode(&self, buf: &mut BufMut) {
+//         buf.put_i16(self.api_key);
+//         buf.put_i16(self.api_version);
+//         buf.put_i32(self.correlation_id);
+//         buf.put_i16(self.client_id.len() as i16);
+//         buf.put_slice(&self.client_id.as_bytes());
+//     }
+// }
 const API_KEY_METADATA: i16 = 3;
 const API_VERSION: i16 = 0;
 
-#[derive(Debug,KafkaSerialize)]
+#[derive(Debug, ToBytes)]
 pub struct MetadataRequest {
     pub header: HeaderRequest,
     pub topics: Vec<String>,
@@ -170,8 +155,7 @@ impl MetadataRequest {
 //     }
 // }
 
-
-#[derive(Debug,KafkaSerialize)]
+#[derive(Debug, ToBytes)]
 pub struct ApiVersionsRequest {
     pub header: HeaderRequest,
 }
@@ -184,107 +168,133 @@ impl ApiVersionsRequest {
     }
 }
 
-#[derive(Debug,KafkaDeserialize)]
+#[derive(Debug, FromBytes)]
 pub struct ApiVersionsResponse {
     pub error_code: i16,
     pub topic: Vec<ApiKeys>,
 }
-#[derive(Debug,KafkaDeserialize)]
+#[derive(Debug, FromBytes)]
 pub struct ApiKeys {
     pub api_key: i16,
     pub min_version: i16,
     pub max_version: i16,
 }
 
-
-
-pub trait KafkaResponse {
-    fn deserialize<T>(buf: &mut T) -> Self where T:Iterator<Item=u8> ;
+pub trait FromBytes {
+    fn deserialize<T>(buf: &mut T) -> Self
+    where
+        T: Iterator<Item = u8>;
 }
 // impl<T> KafkaResponse<T> for i32 where T: IntoIterator<Item = u8> {
 //     fn deserialize(buf:&T) {
 //         buf.put_i32(self.clone());
 //     }
 // }
-impl<R> KafkaResponse for Vec<R> where R:KafkaResponse+fmt::Debug {
-    fn deserialize<T>(buf: &mut T) -> Vec<R> where T:Iterator<Item=u8> {
+impl<R> FromBytes for Vec<R>
+where
+    R: FromBytes + fmt::Debug,
+{
+    fn deserialize<T>(buf: &mut T) -> Vec<R>
+    where
+        T: Iterator<Item = u8>,
+    {
         println!("Deserialize start Vec");
-        let len:[u8;4]  = [buf.next().unwrap(),buf.next().unwrap(),buf.next().unwrap(),buf.next().unwrap()];
+        let len: [u8; 4] = [
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+        ];
         let cap = i32::from_be_bytes(len);
-        println!("Vec size {}",cap);
+        println!("Vec size {}", cap);
         let mut ret = Vec::with_capacity(cap as usize);
-        for i in 0..cap{
-        println!("Start element {}",i);
-        let element = KafkaResponse::deserialize(buf);
-        println!("Element deserialized: {:?}",element);
-        ret.push(element);
-        } 
+        for i in 0..cap {
+            println!("Start element {}", i);
+            let element = FromBytes::deserialize(buf);
+            println!("Element deserialized: {:?}", element);
+            ret.push(element);
+        }
         println!("Deserialize end Vec");
         ret
     }
 }
-impl KafkaResponse for i32 {
-    fn deserialize<T>(buf: &mut T) -> Self  where T: Iterator<Item = u8>{
+impl FromBytes for i32 {
+    fn deserialize<T>(buf: &mut T) -> Self
+    where
+        T: Iterator<Item = u8>,
+    {
         println!("Deserialize start i32");
-        let data:[u8;4]  = [buf.next().unwrap(),buf.next().unwrap(),buf.next().unwrap(),buf.next().unwrap()];
+        let data: [u8; 4] = [
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+        ];
         let x = i32::from_be_bytes(data);
-        println!("{}",x);
+        println!("{}", x);
         x
-
     }
 }
-impl KafkaResponse for i16 {
-    fn deserialize<T>(buf: &mut T) -> Self where T: Iterator<Item = u8> {
+impl FromBytes for i16 {
+    fn deserialize<T>(buf: &mut T) -> Self
+    where
+        T: Iterator<Item = u8>,
+    {
         println!("Deserialize start i16");
-        let data:[u8;2]  = [buf.next().unwrap(),buf.next().unwrap()];
+        let data: [u8; 2] = [buf.next().unwrap(), buf.next().unwrap()];
         let x = i16::from_be_bytes(data);
-        println!("{}",x);
+        println!("{}", x);
         x
     }
 }
 
-
-impl KafkaResponse for String {
-    fn deserialize<T>(buf: &mut T) -> Self where T: Iterator<Item = u8> {
+impl FromBytes for String {
+    fn deserialize<T>(buf: &mut T) -> Self
+    where
+        T: Iterator<Item = u8>,
+    {
         println!("Deserialize start String");
-        let len:i16 = KafkaResponse::deserialize(buf);
-        println!("String length {}",len);
-        let data:Vec<u8>  = buf.take(len as usize).collect();
+        let len: i16 = FromBytes::deserialize(buf);
+        println!("String length {}", len);
+        let data: Vec<u8> = buf.take(len as usize).collect();
         println!("Deserialize end String");
         let x = String::from_utf8_lossy(&data).to_string();
-        println!("{}",x);
+        println!("{}", x);
         x
     }
 }
-#[derive(Debug,KafkaDeserialize)]
-pub struct KafkaResponseS<S> where S:KafkaResponse{
+#[derive(Debug, FromBytes)]
+pub struct KafkaResponseS<S>
+where
+    S: FromBytes,
+{
     pub header: HeaderResponse,
-    pub response: S
+    pub response: S,
 }
 
-#[derive(Debug,KafkaDeserialize)]
+#[derive(Debug, FromBytes)]
 pub struct HeaderResponse {
     pub correlation: i32,
 }
 
-#[derive(Debug,KafkaDeserialize)]
+#[derive(Debug, FromBytes)]
 pub struct MetadataResponse {
     pub brokers: Vec<Broker>,
     pub topic: Vec<Topic>,
 }
-#[derive(Debug,KafkaDeserialize)]
+#[derive(Debug, FromBytes)]
 pub struct Broker {
     pub node_id: i32,
     pub host: String,
     pub port: i32,
 }
-#[derive(Debug,KafkaDeserialize)]
+#[derive(Debug, FromBytes)]
 pub struct Topic {
     pub error_code: i16,
     pub name: String,
     pub partitions: Vec<Partition>,
 }
-#[derive(Debug,KafkaDeserialize)]
+#[derive(Debug, FromBytes)]
 pub struct Partition {
     pub error_code: i16,
     pub partition_index: i32,
