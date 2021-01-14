@@ -15,21 +15,29 @@ pub async fn main() -> anyhow::Result<()> {
     println!("After connect");
 
     let topics: Vec<String> = Vec::new();
-    let req = MetadataRequest::new(1, "my-client".to_string(), topics);
 
-    // ~ buffer to receive data to be sent
     let mut buffer = BytesMut::with_capacity(4096);
-    // ~ reserve bytes for the actual request size (we'll fill in that later)
-    // buffer.extend_from_slice(&[0, 0, 0, 0]);
-    // ~ encode the request data
-    // req.encode(&mut buffer);
-    req.serialize(&mut buffer);
-    // try!(request.encode(&mut buffer));
-    // ~ put the size of the request data into the reseved area
-    // let size = buffer.len() as i32 - 4;
-    // size.encode(&mut &mut buffer[..])?;
 
-    // trace!("__send_request: Sending bytes: {:?}", &buffer);
+    let req = ApiVersionsRequest::new(1,"my-client".to_string());
+    req.serialize(&mut buffer);
+    let len = buffer.len() as i32;
+    stream.write_all(&len.to_be_bytes()).await?;
+    stream.write_all(&buffer).await?;
+    let mut size: [u8; 4] = [0, 0, 0, 0];
+    let read = stream.read_exact(&mut size).await?;
+    println!("Read {} bytes: {:?}", read, size);
+    let cap = i32::from_be_bytes(size);
+    println!("Message size: {}", cap);
+    let mut buf2 =vec![0;cap as usize];
+    let read = stream.read_exact(&mut buf2).await?;
+    let mut x = buf2.iter().copied();
+    let metadata =KafkaResponseS::<ApiVersionsResponse>::deserialize(&mut x);
+    println!("ApiVersions: {:#?}",metadata);
+
+
+
+    let req = MetadataRequest::new(2, "my-client".to_string(), topics);
+    req.serialize(&mut buffer);
 
     // ~ send the prepared buffer
     println!("Before write");
@@ -54,7 +62,7 @@ pub async fn main() -> anyhow::Result<()> {
     let cap = i32::from_be_bytes(size);
     println!("Message size: {}", cap);
     // let mut buf2 = BytesMut::with_capacity(cap as usize);
-    let mut buf2 = [0; 31];
+    let mut buf2 = vec![0;cap as usize];
     let read = stream.read_exact(&mut buf2).await?;
     // let buf2 = Bytes::copy_from_slice(&buf2);
     // println!("Read {} bytes: {:?}", read, buf2);
@@ -154,12 +162,38 @@ impl MetadataRequest {
     }
 }
 
-impl MetadataRequest {
-    fn encode(&self, buf: &mut BufMut) {
-        self.header.encode(buf);
-        let l = self.topics.len() as i32;
-        buf.put_i32(l);
+// impl MetadataRequest {
+//     fn encode(&self, buf: &mut BufMut) {
+//         self.header.encode(buf);
+//         let l = self.topics.len() as i32;
+//         buf.put_i32(l);
+//     }
+// }
+
+
+#[derive(Debug,KafkaSerialize)]
+pub struct ApiVersionsRequest {
+    pub header: HeaderRequest,
+}
+
+impl ApiVersionsRequest {
+    pub fn new(correlation_id: i32, client_id: String) -> ApiVersionsRequest {
+        ApiVersionsRequest {
+            header: HeaderRequest::new(18, 0, correlation_id, client_id),
+        }
     }
+}
+
+#[derive(Debug,KafkaDeserialize)]
+pub struct ApiVersionsResponse {
+    pub error_code: i16,
+    pub topic: Vec<ApiKeys>,
+}
+#[derive(Debug,KafkaDeserialize)]
+pub struct ApiKeys {
+    pub api_key: i16,
+    pub min_version: i16,
+    pub max_version: i16,
 }
 
 
@@ -248,13 +282,13 @@ pub struct Broker {
 pub struct Topic {
     pub error_code: i16,
     pub name: String,
-    // pub partitions: Vec<Partition>,
+    pub partitions: Vec<Partition>,
 }
 #[derive(Debug,KafkaDeserialize)]
 pub struct Partition {
-    // pub error_code: i16,
-    // pub partition_index: i32,
-    // pub leader_id: i32,
-    // pub replica_nodes: Vec<i32>,
-    // pub isr_nodes: Vec<i32>,
+    pub error_code: i16,
+    pub partition_index: i32,
+    pub leader_id: i32,
+    pub replica_nodes: Vec<i32>,
+    pub isr_nodes: Vec<i32>,
 }
