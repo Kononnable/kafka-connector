@@ -1,8 +1,4 @@
-macro_rules! log {
-    ($($y:expr),+) => {
-        // println!($($y),+);
-    };
-}
+use crate::log;
 
 pub trait FromBytes {
     fn deserialize<T>(buf: &mut T) -> Self

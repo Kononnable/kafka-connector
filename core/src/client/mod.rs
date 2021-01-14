@@ -7,6 +7,7 @@ pub struct LibraryState {
 
 pub struct Client {
     pub connection: TcpStream,
+    pub last_correlation: i32,
 }
 
 pub struct KafkaState {}
