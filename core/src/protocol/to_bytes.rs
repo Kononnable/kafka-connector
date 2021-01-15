@@ -17,12 +17,12 @@ impl ToBytes for String {
 }
 impl ToBytes for Option<String> {
     fn serialize(&self, buf: &mut BytesMut) {
-        match &self{
-            Some(str)=>{
+        match &self {
+            Some(str) => {
                 buf.put_i16(str.len() as i16);
                 buf.put_slice(str.as_bytes());
-            },
-            None=>{
+            }
+            None => {
                 buf.put_i16(-1 as i16);
             }
         }

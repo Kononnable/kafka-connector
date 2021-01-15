@@ -1,7 +1,7 @@
 pub mod headers;
 
-pub mod produce;
 pub mod fetch;
+pub mod produce;
 
 pub enum ApiNumbers {
     Produce = 0,

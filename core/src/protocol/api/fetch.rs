@@ -6,13 +6,13 @@ pub struct FetchRequest0 {
     pub replica_id: i32,
     pub max_wait_ms: i32,
     pub min_bytes: i32,
-    pub topics: Vec<Topic0>
+    pub topics: Vec<Topic0>,
 }
 
 #[derive(Debug, ToBytes)]
 pub struct Topic0 {
     pub topic: String,
-    pub partitions: Vec<Partition0>
+    pub partitions: Vec<Partition0>,
 }
 
 #[derive(Debug, ToBytes)]
@@ -31,7 +31,7 @@ pub struct FetchRequest3 {
     pub max_wait_ms: i32,
     pub min_bytes: i32,
     pub max_bytes: i32,
-    pub topics: Vec<Topic0>
+    pub topics: Vec<Topic0>,
 }
 
 #[derive(Debug, ToBytes)]
@@ -41,9 +41,8 @@ pub struct FetchRequest4 {
     pub min_bytes: i32,
     pub max_bytes: i32,
     pub isolation_level: i8,
-    pub topics: Vec<Topic0>
+    pub topics: Vec<Topic0>,
 }
-
 
 #[derive(Debug, ToBytes)]
 pub struct FetchRequest5 {
@@ -52,12 +51,12 @@ pub struct FetchRequest5 {
     pub min_bytes: i32,
     pub max_bytes: i32,
     pub isolation_level: i8,
-    pub topics: Vec<Topic5>
+    pub topics: Vec<Topic5>,
 }
 #[derive(Debug, ToBytes)]
 pub struct Topic5 {
     pub topic: String,
-    pub partitions: Vec<Partition5>
+    pub partitions: Vec<Partition5>,
 }
 
 #[derive(Debug, ToBytes)]
@@ -69,7 +68,6 @@ pub struct Partition5 {
 }
 
 pub type FetchRequest6 = FetchRequest5;
-
 
 #[derive(Debug, ToBytes)]
 pub struct FetchRequest7 {
@@ -86,7 +84,7 @@ pub struct FetchRequest7 {
 #[derive(Debug, ToBytes)]
 pub struct Topic7 {
     pub topic: String,
-    pub partitions: Vec<Partition7>
+    pub partitions: Vec<Partition7>,
 }
 
 #[derive(Debug, ToBytes)]
@@ -99,6 +97,6 @@ pub struct Partition7 {
 #[derive(Debug, ToBytes)]
 pub struct ForgottenTopic7 {
     pub topic: String,
-    pub partitions: Vec<i32>
+    pub partitions: Vec<i32>,
 }
 pub type FetchRequest8 = FetchRequest7;

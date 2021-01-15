@@ -2,7 +2,6 @@ use std::fs::create_dir;
 
 use parser::parser::parse_api_call;
 
-
 const REQ: &str = r#"Fetch Response (Version: 3) => throttle_time_ms [responses] 
 throttle_time_ms => INT32
 responses => topic [partition_responses] 
@@ -15,6 +14,6 @@ responses => topic [partition_responses]
 "#;
 
 fn main() {
-   let result =  parse_api_call(REQ).unwrap();
-   println!("{:#?}",result);
+    let result = parse_api_call(REQ).unwrap();
+    println!("{:#?}", result);
 }

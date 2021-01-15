@@ -68,7 +68,16 @@ impl FromBytes for i64 {
         T: Iterator<Item = u8>,
     {
         log!("Deserialize start i64");
-        let data: [u8; 8] = [buf.next().unwrap(), buf.next().unwrap(),buf.next().unwrap(), buf.next().unwrap(),buf.next().unwrap(), buf.next().unwrap(),buf.next().unwrap(), buf.next().unwrap()];
+        let data: [u8; 8] = [
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+        ];
         let x = i64::from_be_bytes(data);
         log!("{}", x);
         x
@@ -98,8 +107,8 @@ impl FromBytes for Option<String> {
         log!("Deserialize start String");
         let len: i16 = FromBytes::deserialize(buf);
         log!("String length {}", len);
-        if len==-1 {
-           return None;
+        if len == -1 {
+            return None;
         }
         let data: Vec<u8> = buf.take(len as usize).collect();
         log!("Deserialize end String");
