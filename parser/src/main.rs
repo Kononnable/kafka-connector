@@ -1,19 +1,33 @@
-use std::fs::create_dir;
-
 use parser::parser::parse_api_call;
+use scraper::{Html, Selector};
 
-const REQ: &str = r#"Fetch Response (Version: 3) => throttle_time_ms [responses] 
-throttle_time_ms => INT32
-responses => topic [partition_responses] 
-  topic => STRING
-  partition_responses => partition error_code high_watermark record_set 
-    partition => INT32
-    error_code => INT16
-    high_watermark => INT64
-    record_set => RECORDS
-"#;
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
 
-fn main() {
-    let result = parse_api_call(REQ).unwrap();
-    println!("{:#?}", result);
+    let body = reqwest::get("https://kafka.apache.org/protocol")
+        .await?
+        .text()
+        .await?;
+
+    let fragment = Html::parse_fragment(&body);
+    let selector = Selector::parse("pre").unwrap();
+
+    let definitions: Vec<String> = fragment
+        .select(&selector)
+        .skip(6) // example & headers
+        .map(|x| x.inner_html().replace("&gt;", ">"))
+        .collect();
+
+    let definitions: Vec<_> = definitions
+        .iter()
+        .map(|x| {
+          println!("{}",x);
+          parse_api_call(&x).unwrap().1
+        })
+        .collect();
+    for definition in definitions {
+        println!("{:#?}", definition);
+    }
+
+    Ok(())
 }
