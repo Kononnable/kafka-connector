@@ -1,5 +1,3 @@
-use crate::log;
-
 use super::super::from_bytes::FromBytes;
 use super::super::to_bytes::ToBytes;
 

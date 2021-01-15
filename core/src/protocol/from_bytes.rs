@@ -62,6 +62,18 @@ impl FromBytes for i16 {
         x
     }
 }
+impl FromBytes for i64 {
+    fn deserialize<T>(buf: &mut T) -> Self
+    where
+        T: Iterator<Item = u8>,
+    {
+        log!("Deserialize start i64");
+        let data: [u8; 8] = [buf.next().unwrap(), buf.next().unwrap(),buf.next().unwrap(), buf.next().unwrap(),buf.next().unwrap(), buf.next().unwrap(),buf.next().unwrap(), buf.next().unwrap()];
+        let x = i64::from_be_bytes(data);
+        log!("{}", x);
+        x
+    }
+}
 impl FromBytes for String {
     fn deserialize<T>(buf: &mut T) -> Self
     where
@@ -75,5 +87,24 @@ impl FromBytes for String {
         let x = String::from_utf8_lossy(&data).to_string();
         log!("{}", x);
         x
+    }
+}
+
+impl FromBytes for Option<String> {
+    fn deserialize<T>(buf: &mut T) -> Self
+    where
+        T: Iterator<Item = u8>,
+    {
+        log!("Deserialize start String");
+        let len: i16 = FromBytes::deserialize(buf);
+        log!("String length {}", len);
+        if len==-1 {
+           return None;
+        }
+        let data: Vec<u8> = buf.take(len as usize).collect();
+        log!("Deserialize end String");
+        let x = String::from_utf8_lossy(&data).to_string();
+        log!("{}", x);
+        Some(x)
     }
 }

@@ -82,7 +82,7 @@ pub fn from_bytes(input: TokenStream) -> TokenStream {
 
         impl #impl_generics FromBytes for #name #ty_generics #where_clause {
             fn deserialize<T>(buf: &mut T)-> Self where T: Iterator<Item=u8> {
-                log!("From bytes start {}",#s_name);
+                crate::log!("From bytes start {}",#s_name);
                 #name {
                     #deserialization
                 }

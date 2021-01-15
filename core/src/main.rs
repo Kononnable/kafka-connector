@@ -7,6 +7,7 @@ use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 
+#[macro_export]
 macro_rules! log {
     ($($y:expr),+) => {
         // println!($($y),+);
