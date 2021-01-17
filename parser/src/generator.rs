@@ -16,7 +16,7 @@ pub fn generate_content(api_call: GroupedApiCall) -> String {
         .map(genrate_struct)
         .fold("".to_string(), |acc, x| format!("{} \n{}", acc, x));
 
-    format!("{}{}\n{}]",request_type_alias,response_type_alias,structs)
+    format!("{}{}\n{}",request_type_alias,response_type_alias,structs)
 }
 
 fn genrate_struct(api_call: ApiStruct) -> String {
