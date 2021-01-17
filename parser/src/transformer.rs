@@ -43,7 +43,7 @@ fn transform_new_fields_to_optional(api_calls: &mut Vec<Vec<ApiStruct>>)  {
                 Some(base_struct)=>{
                     for field in &mut struc.fields{
                         if base_struct.fields.iter().filter(|x|x.name==field.name).next().is_none() {
-                            field.ty=format!("Option<{}>",field.ty);
+                            field.ty=format!("Optional<{}>",field.ty);
                         }
                     }
                 }

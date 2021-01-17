@@ -33,6 +33,30 @@ where
         ret
     }
 }
+impl FromBytes for i8 {
+    fn deserialize<T>(buf: &mut T) -> Self
+    where
+        T: Iterator<Item = u8>,
+    {
+        log!("Deserialize start i16");
+        let data: [u8;1] = [buf.next().unwrap()];
+        let x = i8::from_be_bytes(data);
+        log!("{}", x);
+        x
+    }
+}
+impl FromBytes for i16 {
+    fn deserialize<T>(buf: &mut T) -> Self
+    where
+        T: Iterator<Item = u8>,
+    {
+        log!("Deserialize start i16");
+        let data: [u8; 2] = [buf.next().unwrap(), buf.next().unwrap()];
+        let x = i16::from_be_bytes(data);
+        log!("{}", x);
+        x
+    }
+}
 impl FromBytes for i32 {
     fn deserialize<T>(buf: &mut T) -> Self
     where
@@ -46,18 +70,6 @@ impl FromBytes for i32 {
             buf.next().unwrap(),
         ];
         let x = i32::from_be_bytes(data);
-        log!("{}", x);
-        x
-    }
-}
-impl FromBytes for i16 {
-    fn deserialize<T>(buf: &mut T) -> Self
-    where
-        T: Iterator<Item = u8>,
-    {
-        log!("Deserialize start i16");
-        let data: [u8; 2] = [buf.next().unwrap(), buf.next().unwrap()];
-        let x = i16::from_be_bytes(data);
         log!("{}", x);
         x
     }
