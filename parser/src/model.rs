@@ -1,3 +1,4 @@
+use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct ApiCall<'a> {
@@ -8,19 +9,19 @@ pub struct ApiCall<'a> {
 }
 
 #[derive(Debug)]
-pub enum FieldTypeWithPayload<'a>{
+pub enum FieldTypeWithPayload<'a> {
     Field(FieldType),
     VecSimple(FieldType),
     VecStruct(Vec<FieldData<'a>>),
 }
 
 #[derive(Debug)]
-pub struct FieldData<'a>{
+pub struct FieldData<'a> {
     pub name: &'a str,
-    pub type_with_payload: FieldTypeWithPayload<'a> 
+    pub type_with_payload: FieldTypeWithPayload<'a>,
 }
 
-#[derive(Debug,Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum CallType {
     Request,
     Response,
@@ -45,11 +46,10 @@ pub enum FieldType {
 }
 
 impl FieldType {
-
-    fn try_from_str(ty:&str)-> anyhow::Result<FieldType>{
+    fn try_from_str(ty: &str) -> anyhow::Result<FieldType> {
         let ret_val = match ty {
-            "BOOLEAN"=> FieldType::Boolean,
-            "BYTES"=> FieldType::Bytes,
+            "BOOLEAN" => FieldType::Boolean,
+            "BYTES" => FieldType::Bytes,
             "INT8" => FieldType::Int8,
             "INT16" => FieldType::Int16,
             "INT32" => FieldType::Int32,
@@ -62,19 +62,23 @@ impl FieldType {
             "COMPACT_RECORDS" => FieldType::CompactRecords,
             "COMPACT_NULLABLE_STRING" => FieldType::CompactNullableString,
             "COMPACT_BYTES" => FieldType::CompactBytes,
-            _ => Err(anyhow::anyhow!("Unknown field type {}",ty))?
+            _ => return Err(anyhow::anyhow!("Unknown field type {}", ty)),
         };
         Ok(ret_val)
     }
 
-    pub fn is_common_type(ty:&str)-> bool{
+    pub fn is_common_type(ty: &str) -> bool {
         FieldType::try_from_str(ty).is_ok()
     }
+}
 
-    pub fn from_str(ty: &str) -> FieldType {
-        match FieldType::try_from_str(ty) {
-            Ok(ty)=>ty,
-            _ => panic!("Unknown field type: {}", ty),
+impl FromStr for FieldType {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match FieldType::try_from_str(s) {
+            Ok(ty) => Ok(ty),
+            _ => Err(format!("Unknown field type: {}", s)),
         }
     }
 }

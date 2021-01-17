@@ -84,12 +84,12 @@ impl ToBytes for String {
 }
 impl ToBytes for i16 {
     fn serialize(&self, buf: &mut BytesMut) {
-        buf.put_i16(self.clone());
+        buf.put_i16(*self);
     }
 }
 impl ToBytes for i32 {
     fn serialize(&self, buf: &mut BytesMut) {
-        buf.put_i32(self.clone());
+        buf.put_i32(*self);
     }
 }
 impl<T> ToBytes for Vec<T> {
@@ -114,10 +114,10 @@ impl HeaderRequest {
         client_id: String,
     ) -> HeaderRequest {
         HeaderRequest {
-            api_key: api_key,
-            api_version: api_version,
-            correlation_id: correlation_id,
-            client_id: client_id,
+            api_key,
+            api_version,
+            correlation_id,
+            client_id,
         }
     }
 }
@@ -143,7 +143,7 @@ impl MetadataRequest {
     pub fn new(correlation_id: i32, client_id: String, topics: Vec<String>) -> MetadataRequest {
         MetadataRequest {
             header: HeaderRequest::new(API_KEY_METADATA, API_VERSION, correlation_id, client_id),
-            topics: topics,
+            topics,
         }
     }
 }

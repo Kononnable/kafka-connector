@@ -23,29 +23,29 @@ impl ToBytes for Option<String> {
                 buf.put_slice(str.as_bytes());
             }
             None => {
-                buf.put_i16(-1 as i16);
+                buf.put_i16(-1_i16);
             }
         }
     }
 }
 impl ToBytes for i16 {
     fn serialize(&self, buf: &mut BytesMut) {
-        buf.put_i16(self.clone());
+        buf.put_i16(*self);
     }
 }
 impl ToBytes for i8 {
     fn serialize(&self, buf: &mut BytesMut) {
-        buf.put_i8(self.clone());
+        buf.put_i8(*self);
     }
 }
 impl ToBytes for i32 {
     fn serialize(&self, buf: &mut BytesMut) {
-        buf.put_i32(self.clone());
+        buf.put_i32(*self);
     }
 }
 impl ToBytes for i64 {
     fn serialize(&self, buf: &mut BytesMut) {
-        buf.put_i64(self.clone());
+        buf.put_i64(*self);
     }
 }
 impl<T> ToBytes for Vec<T> {
