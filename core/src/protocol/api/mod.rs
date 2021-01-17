@@ -53,6 +53,16 @@ mod prelude {
                 Optional::None => {Ok(Optional::None)}
             }
         }
+        pub fn into<R>(self)-> Optional<R>
+        where T: Default + Into<R>, R: Default{
+            match self{
+                Optional::Some(x) => {
+                    let v = x.into();
+                    Optional::Some(v)
+                }
+                Optional::None => Optional::None
+            }
+        }
     }
     impl<T> Default for Optional<T>
     where T: Default{

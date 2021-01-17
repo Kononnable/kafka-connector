@@ -53,13 +53,13 @@ fn serialize_api_request(requests: &Vec<Vec<ApiStruct>>) -> String {
 fn deserialize_api_response(responses: &Vec<Vec<ApiStruct>>) -> String {
     let main_struct = responses.first().unwrap().first().unwrap();
     let struct_name = &main_struct.name;
-    let mut fn_def = format!("pub fn deserialize_{}<T>(version:i32, buf: &mut T) -> Result<{},Error> where T: Iterator<Item=u8> {{\n",to_snake_case(struct_name),struct_name);
-    fn_def.push_str("    Ok(match version {\n");
+    let mut fn_def = format!("pub fn deserialize_{}<T>(version:i32, buf: &mut T) -> {} where T: Iterator<Item=u8> {{\n",to_snake_case(struct_name),struct_name);
+    fn_def.push_str("    match version {\n");
     for version in 0..responses.len()-1{
-        fn_def.push_str(&format!("        {} =>  {}{}::deserialize(buf).try_into()?,\n",version,struct_name,version));
+        fn_def.push_str(&format!("        {} =>  {}{}::deserialize(buf).into(),\n",version,struct_name,version));
     }
     fn_def.push_str(&format!("        _ => {}::deserialize(buf),\n",struct_name));
-    fn_def.push_str("    })\n");
+    fn_def.push_str("    }\n");
     fn_def.push_str("}\n");
     fn_def
 }
@@ -154,19 +154,18 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStruct>>) -> String {
             None => {}
             Some(latest) => {
                 impl_def.push_str(&format!(
-                    "impl TryFrom<{}{}> for {}{}{{\n",
+                    "impl From<{}{}> for {}{}{{\n",
                     call.name, call.version, latest.name, latest.version
                 ));
-                impl_def.push_str("    type Error = Error;\n");
                 impl_def.push_str(&format!(
-                    "    fn try_from(older:{}{}) -> Result<Self, Self::Error> {{\n",
+                    "    fn from(older:{}{}) -> Self {{\n",
                     call.name, call.version
                 ));
-                impl_def.push_str(&format!("        Ok({}{}{{\n", latest.name, latest.version));
+                impl_def.push_str(&format!("        {}{}{{\n", latest.name, latest.version));
                 for field in &call.fields {
                     if field.ty.starts_with(&call.name) || field.ty.starts_with(&format!("Optional<{}",call.name))  {
                         impl_def.push_str(&format!(
-                            "            {}: older.{}.try_into()?,\n",
+                            "            {}: older.{}.into(),\n",
                             field.name, field.name
                         ));
                     } else {
@@ -180,7 +179,7 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStruct>>) -> String {
                     "            ..{}{}::default()\n",
                     latest.name, latest.version
                 ));
-                impl_def.push_str(&format!("        }})\n"));
+                impl_def.push_str(&format!("        }}\n"));
                 impl_def.push_str(&format!("    }}\n"));
                 impl_def.push_str(&format!("}}\n\n"));
             }

@@ -20,22 +20,22 @@ pub fn serialize_fetch_request(data:FetchRequest,version:i32, buf: &mut BytesMut
     }
     Ok(())
 }
-pub fn deserialize_fetch_response<T>(version:i32, buf: &mut T) -> Result<FetchResponse,Error> where T: Iterator<Item=u8> {
-    Ok(match version {
-        0 =>  FetchResponse0::deserialize(buf).try_into()?,
-        1 =>  FetchResponse1::deserialize(buf).try_into()?,
-        2 =>  FetchResponse2::deserialize(buf).try_into()?,
-        3 =>  FetchResponse3::deserialize(buf).try_into()?,
-        4 =>  FetchResponse4::deserialize(buf).try_into()?,
-        5 =>  FetchResponse5::deserialize(buf).try_into()?,
-        6 =>  FetchResponse6::deserialize(buf).try_into()?,
-        7 =>  FetchResponse7::deserialize(buf).try_into()?,
-        8 =>  FetchResponse8::deserialize(buf).try_into()?,
-        9 =>  FetchResponse9::deserialize(buf).try_into()?,
-        10 =>  FetchResponse10::deserialize(buf).try_into()?,
-        11 =>  FetchResponse11::deserialize(buf).try_into()?,
+pub fn deserialize_fetch_response<T>(version:i32, buf: &mut T) -> FetchResponse where T: Iterator<Item=u8> {
+    match version {
+        0 =>  FetchResponse0::deserialize(buf).into(),
+        1 =>  FetchResponse1::deserialize(buf).into(),
+        2 =>  FetchResponse2::deserialize(buf).into(),
+        3 =>  FetchResponse3::deserialize(buf).into(),
+        4 =>  FetchResponse4::deserialize(buf).into(),
+        5 =>  FetchResponse5::deserialize(buf).into(),
+        6 =>  FetchResponse6::deserialize(buf).into(),
+        7 =>  FetchResponse7::deserialize(buf).into(),
+        8 =>  FetchResponse8::deserialize(buf).into(),
+        9 =>  FetchResponse9::deserialize(buf).into(),
+        10 =>  FetchResponse10::deserialize(buf).into(),
+        11 =>  FetchResponse11::deserialize(buf).into(),
         _ => FetchResponse::deserialize(buf),
-    })
+    }
 }
 
 #[derive(Default,ToBytes)]
@@ -1437,544 +1437,500 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
 }
 
 
-impl TryFrom<FetchResponse0> for FetchResponse12{
-    type Error = Error;
-    fn try_from(older:FetchResponse0) -> Result<Self, Self::Error> {
-        Ok(FetchResponse12{
-            responses: older.responses.try_into()?,
+impl From<FetchResponse0> for FetchResponse12{
+    fn from(older:FetchResponse0) -> Self {
+        FetchResponse12{
+            responses: older.responses.into(),
             ..FetchResponse12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponses0> for FetchResponseResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponses0) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponses12{
+impl From<FetchResponseResponses0> for FetchResponseResponses12{
+    fn from(older:FetchResponseResponses0) -> Self {
+        FetchResponseResponses12{
             topic: older.topic,
-            partition_responses: older.partition_responses.try_into()?,
+            partition_responses: older.partition_responses.into(),
             ..FetchResponseResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponses0> for FetchResponseResponsesPartitionResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponses0) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponses12{
+impl From<FetchResponseResponsesPartitionResponses0> for FetchResponseResponsesPartitionResponses12{
+    fn from(older:FetchResponseResponsesPartitionResponses0) -> Self {
+        FetchResponseResponsesPartitionResponses12{
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
             record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponse1> for FetchResponse12{
-    type Error = Error;
-    fn try_from(older:FetchResponse1) -> Result<Self, Self::Error> {
-        Ok(FetchResponse12{
+impl From<FetchResponse1> for FetchResponse12{
+    fn from(older:FetchResponse1) -> Self {
+        FetchResponse12{
             throttle_time_ms: older.throttle_time_ms,
-            responses: older.responses.try_into()?,
+            responses: older.responses.into(),
             ..FetchResponse12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponses1> for FetchResponseResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponses1) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponses12{
+impl From<FetchResponseResponses1> for FetchResponseResponses12{
+    fn from(older:FetchResponseResponses1) -> Self {
+        FetchResponseResponses12{
             topic: older.topic,
-            partition_responses: older.partition_responses.try_into()?,
+            partition_responses: older.partition_responses.into(),
             ..FetchResponseResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponses1> for FetchResponseResponsesPartitionResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponses1) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponses12{
+impl From<FetchResponseResponsesPartitionResponses1> for FetchResponseResponsesPartitionResponses12{
+    fn from(older:FetchResponseResponsesPartitionResponses1) -> Self {
+        FetchResponseResponsesPartitionResponses12{
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
             record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponse2> for FetchResponse12{
-    type Error = Error;
-    fn try_from(older:FetchResponse2) -> Result<Self, Self::Error> {
-        Ok(FetchResponse12{
+impl From<FetchResponse2> for FetchResponse12{
+    fn from(older:FetchResponse2) -> Self {
+        FetchResponse12{
             throttle_time_ms: older.throttle_time_ms,
-            responses: older.responses.try_into()?,
+            responses: older.responses.into(),
             ..FetchResponse12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponses2> for FetchResponseResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponses2) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponses12{
+impl From<FetchResponseResponses2> for FetchResponseResponses12{
+    fn from(older:FetchResponseResponses2) -> Self {
+        FetchResponseResponses12{
             topic: older.topic,
-            partition_responses: older.partition_responses.try_into()?,
+            partition_responses: older.partition_responses.into(),
             ..FetchResponseResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponses2> for FetchResponseResponsesPartitionResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponses2) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponses12{
+impl From<FetchResponseResponsesPartitionResponses2> for FetchResponseResponsesPartitionResponses12{
+    fn from(older:FetchResponseResponsesPartitionResponses2) -> Self {
+        FetchResponseResponsesPartitionResponses12{
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
             record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponse3> for FetchResponse12{
-    type Error = Error;
-    fn try_from(older:FetchResponse3) -> Result<Self, Self::Error> {
-        Ok(FetchResponse12{
+impl From<FetchResponse3> for FetchResponse12{
+    fn from(older:FetchResponse3) -> Self {
+        FetchResponse12{
             throttle_time_ms: older.throttle_time_ms,
-            responses: older.responses.try_into()?,
+            responses: older.responses.into(),
             ..FetchResponse12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponses3> for FetchResponseResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponses3) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponses12{
+impl From<FetchResponseResponses3> for FetchResponseResponses12{
+    fn from(older:FetchResponseResponses3) -> Self {
+        FetchResponseResponses12{
             topic: older.topic,
-            partition_responses: older.partition_responses.try_into()?,
+            partition_responses: older.partition_responses.into(),
             ..FetchResponseResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponses3> for FetchResponseResponsesPartitionResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponses3) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponses12{
+impl From<FetchResponseResponsesPartitionResponses3> for FetchResponseResponsesPartitionResponses12{
+    fn from(older:FetchResponseResponsesPartitionResponses3) -> Self {
+        FetchResponseResponsesPartitionResponses12{
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
             record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponse4> for FetchResponse12{
-    type Error = Error;
-    fn try_from(older:FetchResponse4) -> Result<Self, Self::Error> {
-        Ok(FetchResponse12{
+impl From<FetchResponse4> for FetchResponse12{
+    fn from(older:FetchResponse4) -> Self {
+        FetchResponse12{
             throttle_time_ms: older.throttle_time_ms,
-            responses: older.responses.try_into()?,
+            responses: older.responses.into(),
             ..FetchResponse12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponses4> for FetchResponseResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponses4) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponses12{
+impl From<FetchResponseResponses4> for FetchResponseResponses12{
+    fn from(older:FetchResponseResponses4) -> Self {
+        FetchResponseResponses12{
             topic: older.topic,
-            partition_responses: older.partition_responses.try_into()?,
+            partition_responses: older.partition_responses.into(),
             ..FetchResponseResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponses4> for FetchResponseResponsesPartitionResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponses4) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponses12{
+impl From<FetchResponseResponsesPartitionResponses4> for FetchResponseResponsesPartitionResponses12{
+    fn from(older:FetchResponseResponsesPartitionResponses4) -> Self {
+        FetchResponseResponsesPartitionResponses12{
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
             last_stable_offset: older.last_stable_offset,
-            aborted_transactions: older.aborted_transactions.try_into()?,
+            aborted_transactions: older.aborted_transactions.into(),
             record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponsesAbortedTransactions4> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions4) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions4> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+    fn from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions4) -> Self {
+        FetchResponseResponsesPartitionResponsesAbortedTransactions12{
             producer_id: older.producer_id,
             first_offset: older.first_offset,
             ..FetchResponseResponsesPartitionResponsesAbortedTransactions12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponse5> for FetchResponse12{
-    type Error = Error;
-    fn try_from(older:FetchResponse5) -> Result<Self, Self::Error> {
-        Ok(FetchResponse12{
+impl From<FetchResponse5> for FetchResponse12{
+    fn from(older:FetchResponse5) -> Self {
+        FetchResponse12{
             throttle_time_ms: older.throttle_time_ms,
-            responses: older.responses.try_into()?,
+            responses: older.responses.into(),
             ..FetchResponse12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponses5> for FetchResponseResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponses5) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponses12{
+impl From<FetchResponseResponses5> for FetchResponseResponses12{
+    fn from(older:FetchResponseResponses5) -> Self {
+        FetchResponseResponses12{
             topic: older.topic,
-            partition_responses: older.partition_responses.try_into()?,
+            partition_responses: older.partition_responses.into(),
             ..FetchResponseResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponses5> for FetchResponseResponsesPartitionResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponses5) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponses12{
+impl From<FetchResponseResponsesPartitionResponses5> for FetchResponseResponsesPartitionResponses12{
+    fn from(older:FetchResponseResponsesPartitionResponses5) -> Self {
+        FetchResponseResponsesPartitionResponses12{
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
             last_stable_offset: older.last_stable_offset,
             log_start_offset: older.log_start_offset,
-            aborted_transactions: older.aborted_transactions.try_into()?,
+            aborted_transactions: older.aborted_transactions.into(),
             record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponsesAbortedTransactions5> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions5) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions5> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+    fn from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions5) -> Self {
+        FetchResponseResponsesPartitionResponsesAbortedTransactions12{
             producer_id: older.producer_id,
             first_offset: older.first_offset,
             ..FetchResponseResponsesPartitionResponsesAbortedTransactions12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponse6> for FetchResponse12{
-    type Error = Error;
-    fn try_from(older:FetchResponse6) -> Result<Self, Self::Error> {
-        Ok(FetchResponse12{
+impl From<FetchResponse6> for FetchResponse12{
+    fn from(older:FetchResponse6) -> Self {
+        FetchResponse12{
             throttle_time_ms: older.throttle_time_ms,
-            responses: older.responses.try_into()?,
+            responses: older.responses.into(),
             ..FetchResponse12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponses6> for FetchResponseResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponses6) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponses12{
+impl From<FetchResponseResponses6> for FetchResponseResponses12{
+    fn from(older:FetchResponseResponses6) -> Self {
+        FetchResponseResponses12{
             topic: older.topic,
-            partition_responses: older.partition_responses.try_into()?,
+            partition_responses: older.partition_responses.into(),
             ..FetchResponseResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponses6> for FetchResponseResponsesPartitionResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponses6) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponses12{
+impl From<FetchResponseResponsesPartitionResponses6> for FetchResponseResponsesPartitionResponses12{
+    fn from(older:FetchResponseResponsesPartitionResponses6) -> Self {
+        FetchResponseResponsesPartitionResponses12{
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
             last_stable_offset: older.last_stable_offset,
             log_start_offset: older.log_start_offset,
-            aborted_transactions: older.aborted_transactions.try_into()?,
+            aborted_transactions: older.aborted_transactions.into(),
             record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponsesAbortedTransactions6> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions6) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions6> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+    fn from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions6) -> Self {
+        FetchResponseResponsesPartitionResponsesAbortedTransactions12{
             producer_id: older.producer_id,
             first_offset: older.first_offset,
             ..FetchResponseResponsesPartitionResponsesAbortedTransactions12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponse7> for FetchResponse12{
-    type Error = Error;
-    fn try_from(older:FetchResponse7) -> Result<Self, Self::Error> {
-        Ok(FetchResponse12{
+impl From<FetchResponse7> for FetchResponse12{
+    fn from(older:FetchResponse7) -> Self {
+        FetchResponse12{
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             session_id: older.session_id,
-            responses: older.responses.try_into()?,
+            responses: older.responses.into(),
             ..FetchResponse12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponses7> for FetchResponseResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponses7) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponses12{
+impl From<FetchResponseResponses7> for FetchResponseResponses12{
+    fn from(older:FetchResponseResponses7) -> Self {
+        FetchResponseResponses12{
             topic: older.topic,
-            partition_responses: older.partition_responses.try_into()?,
+            partition_responses: older.partition_responses.into(),
             ..FetchResponseResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponses7> for FetchResponseResponsesPartitionResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponses7) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponses12{
+impl From<FetchResponseResponsesPartitionResponses7> for FetchResponseResponsesPartitionResponses12{
+    fn from(older:FetchResponseResponsesPartitionResponses7) -> Self {
+        FetchResponseResponsesPartitionResponses12{
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
             last_stable_offset: older.last_stable_offset,
             log_start_offset: older.log_start_offset,
-            aborted_transactions: older.aborted_transactions.try_into()?,
+            aborted_transactions: older.aborted_transactions.into(),
             record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponsesAbortedTransactions7> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions7) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions7> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+    fn from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions7) -> Self {
+        FetchResponseResponsesPartitionResponsesAbortedTransactions12{
             producer_id: older.producer_id,
             first_offset: older.first_offset,
             ..FetchResponseResponsesPartitionResponsesAbortedTransactions12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponse8> for FetchResponse12{
-    type Error = Error;
-    fn try_from(older:FetchResponse8) -> Result<Self, Self::Error> {
-        Ok(FetchResponse12{
+impl From<FetchResponse8> for FetchResponse12{
+    fn from(older:FetchResponse8) -> Self {
+        FetchResponse12{
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             session_id: older.session_id,
-            responses: older.responses.try_into()?,
+            responses: older.responses.into(),
             ..FetchResponse12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponses8> for FetchResponseResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponses8) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponses12{
+impl From<FetchResponseResponses8> for FetchResponseResponses12{
+    fn from(older:FetchResponseResponses8) -> Self {
+        FetchResponseResponses12{
             topic: older.topic,
-            partition_responses: older.partition_responses.try_into()?,
+            partition_responses: older.partition_responses.into(),
             ..FetchResponseResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponses8> for FetchResponseResponsesPartitionResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponses8) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponses12{
+impl From<FetchResponseResponsesPartitionResponses8> for FetchResponseResponsesPartitionResponses12{
+    fn from(older:FetchResponseResponsesPartitionResponses8) -> Self {
+        FetchResponseResponsesPartitionResponses12{
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
             last_stable_offset: older.last_stable_offset,
             log_start_offset: older.log_start_offset,
-            aborted_transactions: older.aborted_transactions.try_into()?,
+            aborted_transactions: older.aborted_transactions.into(),
             record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponsesAbortedTransactions8> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions8) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions8> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+    fn from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions8) -> Self {
+        FetchResponseResponsesPartitionResponsesAbortedTransactions12{
             producer_id: older.producer_id,
             first_offset: older.first_offset,
             ..FetchResponseResponsesPartitionResponsesAbortedTransactions12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponse9> for FetchResponse12{
-    type Error = Error;
-    fn try_from(older:FetchResponse9) -> Result<Self, Self::Error> {
-        Ok(FetchResponse12{
+impl From<FetchResponse9> for FetchResponse12{
+    fn from(older:FetchResponse9) -> Self {
+        FetchResponse12{
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             session_id: older.session_id,
-            responses: older.responses.try_into()?,
+            responses: older.responses.into(),
             ..FetchResponse12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponses9> for FetchResponseResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponses9) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponses12{
+impl From<FetchResponseResponses9> for FetchResponseResponses12{
+    fn from(older:FetchResponseResponses9) -> Self {
+        FetchResponseResponses12{
             topic: older.topic,
-            partition_responses: older.partition_responses.try_into()?,
+            partition_responses: older.partition_responses.into(),
             ..FetchResponseResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponses9> for FetchResponseResponsesPartitionResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponses9) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponses12{
+impl From<FetchResponseResponsesPartitionResponses9> for FetchResponseResponsesPartitionResponses12{
+    fn from(older:FetchResponseResponsesPartitionResponses9) -> Self {
+        FetchResponseResponsesPartitionResponses12{
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
             last_stable_offset: older.last_stable_offset,
             log_start_offset: older.log_start_offset,
-            aborted_transactions: older.aborted_transactions.try_into()?,
+            aborted_transactions: older.aborted_transactions.into(),
             record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponsesAbortedTransactions9> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions9) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions9> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+    fn from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions9) -> Self {
+        FetchResponseResponsesPartitionResponsesAbortedTransactions12{
             producer_id: older.producer_id,
             first_offset: older.first_offset,
             ..FetchResponseResponsesPartitionResponsesAbortedTransactions12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponse10> for FetchResponse12{
-    type Error = Error;
-    fn try_from(older:FetchResponse10) -> Result<Self, Self::Error> {
-        Ok(FetchResponse12{
+impl From<FetchResponse10> for FetchResponse12{
+    fn from(older:FetchResponse10) -> Self {
+        FetchResponse12{
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             session_id: older.session_id,
-            responses: older.responses.try_into()?,
+            responses: older.responses.into(),
             ..FetchResponse12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponses10> for FetchResponseResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponses10) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponses12{
+impl From<FetchResponseResponses10> for FetchResponseResponses12{
+    fn from(older:FetchResponseResponses10) -> Self {
+        FetchResponseResponses12{
             topic: older.topic,
-            partition_responses: older.partition_responses.try_into()?,
+            partition_responses: older.partition_responses.into(),
             ..FetchResponseResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponses10> for FetchResponseResponsesPartitionResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponses10) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponses12{
+impl From<FetchResponseResponsesPartitionResponses10> for FetchResponseResponsesPartitionResponses12{
+    fn from(older:FetchResponseResponsesPartitionResponses10) -> Self {
+        FetchResponseResponsesPartitionResponses12{
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
             last_stable_offset: older.last_stable_offset,
             log_start_offset: older.log_start_offset,
-            aborted_transactions: older.aborted_transactions.try_into()?,
+            aborted_transactions: older.aborted_transactions.into(),
             record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponsesAbortedTransactions10> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions10) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions10> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+    fn from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions10) -> Self {
+        FetchResponseResponsesPartitionResponsesAbortedTransactions12{
             producer_id: older.producer_id,
             first_offset: older.first_offset,
             ..FetchResponseResponsesPartitionResponsesAbortedTransactions12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponse11> for FetchResponse12{
-    type Error = Error;
-    fn try_from(older:FetchResponse11) -> Result<Self, Self::Error> {
-        Ok(FetchResponse12{
+impl From<FetchResponse11> for FetchResponse12{
+    fn from(older:FetchResponse11) -> Self {
+        FetchResponse12{
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             session_id: older.session_id,
-            responses: older.responses.try_into()?,
+            responses: older.responses.into(),
             ..FetchResponse12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponses11> for FetchResponseResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponses11) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponses12{
+impl From<FetchResponseResponses11> for FetchResponseResponses12{
+    fn from(older:FetchResponseResponses11) -> Self {
+        FetchResponseResponses12{
             topic: older.topic,
-            partition_responses: older.partition_responses.try_into()?,
+            partition_responses: older.partition_responses.into(),
             ..FetchResponseResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponses11> for FetchResponseResponsesPartitionResponses12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponses11) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponses12{
+impl From<FetchResponseResponsesPartitionResponses11> for FetchResponseResponsesPartitionResponses12{
+    fn from(older:FetchResponseResponsesPartitionResponses11) -> Self {
+        FetchResponseResponsesPartitionResponses12{
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
             last_stable_offset: older.last_stable_offset,
             log_start_offset: older.log_start_offset,
-            aborted_transactions: older.aborted_transactions.try_into()?,
+            aborted_transactions: older.aborted_transactions.into(),
             preferred_read_replica: older.preferred_read_replica,
             record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
-        })
+        }
     }
 }
 
-impl TryFrom<FetchResponseResponsesPartitionResponsesAbortedTransactions11> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
-    type Error = Error;
-    fn try_from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions11) -> Result<Self, Self::Error> {
-        Ok(FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions11> for FetchResponseResponsesPartitionResponsesAbortedTransactions12{
+    fn from(older:FetchResponseResponsesPartitionResponsesAbortedTransactions11) -> Self {
+        FetchResponseResponsesPartitionResponsesAbortedTransactions12{
             producer_id: older.producer_id,
             first_offset: older.first_offset,
             ..FetchResponseResponsesPartitionResponsesAbortedTransactions12::default()
-        })
+        }
     }
 }
 
