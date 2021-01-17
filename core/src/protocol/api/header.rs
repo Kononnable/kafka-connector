@@ -1,8 +1,4 @@
-use super::super::from_bytes::FromBytes;
-use super::super::to_bytes::ToBytes;
-
-use kafka_connector_derive::FromBytes;
-use kafka_connector_derive::ToBytes;
+use super::prelude::*;
 
 #[derive(Debug, FromBytes)]
 pub struct KafkaResponse<R>
@@ -24,17 +20,17 @@ where
 
 #[derive(Debug, ToBytes)]
 pub struct HeaderRequest {
-    pub api_key: i16,
-    pub api_version: i16,
-    pub correlation_id: i32,
+    pub api_key: Int16,
+    pub api_version: Int16,
+    pub correlation_id: Int32,
     pub client_id: String,
 }
 
 impl HeaderRequest {
     pub fn new(
-        api_key: i16,
-        api_version: i16,
-        correlation_id: i32,
+        api_key: Int16,
+        api_version: Int16,
+        correlation_id: Int32,
         client_id: String,
     ) -> HeaderRequest {
         HeaderRequest {
@@ -48,5 +44,5 @@ impl HeaderRequest {
 
 #[derive(Debug, FromBytes)]
 pub struct HeaderResponse {
-    pub correlation: i32,
+    pub correlation: Int32,
 }

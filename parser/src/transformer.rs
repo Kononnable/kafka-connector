@@ -1,6 +1,6 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 
-use crate::model::{ApiCall, CallType, FieldData, FieldTypeWithPayload};
+use crate::{model::{ApiCall, CallType, FieldData, FieldTypeWithPayload}, utils::to_upper_case};
 
 
 pub fn group_api_calls(api_calls:Vec<ApiCall>)->HashMap<&str,GroupedApiCall>{
@@ -98,22 +98,6 @@ fn parse_vec<'a>(fields:Vec<FieldData<'a>>, prefix:String,api_version:i32)->(Vec
         });
     }
     (returned_fields,sub_structs)
-}
-
-pub fn to_upper_case(input:&str)->String{
-    let mut ret =String::new();
-    let mut uppercase_next = true;
-    for ch in input.chars(){
-        if uppercase_next{
-            uppercase_next=false;
-            ret.push_str(&ch.to_uppercase().to_string());
-        }else if ch=='_'{
-            uppercase_next=true;
-        }else{
-            ret.push(ch);
-        }
-    }
-    ret
 }
 
 #[derive(Default,Debug)]

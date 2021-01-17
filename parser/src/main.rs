@@ -1,6 +1,6 @@
 use std::{fs::{DirBuilder, File, remove_dir_all}, io::Write, path::Path};
 
-use parser::{generator::generate_content, parser::parse_api_call, transformer::group_api_calls};
+use parser::{generator::generate_content, parser::parse_api_call, transformer::group_api_calls, utils::to_snake_case};
 use scraper::{Html, Selector};
 
 #[tokio::main]
@@ -35,7 +35,7 @@ async fn main() -> anyhow::Result<()> {
     DirBuilder::new().recursive(true).create(base_path)?;
 
     for (key,grouped_call) in definitions.into_iter() {
-        let file_name = format!("{}{}.rs",&base_path.display(),key);
+        let file_name = format!("{}{}.rs",&base_path.display(),to_snake_case(key));
         let path = Path::new(&file_name);
         println!("{}",path.display());
         
