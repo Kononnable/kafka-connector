@@ -1,4 +1,4 @@
-use parser::parser::parse_api_call;
+use parser::{generator::generate_content, parser::parse_api_call, transformer::group_api_calls};
 use scraper::{Html, Selector};
 
 #[tokio::main]
@@ -25,9 +25,14 @@ async fn main() -> anyhow::Result<()> {
           parse_api_call(&x).unwrap().1
         })
         .collect();
-    for definition in definitions {
-        println!("{:#?}", definition);
+    
+    let definitions = group_api_calls(definitions);
+
+    for (key,grouped_call) in definitions.into_iter() {
+        let content = generate_content(grouped_call);
+        println!("Name: {} Definitions: {}", key,content);
     }
 
+    
     Ok(())
 }

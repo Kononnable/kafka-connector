@@ -8,7 +8,7 @@ use nom::{
     IResult,
 };
 
-use crate::model::{ApiCall, CallType, FieldData, FieldType};
+use crate::model::{ApiCall, CallType, FieldData, FieldType, FieldTypeWithPayload};
 
 #[derive(Debug, PartialEq)]
 pub enum FieldTy {
@@ -72,7 +72,7 @@ fn parse_call_type(input: &str) -> IResult<&str, CallType> {
     Ok((input, call_type))
 }
 
-fn parse_version(input: &str) -> IResult<&str, &str> {
+fn parse_version(input: &str) -> IResult<&str, i32> {
     let version_tag = tag("Version:");
     let bracket_start = char('(');
     let version_number = digit1;
@@ -84,7 +84,7 @@ fn parse_version(input: &str) -> IResult<&str, &str> {
         version_number,
         bracket_end,
     ))(input)?;
-    Ok((input, version))
+    Ok((input, version.parse::<i32>().unwrap()))
 }
 
 fn parse_field_list(input: &str) -> IResult<&str, Vec<FieldDef>> {
@@ -125,7 +125,10 @@ fn parse_field<'a>(
     let ret_val = if is_vec {
         if fields.len() == 1 && FieldType::is_common_type(fields.first().unwrap().name) {
             let typ = FieldType::from_str(fields.first().unwrap().name);
-            FieldData::VecSimple(field_name, typ)
+            FieldData{
+                name:field_name,
+                type_with_payload:FieldTypeWithPayload::VecSimple(typ)
+            }
         } else {
             let mut childrens = vec![];
             for child in fields {
@@ -136,11 +139,17 @@ fn parse_field<'a>(
                 childrens.push(parsed_child);
                 input = input2;
             }
-            FieldData::VecStruct(field_name, childrens)
+            FieldData{
+                name:field_name,
+                type_with_payload: FieldTypeWithPayload::VecStruct(childrens)
+            }
         }
     } else {
         let field_type = FieldType::from_str(fields.first().unwrap().name);
-        FieldData::Field(field_name, field_type)
+        FieldData{
+            name:field_name,
+            type_with_payload: FieldTypeWithPayload::Field(field_type)
+        }
     };
     Ok((input, ret_val))
 }

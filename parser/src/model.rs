@@ -1,18 +1,26 @@
+
 #[derive(Debug)]
 pub struct ApiCall<'a> {
     pub name: &'a str,
     pub typ: CallType,
-    pub version: &'a str,
+    pub version: i32,
     pub fields: Vec<FieldData<'a>>,
 }
 
 #[derive(Debug)]
-pub enum FieldData<'a> {
-    Field(&'a str, FieldType),
-    VecSimple(&'a str, FieldType),
-    VecStruct(&'a str, Vec<FieldData<'a>>),
+pub enum FieldTypeWithPayload<'a>{
+    Field(FieldType),
+    VecSimple(FieldType),
+    VecStruct(Vec<FieldData<'a>>),
 }
+
 #[derive(Debug)]
+pub struct FieldData<'a>{
+    pub name: &'a str,
+    pub type_with_payload: FieldTypeWithPayload<'a> 
+}
+
+#[derive(Debug,Clone, Copy)]
 pub enum CallType {
     Request,
     Response,
