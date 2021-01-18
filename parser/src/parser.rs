@@ -1,5 +1,6 @@
 use std::{str::FromStr, vec};
 
+use anyhow::Result;
 use nom::{bytes::complete::tag, character::complete::line_ending, multi::many0};
 use nom::{
     bytes::streaming::take_while1,
@@ -15,6 +16,7 @@ pub enum FieldTy {
     Field,
     Vec,
 }
+
 #[derive(Debug)]
 pub struct FieldDef<'a> {
     ty: FieldTy,
@@ -53,7 +55,7 @@ fn parse_first_row(input: &str) -> IResult<&str, (ApiCall, Vec<FieldDef>)> {
         (
             ApiCall {
                 name: api_name,
-                typ: api_type,
+                ty: api_type,
                 version: api_version,
                 fields: vec![],
             },
@@ -64,11 +66,7 @@ fn parse_first_row(input: &str) -> IResult<&str, (ApiCall, Vec<FieldDef>)> {
 
 fn parse_call_type(input: &str) -> IResult<&str, CallType> {
     let (input, call_type) = alpha1(input)?;
-    let call_type = match call_type {
-        "Request" => CallType::Request,
-        "Response" => CallType::Response,
-        _ => panic!("{}", call_type),
-    };
+    let call_type = CallType::from_str(call_type).unwrap();
     Ok((input, call_type))
 }
 
@@ -94,20 +92,20 @@ fn parse_field_list(input: &str) -> IResult<&str, Vec<FieldDef>> {
     let (input, fields) = field_list(input)?;
     let fields: Vec<FieldDef> = fields
         .into_iter()
-        .map(|x| {
-            if x.starts_with('[') {
+        .map(|field| {
+            if field.starts_with('[') {
                 FieldDef {
                     ty: FieldTy::Vec,
-                    name: &x[1..x.len() - 1],
+                    name: &field[1..field.len() - 1],
                 }
             } else {
                 FieldDef {
                     ty: FieldTy::Field,
-                    name: x,
+                    name: field,
                 }
             }
         })
-        .filter(|x| x.name != "TAG_BUFFER")
+        .filter(|field| field.name != "TAG_BUFFER")
         .collect();
 
     Ok((input, fields))
@@ -119,37 +117,41 @@ fn parse_field<'a>(
     field_name: &'a str,
 ) -> IResult<&'a str, FieldData<'a>> {
     let ignored = take_while1(|c: char| c != '>');
+
     let (mut input, (_, _, fields, _, _)) =
         tuple((ignored, char('>'), parse_field_list, space0, line_ending))(input)?;
-    let fields: Vec<FieldDef> = fields;
-    let ret_val = if is_vec {
-        if fields.len() == 1 && FieldType::is_common_type(fields.first().unwrap().name) {
-            let typ = FieldType::from_str(fields.first().unwrap().name).unwrap();
-            FieldData {
-                name: field_name,
-                type_with_payload: FieldTypeWithPayload::VecSimple(typ),
-            }
-        } else {
-            let mut childrens = vec![];
-            for child in fields {
-                let field_name = child.name;
-                let is_vec = child.ty == FieldTy::Vec;
 
-                let (input2, parsed_child) = parse_field(input, is_vec, field_name)?;
-                childrens.push(parsed_child);
-                input = input2;
-            }
-            FieldData {
-                name: field_name,
-                type_with_payload: FieldTypeWithPayload::VecStruct(childrens),
+    let type_with_payload = match is_vec {
+        true => {
+            if fields.len() == 1 && FieldType::is_common_type(fields.first().unwrap().name) {
+                let ty = FieldType::from_str(fields.first().unwrap().name).unwrap();
+                FieldTypeWithPayload::VecSimple(ty)
+            } else {
+                let childrens = fields
+                    .iter()
+                    .map(|child| {
+                        let field_name = child.name;
+                        let is_vec = child.ty == FieldTy::Vec;
+
+                        let (input2, parsed_child) = parse_field(input, is_vec, field_name)?;
+                        input = input2;
+
+                        Ok(parsed_child)
+                    })
+                    .collect::<Result<Vec<FieldData>, _>>()?;
+                FieldTypeWithPayload::VecStruct(childrens)
             }
         }
-    } else {
-        let field_type = FieldType::from_str(fields.first().unwrap().name).unwrap();
-        FieldData {
-            name: field_name,
-            type_with_payload: FieldTypeWithPayload::Field(field_type),
+        false => {
+            let ty = FieldType::from_str(fields.first().unwrap().name).unwrap();
+            FieldTypeWithPayload::Field(ty)
         }
     };
-    Ok((input, ret_val))
+    Ok((
+        input,
+        FieldData {
+            name: field_name,
+            type_with_payload,
+        },
+    ))
 }

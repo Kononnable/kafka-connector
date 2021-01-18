@@ -5,15 +5,15 @@ use crate::{
     utils::to_upper_case,
 };
 
-pub fn group_api_calls(api_calls: Vec<ApiCall>) -> HashMap<&str, GroupedApiCall> {
-    let mut ret_val = HashMap::new();
+pub fn group_api_calls(api_calls: Vec<ApiCall>) -> HashMap<&str, ApiEndpoint> {
+    let mut endpoints = HashMap::new();
 
     for call in api_calls {
-        if !ret_val.contains_key(call.name) {
-            ret_val.insert(call.name, GroupedApiCall::default());
+        if !endpoints.contains_key(call.name) {
+            endpoints.insert(call.name, ApiEndpoint::default());
         }
-        let grouped_call = ret_val.get_mut(call.name).unwrap();
-        let call_type = call.typ;
+        let grouped_call = endpoints.get_mut(call.name).unwrap();
+        let call_type = call.ty;
         let parsed_call = parse_call(call);
         match call_type {
             CallType::Request => grouped_call.requests.push(parsed_call),
@@ -21,32 +21,33 @@ pub fn group_api_calls(api_calls: Vec<ApiCall>) -> HashMap<&str, GroupedApiCall>
         }
     }
 
-    for api_call in &mut ret_val {
-        transform_new_fields_to_optional(&mut api_call.1.requests);
-        transform_new_fields_to_optional(&mut api_call.1.responses);
+    for definition in endpoints.values_mut() {
+        mark_new_fields_as_optional(&mut definition.requests);
+        mark_new_fields_as_optional(&mut definition.responses);
     }
 
-    ret_val
+    endpoints
 }
 
-fn transform_new_fields_to_optional(api_calls: &mut Vec<Vec<ApiStruct>>) {
-    let (oldest_api_call, newer_api_calls) = api_calls.split_first_mut().unwrap();
-    assert_eq!(oldest_api_call.get(0).unwrap().version, 0);
-    for api_call in newer_api_calls {
-        for struc in api_call {
-            let base_struc = oldest_api_call.iter().find(|ac| ac.name == struc.name);
-            match base_struc {
-                None => {}
-                Some(base_struct) => {
-                    for field in &mut struc.fields {
-                        if base_struct
-                            .fields
-                            .iter()
-                            .find(|x| x.name == field.name)
-                            .is_none()
-                        {
-                            field.ty = format!("Optional<{}>", field.ty);
-                        }
+fn mark_new_fields_as_optional(endpoint_definitions: &mut Vec<Vec<ApiStructDefinition>>) {
+    let (historic_endpoint_definition, endpoint_definitions) =
+        endpoint_definitions.split_first_mut().unwrap();
+    assert_eq!(historic_endpoint_definition.get(0).unwrap().version, 0);
+    for struc in endpoint_definitions.iter_mut().flatten() {
+        let base_struct = historic_endpoint_definition
+            .iter()
+            .find(|ac| ac.name == struc.name);
+        match base_struct {
+            None => {}
+            Some(base_struct) => {
+                for field in &mut struc.fields {
+                    if base_struct
+                        .fields
+                        .iter()
+                        .find(|x| x.name == field.name)
+                        .is_none()
+                    {
+                        field.ty = format!("Optional<{}>", field.ty);
                     }
                 }
             }
@@ -54,29 +55,29 @@ fn transform_new_fields_to_optional(api_calls: &mut Vec<Vec<ApiStruct>>) {
     }
 }
 
-fn parse_call(grouped_call: ApiCall) -> Vec<ApiStruct> {
-    let mut ret_val = Vec::new();
+fn parse_call(api_call: ApiCall) -> Vec<ApiStructDefinition> {
+    let mut definitions = Vec::new();
 
-    let name = format!("{}{:?}", grouped_call.name, grouped_call.typ);
-    let (fields, mut sub_structs_int) =
-        parse_vec(grouped_call.fields, name.clone(), grouped_call.version);
-    let val = ApiStruct {
+    let name = format!("{}{:?}", api_call.name, api_call.ty);
+    let (fields, mut children_definitions) =
+        parse_vec(api_call.fields, name.clone(), api_call.version);
+    let definition = ApiStructDefinition {
         name,
-        version: grouped_call.version,
+        version: api_call.version,
         fields,
     };
-    ret_val.push(val);
-    ret_val.append(&mut sub_structs_int);
+    definitions.push(definition);
+    definitions.append(&mut children_definitions);
 
-    ret_val
+    definitions
 }
 
 fn parse_vec(
     fields: Vec<FieldData>,
     prefix: String,
     api_version: i32,
-) -> (Vec<StructField>, Vec<ApiStruct>) {
-    let mut sub_structs = Vec::new();
+) -> (Vec<StructField>, Vec<ApiStructDefinition>) {
+    let mut children = Vec::new();
     let mut returned_fields = vec![];
     for field in fields {
         let ty = match field.type_with_payload {
@@ -88,14 +89,13 @@ fn parse_vec(
             }
             FieldTypeWithPayload::VecStruct(ty) => {
                 let struct_name = format!("{}{}", prefix, to_upper_case(field.name));
-                let (fields, mut sub_structs_int) = parse_vec(ty, struct_name.clone(), api_version);
-                let val = ApiStruct {
+                let (fields, mut grandchildren) = parse_vec(ty, struct_name.clone(), api_version);
+                children.push(ApiStructDefinition {
                     name: struct_name.clone(),
                     version: api_version,
                     fields,
-                };
-                sub_structs.push(val);
-                sub_structs.append(&mut sub_structs_int);
+                });
+                children.append(&mut grandchildren);
                 format!("{}{}", struct_name, api_version)
             }
         };
@@ -104,17 +104,17 @@ fn parse_vec(
             ty,
         });
     }
-    (returned_fields, sub_structs)
+    (returned_fields, children)
 }
 
 #[derive(Default, Debug)]
-pub struct GroupedApiCall<'a> {
-    pub requests: Vec<Vec<ApiStruct<'a>>>,
-    pub responses: Vec<Vec<ApiStruct<'a>>>,
+pub struct ApiEndpoint<'a> {
+    pub requests: Vec<Vec<ApiStructDefinition<'a>>>,
+    pub responses: Vec<Vec<ApiStructDefinition<'a>>>,
 }
 
 #[derive(Debug)]
-pub struct ApiStruct<'a> {
+pub struct ApiStructDefinition<'a> {
     pub name: String,
     pub version: i32,
     pub fields: Vec<StructField<'a>>,

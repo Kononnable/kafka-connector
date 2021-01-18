@@ -1,4 +1,5 @@
 pub mod api;
+pub mod error;
 pub mod from_bytes;
+pub mod optional;
 pub mod to_bytes;
-pub mod types;

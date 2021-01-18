@@ -3,7 +3,7 @@ use std::str::FromStr;
 #[derive(Debug)]
 pub struct ApiCall<'a> {
     pub name: &'a str,
-    pub typ: CallType,
+    pub ty: CallType,
     pub version: i32,
     pub fields: Vec<FieldData<'a>>,
 }
@@ -25,6 +25,18 @@ pub struct FieldData<'a> {
 pub enum CallType {
     Request,
     Response,
+}
+
+impl FromStr for CallType {
+    type Err = String;
+
+    fn from_str(call_type: &str) -> Result<Self, Self::Err> {
+        match call_type {
+            "Request" => Ok(CallType::Request),
+            "Response" => Ok(CallType::Response),
+            _ => Err(format!("Unknown field type: {}", call_type)),
+        }
+    }
 }
 
 #[derive(Debug)]

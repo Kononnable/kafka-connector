@@ -11,31 +11,27 @@ impl ToBytes for str {
 }
 impl ToBytes for String {
     fn serialize(&self, buf: &mut BytesMut) {
-        buf.put_i16(self.len() as i16);
-        buf.put_slice(&self.as_bytes());
+        self.as_str().serialize(buf)
     }
 }
 impl ToBytes for Option<String> {
     fn serialize(&self, buf: &mut BytesMut) {
         match &self {
-            Some(str) => {
-                buf.put_i16(str.len() as i16);
-                buf.put_slice(str.as_bytes());
-            }
+            Some(str) => str.serialize(buf),
             None => {
                 buf.put_i16(-1_i16);
             }
         }
     }
 }
-impl ToBytes for i16 {
-    fn serialize(&self, buf: &mut BytesMut) {
-        buf.put_i16(*self);
-    }
-}
 impl ToBytes for i8 {
     fn serialize(&self, buf: &mut BytesMut) {
         buf.put_i8(*self);
+    }
+}
+impl ToBytes for i16 {
+    fn serialize(&self, buf: &mut BytesMut) {
+        buf.put_i16(*self);
     }
 }
 impl ToBytes for i32 {

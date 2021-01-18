@@ -1,9 +1,9 @@
 use crate::{
-    transformer::{ApiStruct, GroupedApiCall, StructField},
+    transformer::{ApiEndpoint, ApiStructDefinition, StructField},
     utils::to_snake_case,
 };
 
-pub fn generate_content(api_call: GroupedApiCall) -> String {
+pub fn generate_content(api_call: ApiEndpoint) -> String {
     let use_statements = "use super::prelude::*;\n";
     let request_type_alias =
         generate_type_alias(api_call.requests.last().unwrap().first().unwrap());
@@ -41,7 +41,7 @@ pub fn generate_content(api_call: GroupedApiCall) -> String {
     )
 }
 
-fn serialize_api_request(requests: &[Vec<ApiStruct>]) -> String {
+fn serialize_api_request(requests: &[Vec<ApiStructDefinition>]) -> String {
     let main_struct = requests.first().unwrap().first().unwrap();
     let struct_name = &main_struct.name;
     let mut fn_def = format!(
@@ -63,7 +63,7 @@ fn serialize_api_request(requests: &[Vec<ApiStruct>]) -> String {
     fn_def
 }
 
-fn deserialize_api_response(responses: &[Vec<ApiStruct>]) -> String {
+fn deserialize_api_response(responses: &[Vec<ApiStructDefinition>]) -> String {
     let main_struct = responses.first().unwrap().first().unwrap();
     let struct_name = &main_struct.name;
     let mut fn_def = format!(
@@ -87,7 +87,7 @@ fn deserialize_api_response(responses: &[Vec<ApiStruct>]) -> String {
     fn_def
 }
 
-fn genrate_struct(api_call: &ApiStruct, is_request: bool) -> String {
+fn genrate_struct(api_call: &ApiStructDefinition, is_request: bool) -> String {
     let struct_name = format!("{}{}", api_call.name, api_call.version);
 
     let derive_bytes = if is_request { "ToBytes" } else { "FromBytes" };
@@ -106,14 +106,14 @@ fn generate_field(field: &StructField) -> String {
     format!("    pub {}: {},\n", field.name, field.ty)
 }
 
-fn generate_type_alias(struc: &ApiStruct) -> String {
+fn generate_type_alias(struc: &ApiStructDefinition) -> String {
     format!(
         "pub type {} = {}{};\n",
         struc.name, struc.name, struc.version
     )
 }
 
-fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStruct>>) -> String {
+fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
     let mut impl_def = "".to_owned();
     let (latest, older_calls) = api_calls.split_last().unwrap();
     for call in older_calls.iter().flatten() {
@@ -138,7 +138,7 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStruct>>) -> String {
                             "            return Err(Error::OldKafkaVersion(\"{}\",{},\"{}\"))\n",
                             call.name, call.version, field.name
                         ));
-                        impl_def.push_str(&"        }}\n");
+                        impl_def.push_str(&"        }\n");
                     }
                 }
                 impl_def.push_str(&format!("        Ok({}{}{{\n", call.name, call.version));
@@ -157,16 +157,16 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStruct>>) -> String {
                         ));
                     }
                 }
-                impl_def.push_str(&"        }})\n");
-                impl_def.push_str(&"    }}\n");
-                impl_def.push_str(&"}}\n\n");
+                impl_def.push_str(&"        })\n");
+                impl_def.push_str(&"    }\n");
+                impl_def.push_str(&"}\n\n");
             }
         }
     }
     impl_def
 }
 
-fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStruct>>) -> String {
+fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
     let mut impl_def = "".to_owned();
     let (latest, older_calls) = api_calls.split_last().unwrap();
     for call in older_calls.iter().flatten() {
@@ -204,9 +204,9 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStruct>>) -> String {
                         latest.name, latest.version
                     ));
                 }
-                impl_def.push_str(&"        }}\n");
-                impl_def.push_str(&"    }}\n");
-                impl_def.push_str(&"}}\n\n");
+                impl_def.push_str(&"        }\n");
+                impl_def.push_str(&"    }\n");
+                impl_def.push_str(&"}\n\n");
             }
         }
     }

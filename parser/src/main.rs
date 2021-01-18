@@ -17,27 +17,27 @@ async fn main() -> anyhow::Result<()> {
         .text()
         .await?;
 
-    let fragment = Html::parse_fragment(&body);
     let selector = Selector::parse("pre").unwrap();
+    let html_fragment = Html::parse_fragment(&body);
 
-    let definitions: Vec<String> = fragment
+    let api_definitions: Vec<String> = html_fragment
         .select(&selector)
         .skip(6) // example & headers
         .map(|x| x.inner_html().replace("&gt;", ">"))
         .collect();
 
-    let definitions: Vec<_> = definitions
+    let parsed_definitions: Vec<_> = api_definitions
         .iter()
-        .map(|x| parse_api_call(&x).unwrap().1)
+        .map(|definition| parse_api_call(&definition).unwrap().1)
         .collect();
 
-    let definitions = group_api_calls(definitions);
+    let transformed_definitions = group_api_calls(parsed_definitions);
 
     let base_path = Path::new("./generated/");
     remove_dir_all(base_path)?;
     DirBuilder::new().recursive(true).create(base_path)?;
 
-    for (key, grouped_call) in definitions.into_iter() {
+    for (key, grouped_call) in transformed_definitions.into_iter() {
         let file_name = format!("{}{}.rs", &base_path.display(), to_snake_case(key));
         let path = Path::new(&file_name);
         println!("{}", path.display());
