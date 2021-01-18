@@ -33,12 +33,14 @@ fn mark_new_fields_as_optional(endpoint_definitions: &mut Vec<Vec<ApiStructDefin
     let (historic_endpoint_definition, endpoint_definitions) =
         endpoint_definitions.split_first_mut().unwrap();
     assert_eq!(historic_endpoint_definition.get(0).unwrap().version, 0);
+    let mut new_structs_base = vec![]; // first versions of structs not available in base(0) api call
     for struc in endpoint_definitions.iter_mut().flatten() {
         let base_struct = historic_endpoint_definition
             .iter()
+            .chain(new_structs_base.iter())
             .find(|ac| ac.name == struc.name);
         match base_struct {
-            None => {}
+            None => new_structs_base.push(struc.clone()),
             Some(base_struct) => {
                 for field in &mut struc.fields {
                     if base_struct
@@ -113,14 +115,14 @@ pub struct ApiEndpoint<'a> {
     pub responses: Vec<Vec<ApiStructDefinition<'a>>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ApiStructDefinition<'a> {
     pub name: String,
     pub version: i32,
     pub fields: Vec<StructField<'a>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StructField<'a> {
     pub name: &'a str,
     pub ty: String,

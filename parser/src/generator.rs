@@ -143,6 +143,14 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
                 }
                 impl_def.push_str(&format!("        Ok({}{}{{\n", call.name, call.version));
                 for field in &call.fields {
+                    if latest
+                        .fields
+                        .iter()
+                        .find(|latest_field| latest_field.name == field.name)
+                        .is_none()
+                    {
+                        continue;
+                    }
                     if field.ty.starts_with(&call.name)
                         || field.ty.starts_with(&format!("Optional<{}", call.name))
                     {
@@ -157,6 +165,18 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
                         ));
                     }
                 }
+                if !call.fields.iter().all(|call_field| {
+                    latest
+                        .fields
+                        .iter()
+                        .any(|latest_field| call_field.name == latest_field.name)
+                }) {
+                    impl_def.push_str(&format!(
+                        "            ..{}{}::default()\n",
+                        call.name, call.version
+                    ));
+                }
+
                 impl_def.push_str(&"        })\n");
                 impl_def.push_str(&"    }\n");
                 impl_def.push_str(&"}\n\n");
@@ -184,6 +204,14 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
                 ));
                 impl_def.push_str(&format!("        {}{}{{\n", latest.name, latest.version));
                 for field in &call.fields {
+                    if latest
+                        .fields
+                        .iter()
+                        .find(|latest_field| latest_field.name == field.name)
+                        .is_none()
+                    {
+                        continue;
+                    }
                     if field.ty.starts_with(&call.name)
                         || field.ty.starts_with(&format!("Optional<{}", call.name))
                     {
@@ -198,7 +226,11 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
                         ));
                     }
                 }
-                if call.fields.len() != latest.fields.len() {
+                if !latest
+                    .fields
+                    .iter()
+                    .all(|latest_field| call.fields.iter().any(|y| latest_field.name == y.name))
+                {
                     impl_def.push_str(&format!(
                         "            ..{}{}::default()\n",
                         latest.name, latest.version
