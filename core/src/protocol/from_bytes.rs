@@ -5,7 +5,7 @@ pub trait FromBytes {
 }
 impl<R> FromBytes for Vec<R>
 where
-    R: FromBytes + std::fmt::Debug,
+    R: FromBytes,
 {
     fn deserialize<T>(buf: &mut T) -> Vec<R>
     where

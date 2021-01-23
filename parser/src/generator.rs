@@ -215,15 +215,30 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
                     if field.ty.starts_with(&call.name)
                         || field.ty.starts_with(&format!("Optional<{}", call.name))
                     {
-                        impl_def.push_str(&format!(
-                            "            {}: older.{}.into(),\n",
-                            field.name, field.name
-                        ));
+                        if field.is_vec{
+                            impl_def.push_str(&format!(
+                                "            {}: older.{}.into_iter().map(|e|e.into()).collect(),\n",
+                                field.name, field.name
+                            ));
+                        }else{
+                            impl_def.push_str(&format!(
+                                "            {}: older.{}.into(),\n",
+                                field.name, field.name
+                            ));
+                        }
                     } else {
-                        impl_def.push_str(&format!(
-                            "            {}: older.{},\n",
-                            field.name, field.name
-                        ));
+                        if field.is_vec{
+                            impl_def.push_str(&format!(
+                                "            {}: older.{}.into_iter().map(|el|el.into()).collect(),\n",
+                                field.name, field.name
+                            ));
+
+                        }else{
+                            impl_def.push_str(&format!(
+                                "            {}: older.{},\n",
+                                field.name, field.name
+                            ));
+                        }
                     }
                 }
                 if !latest

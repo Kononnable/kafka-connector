@@ -82,12 +82,12 @@ fn parse_vec(
     let mut children = Vec::new();
     let mut returned_fields = vec![];
     for field in fields {
-        let ty = match field.type_with_payload {
+        let (ty,is_vec) = match field.type_with_payload {
             FieldTypeWithPayload::Field(ty) => {
-                format!("{:?}", ty)
+                (format!("{:?}", ty),false)
             }
             FieldTypeWithPayload::VecSimple(ty) => {
-                format!("Vec<{:?}>", ty)
+                (format!("Vec<{:?}>", ty),true)
             }
             FieldTypeWithPayload::VecStruct(ty) => {
                 let struct_name = format!("{}{}", prefix, to_upper_case(field.name));
@@ -98,12 +98,13 @@ fn parse_vec(
                     fields,
                 });
                 children.append(&mut grandchildren);
-                format!("{}{}", struct_name, api_version)
+                (format!("Vec<{}{}>", struct_name, api_version),true)
             }
         };
         returned_fields.push(StructField {
             name: field.name,
             ty,
+            is_vec
         });
     }
     (returned_fields, children)
@@ -126,4 +127,5 @@ pub struct ApiStructDefinition<'a> {
 pub struct StructField<'a> {
     pub name: &'a str,
     pub ty: String,
+    pub is_vec:bool,
 }

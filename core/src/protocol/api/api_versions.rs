@@ -2,177 +2,153 @@ use super::prelude::*;
 
 pub type ApiVersionsRequest = ApiVersionsRequest3;
 pub type ApiVersionsResponse = ApiVersionsResponse3;
-pub fn serialize_api_versions_request(
-    data: ApiVersionsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
+pub fn serialize_api_versions_request(data:ApiVersionsRequest,version:i32, buf: &mut BytesMut) -> Result<(),Error> {
     match version {
-        0 => ToBytes::serialize(&ApiVersionsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&ApiVersionsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&ApiVersionsRequest2::try_from(data)?, buf),
-        _ => ToBytes::serialize(&data, buf),
+        0 => ToBytes::serialize(&ApiVersionsRequest0::try_from(data)?,buf),
+        1 => ToBytes::serialize(&ApiVersionsRequest1::try_from(data)?,buf),
+        2 => ToBytes::serialize(&ApiVersionsRequest2::try_from(data)?,buf),
+        _ => ToBytes::serialize(&data,buf),
     }
     Ok(())
 }
-pub fn deserialize_api_versions_response<T>(version: i32, buf: &mut T) -> ApiVersionsResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_api_versions_response<T>(version:i32, buf: &mut T) -> ApiVersionsResponse where T: Iterator<Item=u8> {
     match version {
-        0 => ApiVersionsResponse0::deserialize(buf).into(),
-        1 => ApiVersionsResponse1::deserialize(buf).into(),
-        2 => ApiVersionsResponse2::deserialize(buf).into(),
+        0 =>  ApiVersionsResponse0::deserialize(buf).into(),
+        1 =>  ApiVersionsResponse1::deserialize(buf).into(),
+        2 =>  ApiVersionsResponse2::deserialize(buf).into(),
         _ => ApiVersionsResponse::deserialize(buf),
     }
 }
 
-#[derive(Default, ToBytes)]
-pub struct ApiVersionsRequest0 {}
+#[derive(Default,ToBytes)]
+pub struct ApiVersionsRequest0 { 
+}
 
-#[derive(Default, ToBytes)]
-pub struct ApiVersionsRequest1 {}
+#[derive(Default,ToBytes)]
+pub struct ApiVersionsRequest1 { 
+}
 
-#[derive(Default, ToBytes)]
-pub struct ApiVersionsRequest2 {}
+#[derive(Default,ToBytes)]
+pub struct ApiVersionsRequest2 { 
+}
 
-#[derive(Default, ToBytes)]
-pub struct ApiVersionsRequest3 {
+#[derive(Default,ToBytes)]
+pub struct ApiVersionsRequest3 { 
     pub client_software_name: Optional<CompactString>,
     pub client_software_version: Optional<CompactString>,
 }
 
-#[derive(Default, FromBytes)]
-pub struct ApiVersionsResponse0 {
+#[derive(Default,FromBytes)]
+pub struct ApiVersionsResponse0 { 
     pub error_code: Int16,
-    pub api_keys: ApiVersionsResponseApiKeys0,
+    pub api_keys: Vec<ApiVersionsResponseApiKeys0>,
 }
 
-#[derive(Default, FromBytes)]
-pub struct ApiVersionsResponseApiKeys0 {
+#[derive(Default,FromBytes)]
+pub struct ApiVersionsResponseApiKeys0 { 
     pub api_key: Int16,
     pub min_version: Int16,
     pub max_version: Int16,
 }
 
-#[derive(Default, FromBytes)]
-pub struct ApiVersionsResponse1 {
+#[derive(Default,FromBytes)]
+pub struct ApiVersionsResponse1 { 
     pub error_code: Int16,
-    pub api_keys: ApiVersionsResponseApiKeys1,
+    pub api_keys: Vec<ApiVersionsResponseApiKeys1>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
-pub struct ApiVersionsResponseApiKeys1 {
+#[derive(Default,FromBytes)]
+pub struct ApiVersionsResponseApiKeys1 { 
     pub api_key: Int16,
     pub min_version: Int16,
     pub max_version: Int16,
 }
 
-#[derive(Default, FromBytes)]
-pub struct ApiVersionsResponse2 {
+#[derive(Default,FromBytes)]
+pub struct ApiVersionsResponse2 { 
     pub error_code: Int16,
-    pub api_keys: ApiVersionsResponseApiKeys2,
+    pub api_keys: Vec<ApiVersionsResponseApiKeys2>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
-pub struct ApiVersionsResponseApiKeys2 {
+#[derive(Default,FromBytes)]
+pub struct ApiVersionsResponseApiKeys2 { 
     pub api_key: Int16,
     pub min_version: Int16,
     pub max_version: Int16,
 }
 
-#[derive(Default, FromBytes)]
-pub struct ApiVersionsResponse3 {
+#[derive(Default,FromBytes)]
+pub struct ApiVersionsResponse3 { 
     pub error_code: Int16,
-    pub api_keys: ApiVersionsResponseApiKeys3,
+    pub api_keys: Vec<ApiVersionsResponseApiKeys3>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
-pub struct ApiVersionsResponseApiKeys3 {
+#[derive(Default,FromBytes)]
+pub struct ApiVersionsResponseApiKeys3 { 
     pub api_key: Int16,
     pub min_version: Int16,
     pub max_version: Int16,
 }
 
-impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest0 {
+impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest0{
     type Error = Error;
-    fn try_from(latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
+    fn try_from(latest:ApiVersionsRequest3) -> Result<Self, Self::Error> {
         if latest.client_software_name.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                0,
-                "client_software_name",
-            ));
+            return Err(Error::OldKafkaVersion("ApiVersionsRequest",0,"client_software_name"))
         }
         if latest.client_software_version.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                0,
-                "client_software_version",
-            ));
+            return Err(Error::OldKafkaVersion("ApiVersionsRequest",0,"client_software_version"))
         }
-        Ok(ApiVersionsRequest0 {})
+        Ok(ApiVersionsRequest0{
+        })
     }
 }
 
-impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest1 {
+impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest1{
     type Error = Error;
-    fn try_from(latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
+    fn try_from(latest:ApiVersionsRequest3) -> Result<Self, Self::Error> {
         if latest.client_software_name.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                1,
-                "client_software_name",
-            ));
+            return Err(Error::OldKafkaVersion("ApiVersionsRequest",1,"client_software_name"))
         }
         if latest.client_software_version.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                1,
-                "client_software_version",
-            ));
+            return Err(Error::OldKafkaVersion("ApiVersionsRequest",1,"client_software_version"))
         }
-        Ok(ApiVersionsRequest1 {})
+        Ok(ApiVersionsRequest1{
+        })
     }
 }
 
-impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest2 {
+impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest2{
     type Error = Error;
-    fn try_from(latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
+    fn try_from(latest:ApiVersionsRequest3) -> Result<Self, Self::Error> {
         if latest.client_software_name.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                2,
-                "client_software_name",
-            ));
+            return Err(Error::OldKafkaVersion("ApiVersionsRequest",2,"client_software_name"))
         }
         if latest.client_software_version.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                2,
-                "client_software_version",
-            ));
+            return Err(Error::OldKafkaVersion("ApiVersionsRequest",2,"client_software_version"))
         }
-        Ok(ApiVersionsRequest2 {})
+        Ok(ApiVersionsRequest2{
+        })
     }
 }
 
-impl From<ApiVersionsResponse0> for ApiVersionsResponse3 {
-    fn from(older: ApiVersionsResponse0) -> Self {
-        ApiVersionsResponse3 {
+
+impl From<ApiVersionsResponse0> for ApiVersionsResponse3{
+    fn from(older:ApiVersionsResponse0) -> Self {
+        ApiVersionsResponse3{
             error_code: older.error_code,
-            api_keys: older.api_keys.into(),
+            api_keys: older.api_keys.into_iter().map(|el|el.into()).collect(),
             ..ApiVersionsResponse3::default()
         }
     }
 }
 
-impl From<ApiVersionsResponseApiKeys0> for ApiVersionsResponseApiKeys3 {
-    fn from(older: ApiVersionsResponseApiKeys0) -> Self {
-        ApiVersionsResponseApiKeys3 {
+impl From<ApiVersionsResponseApiKeys0> for ApiVersionsResponseApiKeys3{
+    fn from(older:ApiVersionsResponseApiKeys0) -> Self {
+        ApiVersionsResponseApiKeys3{
             api_key: older.api_key,
             min_version: older.min_version,
             max_version: older.max_version,
@@ -180,19 +156,19 @@ impl From<ApiVersionsResponseApiKeys0> for ApiVersionsResponseApiKeys3 {
     }
 }
 
-impl From<ApiVersionsResponse1> for ApiVersionsResponse3 {
-    fn from(older: ApiVersionsResponse1) -> Self {
-        ApiVersionsResponse3 {
+impl From<ApiVersionsResponse1> for ApiVersionsResponse3{
+    fn from(older:ApiVersionsResponse1) -> Self {
+        ApiVersionsResponse3{
             error_code: older.error_code,
-            api_keys: older.api_keys.into(),
+            api_keys: older.api_keys.into_iter().map(|el|el.into()).collect(),
             throttle_time_ms: older.throttle_time_ms,
         }
     }
 }
 
-impl From<ApiVersionsResponseApiKeys1> for ApiVersionsResponseApiKeys3 {
-    fn from(older: ApiVersionsResponseApiKeys1) -> Self {
-        ApiVersionsResponseApiKeys3 {
+impl From<ApiVersionsResponseApiKeys1> for ApiVersionsResponseApiKeys3{
+    fn from(older:ApiVersionsResponseApiKeys1) -> Self {
+        ApiVersionsResponseApiKeys3{
             api_key: older.api_key,
             min_version: older.min_version,
             max_version: older.max_version,
@@ -200,22 +176,23 @@ impl From<ApiVersionsResponseApiKeys1> for ApiVersionsResponseApiKeys3 {
     }
 }
 
-impl From<ApiVersionsResponse2> for ApiVersionsResponse3 {
-    fn from(older: ApiVersionsResponse2) -> Self {
-        ApiVersionsResponse3 {
+impl From<ApiVersionsResponse2> for ApiVersionsResponse3{
+    fn from(older:ApiVersionsResponse2) -> Self {
+        ApiVersionsResponse3{
             error_code: older.error_code,
-            api_keys: older.api_keys.into(),
+            api_keys: older.api_keys.into_iter().map(|el|el.into()).collect(),
             throttle_time_ms: older.throttle_time_ms,
         }
     }
 }
 
-impl From<ApiVersionsResponseApiKeys2> for ApiVersionsResponseApiKeys3 {
-    fn from(older: ApiVersionsResponseApiKeys2) -> Self {
-        ApiVersionsResponseApiKeys3 {
+impl From<ApiVersionsResponseApiKeys2> for ApiVersionsResponseApiKeys3{
+    fn from(older:ApiVersionsResponseApiKeys2) -> Self {
+        ApiVersionsResponseApiKeys3{
             api_key: older.api_key,
             min_version: older.min_version,
             max_version: older.max_version,
         }
     }
 }
+
