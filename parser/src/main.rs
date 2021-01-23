@@ -8,7 +8,7 @@ use parser::{
     generator::generate_content, parser::parse_api_call, transformer::group_api_calls,
     utils::to_snake_case,
 };
-use scraper::{Html, Selector};
+use regex::Regex;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -17,13 +17,12 @@ async fn main() -> anyhow::Result<()> {
         .text()
         .await?;
 
-    let selector = Selector::parse("pre").unwrap();
-    let html_fragment = Html::parse_fragment(&body);
+    let regex = Regex::new(r"(?m)<pre>([^<]+)</pre>").unwrap();
+    let capture_groups = regex.captures_iter(&body);
 
-    let api_definitions: Vec<String> = html_fragment
-        .select(&selector)
-        .skip(6) // example & headers
-        .map(|x| x.inner_html().replace("&gt;", ">"))
+    let api_definitions: Vec<String> = capture_groups
+        .skip(5) // example & headers
+        .map(|x| x[1].replace("&gt;", ">"))
         .collect();
 
     let parsed_definitions: Vec<_> = api_definitions
