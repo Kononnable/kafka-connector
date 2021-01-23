@@ -166,11 +166,11 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
                     }
                 }
 
-                let cond = |call_field: &StructField|{
+                let cond = |call_field: &StructField| {
                     latest
-                    .fields
-                    .iter()
-                    .any(|latest_field| call_field.name == latest_field.name)
+                        .fields
+                        .iter()
+                        .any(|latest_field| call_field.name == latest_field.name)
                 };
                 if !call.fields.iter().all(cond) {
                     impl_def.push_str(&format!(
@@ -217,29 +217,27 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
                     if field.ty.starts_with(&call.name)
                         || field.ty.starts_with(&format!("Optional<{}", call.name))
                     {
-                        if field.is_vec{
+                        if field.is_vec {
                             impl_def.push_str(&format!(
                                 "            {}: older.{}.into_iter().map(|e|e.into()).collect(),\n",
                                 field.name, field.name
                             ));
-                        }else{
+                        } else {
                             impl_def.push_str(&format!(
                                 "            {}: older.{}.into(),\n",
                                 field.name, field.name
                             ));
                         }
-                    } else if field.is_vec{
-                            impl_def.push_str(&format!(
-                                "            {}: older.{}.into_iter().map(|el|el.into()).collect(),\n",
-                                field.name, field.name
-                            ));
-
-                        }else{
-                            impl_def.push_str(&format!(
-                                "            {}: older.{},\n",
-                                field.name, field.name
-                            ));
-                        
+                    } else if field.is_vec {
+                        impl_def.push_str(&format!(
+                            "            {}: older.{}.into_iter().map(|el|el.into()).collect(),\n",
+                            field.name, field.name
+                        ));
+                    } else {
+                        impl_def.push_str(&format!(
+                            "            {}: older.{},\n",
+                            field.name, field.name
+                        ));
                     }
                 }
                 if !latest

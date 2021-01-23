@@ -1,5 +1,4 @@
-pub struct AdminOptions{
+pub struct AdminOptions {
     // default.api.timeout.ms
-    // retries
-
+// retries
 }
