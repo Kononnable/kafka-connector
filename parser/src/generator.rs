@@ -165,12 +165,14 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
                         ));
                     }
                 }
-                if !call.fields.iter().all(|call_field| {
+
+                let cond = |call_field: &StructField|{
                     latest
-                        .fields
-                        .iter()
-                        .any(|latest_field| call_field.name == latest_field.name)
-                }) {
+                    .fields
+                    .iter()
+                    .any(|latest_field| call_field.name == latest_field.name)
+                };
+                if !call.fields.iter().all(cond) {
                     impl_def.push_str(&format!(
                         "            ..{}{}::default()\n",
                         call.name, call.version
@@ -226,8 +228,7 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
                                 field.name, field.name
                             ));
                         }
-                    } else {
-                        if field.is_vec{
+                    } else if field.is_vec{
                             impl_def.push_str(&format!(
                                 "            {}: older.{}.into_iter().map(|el|el.into()).collect(),\n",
                                 field.name, field.name
@@ -238,7 +239,7 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
                                 "            {}: older.{},\n",
                                 field.name, field.name
                             ));
-                        }
+                        
                     }
                 }
                 if !latest

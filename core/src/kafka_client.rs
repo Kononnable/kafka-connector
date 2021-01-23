@@ -5,7 +5,7 @@ use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::TcpStream};
 
 use thiserror::Error as DeriveError;
 
-use crate::protocol::{api::{ApiNumbers, api_versions::{ApiVersionsRequest, ApiVersionsRequest0, deserialize_api_versions_response, serialize_api_versions_request}, header::{HeaderRequest, HeaderResponse}}, from_bytes::FromBytes, to_bytes::ToBytes};
+use crate::protocol::{api::{ApiNumbers, api_versions::{ApiVersionsRequest, deserialize_api_versions_response, serialize_api_versions_request}, header::{HeaderRequest, HeaderResponse}}, from_bytes::FromBytes, to_bytes::ToBytes};
 
 #[derive(Debug)]
 pub struct KafkaClient {
@@ -65,7 +65,7 @@ impl BrokerClient{
         self.connection.write_all(&len.to_be_bytes()).await.unwrap();
         self.connection.write_all(&buffer).await.unwrap();
         let mut size: [u8; 4] = [0, 0, 0, 0];
-        let read = self.connection.read_exact(&mut size).await.unwrap();
+        self.connection.read_exact(&mut size).await.unwrap();
         let cap = i32::from_be_bytes(size);
         let mut buf2 = vec![0; cap as usize];
         self.connection.read_exact(&mut buf2).await.unwrap();

@@ -5,7 +5,7 @@ pub struct Producer {
 }
 
 impl Producer {
-    pub fn new(brokers:&str, options:ProducerOptions)->Self{
+    pub fn new(_brokers:&str, _options:ProducerOptions)->Self{
         Self{}
     }
 }
