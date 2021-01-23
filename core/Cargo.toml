@@ -3,11 +3,12 @@ name = "kafka-connector"
 version = "0.1.0"
 authors = ["kononnable <kononnable@gmail.com>"]
 edition = "2018"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 anyhow = "1.0.38"
 tokio = {version ="1.0.1", features=["rt-multi-thread","net","macros","io-util"]}
 tokio-stream = "0.1.2"
 bytes = "1.0.1"
-kafka-connector-derive = {path = "./../derive"}
+kafka-connector-derive = {version="0.1.0", path = "./../derive"}
 thiserror="1.0.23"
