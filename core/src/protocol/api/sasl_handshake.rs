@@ -9,6 +9,7 @@ pub fn serialize_sasl_handshake_request(
 ) -> Result<(), Error> {
     match version {
         0 => ToBytes::serialize(&SaslHandshakeRequest0::try_from(data)?, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -19,6 +20,7 @@ where
 {
     match version {
         0 => SaslHandshakeResponse0::deserialize(buf).into(),
+        2 => SaslHandshakeResponse::deserialize(buf),
         _ => SaslHandshakeResponse::deserialize(buf),
     }
 }
@@ -58,7 +60,7 @@ impl From<SaslHandshakeResponse0> for SaslHandshakeResponse1 {
     fn from(older: SaslHandshakeResponse0) -> Self {
         SaslHandshakeResponse1 {
             error_code: older.error_code,
-            mechanisms: older.mechanisms,
+            mechanisms: older.mechanisms.into_iter().collect(),
         }
     }
 }

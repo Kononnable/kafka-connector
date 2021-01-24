@@ -11,6 +11,7 @@ pub fn serialize_controlled_shutdown_request(
         0 => ToBytes::serialize(&ControlledShutdownRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&ControlledShutdownRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&ControlledShutdownRequest2::try_from(data)?, buf),
+        4 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -26,6 +27,7 @@ where
         0 => ControlledShutdownResponse0::deserialize(buf).into(),
         1 => ControlledShutdownResponse1::deserialize(buf).into(),
         2 => ControlledShutdownResponse2::deserialize(buf).into(),
+        4 => ControlledShutdownResponse::deserialize(buf),
         _ => ControlledShutdownResponse::deserialize(buf),
     }
 }
@@ -55,7 +57,7 @@ pub struct ControlledShutdownRequest3 {
 #[derive(Default, FromBytes)]
 pub struct ControlledShutdownResponse0 {
     pub error_code: Int16,
-    pub remaining_partitions: ControlledShutdownResponseRemainingPartitions0,
+    pub remaining_partitions: Vec<ControlledShutdownResponseRemainingPartitions0>,
 }
 
 #[derive(Default, FromBytes)]
@@ -67,7 +69,7 @@ pub struct ControlledShutdownResponseRemainingPartitions0 {
 #[derive(Default, FromBytes)]
 pub struct ControlledShutdownResponse1 {
     pub error_code: Int16,
-    pub remaining_partitions: ControlledShutdownResponseRemainingPartitions1,
+    pub remaining_partitions: Vec<ControlledShutdownResponseRemainingPartitions1>,
 }
 
 #[derive(Default, FromBytes)]
@@ -79,7 +81,7 @@ pub struct ControlledShutdownResponseRemainingPartitions1 {
 #[derive(Default, FromBytes)]
 pub struct ControlledShutdownResponse2 {
     pub error_code: Int16,
-    pub remaining_partitions: ControlledShutdownResponseRemainingPartitions2,
+    pub remaining_partitions: Vec<ControlledShutdownResponseRemainingPartitions2>,
 }
 
 #[derive(Default, FromBytes)]
@@ -91,7 +93,7 @@ pub struct ControlledShutdownResponseRemainingPartitions2 {
 #[derive(Default, FromBytes)]
 pub struct ControlledShutdownResponse3 {
     pub error_code: Int16,
-    pub remaining_partitions: ControlledShutdownResponseRemainingPartitions3,
+    pub remaining_partitions: Vec<ControlledShutdownResponseRemainingPartitions3>,
 }
 
 #[derive(Default, FromBytes)]
@@ -137,7 +139,7 @@ impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest2 {
     fn try_from(latest: ControlledShutdownRequest3) -> Result<Self, Self::Error> {
         Ok(ControlledShutdownRequest2 {
             broker_id: latest.broker_id,
-            broker_epoch: latest.broker_epoch,
+            broker_epoch: latest.broker_epoch.map(|val| val),
         })
     }
 }
@@ -146,7 +148,11 @@ impl From<ControlledShutdownResponse0> for ControlledShutdownResponse3 {
     fn from(older: ControlledShutdownResponse0) -> Self {
         ControlledShutdownResponse3 {
             error_code: older.error_code,
-            remaining_partitions: older.remaining_partitions.into(),
+            remaining_partitions: older
+                .remaining_partitions
+                .into_iter()
+                .map(|el| el.into())
+                .collect(),
         }
     }
 }
@@ -166,7 +172,11 @@ impl From<ControlledShutdownResponse1> for ControlledShutdownResponse3 {
     fn from(older: ControlledShutdownResponse1) -> Self {
         ControlledShutdownResponse3 {
             error_code: older.error_code,
-            remaining_partitions: older.remaining_partitions.into(),
+            remaining_partitions: older
+                .remaining_partitions
+                .into_iter()
+                .map(|el| el.into())
+                .collect(),
         }
     }
 }
@@ -186,7 +196,11 @@ impl From<ControlledShutdownResponse2> for ControlledShutdownResponse3 {
     fn from(older: ControlledShutdownResponse2) -> Self {
         ControlledShutdownResponse3 {
             error_code: older.error_code,
-            remaining_partitions: older.remaining_partitions.into(),
+            remaining_partitions: older
+                .remaining_partitions
+                .into_iter()
+                .map(|el| el.into())
+                .collect(),
         }
     }
 }

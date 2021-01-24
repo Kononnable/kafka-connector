@@ -11,6 +11,7 @@ pub fn serialize_find_coordinator_request(
         0 => ToBytes::serialize(&FindCoordinatorRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&FindCoordinatorRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&FindCoordinatorRequest2::try_from(data)?, buf),
+        4 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -26,6 +27,7 @@ where
         0 => FindCoordinatorResponse0::deserialize(buf).into(),
         1 => FindCoordinatorResponse1::deserialize(buf).into(),
         2 => FindCoordinatorResponse2::deserialize(buf).into(),
+        4 => FindCoordinatorResponse::deserialize(buf),
         _ => FindCoordinatorResponse::deserialize(buf),
     }
 }
@@ -110,7 +112,7 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest1 {
     fn try_from(latest: FindCoordinatorRequest3) -> Result<Self, Self::Error> {
         Ok(FindCoordinatorRequest1 {
             key: latest.key,
-            key_type: latest.key_type,
+            key_type: latest.key_type.map(|val| val),
         })
     }
 }
@@ -120,7 +122,7 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest2 {
     fn try_from(latest: FindCoordinatorRequest3) -> Result<Self, Self::Error> {
         Ok(FindCoordinatorRequest2 {
             key: latest.key,
-            key_type: latest.key_type,
+            key_type: latest.key_type.map(|val| val),
         })
     }
 }
@@ -140,9 +142,9 @@ impl From<FindCoordinatorResponse0> for FindCoordinatorResponse3 {
 impl From<FindCoordinatorResponse1> for FindCoordinatorResponse3 {
     fn from(older: FindCoordinatorResponse1) -> Self {
         FindCoordinatorResponse3 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.map(|val| val),
             node_id: older.node_id,
             host: older.host,
             port: older.port,
@@ -153,9 +155,9 @@ impl From<FindCoordinatorResponse1> for FindCoordinatorResponse3 {
 impl From<FindCoordinatorResponse2> for FindCoordinatorResponse3 {
     fn from(older: FindCoordinatorResponse2) -> Self {
         FindCoordinatorResponse3 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.map(|val| val),
             node_id: older.node_id,
             host: older.host,
             port: older.port,

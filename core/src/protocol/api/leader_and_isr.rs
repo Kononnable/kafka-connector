@@ -12,6 +12,7 @@ pub fn serialize_leader_and_isr_request(
         1 => ToBytes::serialize(&LeaderAndIsrRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&LeaderAndIsrRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&LeaderAndIsrRequest3::try_from(data)?, buf),
+        5 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -25,6 +26,7 @@ where
         1 => LeaderAndIsrResponse1::deserialize(buf).into(),
         2 => LeaderAndIsrResponse2::deserialize(buf).into(),
         3 => LeaderAndIsrResponse3::deserialize(buf).into(),
+        5 => LeaderAndIsrResponse::deserialize(buf),
         _ => LeaderAndIsrResponse::deserialize(buf),
     }
 }
@@ -33,8 +35,8 @@ where
 pub struct LeaderAndIsrRequest0 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub ungrouped_partition_states: LeaderAndIsrRequestUngroupedPartitionStates0,
-    pub live_leaders: LeaderAndIsrRequestLiveLeaders0,
+    pub ungrouped_partition_states: Vec<LeaderAndIsrRequestUngroupedPartitionStates0>,
+    pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders0>,
 }
 
 #[derive(Default, ToBytes)]
@@ -60,8 +62,8 @@ pub struct LeaderAndIsrRequestLiveLeaders0 {
 pub struct LeaderAndIsrRequest1 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub ungrouped_partition_states: LeaderAndIsrRequestUngroupedPartitionStates1,
-    pub live_leaders: LeaderAndIsrRequestLiveLeaders1,
+    pub ungrouped_partition_states: Vec<LeaderAndIsrRequestUngroupedPartitionStates1>,
+    pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders1>,
 }
 
 #[derive(Default, ToBytes)]
@@ -89,14 +91,14 @@ pub struct LeaderAndIsrRequest2 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
     pub broker_epoch: Optional<Int64>,
-    pub topic_states: Optional<LeaderAndIsrRequestTopicStates2>,
-    pub live_leaders: LeaderAndIsrRequestLiveLeaders2,
+    pub topic_states: Optional<Vec<LeaderAndIsrRequestTopicStates2>>,
+    pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders2>,
 }
 
 #[derive(Default, ToBytes)]
 pub struct LeaderAndIsrRequestTopicStates2 {
     pub topic_name: String,
-    pub partition_states: LeaderAndIsrRequestTopicStatesPartitionStates2,
+    pub partition_states: Vec<LeaderAndIsrRequestTopicStatesPartitionStates2>,
 }
 
 #[derive(Default, ToBytes)]
@@ -123,14 +125,14 @@ pub struct LeaderAndIsrRequest3 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
     pub broker_epoch: Optional<Int64>,
-    pub topic_states: Optional<LeaderAndIsrRequestTopicStates3>,
-    pub live_leaders: LeaderAndIsrRequestLiveLeaders3,
+    pub topic_states: Optional<Vec<LeaderAndIsrRequestTopicStates3>>,
+    pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders3>,
 }
 
 #[derive(Default, ToBytes)]
 pub struct LeaderAndIsrRequestTopicStates3 {
     pub topic_name: String,
-    pub partition_states: LeaderAndIsrRequestTopicStatesPartitionStates3,
+    pub partition_states: Vec<LeaderAndIsrRequestTopicStatesPartitionStates3>,
 }
 
 #[derive(Default, ToBytes)]
@@ -159,14 +161,14 @@ pub struct LeaderAndIsrRequest4 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
     pub broker_epoch: Optional<Int64>,
-    pub topic_states: Optional<LeaderAndIsrRequestTopicStates4>,
-    pub live_leaders: LeaderAndIsrRequestLiveLeaders4,
+    pub topic_states: Optional<Vec<LeaderAndIsrRequestTopicStates4>>,
+    pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders4>,
 }
 
 #[derive(Default, ToBytes)]
 pub struct LeaderAndIsrRequestTopicStates4 {
     pub topic_name: CompactString,
-    pub partition_states: LeaderAndIsrRequestTopicStatesPartitionStates4,
+    pub partition_states: Vec<LeaderAndIsrRequestTopicStatesPartitionStates4>,
 }
 
 #[derive(Default, ToBytes)]
@@ -193,7 +195,7 @@ pub struct LeaderAndIsrRequestLiveLeaders4 {
 #[derive(Default, FromBytes)]
 pub struct LeaderAndIsrResponse0 {
     pub error_code: Int16,
-    pub partition_errors: LeaderAndIsrResponsePartitionErrors0,
+    pub partition_errors: Vec<LeaderAndIsrResponsePartitionErrors0>,
 }
 
 #[derive(Default, FromBytes)]
@@ -206,7 +208,7 @@ pub struct LeaderAndIsrResponsePartitionErrors0 {
 #[derive(Default, FromBytes)]
 pub struct LeaderAndIsrResponse1 {
     pub error_code: Int16,
-    pub partition_errors: LeaderAndIsrResponsePartitionErrors1,
+    pub partition_errors: Vec<LeaderAndIsrResponsePartitionErrors1>,
 }
 
 #[derive(Default, FromBytes)]
@@ -219,7 +221,7 @@ pub struct LeaderAndIsrResponsePartitionErrors1 {
 #[derive(Default, FromBytes)]
 pub struct LeaderAndIsrResponse2 {
     pub error_code: Int16,
-    pub partition_errors: LeaderAndIsrResponsePartitionErrors2,
+    pub partition_errors: Vec<LeaderAndIsrResponsePartitionErrors2>,
 }
 
 #[derive(Default, FromBytes)]
@@ -232,7 +234,7 @@ pub struct LeaderAndIsrResponsePartitionErrors2 {
 #[derive(Default, FromBytes)]
 pub struct LeaderAndIsrResponse3 {
     pub error_code: Int16,
-    pub partition_errors: LeaderAndIsrResponsePartitionErrors3,
+    pub partition_errors: Vec<LeaderAndIsrResponsePartitionErrors3>,
 }
 
 #[derive(Default, FromBytes)]
@@ -245,7 +247,7 @@ pub struct LeaderAndIsrResponsePartitionErrors3 {
 #[derive(Default, FromBytes)]
 pub struct LeaderAndIsrResponse4 {
     pub error_code: Int16,
-    pub partition_errors: LeaderAndIsrResponsePartitionErrors4,
+    pub partition_errors: Vec<LeaderAndIsrResponsePartitionErrors4>,
 }
 
 #[derive(Default, FromBytes)]
@@ -275,7 +277,11 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest0 {
         Ok(LeaderAndIsrRequest0 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            live_leaders: latest.live_leaders.try_into()?,
+            live_leaders: latest
+                .live_leaders
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
             ..LeaderAndIsrRequest0::default()
         })
     }
@@ -312,7 +318,11 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest1 {
         Ok(LeaderAndIsrRequest1 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            live_leaders: latest.live_leaders.try_into()?,
+            live_leaders: latest
+                .live_leaders
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
             ..LeaderAndIsrRequest1::default()
         })
     }
@@ -335,9 +345,20 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest2 {
         Ok(LeaderAndIsrRequest2 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            broker_epoch: latest.broker_epoch,
-            topic_states: latest.topic_states.try_into()?,
-            live_leaders: latest.live_leaders.try_into()?,
+            broker_epoch: latest.broker_epoch.map(|val| val),
+            topic_states: latest
+                .topic_states
+                .map(|val| {
+                    val.into_iter()
+                        .map(|el| el.try_into())
+                        .collect::<Result<_, Error>>()
+                })
+                .wrap_result()?,
+            live_leaders: latest
+                .live_leaders
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -347,7 +368,11 @@ impl TryFrom<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates
     fn try_from(latest: LeaderAndIsrRequestTopicStates4) -> Result<Self, Self::Error> {
         Ok(LeaderAndIsrRequestTopicStates2 {
             topic_name: latest.topic_name,
-            partition_states: latest.partition_states.try_into()?,
+            partition_states: latest
+                .partition_states
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -378,9 +403,9 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
             controller_epoch: latest.controller_epoch,
             leader: latest.leader,
             leader_epoch: latest.leader_epoch,
-            isr: latest.isr,
+            isr: latest.isr.into_iter().collect(),
             zk_version: latest.zk_version,
-            replicas: latest.replicas,
+            replicas: latest.replicas.into_iter().collect(),
             is_new: latest.is_new,
         })
     }
@@ -403,9 +428,20 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest3 {
         Ok(LeaderAndIsrRequest3 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            broker_epoch: latest.broker_epoch,
-            topic_states: latest.topic_states.try_into()?,
-            live_leaders: latest.live_leaders.try_into()?,
+            broker_epoch: latest.broker_epoch.map(|val| val),
+            topic_states: latest
+                .topic_states
+                .map(|val| {
+                    val.into_iter()
+                        .map(|el| el.try_into())
+                        .collect::<Result<_, Error>>()
+                })
+                .wrap_result()?,
+            live_leaders: latest
+                .live_leaders
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -415,7 +451,11 @@ impl TryFrom<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates
     fn try_from(latest: LeaderAndIsrRequestTopicStates4) -> Result<Self, Self::Error> {
         Ok(LeaderAndIsrRequestTopicStates3 {
             topic_name: latest.topic_name,
-            partition_states: latest.partition_states.try_into()?,
+            partition_states: latest
+                .partition_states
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -432,11 +472,13 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
             controller_epoch: latest.controller_epoch,
             leader: latest.leader,
             leader_epoch: latest.leader_epoch,
-            isr: latest.isr,
+            isr: latest.isr.into_iter().collect(),
             zk_version: latest.zk_version,
-            replicas: latest.replicas,
-            adding_replicas: latest.adding_replicas,
-            removing_replicas: latest.removing_replicas,
+            replicas: latest.replicas.into_iter().collect(),
+            adding_replicas: latest.adding_replicas.map(|val| val.into_iter().collect()),
+            removing_replicas: latest
+                .removing_replicas
+                .map(|val| val.into_iter().collect()),
             is_new: latest.is_new,
         })
     }
@@ -457,7 +499,11 @@ impl From<LeaderAndIsrResponse0> for LeaderAndIsrResponse4 {
     fn from(older: LeaderAndIsrResponse0) -> Self {
         LeaderAndIsrResponse4 {
             error_code: older.error_code,
-            partition_errors: older.partition_errors.into(),
+            partition_errors: older
+                .partition_errors
+                .into_iter()
+                .map(|el| el.into())
+                .collect(),
         }
     }
 }
@@ -476,7 +522,11 @@ impl From<LeaderAndIsrResponse1> for LeaderAndIsrResponse4 {
     fn from(older: LeaderAndIsrResponse1) -> Self {
         LeaderAndIsrResponse4 {
             error_code: older.error_code,
-            partition_errors: older.partition_errors.into(),
+            partition_errors: older
+                .partition_errors
+                .into_iter()
+                .map(|el| el.into())
+                .collect(),
         }
     }
 }
@@ -495,7 +545,11 @@ impl From<LeaderAndIsrResponse2> for LeaderAndIsrResponse4 {
     fn from(older: LeaderAndIsrResponse2) -> Self {
         LeaderAndIsrResponse4 {
             error_code: older.error_code,
-            partition_errors: older.partition_errors.into(),
+            partition_errors: older
+                .partition_errors
+                .into_iter()
+                .map(|el| el.into())
+                .collect(),
         }
     }
 }
@@ -514,7 +568,11 @@ impl From<LeaderAndIsrResponse3> for LeaderAndIsrResponse4 {
     fn from(older: LeaderAndIsrResponse3) -> Self {
         LeaderAndIsrResponse4 {
             error_code: older.error_code,
-            partition_errors: older.partition_errors.into(),
+            partition_errors: older
+                .partition_errors
+                .into_iter()
+                .map(|el| el.into())
+                .collect(),
         }
     }
 }

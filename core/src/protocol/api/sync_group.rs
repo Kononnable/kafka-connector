@@ -13,6 +13,7 @@ pub fn serialize_sync_group_request(
         2 => ToBytes::serialize(&SyncGroupRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&SyncGroupRequest3::try_from(data)?, buf),
         4 => ToBytes::serialize(&SyncGroupRequest4::try_from(data)?, buf),
+        6 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -27,6 +28,7 @@ where
         2 => SyncGroupResponse2::deserialize(buf).into(),
         3 => SyncGroupResponse3::deserialize(buf).into(),
         4 => SyncGroupResponse4::deserialize(buf).into(),
+        6 => SyncGroupResponse::deserialize(buf),
         _ => SyncGroupResponse::deserialize(buf),
     }
 }
@@ -36,7 +38,7 @@ pub struct SyncGroupRequest0 {
     pub group_id: String,
     pub generation_id: Int32,
     pub member_id: String,
-    pub assignments: SyncGroupRequestAssignments0,
+    pub assignments: Vec<SyncGroupRequestAssignments0>,
 }
 
 #[derive(Default, ToBytes)]
@@ -50,7 +52,7 @@ pub struct SyncGroupRequest1 {
     pub group_id: String,
     pub generation_id: Int32,
     pub member_id: String,
-    pub assignments: SyncGroupRequestAssignments1,
+    pub assignments: Vec<SyncGroupRequestAssignments1>,
 }
 
 #[derive(Default, ToBytes)]
@@ -64,7 +66,7 @@ pub struct SyncGroupRequest2 {
     pub group_id: String,
     pub generation_id: Int32,
     pub member_id: String,
-    pub assignments: SyncGroupRequestAssignments2,
+    pub assignments: Vec<SyncGroupRequestAssignments2>,
 }
 
 #[derive(Default, ToBytes)]
@@ -79,7 +81,7 @@ pub struct SyncGroupRequest3 {
     pub generation_id: Int32,
     pub member_id: String,
     pub group_instance_id: Optional<NullableString>,
-    pub assignments: SyncGroupRequestAssignments3,
+    pub assignments: Vec<SyncGroupRequestAssignments3>,
 }
 
 #[derive(Default, ToBytes)]
@@ -94,7 +96,7 @@ pub struct SyncGroupRequest4 {
     pub generation_id: Int32,
     pub member_id: CompactString,
     pub group_instance_id: Optional<CompactNullableString>,
-    pub assignments: SyncGroupRequestAssignments4,
+    pub assignments: Vec<SyncGroupRequestAssignments4>,
 }
 
 #[derive(Default, ToBytes)]
@@ -111,7 +113,7 @@ pub struct SyncGroupRequest5 {
     pub group_instance_id: Optional<CompactNullableString>,
     pub protocol_type: Optional<CompactNullableString>,
     pub protocol_name: Optional<CompactNullableString>,
-    pub assignments: SyncGroupRequestAssignments5,
+    pub assignments: Vec<SyncGroupRequestAssignments5>,
 }
 
 #[derive(Default, ToBytes)]
@@ -191,7 +193,11 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest0 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
-            assignments: latest.assignments.try_into()?,
+            assignments: latest
+                .assignments
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -234,7 +240,11 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest1 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
-            assignments: latest.assignments.try_into()?,
+            assignments: latest
+                .assignments
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -277,7 +287,11 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest2 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
-            assignments: latest.assignments.try_into()?,
+            assignments: latest
+                .assignments
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -313,8 +327,12 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest3 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
-            group_instance_id: latest.group_instance_id,
-            assignments: latest.assignments.try_into()?,
+            group_instance_id: latest.group_instance_id.map(|val| val),
+            assignments: latest
+                .assignments
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -350,8 +368,12 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest4 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
-            group_instance_id: latest.group_instance_id,
-            assignments: latest.assignments.try_into()?,
+            group_instance_id: latest.group_instance_id.map(|val| val),
+            assignments: latest
+                .assignments
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -379,7 +401,7 @@ impl From<SyncGroupResponse0> for SyncGroupResponse5 {
 impl From<SyncGroupResponse1> for SyncGroupResponse5 {
     fn from(older: SyncGroupResponse1) -> Self {
         SyncGroupResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
             assignment: older.assignment,
             ..SyncGroupResponse5::default()
@@ -390,7 +412,7 @@ impl From<SyncGroupResponse1> for SyncGroupResponse5 {
 impl From<SyncGroupResponse2> for SyncGroupResponse5 {
     fn from(older: SyncGroupResponse2) -> Self {
         SyncGroupResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
             assignment: older.assignment,
             ..SyncGroupResponse5::default()
@@ -401,7 +423,7 @@ impl From<SyncGroupResponse2> for SyncGroupResponse5 {
 impl From<SyncGroupResponse3> for SyncGroupResponse5 {
     fn from(older: SyncGroupResponse3) -> Self {
         SyncGroupResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
             assignment: older.assignment,
             ..SyncGroupResponse5::default()
@@ -412,7 +434,7 @@ impl From<SyncGroupResponse3> for SyncGroupResponse5 {
 impl From<SyncGroupResponse4> for SyncGroupResponse5 {
     fn from(older: SyncGroupResponse4) -> Self {
         SyncGroupResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
             assignment: older.assignment,
             ..SyncGroupResponse5::default()

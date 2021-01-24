@@ -13,6 +13,7 @@ pub fn serialize_list_offsets_request(
         2 => ToBytes::serialize(&ListOffsetsRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&ListOffsetsRequest3::try_from(data)?, buf),
         4 => ToBytes::serialize(&ListOffsetsRequest4::try_from(data)?, buf),
+        6 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -27,6 +28,7 @@ where
         2 => ListOffsetsResponse2::deserialize(buf).into(),
         3 => ListOffsetsResponse3::deserialize(buf).into(),
         4 => ListOffsetsResponse4::deserialize(buf).into(),
+        6 => ListOffsetsResponse::deserialize(buf),
         _ => ListOffsetsResponse::deserialize(buf),
     }
 }
@@ -34,13 +36,13 @@ where
 #[derive(Default, ToBytes)]
 pub struct ListOffsetsRequest0 {
     pub replica_id: Int32,
-    pub topics: ListOffsetsRequestTopics0,
+    pub topics: Vec<ListOffsetsRequestTopics0>,
 }
 
 #[derive(Default, ToBytes)]
 pub struct ListOffsetsRequestTopics0 {
     pub name: String,
-    pub partitions: ListOffsetsRequestTopicsPartitions0,
+    pub partitions: Vec<ListOffsetsRequestTopicsPartitions0>,
 }
 
 #[derive(Default, ToBytes)]
@@ -53,13 +55,13 @@ pub struct ListOffsetsRequestTopicsPartitions0 {
 #[derive(Default, ToBytes)]
 pub struct ListOffsetsRequest1 {
     pub replica_id: Int32,
-    pub topics: ListOffsetsRequestTopics1,
+    pub topics: Vec<ListOffsetsRequestTopics1>,
 }
 
 #[derive(Default, ToBytes)]
 pub struct ListOffsetsRequestTopics1 {
     pub name: String,
-    pub partitions: ListOffsetsRequestTopicsPartitions1,
+    pub partitions: Vec<ListOffsetsRequestTopicsPartitions1>,
 }
 
 #[derive(Default, ToBytes)]
@@ -72,13 +74,13 @@ pub struct ListOffsetsRequestTopicsPartitions1 {
 pub struct ListOffsetsRequest2 {
     pub replica_id: Int32,
     pub isolation_level: Optional<Int8>,
-    pub topics: ListOffsetsRequestTopics2,
+    pub topics: Vec<ListOffsetsRequestTopics2>,
 }
 
 #[derive(Default, ToBytes)]
 pub struct ListOffsetsRequestTopics2 {
     pub name: String,
-    pub partitions: ListOffsetsRequestTopicsPartitions2,
+    pub partitions: Vec<ListOffsetsRequestTopicsPartitions2>,
 }
 
 #[derive(Default, ToBytes)]
@@ -91,13 +93,13 @@ pub struct ListOffsetsRequestTopicsPartitions2 {
 pub struct ListOffsetsRequest3 {
     pub replica_id: Int32,
     pub isolation_level: Optional<Int8>,
-    pub topics: ListOffsetsRequestTopics3,
+    pub topics: Vec<ListOffsetsRequestTopics3>,
 }
 
 #[derive(Default, ToBytes)]
 pub struct ListOffsetsRequestTopics3 {
     pub name: String,
-    pub partitions: ListOffsetsRequestTopicsPartitions3,
+    pub partitions: Vec<ListOffsetsRequestTopicsPartitions3>,
 }
 
 #[derive(Default, ToBytes)]
@@ -110,13 +112,13 @@ pub struct ListOffsetsRequestTopicsPartitions3 {
 pub struct ListOffsetsRequest4 {
     pub replica_id: Int32,
     pub isolation_level: Optional<Int8>,
-    pub topics: ListOffsetsRequestTopics4,
+    pub topics: Vec<ListOffsetsRequestTopics4>,
 }
 
 #[derive(Default, ToBytes)]
 pub struct ListOffsetsRequestTopics4 {
     pub name: String,
-    pub partitions: ListOffsetsRequestTopicsPartitions4,
+    pub partitions: Vec<ListOffsetsRequestTopicsPartitions4>,
 }
 
 #[derive(Default, ToBytes)]
@@ -130,13 +132,13 @@ pub struct ListOffsetsRequestTopicsPartitions4 {
 pub struct ListOffsetsRequest5 {
     pub replica_id: Int32,
     pub isolation_level: Optional<Int8>,
-    pub topics: ListOffsetsRequestTopics5,
+    pub topics: Vec<ListOffsetsRequestTopics5>,
 }
 
 #[derive(Default, ToBytes)]
 pub struct ListOffsetsRequestTopics5 {
     pub name: String,
-    pub partitions: ListOffsetsRequestTopicsPartitions5,
+    pub partitions: Vec<ListOffsetsRequestTopicsPartitions5>,
 }
 
 #[derive(Default, ToBytes)]
@@ -148,13 +150,13 @@ pub struct ListOffsetsRequestTopicsPartitions5 {
 
 #[derive(Default, FromBytes)]
 pub struct ListOffsetsResponse0 {
-    pub topics: ListOffsetsResponseTopics0,
+    pub topics: Vec<ListOffsetsResponseTopics0>,
 }
 
 #[derive(Default, FromBytes)]
 pub struct ListOffsetsResponseTopics0 {
     pub name: String,
-    pub partitions: ListOffsetsResponseTopicsPartitions0,
+    pub partitions: Vec<ListOffsetsResponseTopicsPartitions0>,
 }
 
 #[derive(Default, FromBytes)]
@@ -166,13 +168,13 @@ pub struct ListOffsetsResponseTopicsPartitions0 {
 
 #[derive(Default, FromBytes)]
 pub struct ListOffsetsResponse1 {
-    pub topics: ListOffsetsResponseTopics1,
+    pub topics: Vec<ListOffsetsResponseTopics1>,
 }
 
 #[derive(Default, FromBytes)]
 pub struct ListOffsetsResponseTopics1 {
     pub name: String,
-    pub partitions: ListOffsetsResponseTopicsPartitions1,
+    pub partitions: Vec<ListOffsetsResponseTopicsPartitions1>,
 }
 
 #[derive(Default, FromBytes)]
@@ -186,13 +188,13 @@ pub struct ListOffsetsResponseTopicsPartitions1 {
 #[derive(Default, FromBytes)]
 pub struct ListOffsetsResponse2 {
     pub throttle_time_ms: Optional<Int32>,
-    pub topics: ListOffsetsResponseTopics2,
+    pub topics: Vec<ListOffsetsResponseTopics2>,
 }
 
 #[derive(Default, FromBytes)]
 pub struct ListOffsetsResponseTopics2 {
     pub name: String,
-    pub partitions: ListOffsetsResponseTopicsPartitions2,
+    pub partitions: Vec<ListOffsetsResponseTopicsPartitions2>,
 }
 
 #[derive(Default, FromBytes)]
@@ -206,13 +208,13 @@ pub struct ListOffsetsResponseTopicsPartitions2 {
 #[derive(Default, FromBytes)]
 pub struct ListOffsetsResponse3 {
     pub throttle_time_ms: Optional<Int32>,
-    pub topics: ListOffsetsResponseTopics3,
+    pub topics: Vec<ListOffsetsResponseTopics3>,
 }
 
 #[derive(Default, FromBytes)]
 pub struct ListOffsetsResponseTopics3 {
     pub name: String,
-    pub partitions: ListOffsetsResponseTopicsPartitions3,
+    pub partitions: Vec<ListOffsetsResponseTopicsPartitions3>,
 }
 
 #[derive(Default, FromBytes)]
@@ -226,13 +228,13 @@ pub struct ListOffsetsResponseTopicsPartitions3 {
 #[derive(Default, FromBytes)]
 pub struct ListOffsetsResponse4 {
     pub throttle_time_ms: Optional<Int32>,
-    pub topics: ListOffsetsResponseTopics4,
+    pub topics: Vec<ListOffsetsResponseTopics4>,
 }
 
 #[derive(Default, FromBytes)]
 pub struct ListOffsetsResponseTopics4 {
     pub name: String,
-    pub partitions: ListOffsetsResponseTopicsPartitions4,
+    pub partitions: Vec<ListOffsetsResponseTopicsPartitions4>,
 }
 
 #[derive(Default, FromBytes)]
@@ -247,13 +249,13 @@ pub struct ListOffsetsResponseTopicsPartitions4 {
 #[derive(Default, FromBytes)]
 pub struct ListOffsetsResponse5 {
     pub throttle_time_ms: Optional<Int32>,
-    pub topics: ListOffsetsResponseTopics5,
+    pub topics: Vec<ListOffsetsResponseTopics5>,
 }
 
 #[derive(Default, FromBytes)]
 pub struct ListOffsetsResponseTopics5 {
     pub name: String,
-    pub partitions: ListOffsetsResponseTopicsPartitions5,
+    pub partitions: Vec<ListOffsetsResponseTopicsPartitions5>,
 }
 
 #[derive(Default, FromBytes)]
@@ -277,7 +279,11 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest0 {
         }
         Ok(ListOffsetsRequest0 {
             replica_id: latest.replica_id,
-            topics: latest.topics.try_into()?,
+            topics: latest
+                .topics
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -287,7 +293,11 @@ impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics0 {
     fn try_from(latest: ListOffsetsRequestTopics5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequestTopics0 {
             name: latest.name,
-            partitions: latest.partitions.try_into()?,
+            partitions: latest
+                .partitions
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -322,7 +332,11 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest1 {
         }
         Ok(ListOffsetsRequest1 {
             replica_id: latest.replica_id,
-            topics: latest.topics.try_into()?,
+            topics: latest
+                .topics
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -332,7 +346,11 @@ impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics1 {
     fn try_from(latest: ListOffsetsRequestTopics5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequestTopics1 {
             name: latest.name,
-            partitions: latest.partitions.try_into()?,
+            partitions: latest
+                .partitions
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -359,8 +377,12 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest2 {
     fn try_from(latest: ListOffsetsRequest5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequest2 {
             replica_id: latest.replica_id,
-            isolation_level: latest.isolation_level,
-            topics: latest.topics.try_into()?,
+            isolation_level: latest.isolation_level.map(|val| val),
+            topics: latest
+                .topics
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -370,7 +392,11 @@ impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics2 {
     fn try_from(latest: ListOffsetsRequestTopics5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequestTopics2 {
             name: latest.name,
-            partitions: latest.partitions.try_into()?,
+            partitions: latest
+                .partitions
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -397,8 +423,12 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest3 {
     fn try_from(latest: ListOffsetsRequest5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequest3 {
             replica_id: latest.replica_id,
-            isolation_level: latest.isolation_level,
-            topics: latest.topics.try_into()?,
+            isolation_level: latest.isolation_level.map(|val| val),
+            topics: latest
+                .topics
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -408,7 +438,11 @@ impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics3 {
     fn try_from(latest: ListOffsetsRequestTopics5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequestTopics3 {
             name: latest.name,
-            partitions: latest.partitions.try_into()?,
+            partitions: latest
+                .partitions
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -435,8 +469,12 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest4 {
     fn try_from(latest: ListOffsetsRequest5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequest4 {
             replica_id: latest.replica_id,
-            isolation_level: latest.isolation_level,
-            topics: latest.topics.try_into()?,
+            isolation_level: latest.isolation_level.map(|val| val),
+            topics: latest
+                .topics
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -446,7 +484,11 @@ impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics4 {
     fn try_from(latest: ListOffsetsRequestTopics5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequestTopics4 {
             name: latest.name,
-            partitions: latest.partitions.try_into()?,
+            partitions: latest
+                .partitions
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -456,7 +498,7 @@ impl TryFrom<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPa
     fn try_from(latest: ListOffsetsRequestTopicsPartitions5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequestTopicsPartitions4 {
             partition_index: latest.partition_index,
-            current_leader_epoch: latest.current_leader_epoch,
+            current_leader_epoch: latest.current_leader_epoch.map(|val| val),
             timestamp: latest.timestamp,
         })
     }
@@ -465,7 +507,7 @@ impl TryFrom<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPa
 impl From<ListOffsetsResponse0> for ListOffsetsResponse5 {
     fn from(older: ListOffsetsResponse0) -> Self {
         ListOffsetsResponse5 {
-            topics: older.topics.into(),
+            topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..ListOffsetsResponse5::default()
         }
     }
@@ -475,7 +517,7 @@ impl From<ListOffsetsResponseTopics0> for ListOffsetsResponseTopics5 {
     fn from(older: ListOffsetsResponseTopics0) -> Self {
         ListOffsetsResponseTopics5 {
             name: older.name,
-            partitions: older.partitions.into(),
+            partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -493,7 +535,7 @@ impl From<ListOffsetsResponseTopicsPartitions0> for ListOffsetsResponseTopicsPar
 impl From<ListOffsetsResponse1> for ListOffsetsResponse5 {
     fn from(older: ListOffsetsResponse1) -> Self {
         ListOffsetsResponse5 {
-            topics: older.topics.into(),
+            topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..ListOffsetsResponse5::default()
         }
     }
@@ -503,7 +545,7 @@ impl From<ListOffsetsResponseTopics1> for ListOffsetsResponseTopics5 {
     fn from(older: ListOffsetsResponseTopics1) -> Self {
         ListOffsetsResponseTopics5 {
             name: older.name,
-            partitions: older.partitions.into(),
+            partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -513,8 +555,8 @@ impl From<ListOffsetsResponseTopicsPartitions1> for ListOffsetsResponseTopicsPar
         ListOffsetsResponseTopicsPartitions5 {
             partition_index: older.partition_index,
             error_code: older.error_code,
-            timestamp: older.timestamp,
-            offset: older.offset,
+            timestamp: older.timestamp.map(|val| val),
+            offset: older.offset.map(|val| val),
             ..ListOffsetsResponseTopicsPartitions5::default()
         }
     }
@@ -523,8 +565,8 @@ impl From<ListOffsetsResponseTopicsPartitions1> for ListOffsetsResponseTopicsPar
 impl From<ListOffsetsResponse2> for ListOffsetsResponse5 {
     fn from(older: ListOffsetsResponse2) -> Self {
         ListOffsetsResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
-            topics: older.topics.into(),
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -533,7 +575,7 @@ impl From<ListOffsetsResponseTopics2> for ListOffsetsResponseTopics5 {
     fn from(older: ListOffsetsResponseTopics2) -> Self {
         ListOffsetsResponseTopics5 {
             name: older.name,
-            partitions: older.partitions.into(),
+            partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -543,8 +585,8 @@ impl From<ListOffsetsResponseTopicsPartitions2> for ListOffsetsResponseTopicsPar
         ListOffsetsResponseTopicsPartitions5 {
             partition_index: older.partition_index,
             error_code: older.error_code,
-            timestamp: older.timestamp,
-            offset: older.offset,
+            timestamp: older.timestamp.map(|val| val),
+            offset: older.offset.map(|val| val),
             ..ListOffsetsResponseTopicsPartitions5::default()
         }
     }
@@ -553,8 +595,8 @@ impl From<ListOffsetsResponseTopicsPartitions2> for ListOffsetsResponseTopicsPar
 impl From<ListOffsetsResponse3> for ListOffsetsResponse5 {
     fn from(older: ListOffsetsResponse3) -> Self {
         ListOffsetsResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
-            topics: older.topics.into(),
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -563,7 +605,7 @@ impl From<ListOffsetsResponseTopics3> for ListOffsetsResponseTopics5 {
     fn from(older: ListOffsetsResponseTopics3) -> Self {
         ListOffsetsResponseTopics5 {
             name: older.name,
-            partitions: older.partitions.into(),
+            partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -573,8 +615,8 @@ impl From<ListOffsetsResponseTopicsPartitions3> for ListOffsetsResponseTopicsPar
         ListOffsetsResponseTopicsPartitions5 {
             partition_index: older.partition_index,
             error_code: older.error_code,
-            timestamp: older.timestamp,
-            offset: older.offset,
+            timestamp: older.timestamp.map(|val| val),
+            offset: older.offset.map(|val| val),
             ..ListOffsetsResponseTopicsPartitions5::default()
         }
     }
@@ -583,8 +625,8 @@ impl From<ListOffsetsResponseTopicsPartitions3> for ListOffsetsResponseTopicsPar
 impl From<ListOffsetsResponse4> for ListOffsetsResponse5 {
     fn from(older: ListOffsetsResponse4) -> Self {
         ListOffsetsResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
-            topics: older.topics.into(),
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -593,7 +635,7 @@ impl From<ListOffsetsResponseTopics4> for ListOffsetsResponseTopics5 {
     fn from(older: ListOffsetsResponseTopics4) -> Self {
         ListOffsetsResponseTopics5 {
             name: older.name,
-            partitions: older.partitions.into(),
+            partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -603,9 +645,9 @@ impl From<ListOffsetsResponseTopicsPartitions4> for ListOffsetsResponseTopicsPar
         ListOffsetsResponseTopicsPartitions5 {
             partition_index: older.partition_index,
             error_code: older.error_code,
-            timestamp: older.timestamp,
-            offset: older.offset,
-            leader_epoch: older.leader_epoch,
+            timestamp: older.timestamp.map(|val| val),
+            offset: older.offset.map(|val| val),
+            leader_epoch: older.leader_epoch.map(|val| val),
         }
     }
 }

@@ -6,17 +6,28 @@ use super::{error::Error, from_bytes::FromBytes, to_bytes::ToBytes};
 
 ///Fields not supported by some old kafka version
 pub enum Optional<T>
-where
-    T: Default,
+// TODO: remove requirement of default
+// where
+//     T: Default,
 {
     Some(T),
     None,
 }
 
 impl<T> Optional<T>
-where
-    T: Default,
+// where
+//     T: Default,
 {
+    pub fn map<F, U>(self, func: F) -> Optional<U>
+    where
+        // U: Default,
+        F: FnOnce(T) -> U,
+    {
+        match self {
+            Optional::None => Optional::None,
+            Optional::Some(val) => Optional::Some(func(val)),
+        }
+    }
     pub fn is_some(&self) -> bool {
         match self {
             Self::Some(_) => true,
@@ -50,6 +61,18 @@ where
         }
     }
 }
+impl<V, E> Optional<Result<V, E>> {
+    pub fn wrap_result(self) -> Result<Optional<V>, E> {
+        match self {
+            Optional::None => Ok(Optional::None),
+            Optional::Some(result) => match result {
+                Ok(val) => Ok(Optional::Some(val)),
+                Err(e) => Err(e),
+            },
+        }
+    }
+}
+
 impl<T> Default for Optional<T>
 where
     T: Default,

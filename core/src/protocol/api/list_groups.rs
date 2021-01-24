@@ -12,6 +12,7 @@ pub fn serialize_list_groups_request(
         1 => ToBytes::serialize(&ListGroupsRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&ListGroupsRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&ListGroupsRequest3::try_from(data)?, buf),
+        5 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -25,6 +26,7 @@ where
         1 => ListGroupsResponse1::deserialize(buf).into(),
         2 => ListGroupsResponse2::deserialize(buf).into(),
         3 => ListGroupsResponse3::deserialize(buf).into(),
+        5 => ListGroupsResponse::deserialize(buf),
         _ => ListGroupsResponse::deserialize(buf),
     }
 }
@@ -49,7 +51,7 @@ pub struct ListGroupsRequest4 {
 #[derive(Default, FromBytes)]
 pub struct ListGroupsResponse0 {
     pub error_code: Int16,
-    pub groups: ListGroupsResponseGroups0,
+    pub groups: Vec<ListGroupsResponseGroups0>,
 }
 
 #[derive(Default, FromBytes)]
@@ -62,7 +64,7 @@ pub struct ListGroupsResponseGroups0 {
 pub struct ListGroupsResponse1 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
-    pub groups: ListGroupsResponseGroups1,
+    pub groups: Vec<ListGroupsResponseGroups1>,
 }
 
 #[derive(Default, FromBytes)]
@@ -75,7 +77,7 @@ pub struct ListGroupsResponseGroups1 {
 pub struct ListGroupsResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
-    pub groups: ListGroupsResponseGroups2,
+    pub groups: Vec<ListGroupsResponseGroups2>,
 }
 
 #[derive(Default, FromBytes)]
@@ -88,7 +90,7 @@ pub struct ListGroupsResponseGroups2 {
 pub struct ListGroupsResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
-    pub groups: ListGroupsResponseGroups3,
+    pub groups: Vec<ListGroupsResponseGroups3>,
 }
 
 #[derive(Default, FromBytes)]
@@ -101,7 +103,7 @@ pub struct ListGroupsResponseGroups3 {
 pub struct ListGroupsResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
-    pub groups: ListGroupsResponseGroups4,
+    pub groups: Vec<ListGroupsResponseGroups4>,
 }
 
 #[derive(Default, FromBytes)]
@@ -171,7 +173,7 @@ impl From<ListGroupsResponse0> for ListGroupsResponse4 {
     fn from(older: ListGroupsResponse0) -> Self {
         ListGroupsResponse4 {
             error_code: older.error_code,
-            groups: older.groups.into(),
+            groups: older.groups.into_iter().map(|el| el.into()).collect(),
             ..ListGroupsResponse4::default()
         }
     }
@@ -190,9 +192,9 @@ impl From<ListGroupsResponseGroups0> for ListGroupsResponseGroups4 {
 impl From<ListGroupsResponse1> for ListGroupsResponse4 {
     fn from(older: ListGroupsResponse1) -> Self {
         ListGroupsResponse4 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
-            groups: older.groups.into(),
+            groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -210,9 +212,9 @@ impl From<ListGroupsResponseGroups1> for ListGroupsResponseGroups4 {
 impl From<ListGroupsResponse2> for ListGroupsResponse4 {
     fn from(older: ListGroupsResponse2) -> Self {
         ListGroupsResponse4 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
-            groups: older.groups.into(),
+            groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -230,9 +232,9 @@ impl From<ListGroupsResponseGroups2> for ListGroupsResponseGroups4 {
 impl From<ListGroupsResponse3> for ListGroupsResponse4 {
     fn from(older: ListGroupsResponse3) -> Self {
         ListGroupsResponse4 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
-            groups: older.groups.into(),
+            groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
     }
 }

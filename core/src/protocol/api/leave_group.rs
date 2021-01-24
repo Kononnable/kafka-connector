@@ -12,6 +12,7 @@ pub fn serialize_leave_group_request(
         1 => ToBytes::serialize(&LeaveGroupRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&LeaveGroupRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&LeaveGroupRequest3::try_from(data)?, buf),
+        5 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -25,6 +26,7 @@ where
         1 => LeaveGroupResponse1::deserialize(buf).into(),
         2 => LeaveGroupResponse2::deserialize(buf).into(),
         3 => LeaveGroupResponse3::deserialize(buf).into(),
+        5 => LeaveGroupResponse::deserialize(buf),
         _ => LeaveGroupResponse::deserialize(buf),
     }
 }
@@ -50,7 +52,7 @@ pub struct LeaveGroupRequest2 {
 #[derive(Default, ToBytes)]
 pub struct LeaveGroupRequest3 {
     pub group_id: String,
-    pub members: Optional<LeaveGroupRequestMembers3>,
+    pub members: Optional<Vec<LeaveGroupRequestMembers3>>,
 }
 
 #[derive(Default, ToBytes)]
@@ -62,7 +64,7 @@ pub struct LeaveGroupRequestMembers3 {
 #[derive(Default, ToBytes)]
 pub struct LeaveGroupRequest4 {
     pub group_id: CompactString,
-    pub members: Optional<LeaveGroupRequestMembers4>,
+    pub members: Optional<Vec<LeaveGroupRequestMembers4>>,
 }
 
 #[derive(Default, ToBytes)]
@@ -92,7 +94,7 @@ pub struct LeaveGroupResponse2 {
 pub struct LeaveGroupResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
-    pub members: Optional<LeaveGroupResponseMembers3>,
+    pub members: Optional<Vec<LeaveGroupResponseMembers3>>,
 }
 
 #[derive(Default, FromBytes)]
@@ -106,7 +108,7 @@ pub struct LeaveGroupResponseMembers3 {
 pub struct LeaveGroupResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
-    pub members: Optional<LeaveGroupResponseMembers4>,
+    pub members: Optional<Vec<LeaveGroupResponseMembers4>>,
 }
 
 #[derive(Default, FromBytes)]
@@ -160,7 +162,14 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest3 {
     fn try_from(latest: LeaveGroupRequest4) -> Result<Self, Self::Error> {
         Ok(LeaveGroupRequest3 {
             group_id: latest.group_id,
-            members: latest.members.try_into()?,
+            members: latest
+                .members
+                .map(|val| {
+                    val.into_iter()
+                        .map(|el| el.try_into())
+                        .collect::<Result<_, Error>>()
+                })
+                .wrap_result()?,
         })
     }
 }
@@ -187,7 +196,7 @@ impl From<LeaveGroupResponse0> for LeaveGroupResponse4 {
 impl From<LeaveGroupResponse1> for LeaveGroupResponse4 {
     fn from(older: LeaveGroupResponse1) -> Self {
         LeaveGroupResponse4 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
             ..LeaveGroupResponse4::default()
         }
@@ -197,7 +206,7 @@ impl From<LeaveGroupResponse1> for LeaveGroupResponse4 {
 impl From<LeaveGroupResponse2> for LeaveGroupResponse4 {
     fn from(older: LeaveGroupResponse2) -> Self {
         LeaveGroupResponse4 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
             ..LeaveGroupResponse4::default()
         }
@@ -207,9 +216,11 @@ impl From<LeaveGroupResponse2> for LeaveGroupResponse4 {
 impl From<LeaveGroupResponse3> for LeaveGroupResponse4 {
     fn from(older: LeaveGroupResponse3) -> Self {
         LeaveGroupResponse4 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
-            members: older.members.into(),
+            members: older
+                .members
+                .map(|val| val.into_iter().map(|el| el.into()).collect()),
         }
     }
 }

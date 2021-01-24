@@ -14,7 +14,8 @@ pub fn group_api_calls(api_calls: Vec<ApiCall>) -> HashMap<&str, ApiEndpoint> {
         }
         let grouped_call = endpoints.get_mut(call.name).unwrap();
         let call_type = call.ty;
-        let parsed_call = parse_call(call);
+        let mut parsed_call = parse_call(call);
+        change_reserved_keywords(&mut parsed_call);
         match call_type {
             CallType::Request => grouped_call.requests.push(parsed_call),
             CallType::Response => grouped_call.responses.push(parsed_call),
@@ -27,6 +28,16 @@ pub fn group_api_calls(api_calls: Vec<ApiCall>) -> HashMap<&str, ApiEndpoint> {
     }
 
     endpoints
+}
+
+fn change_reserved_keywords(api_calls: &mut Vec<ApiStructDefinition>) {
+    for api_call in api_calls {
+        for field in &mut api_call.fields {
+            if let "match" = field.name {
+                field.name = "match_";
+            }
+        }
+    }
 }
 
 fn mark_new_fields_as_optional(endpoint_definitions: &mut Vec<Vec<ApiStructDefinition>>) {
@@ -50,6 +61,7 @@ fn mark_new_fields_as_optional(endpoint_definitions: &mut Vec<Vec<ApiStructDefin
                         .is_none()
                     {
                         field.ty = format!("Optional<{}>", field.ty);
+                        field.is_optional = true;
                     }
                 }
             }
@@ -82,9 +94,25 @@ fn parse_vec(
     let mut children = Vec::new();
     let mut returned_fields = vec![];
     for field in fields {
-        let (ty, is_vec) = match field.type_with_payload {
-            FieldTypeWithPayload::Field(ty) => (format!("{:?}", ty), false),
-            FieldTypeWithPayload::VecSimple(ty) => (format!("Vec<{:?}>", ty), true),
+        match field.type_with_payload {
+            FieldTypeWithPayload::Field(ty) => {
+                returned_fields.push(StructField {
+                    name: field.name,
+                    ty: format!("{:?}", ty),
+                    is_vec: false,
+                    is_simple_type: true,
+                    is_optional: false,
+                });
+            }
+            FieldTypeWithPayload::VecSimple(ty) => {
+                returned_fields.push(StructField {
+                    name: field.name,
+                    ty: format!("Vec<{:?}>", ty),
+                    is_vec: true,
+                    is_simple_type: true,
+                    is_optional: false,
+                });
+            }
             FieldTypeWithPayload::VecStruct(ty) => {
                 let struct_name = format!("{}{}", prefix, to_upper_case(field.name));
                 let (fields, mut grandchildren) = parse_vec(ty, struct_name.clone(), api_version);
@@ -94,14 +122,15 @@ fn parse_vec(
                     fields,
                 });
                 children.append(&mut grandchildren);
-                (format!("Vec<{}{}>", struct_name, api_version), true)
+                returned_fields.push(StructField {
+                    name: field.name,
+                    ty: format!("Vec<{}{}>", struct_name, api_version),
+                    is_vec: true,
+                    is_simple_type: false,
+                    is_optional: false,
+                });
             }
         };
-        returned_fields.push(StructField {
-            name: field.name,
-            ty,
-            is_vec,
-        });
     }
     (returned_fields, children)
 }
@@ -124,4 +153,6 @@ pub struct StructField<'a> {
     pub name: &'a str,
     pub ty: String,
     pub is_vec: bool,
+    pub is_simple_type: bool,
+    pub is_optional: bool,
 }

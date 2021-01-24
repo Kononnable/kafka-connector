@@ -13,6 +13,7 @@ pub fn serialize_describe_groups_request(
         2 => ToBytes::serialize(&DescribeGroupsRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&DescribeGroupsRequest3::try_from(data)?, buf),
         4 => ToBytes::serialize(&DescribeGroupsRequest4::try_from(data)?, buf),
+        6 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -27,6 +28,7 @@ where
         2 => DescribeGroupsResponse2::deserialize(buf).into(),
         3 => DescribeGroupsResponse3::deserialize(buf).into(),
         4 => DescribeGroupsResponse4::deserialize(buf).into(),
+        6 => DescribeGroupsResponse::deserialize(buf),
         _ => DescribeGroupsResponse::deserialize(buf),
     }
 }
@@ -66,7 +68,7 @@ pub struct DescribeGroupsRequest5 {
 
 #[derive(Default, FromBytes)]
 pub struct DescribeGroupsResponse0 {
-    pub groups: DescribeGroupsResponseGroups0,
+    pub groups: Vec<DescribeGroupsResponseGroups0>,
 }
 
 #[derive(Default, FromBytes)]
@@ -76,7 +78,7 @@ pub struct DescribeGroupsResponseGroups0 {
     pub group_state: String,
     pub protocol_type: String,
     pub protocol_data: String,
-    pub members: DescribeGroupsResponseGroupsMembers0,
+    pub members: Vec<DescribeGroupsResponseGroupsMembers0>,
 }
 
 #[derive(Default, FromBytes)]
@@ -91,7 +93,7 @@ pub struct DescribeGroupsResponseGroupsMembers0 {
 #[derive(Default, FromBytes)]
 pub struct DescribeGroupsResponse1 {
     pub throttle_time_ms: Optional<Int32>,
-    pub groups: DescribeGroupsResponseGroups1,
+    pub groups: Vec<DescribeGroupsResponseGroups1>,
 }
 
 #[derive(Default, FromBytes)]
@@ -101,7 +103,7 @@ pub struct DescribeGroupsResponseGroups1 {
     pub group_state: String,
     pub protocol_type: String,
     pub protocol_data: String,
-    pub members: DescribeGroupsResponseGroupsMembers1,
+    pub members: Vec<DescribeGroupsResponseGroupsMembers1>,
 }
 
 #[derive(Default, FromBytes)]
@@ -116,7 +118,7 @@ pub struct DescribeGroupsResponseGroupsMembers1 {
 #[derive(Default, FromBytes)]
 pub struct DescribeGroupsResponse2 {
     pub throttle_time_ms: Optional<Int32>,
-    pub groups: DescribeGroupsResponseGroups2,
+    pub groups: Vec<DescribeGroupsResponseGroups2>,
 }
 
 #[derive(Default, FromBytes)]
@@ -126,7 +128,7 @@ pub struct DescribeGroupsResponseGroups2 {
     pub group_state: String,
     pub protocol_type: String,
     pub protocol_data: String,
-    pub members: DescribeGroupsResponseGroupsMembers2,
+    pub members: Vec<DescribeGroupsResponseGroupsMembers2>,
 }
 
 #[derive(Default, FromBytes)]
@@ -141,7 +143,7 @@ pub struct DescribeGroupsResponseGroupsMembers2 {
 #[derive(Default, FromBytes)]
 pub struct DescribeGroupsResponse3 {
     pub throttle_time_ms: Optional<Int32>,
-    pub groups: DescribeGroupsResponseGroups3,
+    pub groups: Vec<DescribeGroupsResponseGroups3>,
 }
 
 #[derive(Default, FromBytes)]
@@ -151,7 +153,7 @@ pub struct DescribeGroupsResponseGroups3 {
     pub group_state: String,
     pub protocol_type: String,
     pub protocol_data: String,
-    pub members: DescribeGroupsResponseGroupsMembers3,
+    pub members: Vec<DescribeGroupsResponseGroupsMembers3>,
     pub authorized_operations: Optional<Int32>,
 }
 
@@ -167,7 +169,7 @@ pub struct DescribeGroupsResponseGroupsMembers3 {
 #[derive(Default, FromBytes)]
 pub struct DescribeGroupsResponse4 {
     pub throttle_time_ms: Optional<Int32>,
-    pub groups: DescribeGroupsResponseGroups4,
+    pub groups: Vec<DescribeGroupsResponseGroups4>,
 }
 
 #[derive(Default, FromBytes)]
@@ -177,7 +179,7 @@ pub struct DescribeGroupsResponseGroups4 {
     pub group_state: String,
     pub protocol_type: String,
     pub protocol_data: String,
-    pub members: DescribeGroupsResponseGroupsMembers4,
+    pub members: Vec<DescribeGroupsResponseGroupsMembers4>,
     pub authorized_operations: Optional<Int32>,
 }
 
@@ -194,7 +196,7 @@ pub struct DescribeGroupsResponseGroupsMembers4 {
 #[derive(Default, FromBytes)]
 pub struct DescribeGroupsResponse5 {
     pub throttle_time_ms: Optional<Int32>,
-    pub groups: DescribeGroupsResponseGroups5,
+    pub groups: Vec<DescribeGroupsResponseGroups5>,
 }
 
 #[derive(Default, FromBytes)]
@@ -204,7 +206,7 @@ pub struct DescribeGroupsResponseGroups5 {
     pub group_state: CompactString,
     pub protocol_type: CompactString,
     pub protocol_data: CompactString,
-    pub members: DescribeGroupsResponseGroupsMembers5,
+    pub members: Vec<DescribeGroupsResponseGroupsMembers5>,
     pub authorized_operations: Optional<Int32>,
 }
 
@@ -229,7 +231,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest0 {
             ));
         }
         Ok(DescribeGroupsRequest0 {
-            groups: latest.groups,
+            groups: latest.groups.into_iter().collect(),
         })
     }
 }
@@ -245,7 +247,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest1 {
             ));
         }
         Ok(DescribeGroupsRequest1 {
-            groups: latest.groups,
+            groups: latest.groups.into_iter().collect(),
         })
     }
 }
@@ -261,7 +263,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest2 {
             ));
         }
         Ok(DescribeGroupsRequest2 {
-            groups: latest.groups,
+            groups: latest.groups.into_iter().collect(),
         })
     }
 }
@@ -270,8 +272,8 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest3 {
     type Error = Error;
     fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
         Ok(DescribeGroupsRequest3 {
-            groups: latest.groups,
-            include_authorized_operations: latest.include_authorized_operations,
+            groups: latest.groups.into_iter().collect(),
+            include_authorized_operations: latest.include_authorized_operations.map(|val| val),
         })
     }
 }
@@ -280,8 +282,8 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest4 {
     type Error = Error;
     fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
         Ok(DescribeGroupsRequest4 {
-            groups: latest.groups,
-            include_authorized_operations: latest.include_authorized_operations,
+            groups: latest.groups.into_iter().collect(),
+            include_authorized_operations: latest.include_authorized_operations.map(|val| val),
         })
     }
 }
@@ -289,7 +291,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest4 {
 impl From<DescribeGroupsResponse0> for DescribeGroupsResponse5 {
     fn from(older: DescribeGroupsResponse0) -> Self {
         DescribeGroupsResponse5 {
-            groups: older.groups.into(),
+            groups: older.groups.into_iter().map(|el| el.into()).collect(),
             ..DescribeGroupsResponse5::default()
         }
     }
@@ -303,7 +305,7 @@ impl From<DescribeGroupsResponseGroups0> for DescribeGroupsResponseGroups5 {
             group_state: older.group_state,
             protocol_type: older.protocol_type,
             protocol_data: older.protocol_data,
-            members: older.members.into(),
+            members: older.members.into_iter().map(|el| el.into()).collect(),
             ..DescribeGroupsResponseGroups5::default()
         }
     }
@@ -325,8 +327,8 @@ impl From<DescribeGroupsResponseGroupsMembers0> for DescribeGroupsResponseGroups
 impl From<DescribeGroupsResponse1> for DescribeGroupsResponse5 {
     fn from(older: DescribeGroupsResponse1) -> Self {
         DescribeGroupsResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
-            groups: older.groups.into(),
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -339,7 +341,7 @@ impl From<DescribeGroupsResponseGroups1> for DescribeGroupsResponseGroups5 {
             group_state: older.group_state,
             protocol_type: older.protocol_type,
             protocol_data: older.protocol_data,
-            members: older.members.into(),
+            members: older.members.into_iter().map(|el| el.into()).collect(),
             ..DescribeGroupsResponseGroups5::default()
         }
     }
@@ -361,8 +363,8 @@ impl From<DescribeGroupsResponseGroupsMembers1> for DescribeGroupsResponseGroups
 impl From<DescribeGroupsResponse2> for DescribeGroupsResponse5 {
     fn from(older: DescribeGroupsResponse2) -> Self {
         DescribeGroupsResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
-            groups: older.groups.into(),
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -375,7 +377,7 @@ impl From<DescribeGroupsResponseGroups2> for DescribeGroupsResponseGroups5 {
             group_state: older.group_state,
             protocol_type: older.protocol_type,
             protocol_data: older.protocol_data,
-            members: older.members.into(),
+            members: older.members.into_iter().map(|el| el.into()).collect(),
             ..DescribeGroupsResponseGroups5::default()
         }
     }
@@ -397,8 +399,8 @@ impl From<DescribeGroupsResponseGroupsMembers2> for DescribeGroupsResponseGroups
 impl From<DescribeGroupsResponse3> for DescribeGroupsResponse5 {
     fn from(older: DescribeGroupsResponse3) -> Self {
         DescribeGroupsResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
-            groups: older.groups.into(),
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -411,8 +413,8 @@ impl From<DescribeGroupsResponseGroups3> for DescribeGroupsResponseGroups5 {
             group_state: older.group_state,
             protocol_type: older.protocol_type,
             protocol_data: older.protocol_data,
-            members: older.members.into(),
-            authorized_operations: older.authorized_operations,
+            members: older.members.into_iter().map(|el| el.into()).collect(),
+            authorized_operations: older.authorized_operations.map(|val| val),
         }
     }
 }
@@ -433,8 +435,8 @@ impl From<DescribeGroupsResponseGroupsMembers3> for DescribeGroupsResponseGroups
 impl From<DescribeGroupsResponse4> for DescribeGroupsResponse5 {
     fn from(older: DescribeGroupsResponse4) -> Self {
         DescribeGroupsResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
-            groups: older.groups.into(),
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
     }
 }
@@ -447,8 +449,8 @@ impl From<DescribeGroupsResponseGroups4> for DescribeGroupsResponseGroups5 {
             group_state: older.group_state,
             protocol_type: older.protocol_type,
             protocol_data: older.protocol_data,
-            members: older.members.into(),
-            authorized_operations: older.authorized_operations,
+            members: older.members.into_iter().map(|el| el.into()).collect(),
+            authorized_operations: older.authorized_operations.map(|val| val),
         }
     }
 }
@@ -457,7 +459,7 @@ impl From<DescribeGroupsResponseGroupsMembers4> for DescribeGroupsResponseGroups
     fn from(older: DescribeGroupsResponseGroupsMembers4) -> Self {
         DescribeGroupsResponseGroupsMembers5 {
             member_id: older.member_id,
-            group_instance_id: older.group_instance_id,
+            group_instance_id: older.group_instance_id.map(|val| val),
             client_id: older.client_id,
             client_host: older.client_host,
             member_metadata: older.member_metadata,

@@ -14,6 +14,7 @@ pub fn serialize_update_metadata_request(
         3 => ToBytes::serialize(&UpdateMetadataRequest3::try_from(data)?, buf),
         4 => ToBytes::serialize(&UpdateMetadataRequest4::try_from(data)?, buf),
         5 => ToBytes::serialize(&UpdateMetadataRequest5::try_from(data)?, buf),
+        7 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -29,6 +30,7 @@ where
         3 => UpdateMetadataResponse3::deserialize(buf).into(),
         4 => UpdateMetadataResponse4::deserialize(buf).into(),
         5 => UpdateMetadataResponse5::deserialize(buf).into(),
+        7 => UpdateMetadataResponse::deserialize(buf),
         _ => UpdateMetadataResponse::deserialize(buf),
     }
 }
@@ -37,8 +39,8 @@ where
 pub struct UpdateMetadataRequest0 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub ungrouped_partition_states: UpdateMetadataRequestUngroupedPartitionStates0,
-    pub live_brokers: UpdateMetadataRequestLiveBrokers0,
+    pub ungrouped_partition_states: Vec<UpdateMetadataRequestUngroupedPartitionStates0>,
+    pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers0>,
 }
 
 #[derive(Default, ToBytes)]
@@ -64,8 +66,8 @@ pub struct UpdateMetadataRequestLiveBrokers0 {
 pub struct UpdateMetadataRequest1 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub ungrouped_partition_states: UpdateMetadataRequestUngroupedPartitionStates1,
-    pub live_brokers: UpdateMetadataRequestLiveBrokers1,
+    pub ungrouped_partition_states: Vec<UpdateMetadataRequestUngroupedPartitionStates1>,
+    pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers1>,
 }
 
 #[derive(Default, ToBytes)]
@@ -83,7 +85,7 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates1 {
 #[derive(Default, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers1 {
     pub id: Int32,
-    pub endpoints: Optional<UpdateMetadataRequestLiveBrokersEndpoints1>,
+    pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints1>>,
 }
 
 #[derive(Default, ToBytes)]
@@ -97,8 +99,8 @@ pub struct UpdateMetadataRequestLiveBrokersEndpoints1 {
 pub struct UpdateMetadataRequest2 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub ungrouped_partition_states: UpdateMetadataRequestUngroupedPartitionStates2,
-    pub live_brokers: UpdateMetadataRequestLiveBrokers2,
+    pub ungrouped_partition_states: Vec<UpdateMetadataRequestUngroupedPartitionStates2>,
+    pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers2>,
 }
 
 #[derive(Default, ToBytes)]
@@ -116,7 +118,7 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates2 {
 #[derive(Default, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers2 {
     pub id: Int32,
-    pub endpoints: Optional<UpdateMetadataRequestLiveBrokersEndpoints2>,
+    pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints2>>,
     pub rack: Optional<NullableString>,
 }
 
@@ -131,8 +133,8 @@ pub struct UpdateMetadataRequestLiveBrokersEndpoints2 {
 pub struct UpdateMetadataRequest3 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub ungrouped_partition_states: UpdateMetadataRequestUngroupedPartitionStates3,
-    pub live_brokers: UpdateMetadataRequestLiveBrokers3,
+    pub ungrouped_partition_states: Vec<UpdateMetadataRequestUngroupedPartitionStates3>,
+    pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers3>,
 }
 
 #[derive(Default, ToBytes)]
@@ -150,7 +152,7 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates3 {
 #[derive(Default, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers3 {
     pub id: Int32,
-    pub endpoints: Optional<UpdateMetadataRequestLiveBrokersEndpoints3>,
+    pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints3>>,
     pub rack: Optional<NullableString>,
 }
 
@@ -166,8 +168,8 @@ pub struct UpdateMetadataRequestLiveBrokersEndpoints3 {
 pub struct UpdateMetadataRequest4 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub ungrouped_partition_states: UpdateMetadataRequestUngroupedPartitionStates4,
-    pub live_brokers: UpdateMetadataRequestLiveBrokers4,
+    pub ungrouped_partition_states: Vec<UpdateMetadataRequestUngroupedPartitionStates4>,
+    pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers4>,
 }
 
 #[derive(Default, ToBytes)]
@@ -186,7 +188,7 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates4 {
 #[derive(Default, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers4 {
     pub id: Int32,
-    pub endpoints: Optional<UpdateMetadataRequestLiveBrokersEndpoints4>,
+    pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints4>>,
     pub rack: Optional<NullableString>,
 }
 
@@ -203,14 +205,14 @@ pub struct UpdateMetadataRequest5 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
     pub broker_epoch: Optional<Int64>,
-    pub topic_states: Optional<UpdateMetadataRequestTopicStates5>,
-    pub live_brokers: UpdateMetadataRequestLiveBrokers5,
+    pub topic_states: Optional<Vec<UpdateMetadataRequestTopicStates5>>,
+    pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers5>,
 }
 
 #[derive(Default, ToBytes)]
 pub struct UpdateMetadataRequestTopicStates5 {
     pub topic_name: String,
-    pub partition_states: UpdateMetadataRequestTopicStatesPartitionStates5,
+    pub partition_states: Vec<UpdateMetadataRequestTopicStatesPartitionStates5>,
 }
 
 #[derive(Default, ToBytes)]
@@ -228,7 +230,7 @@ pub struct UpdateMetadataRequestTopicStatesPartitionStates5 {
 #[derive(Default, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers5 {
     pub id: Int32,
-    pub endpoints: Optional<UpdateMetadataRequestLiveBrokersEndpoints5>,
+    pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints5>>,
     pub rack: Optional<NullableString>,
 }
 
@@ -245,14 +247,14 @@ pub struct UpdateMetadataRequest6 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
     pub broker_epoch: Optional<Int64>,
-    pub topic_states: Optional<UpdateMetadataRequestTopicStates6>,
-    pub live_brokers: UpdateMetadataRequestLiveBrokers6,
+    pub topic_states: Optional<Vec<UpdateMetadataRequestTopicStates6>>,
+    pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers6>,
 }
 
 #[derive(Default, ToBytes)]
 pub struct UpdateMetadataRequestTopicStates6 {
     pub topic_name: CompactString,
-    pub partition_states: UpdateMetadataRequestTopicStatesPartitionStates6,
+    pub partition_states: Vec<UpdateMetadataRequestTopicStatesPartitionStates6>,
 }
 
 #[derive(Default, ToBytes)]
@@ -270,7 +272,7 @@ pub struct UpdateMetadataRequestTopicStatesPartitionStates6 {
 #[derive(Default, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers6 {
     pub id: Int32,
-    pub endpoints: Optional<UpdateMetadataRequestLiveBrokersEndpoints6>,
+    pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints6>>,
     pub rack: Optional<CompactNullableString>,
 }
 
@@ -337,7 +339,11 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest0 {
         Ok(UpdateMetadataRequest0 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            live_brokers: latest.live_brokers.try_into()?,
+            live_brokers: latest
+                .live_brokers
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
             ..UpdateMetadataRequest0::default()
         })
     }
@@ -387,7 +393,11 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest1 {
         Ok(UpdateMetadataRequest1 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            live_brokers: latest.live_brokers.try_into()?,
+            live_brokers: latest
+                .live_brokers
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
             ..UpdateMetadataRequest1::default()
         })
     }
@@ -405,7 +415,14 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
         }
         Ok(UpdateMetadataRequestLiveBrokers1 {
             id: latest.id,
-            endpoints: latest.endpoints.try_into()?,
+            endpoints: latest
+                .endpoints
+                .map(|val| {
+                    val.into_iter()
+                        .map(|el| el.try_into())
+                        .collect::<Result<_, Error>>()
+                })
+                .wrap_result()?,
         })
     }
 }
@@ -450,7 +467,11 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest2 {
         Ok(UpdateMetadataRequest2 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            live_brokers: latest.live_brokers.try_into()?,
+            live_brokers: latest
+                .live_brokers
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
             ..UpdateMetadataRequest2::default()
         })
     }
@@ -461,8 +482,15 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
     fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
         Ok(UpdateMetadataRequestLiveBrokers2 {
             id: latest.id,
-            endpoints: latest.endpoints.try_into()?,
-            rack: latest.rack,
+            endpoints: latest
+                .endpoints
+                .map(|val| {
+                    val.into_iter()
+                        .map(|el| el.try_into())
+                        .collect::<Result<_, Error>>()
+                })
+                .wrap_result()?,
+            rack: latest.rack.map(|val| val),
         })
     }
 }
@@ -507,7 +535,11 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest3 {
         Ok(UpdateMetadataRequest3 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            live_brokers: latest.live_brokers.try_into()?,
+            live_brokers: latest
+                .live_brokers
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
             ..UpdateMetadataRequest3::default()
         })
     }
@@ -518,8 +550,15 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
     fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
         Ok(UpdateMetadataRequestLiveBrokers3 {
             id: latest.id,
-            endpoints: latest.endpoints.try_into()?,
-            rack: latest.rack,
+            endpoints: latest
+                .endpoints
+                .map(|val| {
+                    val.into_iter()
+                        .map(|el| el.try_into())
+                        .collect::<Result<_, Error>>()
+                })
+                .wrap_result()?,
+            rack: latest.rack.map(|val| val),
         })
     }
 }
@@ -532,7 +571,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
         Ok(UpdateMetadataRequestLiveBrokersEndpoints3 {
             port: latest.port,
             host: latest.host,
-            listener: latest.listener,
+            listener: latest.listener.map(|val| val),
             security_protocol: latest.security_protocol,
         })
     }
@@ -558,7 +597,11 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest4 {
         Ok(UpdateMetadataRequest4 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            live_brokers: latest.live_brokers.try_into()?,
+            live_brokers: latest
+                .live_brokers
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
             ..UpdateMetadataRequest4::default()
         })
     }
@@ -569,8 +612,15 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
     fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
         Ok(UpdateMetadataRequestLiveBrokers4 {
             id: latest.id,
-            endpoints: latest.endpoints.try_into()?,
-            rack: latest.rack,
+            endpoints: latest
+                .endpoints
+                .map(|val| {
+                    val.into_iter()
+                        .map(|el| el.try_into())
+                        .collect::<Result<_, Error>>()
+                })
+                .wrap_result()?,
+            rack: latest.rack.map(|val| val),
         })
     }
 }
@@ -583,7 +633,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
         Ok(UpdateMetadataRequestLiveBrokersEndpoints4 {
             port: latest.port,
             host: latest.host,
-            listener: latest.listener,
+            listener: latest.listener.map(|val| val),
             security_protocol: latest.security_protocol,
         })
     }
@@ -595,9 +645,20 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest5 {
         Ok(UpdateMetadataRequest5 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            broker_epoch: latest.broker_epoch,
-            topic_states: latest.topic_states.try_into()?,
-            live_brokers: latest.live_brokers.try_into()?,
+            broker_epoch: latest.broker_epoch.map(|val| val),
+            topic_states: latest
+                .topic_states
+                .map(|val| {
+                    val.into_iter()
+                        .map(|el| el.try_into())
+                        .collect::<Result<_, Error>>()
+                })
+                .wrap_result()?,
+            live_brokers: latest
+                .live_brokers
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -607,7 +668,11 @@ impl TryFrom<UpdateMetadataRequestTopicStates6> for UpdateMetadataRequestTopicSt
     fn try_from(latest: UpdateMetadataRequestTopicStates6) -> Result<Self, Self::Error> {
         Ok(UpdateMetadataRequestTopicStates5 {
             topic_name: latest.topic_name,
-            partition_states: latest.partition_states.try_into()?,
+            partition_states: latest
+                .partition_states
+                .into_iter()
+                .map(|el| el.try_into())
+                .collect::<Result<_, Error>>()?,
         })
     }
 }
@@ -624,10 +689,10 @@ impl TryFrom<UpdateMetadataRequestTopicStatesPartitionStates6>
             controller_epoch: latest.controller_epoch,
             leader: latest.leader,
             leader_epoch: latest.leader_epoch,
-            isr: latest.isr,
+            isr: latest.isr.into_iter().collect(),
             zk_version: latest.zk_version,
-            replicas: latest.replicas,
-            offline_replicas: latest.offline_replicas,
+            replicas: latest.replicas.into_iter().collect(),
+            offline_replicas: latest.offline_replicas.into_iter().collect(),
         })
     }
 }
@@ -637,8 +702,15 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
     fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
         Ok(UpdateMetadataRequestLiveBrokers5 {
             id: latest.id,
-            endpoints: latest.endpoints.try_into()?,
-            rack: latest.rack,
+            endpoints: latest
+                .endpoints
+                .map(|val| {
+                    val.into_iter()
+                        .map(|el| el.try_into())
+                        .collect::<Result<_, Error>>()
+                })
+                .wrap_result()?,
+            rack: latest.rack.map(|val| val),
         })
     }
 }
@@ -651,7 +723,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
         Ok(UpdateMetadataRequestLiveBrokersEndpoints5 {
             port: latest.port,
             host: latest.host,
-            listener: latest.listener,
+            listener: latest.listener.map(|val| val),
             security_protocol: latest.security_protocol,
         })
     }

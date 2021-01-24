@@ -12,6 +12,7 @@ pub fn serialize_heartbeat_request(
         1 => ToBytes::serialize(&HeartbeatRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&HeartbeatRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&HeartbeatRequest3::try_from(data)?, buf),
+        5 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -25,6 +26,7 @@ where
         1 => HeartbeatResponse1::deserialize(buf).into(),
         2 => HeartbeatResponse2::deserialize(buf).into(),
         3 => HeartbeatResponse3::deserialize(buf).into(),
+        5 => HeartbeatResponse::deserialize(buf),
         _ => HeartbeatResponse::deserialize(buf),
     }
 }
@@ -156,7 +158,7 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest3 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
-            group_instance_id: latest.group_instance_id,
+            group_instance_id: latest.group_instance_id.map(|val| val),
         })
     }
 }
@@ -173,7 +175,7 @@ impl From<HeartbeatResponse0> for HeartbeatResponse4 {
 impl From<HeartbeatResponse1> for HeartbeatResponse4 {
     fn from(older: HeartbeatResponse1) -> Self {
         HeartbeatResponse4 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
         }
     }
@@ -182,7 +184,7 @@ impl From<HeartbeatResponse1> for HeartbeatResponse4 {
 impl From<HeartbeatResponse2> for HeartbeatResponse4 {
     fn from(older: HeartbeatResponse2) -> Self {
         HeartbeatResponse4 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
         }
     }
@@ -191,7 +193,7 @@ impl From<HeartbeatResponse2> for HeartbeatResponse4 {
 impl From<HeartbeatResponse3> for HeartbeatResponse4 {
     fn from(older: HeartbeatResponse3) -> Self {
         HeartbeatResponse4 {
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
             error_code: older.error_code,
         }
     }

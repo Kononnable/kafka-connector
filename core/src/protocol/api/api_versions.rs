@@ -11,6 +11,7 @@ pub fn serialize_api_versions_request(
         0 => ToBytes::serialize(&ApiVersionsRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&ApiVersionsRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&ApiVersionsRequest2::try_from(data)?, buf),
+        4 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -23,6 +24,7 @@ where
         0 => ApiVersionsResponse0::deserialize(buf).into(),
         1 => ApiVersionsResponse1::deserialize(buf).into(),
         2 => ApiVersionsResponse2::deserialize(buf).into(),
+        4 => ApiVersionsResponse::deserialize(buf),
         _ => ApiVersionsResponse::deserialize(buf),
     }
 }
@@ -185,7 +187,7 @@ impl From<ApiVersionsResponse1> for ApiVersionsResponse3 {
         ApiVersionsResponse3 {
             error_code: older.error_code,
             api_keys: older.api_keys.into_iter().map(|el| el.into()).collect(),
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
         }
     }
 }
@@ -205,7 +207,7 @@ impl From<ApiVersionsResponse2> for ApiVersionsResponse3 {
         ApiVersionsResponse3 {
             error_code: older.error_code,
             api_keys: older.api_keys.into_iter().map(|el| el.into()).collect(),
-            throttle_time_ms: older.throttle_time_ms,
+            throttle_time_ms: older.throttle_time_ms.map(|val| val),
         }
     }
 }

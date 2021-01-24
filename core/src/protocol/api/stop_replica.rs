@@ -11,6 +11,7 @@ pub fn serialize_stop_replica_request(
         0 => ToBytes::serialize(&StopReplicaRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&StopReplicaRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&StopReplicaRequest2::try_from(data)?, buf),
+        4 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
@@ -23,6 +24,7 @@ where
         0 => StopReplicaResponse0::deserialize(buf).into(),
         1 => StopReplicaResponse1::deserialize(buf).into(),
         2 => StopReplicaResponse2::deserialize(buf).into(),
+        4 => StopReplicaResponse::deserialize(buf),
         _ => StopReplicaResponse::deserialize(buf),
     }
 }
@@ -32,7 +34,7 @@ pub struct StopReplicaRequest0 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
     pub delete_partitions: Boolean,
-    pub ungrouped_partitions: StopReplicaRequestUngroupedPartitions0,
+    pub ungrouped_partitions: Vec<StopReplicaRequestUngroupedPartitions0>,
 }
 
 #[derive(Default, ToBytes)]
@@ -47,7 +49,7 @@ pub struct StopReplicaRequest1 {
     pub controller_epoch: Int32,
     pub broker_epoch: Optional<Int64>,
     pub delete_partitions: Boolean,
-    pub topics: Optional<StopReplicaRequestTopics1>,
+    pub topics: Optional<Vec<StopReplicaRequestTopics1>>,
 }
 
 #[derive(Default, ToBytes)]
@@ -62,7 +64,7 @@ pub struct StopReplicaRequest2 {
     pub controller_epoch: Int32,
     pub broker_epoch: Optional<Int64>,
     pub delete_partitions: Boolean,
-    pub topics: Optional<StopReplicaRequestTopics2>,
+    pub topics: Optional<Vec<StopReplicaRequestTopics2>>,
 }
 
 #[derive(Default, ToBytes)]
@@ -76,13 +78,13 @@ pub struct StopReplicaRequest3 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
     pub broker_epoch: Optional<Int64>,
-    pub topic_states: Optional<StopReplicaRequestTopicStates3>,
+    pub topic_states: Optional<Vec<StopReplicaRequestTopicStates3>>,
 }
 
 #[derive(Default, ToBytes)]
 pub struct StopReplicaRequestTopicStates3 {
     pub topic_name: CompactString,
-    pub partition_states: StopReplicaRequestTopicStatesPartitionStates3,
+    pub partition_states: Vec<StopReplicaRequestTopicStatesPartitionStates3>,
 }
 
 #[derive(Default, ToBytes)]
@@ -95,7 +97,7 @@ pub struct StopReplicaRequestTopicStatesPartitionStates3 {
 #[derive(Default, FromBytes)]
 pub struct StopReplicaResponse0 {
     pub error_code: Int16,
-    pub partition_errors: StopReplicaResponsePartitionErrors0,
+    pub partition_errors: Vec<StopReplicaResponsePartitionErrors0>,
 }
 
 #[derive(Default, FromBytes)]
@@ -108,7 +110,7 @@ pub struct StopReplicaResponsePartitionErrors0 {
 #[derive(Default, FromBytes)]
 pub struct StopReplicaResponse1 {
     pub error_code: Int16,
-    pub partition_errors: StopReplicaResponsePartitionErrors1,
+    pub partition_errors: Vec<StopReplicaResponsePartitionErrors1>,
 }
 
 #[derive(Default, FromBytes)]
@@ -121,7 +123,7 @@ pub struct StopReplicaResponsePartitionErrors1 {
 #[derive(Default, FromBytes)]
 pub struct StopReplicaResponse2 {
     pub error_code: Int16,
-    pub partition_errors: StopReplicaResponsePartitionErrors2,
+    pub partition_errors: Vec<StopReplicaResponsePartitionErrors2>,
 }
 
 #[derive(Default, FromBytes)]
@@ -134,7 +136,7 @@ pub struct StopReplicaResponsePartitionErrors2 {
 #[derive(Default, FromBytes)]
 pub struct StopReplicaResponse3 {
     pub error_code: Int16,
-    pub partition_errors: StopReplicaResponsePartitionErrors3,
+    pub partition_errors: Vec<StopReplicaResponsePartitionErrors3>,
 }
 
 #[derive(Default, FromBytes)]
@@ -182,7 +184,7 @@ impl TryFrom<StopReplicaRequest3> for StopReplicaRequest1 {
         Ok(StopReplicaRequest1 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            broker_epoch: latest.broker_epoch,
+            broker_epoch: latest.broker_epoch.map(|val| val),
             ..StopReplicaRequest1::default()
         })
     }
@@ -201,7 +203,7 @@ impl TryFrom<StopReplicaRequest3> for StopReplicaRequest2 {
         Ok(StopReplicaRequest2 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            broker_epoch: latest.broker_epoch,
+            broker_epoch: latest.broker_epoch.map(|val| val),
             ..StopReplicaRequest2::default()
         })
     }
@@ -211,7 +213,11 @@ impl From<StopReplicaResponse0> for StopReplicaResponse3 {
     fn from(older: StopReplicaResponse0) -> Self {
         StopReplicaResponse3 {
             error_code: older.error_code,
-            partition_errors: older.partition_errors.into(),
+            partition_errors: older
+                .partition_errors
+                .into_iter()
+                .map(|el| el.into())
+                .collect(),
         }
     }
 }
@@ -230,7 +236,11 @@ impl From<StopReplicaResponse1> for StopReplicaResponse3 {
     fn from(older: StopReplicaResponse1) -> Self {
         StopReplicaResponse3 {
             error_code: older.error_code,
-            partition_errors: older.partition_errors.into(),
+            partition_errors: older
+                .partition_errors
+                .into_iter()
+                .map(|el| el.into())
+                .collect(),
         }
     }
 }
@@ -249,7 +259,11 @@ impl From<StopReplicaResponse2> for StopReplicaResponse3 {
     fn from(older: StopReplicaResponse2) -> Self {
         StopReplicaResponse3 {
             error_code: older.error_code,
-            partition_errors: older.partition_errors.into(),
+            partition_errors: older
+                .partition_errors
+                .into_iter()
+                .map(|el| el.into())
+                .collect(),
         }
     }
 }
