@@ -35,6 +35,15 @@ impl FromBytes for i8 {
         i8::from_be_bytes(data)
     }
 }
+impl FromBytes for bool {
+    fn deserialize<T>(buf: &mut T) -> Self
+    where
+        T: Iterator<Item = u8>,
+    {
+        let data: [u8; 1] = [buf.next().unwrap()];
+        i8::from_be_bytes(data) == 0
+    }
+}
 impl FromBytes for i16 {
     fn deserialize<T>(buf: &mut T) -> Self
     where
@@ -76,6 +85,24 @@ impl FromBytes for i64 {
         i64::from_be_bytes(data)
     }
 }
+impl FromBytes for f64 {
+    fn deserialize<T>(buf: &mut T) -> Self
+    where
+        T: Iterator<Item = u8>,
+    {
+        let data: [u8; 8] = [
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+            buf.next().unwrap(),
+        ];
+        f64::from_be_bytes(data)
+    }
+}
 impl FromBytes for String {
     fn deserialize<T>(buf: &mut T) -> Self
     where
@@ -98,5 +125,15 @@ impl FromBytes for Option<String> {
         }
         let data: Vec<u8> = buf.take(len as usize).collect();
         Some(String::from_utf8_lossy(&data).to_string())
+    }
+}
+
+impl FromBytes for Vec<u8> {
+    fn deserialize<T>(buf: &mut T) -> Self
+    where
+        T: Iterator<Item = u8>,
+    {
+        let len: i32 = FromBytes::deserialize(buf);
+        buf.take(len as usize).collect()
     }
 }

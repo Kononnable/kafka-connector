@@ -11,4 +11,5 @@ tokio = {version ="1.0.1", features=["rt-multi-thread","net","macros","io-util"]
 tokio-stream = "0.1.2"
 bytes = "1.0.1"
 kafka-connector-derive = {version="0.1.0", path = "./../derive"}
-thiserror="1.0.23"
+thiserror = "1.0.23"
+unsigned-varint = "0.6.0"

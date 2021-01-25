@@ -24,6 +24,11 @@ impl ToBytes for Option<String> {
         }
     }
 }
+impl ToBytes for bool {
+    fn serialize(&self, buf: &mut BytesMut) {
+        buf.put_i8(*self as i8);
+    }
+}
 impl ToBytes for i8 {
     fn serialize(&self, buf: &mut BytesMut) {
         buf.put_i8(*self);
@@ -44,8 +49,22 @@ impl ToBytes for i64 {
         buf.put_i64(*self);
     }
 }
-impl<T> ToBytes for Vec<T> {
+impl ToBytes for f64 {
+    fn serialize(&self, buf: &mut BytesMut) {
+        buf.put_f64(*self);
+    }
+}
+impl<T> ToBytes for Vec<T>
+where
+    T: ToBytes,
+{
     fn serialize(&self, buf: &mut BytesMut) {
         buf.put_i32(self.len() as i32);
+    }
+}
+impl ToBytes for Vec<u8> {
+    fn serialize(&self, buf: &mut BytesMut) {
+        buf.put_i32(self.len() as i32);
+        buf.put_slice(self.as_slice());
     }
 }

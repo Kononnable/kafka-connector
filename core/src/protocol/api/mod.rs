@@ -123,19 +123,19 @@ mod prelude {
     pub use std::convert::TryFrom;
     pub use std::convert::TryInto;
 
+    pub type Boolean = bool;
+    pub type Bytes = Vec<u8>;
     pub type Int8 = i8;
     pub type Int16 = i16;
     pub type Int32 = i32;
     pub type Int64 = i64;
+    pub type Float64 = f64;
 
     // TODO:
     pub type CompactString = String;
     pub type NullableString = String;
     pub type CompactNullableString = String;
-    pub type Boolean = i64;
     pub type CompactRecords = i64;
     pub type Records = i64;
-    pub type CompactBytes = i64;
-    pub type Bytes = i64;
-    pub type Float64 = i64;
+    pub type CompactBytes = Vec<u8>;
 }
