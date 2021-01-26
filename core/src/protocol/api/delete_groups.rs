@@ -79,7 +79,11 @@ impl TryFrom<DeleteGroupsRequest2> for DeleteGroupsRequest0 {
     type Error = Error;
     fn try_from(latest: DeleteGroupsRequest2) -> Result<Self, Self::Error> {
         Ok(DeleteGroupsRequest0 {
-            groups_names: latest.groups_names.into_iter().collect(),
+            groups_names: latest
+                .groups_names
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
         })
     }
 }
@@ -88,7 +92,11 @@ impl TryFrom<DeleteGroupsRequest2> for DeleteGroupsRequest1 {
     type Error = Error;
     fn try_from(latest: DeleteGroupsRequest2) -> Result<Self, Self::Error> {
         Ok(DeleteGroupsRequest1 {
-            groups_names: latest.groups_names.into_iter().collect(),
+            groups_names: latest
+                .groups_names
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
         })
     }
 }
@@ -105,7 +113,7 @@ impl From<DeleteGroupsResponse0> for DeleteGroupsResponse2 {
 impl From<DeleteGroupsResponseResults0> for DeleteGroupsResponseResults2 {
     fn from(older: DeleteGroupsResponseResults0) -> Self {
         DeleteGroupsResponseResults2 {
-            group_id: older.group_id,
+            group_id: older.group_id.into(),
             error_code: older.error_code,
         }
     }
@@ -123,7 +131,7 @@ impl From<DeleteGroupsResponse1> for DeleteGroupsResponse2 {
 impl From<DeleteGroupsResponseResults1> for DeleteGroupsResponseResults2 {
     fn from(older: DeleteGroupsResponseResults1) -> Self {
         DeleteGroupsResponseResults2 {
-            group_id: older.group_id,
+            group_id: older.group_id.into(),
             error_code: older.error_code,
         }
     }

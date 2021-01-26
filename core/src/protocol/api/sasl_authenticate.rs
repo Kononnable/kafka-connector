@@ -87,7 +87,7 @@ impl From<SaslAuthenticateResponse0> for SaslAuthenticateResponse2 {
     fn from(older: SaslAuthenticateResponse0) -> Self {
         SaslAuthenticateResponse2 {
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
             auth_bytes: older.auth_bytes.into(),
             ..SaslAuthenticateResponse2::default()
         }
@@ -98,7 +98,7 @@ impl From<SaslAuthenticateResponse1> for SaslAuthenticateResponse2 {
     fn from(older: SaslAuthenticateResponse1) -> Self {
         SaslAuthenticateResponse2 {
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
             auth_bytes: older.auth_bytes.into(),
             session_lifetime_ms: older.session_lifetime_ms,
         }

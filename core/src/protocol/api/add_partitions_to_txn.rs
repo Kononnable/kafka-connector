@@ -133,7 +133,7 @@ impl TryFrom<AddPartitionsToTxnRequest2> for AddPartitionsToTxnRequest0 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -159,7 +159,7 @@ impl TryFrom<AddPartitionsToTxnRequest2> for AddPartitionsToTxnRequest1 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }

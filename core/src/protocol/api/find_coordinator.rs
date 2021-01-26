@@ -100,7 +100,9 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest0 {
                 "key_type",
             ));
         }
-        Ok(FindCoordinatorRequest0 { key: latest.key })
+        Ok(FindCoordinatorRequest0 {
+            key: latest.key.into(),
+        })
     }
 }
 
@@ -108,7 +110,7 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest1 {
     type Error = Error;
     fn try_from(latest: FindCoordinatorRequest3) -> Result<Self, Self::Error> {
         Ok(FindCoordinatorRequest1 {
-            key: latest.key,
+            key: latest.key.into(),
             key_type: latest.key_type,
         })
     }
@@ -118,7 +120,7 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest2 {
     type Error = Error;
     fn try_from(latest: FindCoordinatorRequest3) -> Result<Self, Self::Error> {
         Ok(FindCoordinatorRequest2 {
-            key: latest.key,
+            key: latest.key.into(),
             key_type: latest.key_type,
         })
     }
@@ -129,7 +131,7 @@ impl From<FindCoordinatorResponse0> for FindCoordinatorResponse3 {
         FindCoordinatorResponse3 {
             error_code: older.error_code,
             node_id: older.node_id,
-            host: older.host,
+            host: older.host.into(),
             port: older.port,
             ..FindCoordinatorResponse3::default()
         }
@@ -141,9 +143,9 @@ impl From<FindCoordinatorResponse1> for FindCoordinatorResponse3 {
         FindCoordinatorResponse3 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val),
+            error_message: older.error_message.map(|val| val.into()),
             node_id: older.node_id,
-            host: older.host,
+            host: older.host.into(),
             port: older.port,
         }
     }
@@ -154,9 +156,9 @@ impl From<FindCoordinatorResponse2> for FindCoordinatorResponse3 {
         FindCoordinatorResponse3 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val),
+            error_message: older.error_message.map(|val| val.into()),
             node_id: older.node_id,
-            host: older.host,
+            host: older.host.into(),
             port: older.port,
         }
     }

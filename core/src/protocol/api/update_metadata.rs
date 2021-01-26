@@ -342,7 +342,7 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest0 {
             live_brokers: latest
                 .live_brokers
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             ..UpdateMetadataRequest0::default()
         })
@@ -396,7 +396,7 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest1 {
             live_brokers: latest
                 .live_brokers
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             ..UpdateMetadataRequest1::default()
         })
@@ -441,7 +441,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
         }
         Ok(UpdateMetadataRequestLiveBrokersEndpoints1 {
             port: latest.port,
-            host: latest.host,
+            host: latest.host.into(),
             security_protocol: latest.security_protocol,
         })
     }
@@ -470,7 +470,7 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest2 {
             live_brokers: latest
                 .live_brokers
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             ..UpdateMetadataRequest2::default()
         })
@@ -509,7 +509,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
         }
         Ok(UpdateMetadataRequestLiveBrokersEndpoints2 {
             port: latest.port,
-            host: latest.host,
+            host: latest.host.into(),
             security_protocol: latest.security_protocol,
         })
     }
@@ -538,7 +538,7 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest3 {
             live_brokers: latest
                 .live_brokers
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             ..UpdateMetadataRequest3::default()
         })
@@ -570,8 +570,8 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
     fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
         Ok(UpdateMetadataRequestLiveBrokersEndpoints3 {
             port: latest.port,
-            host: latest.host,
-            listener: latest.listener.map(|val| val),
+            host: latest.host.into(),
+            listener: latest.listener.map(|val| val.into()),
             security_protocol: latest.security_protocol,
         })
     }
@@ -600,7 +600,7 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest4 {
             live_brokers: latest
                 .live_brokers
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             ..UpdateMetadataRequest4::default()
         })
@@ -632,8 +632,8 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
     fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
         Ok(UpdateMetadataRequestLiveBrokersEndpoints4 {
             port: latest.port,
-            host: latest.host,
-            listener: latest.listener.map(|val| val),
+            host: latest.host.into(),
+            listener: latest.listener.map(|val| val.into()),
             security_protocol: latest.security_protocol,
         })
     }
@@ -657,7 +657,7 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest5 {
             live_brokers: latest
                 .live_brokers
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -667,11 +667,11 @@ impl TryFrom<UpdateMetadataRequestTopicStates6> for UpdateMetadataRequestTopicSt
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequestTopicStates6) -> Result<Self, Self::Error> {
         Ok(UpdateMetadataRequestTopicStates5 {
-            topic_name: latest.topic_name,
+            topic_name: latest.topic_name.into(),
             partition_states: latest
                 .partition_states
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -722,8 +722,8 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
     fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
         Ok(UpdateMetadataRequestLiveBrokersEndpoints5 {
             port: latest.port,
-            host: latest.host,
-            listener: latest.listener.map(|val| val),
+            host: latest.host.into(),
+            listener: latest.listener.map(|val| val.into()),
             security_protocol: latest.security_protocol,
         })
     }

@@ -148,7 +148,7 @@ impl TryFrom<DescribeLogDirsRequest2> for DescribeLogDirsRequest0 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -158,7 +158,7 @@ impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics0 {
     type Error = Error;
     fn try_from(latest: DescribeLogDirsRequestTopics2) -> Result<Self, Self::Error> {
         Ok(DescribeLogDirsRequestTopics0 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partition_index: latest.partition_index,
         })
     }
@@ -171,7 +171,7 @@ impl TryFrom<DescribeLogDirsRequest2> for DescribeLogDirsRequest1 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -181,7 +181,7 @@ impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics1 {
     type Error = Error;
     fn try_from(latest: DescribeLogDirsRequestTopics2) -> Result<Self, Self::Error> {
         Ok(DescribeLogDirsRequestTopics1 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partition_index: latest.partition_index,
         })
     }
@@ -200,7 +200,7 @@ impl From<DescribeLogDirsResponseResults0> for DescribeLogDirsResponseResults2 {
     fn from(older: DescribeLogDirsResponseResults0) -> Self {
         DescribeLogDirsResponseResults2 {
             error_code: older.error_code,
-            log_dir: older.log_dir,
+            log_dir: older.log_dir.into(),
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -209,7 +209,7 @@ impl From<DescribeLogDirsResponseResults0> for DescribeLogDirsResponseResults2 {
 impl From<DescribeLogDirsResponseResultsTopics0> for DescribeLogDirsResponseResultsTopics2 {
     fn from(older: DescribeLogDirsResponseResultsTopics0) -> Self {
         DescribeLogDirsResponseResultsTopics2 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -241,7 +241,7 @@ impl From<DescribeLogDirsResponseResults1> for DescribeLogDirsResponseResults2 {
     fn from(older: DescribeLogDirsResponseResults1) -> Self {
         DescribeLogDirsResponseResults2 {
             error_code: older.error_code,
-            log_dir: older.log_dir,
+            log_dir: older.log_dir.into(),
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -250,7 +250,7 @@ impl From<DescribeLogDirsResponseResults1> for DescribeLogDirsResponseResults2 {
 impl From<DescribeLogDirsResponseResultsTopics1> for DescribeLogDirsResponseResultsTopics2 {
     fn from(older: DescribeLogDirsResponseResultsTopics1) -> Self {
         DescribeLogDirsResponseResultsTopics2 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }

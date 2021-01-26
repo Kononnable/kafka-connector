@@ -95,7 +95,7 @@ impl TryFrom<AlterConfigsRequest1> for AlterConfigsRequest0 {
             resources: latest
                 .resources
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             validate_only: latest.validate_only,
         })
@@ -111,7 +111,7 @@ impl TryFrom<AlterConfigsRequestResources1> for AlterConfigsRequestResources0 {
             configs: latest
                 .configs
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }

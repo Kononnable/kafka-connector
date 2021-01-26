@@ -416,11 +416,11 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest0 {
             ));
         }
         Ok(OffsetCommitRequest0 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -430,11 +430,11 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics0 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
         Ok(OffsetCommitRequestTopics0 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -469,13 +469,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest1 {
             ));
         }
         Ok(OffsetCommitRequest1 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val),
+            member_id: latest.member_id.map(|val| val.into()),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -485,11 +485,11 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics1 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
         Ok(OffsetCommitRequestTopics1 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -525,13 +525,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest2 {
             ));
         }
         Ok(OffsetCommitRequest2 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val),
+            member_id: latest.member_id.map(|val| val.into()),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             ..OffsetCommitRequest2::default()
         })
@@ -542,11 +542,11 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics2 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
         Ok(OffsetCommitRequestTopics2 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -581,13 +581,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest3 {
             ));
         }
         Ok(OffsetCommitRequest3 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val),
+            member_id: latest.member_id.map(|val| val.into()),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             ..OffsetCommitRequest3::default()
         })
@@ -598,11 +598,11 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics3 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
         Ok(OffsetCommitRequestTopics3 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -637,13 +637,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest4 {
             ));
         }
         Ok(OffsetCommitRequest4 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val),
+            member_id: latest.member_id.map(|val| val.into()),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             ..OffsetCommitRequest4::default()
         })
@@ -654,11 +654,11 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics4 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
         Ok(OffsetCommitRequestTopics4 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -693,13 +693,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest5 {
             ));
         }
         Ok(OffsetCommitRequest5 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val),
+            member_id: latest.member_id.map(|val| val.into()),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -709,11 +709,11 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics5 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
         Ok(OffsetCommitRequestTopics5 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -748,13 +748,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest6 {
             ));
         }
         Ok(OffsetCommitRequest6 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val),
+            member_id: latest.member_id.map(|val| val.into()),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -764,11 +764,11 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics6 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
         Ok(OffsetCommitRequestTopics6 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -790,14 +790,14 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest7 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequest8) -> Result<Self, Self::Error> {
         Ok(OffsetCommitRequest7 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val),
+            member_id: latest.member_id.map(|val| val.into()),
             group_instance_id: latest.group_instance_id.map(|val| val),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -807,11 +807,11 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics7 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
         Ok(OffsetCommitRequestTopics7 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -841,7 +841,7 @@ impl From<OffsetCommitResponse0> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics0> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics0) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -868,7 +868,7 @@ impl From<OffsetCommitResponse1> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics1> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics1) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -895,7 +895,7 @@ impl From<OffsetCommitResponse2> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics2> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics2) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -922,7 +922,7 @@ impl From<OffsetCommitResponse3> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics3> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics3) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -949,7 +949,7 @@ impl From<OffsetCommitResponse4> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics4> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics4) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -976,7 +976,7 @@ impl From<OffsetCommitResponse5> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics5> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics5) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -1003,7 +1003,7 @@ impl From<OffsetCommitResponse6> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics6> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics6) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -1030,7 +1030,7 @@ impl From<OffsetCommitResponse7> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics7> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics7) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }

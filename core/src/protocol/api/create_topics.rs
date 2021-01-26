@@ -353,7 +353,7 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest0 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
         })
@@ -364,18 +364,18 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics0 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopics0 {
-            name: latest.name,
+            name: latest.name.into(),
             num_partitions: latest.num_partitions,
             replication_factor: latest.replication_factor,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             configs: latest
                 .configs
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -395,7 +395,7 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsConfigs0 {
-            name: latest.name,
+            name: latest.name.into(),
             value: latest.value,
         })
     }
@@ -408,7 +408,7 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest1 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
@@ -420,18 +420,18 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics1 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopics1 {
-            name: latest.name,
+            name: latest.name.into(),
             num_partitions: latest.num_partitions,
             replication_factor: latest.replication_factor,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             configs: latest
                 .configs
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -451,7 +451,7 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsConfigs1 {
-            name: latest.name,
+            name: latest.name.into(),
             value: latest.value,
         })
     }
@@ -464,7 +464,7 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest2 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
@@ -476,18 +476,18 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics2 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopics2 {
-            name: latest.name,
+            name: latest.name.into(),
             num_partitions: latest.num_partitions,
             replication_factor: latest.replication_factor,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             configs: latest
                 .configs
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -507,7 +507,7 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsConfigs2 {
-            name: latest.name,
+            name: latest.name.into(),
             value: latest.value,
         })
     }
@@ -520,7 +520,7 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest3 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
@@ -532,18 +532,18 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics3 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopics3 {
-            name: latest.name,
+            name: latest.name.into(),
             num_partitions: latest.num_partitions,
             replication_factor: latest.replication_factor,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             configs: latest
                 .configs
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -563,7 +563,7 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsConfigs3 {
-            name: latest.name,
+            name: latest.name.into(),
             value: latest.value,
         })
     }
@@ -576,7 +576,7 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest4 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
@@ -588,18 +588,18 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics4 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopics4 {
-            name: latest.name,
+            name: latest.name.into(),
             num_partitions: latest.num_partitions,
             replication_factor: latest.replication_factor,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             configs: latest
                 .configs
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -619,7 +619,7 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsConfigs4 {
-            name: latest.name,
+            name: latest.name.into(),
             value: latest.value,
         })
     }
@@ -632,7 +632,7 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest5 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
@@ -650,12 +650,12 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics5 {
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             configs: latest
                 .configs
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -693,7 +693,7 @@ impl From<CreateTopicsResponse0> for CreateTopicsResponse6 {
 impl From<CreateTopicsResponseTopics0> for CreateTopicsResponseTopics6 {
     fn from(older: CreateTopicsResponseTopics0) -> Self {
         CreateTopicsResponseTopics6 {
-            name: older.name,
+            name: older.name.into(),
             error_code: older.error_code,
             ..CreateTopicsResponseTopics6::default()
         }
@@ -712,9 +712,9 @@ impl From<CreateTopicsResponse1> for CreateTopicsResponse6 {
 impl From<CreateTopicsResponseTopics1> for CreateTopicsResponseTopics6 {
     fn from(older: CreateTopicsResponseTopics1) -> Self {
         CreateTopicsResponseTopics6 {
-            name: older.name,
+            name: older.name.into(),
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val),
+            error_message: older.error_message.map(|val| val.into()),
             ..CreateTopicsResponseTopics6::default()
         }
     }
@@ -732,9 +732,9 @@ impl From<CreateTopicsResponse2> for CreateTopicsResponse6 {
 impl From<CreateTopicsResponseTopics2> for CreateTopicsResponseTopics6 {
     fn from(older: CreateTopicsResponseTopics2) -> Self {
         CreateTopicsResponseTopics6 {
-            name: older.name,
+            name: older.name.into(),
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val),
+            error_message: older.error_message.map(|val| val.into()),
             ..CreateTopicsResponseTopics6::default()
         }
     }
@@ -752,9 +752,9 @@ impl From<CreateTopicsResponse3> for CreateTopicsResponse6 {
 impl From<CreateTopicsResponseTopics3> for CreateTopicsResponseTopics6 {
     fn from(older: CreateTopicsResponseTopics3) -> Self {
         CreateTopicsResponseTopics6 {
-            name: older.name,
+            name: older.name.into(),
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val),
+            error_message: older.error_message.map(|val| val.into()),
             ..CreateTopicsResponseTopics6::default()
         }
     }
@@ -772,9 +772,9 @@ impl From<CreateTopicsResponse4> for CreateTopicsResponse6 {
 impl From<CreateTopicsResponseTopics4> for CreateTopicsResponseTopics6 {
     fn from(older: CreateTopicsResponseTopics4) -> Self {
         CreateTopicsResponseTopics6 {
-            name: older.name,
+            name: older.name.into(),
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val),
+            error_message: older.error_message.map(|val| val.into()),
             ..CreateTopicsResponseTopics6::default()
         }
     }

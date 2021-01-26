@@ -100,7 +100,7 @@ impl TryFrom<IncrementalAlterConfigsRequest1> for IncrementalAlterConfigsRequest
             resources: latest
                 .resources
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             validate_only: latest.validate_only,
         })
@@ -114,11 +114,11 @@ impl TryFrom<IncrementalAlterConfigsRequestResources1>
     fn try_from(latest: IncrementalAlterConfigsRequestResources1) -> Result<Self, Self::Error> {
         Ok(IncrementalAlterConfigsRequestResources0 {
             resource_type: latest.resource_type,
-            resource_name: latest.resource_name,
+            resource_name: latest.resource_name.into(),
             configs: latest
                 .configs
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -132,7 +132,7 @@ impl TryFrom<IncrementalAlterConfigsRequestResourcesConfigs1>
         latest: IncrementalAlterConfigsRequestResourcesConfigs1,
     ) -> Result<Self, Self::Error> {
         Ok(IncrementalAlterConfigsRequestResourcesConfigs0 {
-            name: latest.name,
+            name: latest.name.into(),
             config_operation: latest.config_operation,
             value: latest.value,
         })
@@ -152,9 +152,9 @@ impl From<IncrementalAlterConfigsResponseResponses0> for IncrementalAlterConfigs
     fn from(older: IncrementalAlterConfigsResponseResponses0) -> Self {
         IncrementalAlterConfigsResponseResponses1 {
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
             resource_type: older.resource_type,
-            resource_name: older.resource_name,
+            resource_name: older.resource_name.into(),
         }
     }
 }

@@ -122,7 +122,7 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest0 {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 0, "members"));
         }
         Ok(LeaveGroupRequest0 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             ..LeaveGroupRequest0::default()
         })
     }
@@ -135,7 +135,7 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest1 {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 1, "members"));
         }
         Ok(LeaveGroupRequest1 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             ..LeaveGroupRequest1::default()
         })
     }
@@ -148,7 +148,7 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest2 {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 2, "members"));
         }
         Ok(LeaveGroupRequest2 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             ..LeaveGroupRequest2::default()
         })
     }
@@ -158,7 +158,7 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest3 {
     type Error = Error;
     fn try_from(latest: LeaveGroupRequest4) -> Result<Self, Self::Error> {
         Ok(LeaveGroupRequest3 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             members: latest
                 .members
                 .map(|val| {
@@ -175,7 +175,7 @@ impl TryFrom<LeaveGroupRequestMembers4> for LeaveGroupRequestMembers3 {
     type Error = Error;
     fn try_from(latest: LeaveGroupRequestMembers4) -> Result<Self, Self::Error> {
         Ok(LeaveGroupRequestMembers3 {
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
             group_instance_id: latest.group_instance_id,
         })
     }
@@ -225,8 +225,8 @@ impl From<LeaveGroupResponse3> for LeaveGroupResponse4 {
 impl From<LeaveGroupResponseMembers3> for LeaveGroupResponseMembers4 {
     fn from(older: LeaveGroupResponseMembers3) -> Self {
         LeaveGroupResponseMembers4 {
-            member_id: older.member_id,
-            group_instance_id: older.group_instance_id,
+            member_id: older.member_id.into(),
+            group_instance_id: older.group_instance_id.into(),
             error_code: older.error_code,
         }
     }

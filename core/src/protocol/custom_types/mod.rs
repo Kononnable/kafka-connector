@@ -1,6 +1,7 @@
 use bytes::{BufMut, Bytes, BytesMut};
 
 pub mod compact_bytes;
+pub mod compact_string;
 
 pub type Boolean = bool;
 pub type KafkaBytes = Vec<u8>;
@@ -11,7 +12,6 @@ pub type Int64 = i64;
 pub type Float64 = f64;
 
 // TODO:
-pub type CompactString = String;
 pub type NullableString = String;
 pub type CompactNullableString = String;
 pub type CompactRecords = i64;

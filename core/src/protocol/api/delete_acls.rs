@@ -155,7 +155,7 @@ impl TryFrom<DeleteAclsRequest2> for DeleteAclsRequest0 {
             filters: latest
                 .filters
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -189,7 +189,7 @@ impl TryFrom<DeleteAclsRequest2> for DeleteAclsRequest1 {
             filters: latest
                 .filters
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -227,7 +227,7 @@ impl From<DeleteAclsResponseFilterResults0> for DeleteAclsResponseFilterResults2
     fn from(older: DeleteAclsResponseFilterResults0) -> Self {
         DeleteAclsResponseFilterResults2 {
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
             matching_acls: older
                 .matching_acls
                 .into_iter()
@@ -243,11 +243,11 @@ impl From<DeleteAclsResponseFilterResultsMatchingAcls0>
     fn from(older: DeleteAclsResponseFilterResultsMatchingAcls0) -> Self {
         DeleteAclsResponseFilterResultsMatchingAcls2 {
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
             resource_type: older.resource_type,
-            resource_name: older.resource_name,
-            principal: older.principal,
-            host: older.host,
+            resource_name: older.resource_name.into(),
+            principal: older.principal.into(),
+            host: older.host.into(),
             operation: older.operation,
             permission_type: older.permission_type,
             ..DeleteAclsResponseFilterResultsMatchingAcls2::default()
@@ -272,7 +272,7 @@ impl From<DeleteAclsResponseFilterResults1> for DeleteAclsResponseFilterResults2
     fn from(older: DeleteAclsResponseFilterResults1) -> Self {
         DeleteAclsResponseFilterResults2 {
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
             matching_acls: older
                 .matching_acls
                 .into_iter()
@@ -288,12 +288,12 @@ impl From<DeleteAclsResponseFilterResultsMatchingAcls1>
     fn from(older: DeleteAclsResponseFilterResultsMatchingAcls1) -> Self {
         DeleteAclsResponseFilterResultsMatchingAcls2 {
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
             resource_type: older.resource_type,
-            resource_name: older.resource_name,
+            resource_name: older.resource_name.into(),
             pattern_type: older.pattern_type,
-            principal: older.principal,
-            host: older.host,
+            principal: older.principal.into(),
+            host: older.host.into(),
             operation: older.operation,
             permission_type: older.permission_type,
         }

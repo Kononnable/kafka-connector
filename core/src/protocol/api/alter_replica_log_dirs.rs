@@ -102,7 +102,7 @@ impl TryFrom<AlterReplicaLogDirsRequest1> for AlterReplicaLogDirsRequest0 {
             dirs: latest
                 .dirs
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -116,7 +116,7 @@ impl TryFrom<AlterReplicaLogDirsRequestDirs1> for AlterReplicaLogDirsRequestDirs
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }

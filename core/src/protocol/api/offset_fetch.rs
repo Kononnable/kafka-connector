@@ -308,11 +308,11 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest0 {
             ));
         }
         Ok(OffsetFetchRequest0 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -322,7 +322,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics0 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
         Ok(OffsetFetchRequestTopics0 {
-            name: latest.name,
+            name: latest.name.into(),
             partition_indexes: latest.partition_indexes,
         })
     }
@@ -339,11 +339,11 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest1 {
             ));
         }
         Ok(OffsetFetchRequest1 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -353,7 +353,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics1 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
         Ok(OffsetFetchRequestTopics1 {
-            name: latest.name,
+            name: latest.name.into(),
             partition_indexes: latest.partition_indexes,
         })
     }
@@ -370,11 +370,11 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest2 {
             ));
         }
         Ok(OffsetFetchRequest2 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -384,7 +384,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics2 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
         Ok(OffsetFetchRequestTopics2 {
-            name: latest.name,
+            name: latest.name.into(),
             partition_indexes: latest.partition_indexes,
         })
     }
@@ -401,11 +401,11 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest3 {
             ));
         }
         Ok(OffsetFetchRequest3 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -415,7 +415,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics3 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
         Ok(OffsetFetchRequestTopics3 {
-            name: latest.name,
+            name: latest.name.into(),
             partition_indexes: latest.partition_indexes,
         })
     }
@@ -432,11 +432,11 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest4 {
             ));
         }
         Ok(OffsetFetchRequest4 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -446,7 +446,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics4 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
         Ok(OffsetFetchRequestTopics4 {
-            name: latest.name,
+            name: latest.name.into(),
             partition_indexes: latest.partition_indexes,
         })
     }
@@ -463,11 +463,11 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest5 {
             ));
         }
         Ok(OffsetFetchRequest5 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -477,7 +477,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics5 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
         Ok(OffsetFetchRequestTopics5 {
-            name: latest.name,
+            name: latest.name.into(),
             partition_indexes: latest.partition_indexes,
         })
     }
@@ -498,7 +498,7 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest6 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -526,7 +526,7 @@ impl From<OffsetFetchResponse0> for OffsetFetchResponse7 {
 impl From<OffsetFetchResponseTopics0> for OffsetFetchResponseTopics7 {
     fn from(older: OffsetFetchResponseTopics0) -> Self {
         OffsetFetchResponseTopics7 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -537,7 +537,7 @@ impl From<OffsetFetchResponseTopicsPartitions0> for OffsetFetchResponseTopicsPar
         OffsetFetchResponseTopicsPartitions7 {
             partition_index: older.partition_index,
             committed_offset: older.committed_offset,
-            metadata: older.metadata,
+            metadata: older.metadata.into(),
             error_code: older.error_code,
             ..OffsetFetchResponseTopicsPartitions7::default()
         }
@@ -556,7 +556,7 @@ impl From<OffsetFetchResponse1> for OffsetFetchResponse7 {
 impl From<OffsetFetchResponseTopics1> for OffsetFetchResponseTopics7 {
     fn from(older: OffsetFetchResponseTopics1) -> Self {
         OffsetFetchResponseTopics7 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -567,7 +567,7 @@ impl From<OffsetFetchResponseTopicsPartitions1> for OffsetFetchResponseTopicsPar
         OffsetFetchResponseTopicsPartitions7 {
             partition_index: older.partition_index,
             committed_offset: older.committed_offset,
-            metadata: older.metadata,
+            metadata: older.metadata.into(),
             error_code: older.error_code,
             ..OffsetFetchResponseTopicsPartitions7::default()
         }
@@ -587,7 +587,7 @@ impl From<OffsetFetchResponse2> for OffsetFetchResponse7 {
 impl From<OffsetFetchResponseTopics2> for OffsetFetchResponseTopics7 {
     fn from(older: OffsetFetchResponseTopics2) -> Self {
         OffsetFetchResponseTopics7 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -598,7 +598,7 @@ impl From<OffsetFetchResponseTopicsPartitions2> for OffsetFetchResponseTopicsPar
         OffsetFetchResponseTopicsPartitions7 {
             partition_index: older.partition_index,
             committed_offset: older.committed_offset,
-            metadata: older.metadata,
+            metadata: older.metadata.into(),
             error_code: older.error_code,
             ..OffsetFetchResponseTopicsPartitions7::default()
         }
@@ -618,7 +618,7 @@ impl From<OffsetFetchResponse3> for OffsetFetchResponse7 {
 impl From<OffsetFetchResponseTopics3> for OffsetFetchResponseTopics7 {
     fn from(older: OffsetFetchResponseTopics3) -> Self {
         OffsetFetchResponseTopics7 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -629,7 +629,7 @@ impl From<OffsetFetchResponseTopicsPartitions3> for OffsetFetchResponseTopicsPar
         OffsetFetchResponseTopicsPartitions7 {
             partition_index: older.partition_index,
             committed_offset: older.committed_offset,
-            metadata: older.metadata,
+            metadata: older.metadata.into(),
             error_code: older.error_code,
             ..OffsetFetchResponseTopicsPartitions7::default()
         }
@@ -649,7 +649,7 @@ impl From<OffsetFetchResponse4> for OffsetFetchResponse7 {
 impl From<OffsetFetchResponseTopics4> for OffsetFetchResponseTopics7 {
     fn from(older: OffsetFetchResponseTopics4) -> Self {
         OffsetFetchResponseTopics7 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -660,7 +660,7 @@ impl From<OffsetFetchResponseTopicsPartitions4> for OffsetFetchResponseTopicsPar
         OffsetFetchResponseTopicsPartitions7 {
             partition_index: older.partition_index,
             committed_offset: older.committed_offset,
-            metadata: older.metadata,
+            metadata: older.metadata.into(),
             error_code: older.error_code,
             ..OffsetFetchResponseTopicsPartitions7::default()
         }
@@ -680,7 +680,7 @@ impl From<OffsetFetchResponse5> for OffsetFetchResponse7 {
 impl From<OffsetFetchResponseTopics5> for OffsetFetchResponseTopics7 {
     fn from(older: OffsetFetchResponseTopics5) -> Self {
         OffsetFetchResponseTopics7 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -692,7 +692,7 @@ impl From<OffsetFetchResponseTopicsPartitions5> for OffsetFetchResponseTopicsPar
             partition_index: older.partition_index,
             committed_offset: older.committed_offset,
             committed_leader_epoch: older.committed_leader_epoch,
-            metadata: older.metadata,
+            metadata: older.metadata.into(),
             error_code: older.error_code,
         }
     }

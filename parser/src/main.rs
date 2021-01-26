@@ -36,7 +36,9 @@ async fn main() -> anyhow::Result<()> {
     remove_dir_all(base_path)?;
     DirBuilder::new().recursive(true).create(base_path)?;
 
-    for (key, grouped_call) in transformed_definitions.into_iter() {
+    for (key, grouped_call) in transformed_definitions.into_iter()
+    // .filter(|x| x.0 == "DeleteGroups")
+    {
         let file_name = format!("{}{}.rs", &base_path.display(), to_snake_case(key));
         let path = Path::new(&file_name);
         println!("{}", path.display());

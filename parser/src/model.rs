@@ -94,11 +94,10 @@ impl FieldType {
             // TODO:
             FieldType::Records
             | FieldType::NullableString
-            | FieldType::CompactString
             | FieldType::CompactNullableString
             | FieldType::CompactRecords => true,
 
-            FieldType::KafkaBytes | FieldType::CompactBytes => false,
+            FieldType::KafkaBytes | FieldType::CompactBytes | FieldType::CompactString => false,
         }
     }
     pub fn is_easily_convertable(&self) -> bool {
@@ -115,9 +114,9 @@ impl FieldType {
             // TODO:
             FieldType::Records
             | FieldType::NullableString
-            | FieldType::CompactString
             | FieldType::CompactNullableString
             | FieldType::CompactRecords => true,
+            FieldType::CompactString => true,
         }
     }
 }

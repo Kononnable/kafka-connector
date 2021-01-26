@@ -168,7 +168,7 @@ impl From<DescribeAclsResponse0> for DescribeAclsResponse2 {
         DescribeAclsResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
             resources: older.resources.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -178,7 +178,7 @@ impl From<DescribeAclsResponseResources0> for DescribeAclsResponseResources2 {
     fn from(older: DescribeAclsResponseResources0) -> Self {
         DescribeAclsResponseResources2 {
             resource_type: older.resource_type,
-            resource_name: older.resource_name,
+            resource_name: older.resource_name.into(),
             acls: older.acls.into_iter().map(|el| el.into()).collect(),
             ..DescribeAclsResponseResources2::default()
         }
@@ -188,8 +188,8 @@ impl From<DescribeAclsResponseResources0> for DescribeAclsResponseResources2 {
 impl From<DescribeAclsResponseResourcesAcls0> for DescribeAclsResponseResourcesAcls2 {
     fn from(older: DescribeAclsResponseResourcesAcls0) -> Self {
         DescribeAclsResponseResourcesAcls2 {
-            principal: older.principal,
-            host: older.host,
+            principal: older.principal.into(),
+            host: older.host.into(),
             operation: older.operation,
             permission_type: older.permission_type,
         }
@@ -201,7 +201,7 @@ impl From<DescribeAclsResponse1> for DescribeAclsResponse2 {
         DescribeAclsResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
             resources: older.resources.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -211,7 +211,7 @@ impl From<DescribeAclsResponseResources1> for DescribeAclsResponseResources2 {
     fn from(older: DescribeAclsResponseResources1) -> Self {
         DescribeAclsResponseResources2 {
             resource_type: older.resource_type,
-            resource_name: older.resource_name,
+            resource_name: older.resource_name.into(),
             pattern_type: older.pattern_type,
             acls: older.acls.into_iter().map(|el| el.into()).collect(),
         }
@@ -221,8 +221,8 @@ impl From<DescribeAclsResponseResources1> for DescribeAclsResponseResources2 {
 impl From<DescribeAclsResponseResourcesAcls1> for DescribeAclsResponseResourcesAcls2 {
     fn from(older: DescribeAclsResponseResourcesAcls1) -> Self {
         DescribeAclsResponseResourcesAcls2 {
-            principal: older.principal,
-            host: older.host,
+            principal: older.principal.into(),
+            host: older.host.into(),
             operation: older.operation,
             permission_type: older.permission_type,
         }

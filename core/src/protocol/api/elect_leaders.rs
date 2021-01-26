@@ -135,7 +135,7 @@ impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest0 {
             topic_partitions: latest
                 .topic_partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
         })
@@ -146,7 +146,7 @@ impl TryFrom<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPa
     type Error = Error;
     fn try_from(latest: ElectLeadersRequestTopicPartitions2) -> Result<Self, Self::Error> {
         Ok(ElectLeadersRequestTopicPartitions0 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partition_id: latest.partition_id,
         })
     }
@@ -160,7 +160,7 @@ impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest1 {
             topic_partitions: latest
                 .topic_partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
         })
@@ -171,7 +171,7 @@ impl TryFrom<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPa
     type Error = Error;
     fn try_from(latest: ElectLeadersRequestTopicPartitions2) -> Result<Self, Self::Error> {
         Ok(ElectLeadersRequestTopicPartitions1 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partition_id: latest.partition_id,
         })
     }
@@ -196,7 +196,7 @@ impl From<ElectLeadersResponseReplicaElectionResults0>
 {
     fn from(older: ElectLeadersResponseReplicaElectionResults0) -> Self {
         ElectLeadersResponseReplicaElectionResults2 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_result: older
                 .partition_result
                 .into_iter()
@@ -213,7 +213,7 @@ impl From<ElectLeadersResponseReplicaElectionResultsPartitionResult0>
         ElectLeadersResponseReplicaElectionResultsPartitionResult2 {
             partition_id: older.partition_id,
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
         }
     }
 }
@@ -237,7 +237,7 @@ impl From<ElectLeadersResponseReplicaElectionResults1>
 {
     fn from(older: ElectLeadersResponseReplicaElectionResults1) -> Self {
         ElectLeadersResponseReplicaElectionResults2 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_result: older
                 .partition_result
                 .into_iter()
@@ -254,7 +254,7 @@ impl From<ElectLeadersResponseReplicaElectionResultsPartitionResult1>
         ElectLeadersResponseReplicaElectionResultsPartitionResult2 {
             partition_id: older.partition_id,
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
         }
     }
 }

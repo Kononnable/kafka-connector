@@ -231,7 +231,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest0 {
             ));
         }
         Ok(DescribeGroupsRequest0 {
-            groups: latest.groups.into_iter().collect(),
+            groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
         })
     }
 }
@@ -247,7 +247,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest1 {
             ));
         }
         Ok(DescribeGroupsRequest1 {
-            groups: latest.groups.into_iter().collect(),
+            groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
         })
     }
 }
@@ -263,7 +263,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest2 {
             ));
         }
         Ok(DescribeGroupsRequest2 {
-            groups: latest.groups.into_iter().collect(),
+            groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
         })
     }
 }
@@ -272,7 +272,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest3 {
     type Error = Error;
     fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
         Ok(DescribeGroupsRequest3 {
-            groups: latest.groups.into_iter().collect(),
+            groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
             include_authorized_operations: latest.include_authorized_operations,
         })
     }
@@ -282,7 +282,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest4 {
     type Error = Error;
     fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
         Ok(DescribeGroupsRequest4 {
-            groups: latest.groups.into_iter().collect(),
+            groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
             include_authorized_operations: latest.include_authorized_operations,
         })
     }
@@ -301,10 +301,10 @@ impl From<DescribeGroupsResponseGroups0> for DescribeGroupsResponseGroups5 {
     fn from(older: DescribeGroupsResponseGroups0) -> Self {
         DescribeGroupsResponseGroups5 {
             error_code: older.error_code,
-            group_id: older.group_id,
-            group_state: older.group_state,
-            protocol_type: older.protocol_type,
-            protocol_data: older.protocol_data,
+            group_id: older.group_id.into(),
+            group_state: older.group_state.into(),
+            protocol_type: older.protocol_type.into(),
+            protocol_data: older.protocol_data.into(),
             members: older.members.into_iter().map(|el| el.into()).collect(),
             ..DescribeGroupsResponseGroups5::default()
         }
@@ -314,9 +314,9 @@ impl From<DescribeGroupsResponseGroups0> for DescribeGroupsResponseGroups5 {
 impl From<DescribeGroupsResponseGroupsMembers0> for DescribeGroupsResponseGroupsMembers5 {
     fn from(older: DescribeGroupsResponseGroupsMembers0) -> Self {
         DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id,
-            client_id: older.client_id,
-            client_host: older.client_host,
+            member_id: older.member_id.into(),
+            client_id: older.client_id.into(),
+            client_host: older.client_host.into(),
             member_metadata: older.member_metadata.into(),
             member_assignment: older.member_assignment.into(),
             ..DescribeGroupsResponseGroupsMembers5::default()
@@ -337,10 +337,10 @@ impl From<DescribeGroupsResponseGroups1> for DescribeGroupsResponseGroups5 {
     fn from(older: DescribeGroupsResponseGroups1) -> Self {
         DescribeGroupsResponseGroups5 {
             error_code: older.error_code,
-            group_id: older.group_id,
-            group_state: older.group_state,
-            protocol_type: older.protocol_type,
-            protocol_data: older.protocol_data,
+            group_id: older.group_id.into(),
+            group_state: older.group_state.into(),
+            protocol_type: older.protocol_type.into(),
+            protocol_data: older.protocol_data.into(),
             members: older.members.into_iter().map(|el| el.into()).collect(),
             ..DescribeGroupsResponseGroups5::default()
         }
@@ -350,9 +350,9 @@ impl From<DescribeGroupsResponseGroups1> for DescribeGroupsResponseGroups5 {
 impl From<DescribeGroupsResponseGroupsMembers1> for DescribeGroupsResponseGroupsMembers5 {
     fn from(older: DescribeGroupsResponseGroupsMembers1) -> Self {
         DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id,
-            client_id: older.client_id,
-            client_host: older.client_host,
+            member_id: older.member_id.into(),
+            client_id: older.client_id.into(),
+            client_host: older.client_host.into(),
             member_metadata: older.member_metadata.into(),
             member_assignment: older.member_assignment.into(),
             ..DescribeGroupsResponseGroupsMembers5::default()
@@ -373,10 +373,10 @@ impl From<DescribeGroupsResponseGroups2> for DescribeGroupsResponseGroups5 {
     fn from(older: DescribeGroupsResponseGroups2) -> Self {
         DescribeGroupsResponseGroups5 {
             error_code: older.error_code,
-            group_id: older.group_id,
-            group_state: older.group_state,
-            protocol_type: older.protocol_type,
-            protocol_data: older.protocol_data,
+            group_id: older.group_id.into(),
+            group_state: older.group_state.into(),
+            protocol_type: older.protocol_type.into(),
+            protocol_data: older.protocol_data.into(),
             members: older.members.into_iter().map(|el| el.into()).collect(),
             ..DescribeGroupsResponseGroups5::default()
         }
@@ -386,9 +386,9 @@ impl From<DescribeGroupsResponseGroups2> for DescribeGroupsResponseGroups5 {
 impl From<DescribeGroupsResponseGroupsMembers2> for DescribeGroupsResponseGroupsMembers5 {
     fn from(older: DescribeGroupsResponseGroupsMembers2) -> Self {
         DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id,
-            client_id: older.client_id,
-            client_host: older.client_host,
+            member_id: older.member_id.into(),
+            client_id: older.client_id.into(),
+            client_host: older.client_host.into(),
             member_metadata: older.member_metadata.into(),
             member_assignment: older.member_assignment.into(),
             ..DescribeGroupsResponseGroupsMembers5::default()
@@ -409,10 +409,10 @@ impl From<DescribeGroupsResponseGroups3> for DescribeGroupsResponseGroups5 {
     fn from(older: DescribeGroupsResponseGroups3) -> Self {
         DescribeGroupsResponseGroups5 {
             error_code: older.error_code,
-            group_id: older.group_id,
-            group_state: older.group_state,
-            protocol_type: older.protocol_type,
-            protocol_data: older.protocol_data,
+            group_id: older.group_id.into(),
+            group_state: older.group_state.into(),
+            protocol_type: older.protocol_type.into(),
+            protocol_data: older.protocol_data.into(),
             members: older.members.into_iter().map(|el| el.into()).collect(),
             authorized_operations: older.authorized_operations,
         }
@@ -422,9 +422,9 @@ impl From<DescribeGroupsResponseGroups3> for DescribeGroupsResponseGroups5 {
 impl From<DescribeGroupsResponseGroupsMembers3> for DescribeGroupsResponseGroupsMembers5 {
     fn from(older: DescribeGroupsResponseGroupsMembers3) -> Self {
         DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id,
-            client_id: older.client_id,
-            client_host: older.client_host,
+            member_id: older.member_id.into(),
+            client_id: older.client_id.into(),
+            client_host: older.client_host.into(),
             member_metadata: older.member_metadata.into(),
             member_assignment: older.member_assignment.into(),
             ..DescribeGroupsResponseGroupsMembers5::default()
@@ -445,10 +445,10 @@ impl From<DescribeGroupsResponseGroups4> for DescribeGroupsResponseGroups5 {
     fn from(older: DescribeGroupsResponseGroups4) -> Self {
         DescribeGroupsResponseGroups5 {
             error_code: older.error_code,
-            group_id: older.group_id,
-            group_state: older.group_state,
-            protocol_type: older.protocol_type,
-            protocol_data: older.protocol_data,
+            group_id: older.group_id.into(),
+            group_state: older.group_state.into(),
+            protocol_type: older.protocol_type.into(),
+            protocol_data: older.protocol_data.into(),
             members: older.members.into_iter().map(|el| el.into()).collect(),
             authorized_operations: older.authorized_operations,
         }
@@ -458,10 +458,10 @@ impl From<DescribeGroupsResponseGroups4> for DescribeGroupsResponseGroups5 {
 impl From<DescribeGroupsResponseGroupsMembers4> for DescribeGroupsResponseGroupsMembers5 {
     fn from(older: DescribeGroupsResponseGroupsMembers4) -> Self {
         DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id,
-            group_instance_id: older.group_instance_id.map(|val| val),
-            client_id: older.client_id,
-            client_host: older.client_host,
+            member_id: older.member_id.into(),
+            group_instance_id: older.group_instance_id.map(|val| val.into()),
+            client_id: older.client_id.into(),
+            client_host: older.client_host.into(),
             member_metadata: older.member_metadata.into(),
             member_assignment: older.member_assignment.into(),
         }

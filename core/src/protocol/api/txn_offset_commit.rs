@@ -219,14 +219,14 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest0 {
             ));
         }
         Ok(TxnOffsetCommitRequest0 {
-            transactional_id: latest.transactional_id,
-            group_id: latest.group_id,
+            transactional_id: latest.transactional_id.into(),
+            group_id: latest.group_id.into(),
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -236,11 +236,11 @@ impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics0 {
     type Error = Error;
     fn try_from(latest: TxnOffsetCommitRequestTopics3) -> Result<Self, Self::Error> {
         Ok(TxnOffsetCommitRequestTopics0 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -289,14 +289,14 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest1 {
             ));
         }
         Ok(TxnOffsetCommitRequest1 {
-            transactional_id: latest.transactional_id,
-            group_id: latest.group_id,
+            transactional_id: latest.transactional_id.into(),
+            group_id: latest.group_id.into(),
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -306,11 +306,11 @@ impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics1 {
     type Error = Error;
     fn try_from(latest: TxnOffsetCommitRequestTopics3) -> Result<Self, Self::Error> {
         Ok(TxnOffsetCommitRequestTopics1 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -359,14 +359,14 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest2 {
             ));
         }
         Ok(TxnOffsetCommitRequest2 {
-            transactional_id: latest.transactional_id,
-            group_id: latest.group_id,
+            transactional_id: latest.transactional_id.into(),
+            group_id: latest.group_id.into(),
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -376,11 +376,11 @@ impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics2 {
     type Error = Error;
     fn try_from(latest: TxnOffsetCommitRequestTopics3) -> Result<Self, Self::Error> {
         Ok(TxnOffsetCommitRequestTopics2 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -410,7 +410,7 @@ impl From<TxnOffsetCommitResponse0> for TxnOffsetCommitResponse3 {
 impl From<TxnOffsetCommitResponseTopics0> for TxnOffsetCommitResponseTopics3 {
     fn from(older: TxnOffsetCommitResponseTopics0) -> Self {
         TxnOffsetCommitResponseTopics3 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -437,7 +437,7 @@ impl From<TxnOffsetCommitResponse1> for TxnOffsetCommitResponse3 {
 impl From<TxnOffsetCommitResponseTopics1> for TxnOffsetCommitResponseTopics3 {
     fn from(older: TxnOffsetCommitResponseTopics1) -> Self {
         TxnOffsetCommitResponseTopics3 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -464,7 +464,7 @@ impl From<TxnOffsetCommitResponse2> for TxnOffsetCommitResponse3 {
 impl From<TxnOffsetCommitResponseTopics2> for TxnOffsetCommitResponseTopics3 {
     fn from(older: TxnOffsetCommitResponseTopics2) -> Self {
         TxnOffsetCommitResponseTopics3 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }

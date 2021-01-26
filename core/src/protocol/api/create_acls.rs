@@ -114,7 +114,7 @@ impl TryFrom<CreateAclsRequest2> for CreateAclsRequest0 {
             creations: latest
                 .creations
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -132,9 +132,9 @@ impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations0 {
         }
         Ok(CreateAclsRequestCreations0 {
             resource_type: latest.resource_type,
-            resource_name: latest.resource_name,
-            principal: latest.principal,
-            host: latest.host,
+            resource_name: latest.resource_name.into(),
+            principal: latest.principal.into(),
+            host: latest.host.into(),
             operation: latest.operation,
             permission_type: latest.permission_type,
         })
@@ -148,7 +148,7 @@ impl TryFrom<CreateAclsRequest2> for CreateAclsRequest1 {
             creations: latest
                 .creations
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -159,10 +159,10 @@ impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations1 {
     fn try_from(latest: CreateAclsRequestCreations2) -> Result<Self, Self::Error> {
         Ok(CreateAclsRequestCreations1 {
             resource_type: latest.resource_type,
-            resource_name: latest.resource_name,
+            resource_name: latest.resource_name.into(),
             resource_pattern_type: latest.resource_pattern_type,
-            principal: latest.principal,
-            host: latest.host,
+            principal: latest.principal.into(),
+            host: latest.host.into(),
             operation: latest.operation,
             permission_type: latest.permission_type,
         })
@@ -182,7 +182,7 @@ impl From<CreateAclsResponseResults0> for CreateAclsResponseResults2 {
     fn from(older: CreateAclsResponseResults0) -> Self {
         CreateAclsResponseResults2 {
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
         }
     }
 }
@@ -200,7 +200,7 @@ impl From<CreateAclsResponseResults1> for CreateAclsResponseResults2 {
     fn from(older: CreateAclsResponseResults1) -> Self {
         CreateAclsResponseResults2 {
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
         }
     }
 }

@@ -520,7 +520,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest0 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -529,7 +529,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest0 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics0 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics0 { name: latest.name })
+        Ok(MetadataRequestTopics0 {
+            name: latest.name.into(),
+        })
     }
 }
 
@@ -561,7 +563,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest1 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -570,7 +572,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest1 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics1 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics1 { name: latest.name })
+        Ok(MetadataRequestTopics1 {
+            name: latest.name.into(),
+        })
     }
 }
 
@@ -602,7 +606,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest2 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -611,7 +615,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest2 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics2 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics2 { name: latest.name })
+        Ok(MetadataRequestTopics2 {
+            name: latest.name.into(),
+        })
     }
 }
 
@@ -643,7 +649,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest3 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -652,7 +658,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest3 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics3 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics3 { name: latest.name })
+        Ok(MetadataRequestTopics3 {
+            name: latest.name.into(),
+        })
     }
 }
 
@@ -677,7 +685,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest4 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             allow_auto_topic_creation: latest.allow_auto_topic_creation,
         })
@@ -687,7 +695,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest4 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics4 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics4 { name: latest.name })
+        Ok(MetadataRequestTopics4 {
+            name: latest.name.into(),
+        })
     }
 }
 
@@ -712,7 +722,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest5 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             allow_auto_topic_creation: latest.allow_auto_topic_creation,
         })
@@ -722,7 +732,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest5 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics5 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics5 { name: latest.name })
+        Ok(MetadataRequestTopics5 {
+            name: latest.name.into(),
+        })
     }
 }
 
@@ -747,7 +759,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest6 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             allow_auto_topic_creation: latest.allow_auto_topic_creation,
         })
@@ -757,7 +769,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest6 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics6 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics6 { name: latest.name })
+        Ok(MetadataRequestTopics6 {
+            name: latest.name.into(),
+        })
     }
 }
 
@@ -782,7 +796,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest7 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             allow_auto_topic_creation: latest.allow_auto_topic_creation,
         })
@@ -792,7 +806,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest7 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics7 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics7 { name: latest.name })
+        Ok(MetadataRequestTopics7 {
+            name: latest.name.into(),
+        })
     }
 }
 
@@ -803,7 +819,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest8 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             allow_auto_topic_creation: latest.allow_auto_topic_creation,
             include_cluster_authorized_operations: latest.include_cluster_authorized_operations,
@@ -815,7 +831,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest8 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics8 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics8 { name: latest.name })
+        Ok(MetadataRequestTopics8 {
+            name: latest.name.into(),
+        })
     }
 }
 
@@ -833,7 +851,7 @@ impl From<MetadataResponseBrokers0> for MetadataResponseBrokers9 {
     fn from(older: MetadataResponseBrokers0) -> Self {
         MetadataResponseBrokers9 {
             node_id: older.node_id,
-            host: older.host,
+            host: older.host.into(),
             port: older.port,
             ..MetadataResponseBrokers9::default()
         }
@@ -844,7 +862,7 @@ impl From<MetadataResponseTopics0> for MetadataResponseTopics9 {
     fn from(older: MetadataResponseTopics0) -> Self {
         MetadataResponseTopics9 {
             error_code: older.error_code,
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
         }
@@ -879,9 +897,9 @@ impl From<MetadataResponseBrokers1> for MetadataResponseBrokers9 {
     fn from(older: MetadataResponseBrokers1) -> Self {
         MetadataResponseBrokers9 {
             node_id: older.node_id,
-            host: older.host,
+            host: older.host.into(),
             port: older.port,
-            rack: older.rack.map(|val| val),
+            rack: older.rack.map(|val| val.into()),
         }
     }
 }
@@ -890,7 +908,7 @@ impl From<MetadataResponseTopics1> for MetadataResponseTopics9 {
     fn from(older: MetadataResponseTopics1) -> Self {
         MetadataResponseTopics9 {
             error_code: older.error_code,
-            name: older.name,
+            name: older.name.into(),
             is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
@@ -915,7 +933,7 @@ impl From<MetadataResponse2> for MetadataResponse9 {
     fn from(older: MetadataResponse2) -> Self {
         MetadataResponse9 {
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
-            cluster_id: older.cluster_id.map(|val| val),
+            cluster_id: older.cluster_id.map(|val| val.into()),
             controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
@@ -927,9 +945,9 @@ impl From<MetadataResponseBrokers2> for MetadataResponseBrokers9 {
     fn from(older: MetadataResponseBrokers2) -> Self {
         MetadataResponseBrokers9 {
             node_id: older.node_id,
-            host: older.host,
+            host: older.host.into(),
             port: older.port,
-            rack: older.rack.map(|val| val),
+            rack: older.rack.map(|val| val.into()),
         }
     }
 }
@@ -938,7 +956,7 @@ impl From<MetadataResponseTopics2> for MetadataResponseTopics9 {
     fn from(older: MetadataResponseTopics2) -> Self {
         MetadataResponseTopics9 {
             error_code: older.error_code,
-            name: older.name,
+            name: older.name.into(),
             is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
@@ -964,7 +982,7 @@ impl From<MetadataResponse3> for MetadataResponse9 {
         MetadataResponse9 {
             throttle_time_ms: older.throttle_time_ms,
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
-            cluster_id: older.cluster_id.map(|val| val),
+            cluster_id: older.cluster_id.map(|val| val.into()),
             controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
@@ -976,9 +994,9 @@ impl From<MetadataResponseBrokers3> for MetadataResponseBrokers9 {
     fn from(older: MetadataResponseBrokers3) -> Self {
         MetadataResponseBrokers9 {
             node_id: older.node_id,
-            host: older.host,
+            host: older.host.into(),
             port: older.port,
-            rack: older.rack.map(|val| val),
+            rack: older.rack.map(|val| val.into()),
         }
     }
 }
@@ -987,7 +1005,7 @@ impl From<MetadataResponseTopics3> for MetadataResponseTopics9 {
     fn from(older: MetadataResponseTopics3) -> Self {
         MetadataResponseTopics9 {
             error_code: older.error_code,
-            name: older.name,
+            name: older.name.into(),
             is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
@@ -1013,7 +1031,7 @@ impl From<MetadataResponse4> for MetadataResponse9 {
         MetadataResponse9 {
             throttle_time_ms: older.throttle_time_ms,
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
-            cluster_id: older.cluster_id.map(|val| val),
+            cluster_id: older.cluster_id.map(|val| val.into()),
             controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
@@ -1025,9 +1043,9 @@ impl From<MetadataResponseBrokers4> for MetadataResponseBrokers9 {
     fn from(older: MetadataResponseBrokers4) -> Self {
         MetadataResponseBrokers9 {
             node_id: older.node_id,
-            host: older.host,
+            host: older.host.into(),
             port: older.port,
-            rack: older.rack.map(|val| val),
+            rack: older.rack.map(|val| val.into()),
         }
     }
 }
@@ -1036,7 +1054,7 @@ impl From<MetadataResponseTopics4> for MetadataResponseTopics9 {
     fn from(older: MetadataResponseTopics4) -> Self {
         MetadataResponseTopics9 {
             error_code: older.error_code,
-            name: older.name,
+            name: older.name.into(),
             is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
@@ -1062,7 +1080,7 @@ impl From<MetadataResponse5> for MetadataResponse9 {
         MetadataResponse9 {
             throttle_time_ms: older.throttle_time_ms,
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
-            cluster_id: older.cluster_id.map(|val| val),
+            cluster_id: older.cluster_id.map(|val| val.into()),
             controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
@@ -1074,9 +1092,9 @@ impl From<MetadataResponseBrokers5> for MetadataResponseBrokers9 {
     fn from(older: MetadataResponseBrokers5) -> Self {
         MetadataResponseBrokers9 {
             node_id: older.node_id,
-            host: older.host,
+            host: older.host.into(),
             port: older.port,
-            rack: older.rack.map(|val| val),
+            rack: older.rack.map(|val| val.into()),
         }
     }
 }
@@ -1085,7 +1103,7 @@ impl From<MetadataResponseTopics5> for MetadataResponseTopics9 {
     fn from(older: MetadataResponseTopics5) -> Self {
         MetadataResponseTopics9 {
             error_code: older.error_code,
-            name: older.name,
+            name: older.name.into(),
             is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
@@ -1112,7 +1130,7 @@ impl From<MetadataResponse6> for MetadataResponse9 {
         MetadataResponse9 {
             throttle_time_ms: older.throttle_time_ms,
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
-            cluster_id: older.cluster_id.map(|val| val),
+            cluster_id: older.cluster_id.map(|val| val.into()),
             controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
@@ -1124,9 +1142,9 @@ impl From<MetadataResponseBrokers6> for MetadataResponseBrokers9 {
     fn from(older: MetadataResponseBrokers6) -> Self {
         MetadataResponseBrokers9 {
             node_id: older.node_id,
-            host: older.host,
+            host: older.host.into(),
             port: older.port,
-            rack: older.rack.map(|val| val),
+            rack: older.rack.map(|val| val.into()),
         }
     }
 }
@@ -1135,7 +1153,7 @@ impl From<MetadataResponseTopics6> for MetadataResponseTopics9 {
     fn from(older: MetadataResponseTopics6) -> Self {
         MetadataResponseTopics9 {
             error_code: older.error_code,
-            name: older.name,
+            name: older.name.into(),
             is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
@@ -1162,7 +1180,7 @@ impl From<MetadataResponse7> for MetadataResponse9 {
         MetadataResponse9 {
             throttle_time_ms: older.throttle_time_ms,
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
-            cluster_id: older.cluster_id.map(|val| val),
+            cluster_id: older.cluster_id.map(|val| val.into()),
             controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
@@ -1174,9 +1192,9 @@ impl From<MetadataResponseBrokers7> for MetadataResponseBrokers9 {
     fn from(older: MetadataResponseBrokers7) -> Self {
         MetadataResponseBrokers9 {
             node_id: older.node_id,
-            host: older.host,
+            host: older.host.into(),
             port: older.port,
-            rack: older.rack.map(|val| val),
+            rack: older.rack.map(|val| val.into()),
         }
     }
 }
@@ -1185,7 +1203,7 @@ impl From<MetadataResponseTopics7> for MetadataResponseTopics9 {
     fn from(older: MetadataResponseTopics7) -> Self {
         MetadataResponseTopics9 {
             error_code: older.error_code,
-            name: older.name,
+            name: older.name.into(),
             is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
@@ -1212,7 +1230,7 @@ impl From<MetadataResponse8> for MetadataResponse9 {
         MetadataResponse9 {
             throttle_time_ms: older.throttle_time_ms,
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
-            cluster_id: older.cluster_id.map(|val| val),
+            cluster_id: older.cluster_id.map(|val| val.into()),
             controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             cluster_authorized_operations: older.cluster_authorized_operations,
@@ -1224,9 +1242,9 @@ impl From<MetadataResponseBrokers8> for MetadataResponseBrokers9 {
     fn from(older: MetadataResponseBrokers8) -> Self {
         MetadataResponseBrokers9 {
             node_id: older.node_id,
-            host: older.host,
+            host: older.host.into(),
             port: older.port,
-            rack: older.rack.map(|val| val),
+            rack: older.rack.map(|val| val.into()),
         }
     }
 }
@@ -1235,7 +1253,7 @@ impl From<MetadataResponseTopics8> for MetadataResponseTopics9 {
     fn from(older: MetadataResponseTopics8) -> Self {
         MetadataResponseTopics9 {
             error_code: older.error_code,
-            name: older.name,
+            name: older.name.into(),
             is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             topic_authorized_operations: older.topic_authorized_operations,

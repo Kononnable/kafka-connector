@@ -799,7 +799,7 @@ impl TryFrom<FetchRequest12> for FetchRequest0 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -809,11 +809,11 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics0 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
         Ok(FetchRequestTopics0 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -883,7 +883,7 @@ impl TryFrom<FetchRequest12> for FetchRequest1 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -893,11 +893,11 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics1 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
         Ok(FetchRequestTopics1 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -967,7 +967,7 @@ impl TryFrom<FetchRequest12> for FetchRequest2 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -977,11 +977,11 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics2 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
         Ok(FetchRequestTopics2 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1049,7 +1049,7 @@ impl TryFrom<FetchRequest12> for FetchRequest3 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1059,11 +1059,11 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics3 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
         Ok(FetchRequestTopics3 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1129,7 +1129,7 @@ impl TryFrom<FetchRequest12> for FetchRequest4 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1139,11 +1139,11 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics4 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
         Ok(FetchRequestTopics4 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1209,7 +1209,7 @@ impl TryFrom<FetchRequest12> for FetchRequest5 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1219,11 +1219,11 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics5 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
         Ok(FetchRequestTopics5 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1283,7 +1283,7 @@ impl TryFrom<FetchRequest12> for FetchRequest6 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1293,11 +1293,11 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics6 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
         Ok(FetchRequestTopics6 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1346,7 +1346,7 @@ impl TryFrom<FetchRequest12> for FetchRequest7 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             forgotten_topics_data: latest
                 .forgotten_topics_data
@@ -1364,11 +1364,11 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics7 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
         Ok(FetchRequestTopics7 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1404,7 +1404,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
     type Error = Error;
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
         Ok(FetchRequestForgottenTopicsData7 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest.partitions,
         })
     }
@@ -1427,7 +1427,7 @@ impl TryFrom<FetchRequest12> for FetchRequest8 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             forgotten_topics_data: latest
                 .forgotten_topics_data
@@ -1445,11 +1445,11 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics8 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
         Ok(FetchRequestTopics8 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1485,7 +1485,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
     type Error = Error;
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
         Ok(FetchRequestForgottenTopicsData8 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest.partitions,
         })
     }
@@ -1508,7 +1508,7 @@ impl TryFrom<FetchRequest12> for FetchRequest9 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             forgotten_topics_data: latest
                 .forgotten_topics_data
@@ -1526,11 +1526,11 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics9 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
         Ok(FetchRequestTopics9 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1560,7 +1560,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
     type Error = Error;
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
         Ok(FetchRequestForgottenTopicsData9 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest.partitions,
         })
     }
@@ -1583,7 +1583,7 @@ impl TryFrom<FetchRequest12> for FetchRequest10 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             forgotten_topics_data: latest
                 .forgotten_topics_data
@@ -1601,11 +1601,11 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics10 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
         Ok(FetchRequestTopics10 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1635,7 +1635,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
     type Error = Error;
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
         Ok(FetchRequestForgottenTopicsData10 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest.partitions,
         })
     }
@@ -1655,7 +1655,7 @@ impl TryFrom<FetchRequest12> for FetchRequest11 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             forgotten_topics_data: latest
                 .forgotten_topics_data
@@ -1665,7 +1665,7 @@ impl TryFrom<FetchRequest12> for FetchRequest11 {
                         .collect::<Result<_, Error>>()
                 })
                 .wrap_result()?,
-            rack_id: latest.rack_id.map(|val| val),
+            rack_id: latest.rack_id.map(|val| val.into()),
         })
     }
 }
@@ -1674,11 +1674,11 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics11 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
         Ok(FetchRequestTopics11 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -1708,7 +1708,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
     type Error = Error;
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
         Ok(FetchRequestForgottenTopicsData11 {
-            topic: latest.topic,
+            topic: latest.topic.into(),
             partitions: latest.partitions,
         })
     }
@@ -1726,7 +1726,7 @@ impl From<FetchResponse0> for FetchResponse12 {
 impl From<FetchResponseResponses0> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses0) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -1744,7 +1744,7 @@ impl From<FetchResponseResponsesPartitionResponses0>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            record_set: older.record_set,
+            record_set: older.record_set.into(),
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -1763,7 +1763,7 @@ impl From<FetchResponse1> for FetchResponse12 {
 impl From<FetchResponseResponses1> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses1) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -1781,7 +1781,7 @@ impl From<FetchResponseResponsesPartitionResponses1>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            record_set: older.record_set,
+            record_set: older.record_set.into(),
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -1800,7 +1800,7 @@ impl From<FetchResponse2> for FetchResponse12 {
 impl From<FetchResponseResponses2> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses2) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -1818,7 +1818,7 @@ impl From<FetchResponseResponsesPartitionResponses2>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            record_set: older.record_set,
+            record_set: older.record_set.into(),
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -1837,7 +1837,7 @@ impl From<FetchResponse3> for FetchResponse12 {
 impl From<FetchResponseResponses3> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses3) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -1855,7 +1855,7 @@ impl From<FetchResponseResponsesPartitionResponses3>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            record_set: older.record_set,
+            record_set: older.record_set.into(),
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -1874,7 +1874,7 @@ impl From<FetchResponse4> for FetchResponse12 {
 impl From<FetchResponseResponses4> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses4) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -1896,7 +1896,7 @@ impl From<FetchResponseResponsesPartitionResponses4>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set,
+            record_set: older.record_set.into(),
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -1926,7 +1926,7 @@ impl From<FetchResponse5> for FetchResponse12 {
 impl From<FetchResponseResponses5> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses5) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -1949,7 +1949,7 @@ impl From<FetchResponseResponsesPartitionResponses5>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set,
+            record_set: older.record_set.into(),
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -1979,7 +1979,7 @@ impl From<FetchResponse6> for FetchResponse12 {
 impl From<FetchResponseResponses6> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses6) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2002,7 +2002,7 @@ impl From<FetchResponseResponsesPartitionResponses6>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set,
+            record_set: older.record_set.into(),
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2033,7 +2033,7 @@ impl From<FetchResponse7> for FetchResponse12 {
 impl From<FetchResponseResponses7> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses7) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2056,7 +2056,7 @@ impl From<FetchResponseResponsesPartitionResponses7>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set,
+            record_set: older.record_set.into(),
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2087,7 +2087,7 @@ impl From<FetchResponse8> for FetchResponse12 {
 impl From<FetchResponseResponses8> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses8) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2110,7 +2110,7 @@ impl From<FetchResponseResponsesPartitionResponses8>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set,
+            record_set: older.record_set.into(),
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2141,7 +2141,7 @@ impl From<FetchResponse9> for FetchResponse12 {
 impl From<FetchResponseResponses9> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses9) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2164,7 +2164,7 @@ impl From<FetchResponseResponsesPartitionResponses9>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set,
+            record_set: older.record_set.into(),
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2195,7 +2195,7 @@ impl From<FetchResponse10> for FetchResponse12 {
 impl From<FetchResponseResponses10> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses10) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2218,7 +2218,7 @@ impl From<FetchResponseResponsesPartitionResponses10>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set,
+            record_set: older.record_set.into(),
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2249,7 +2249,7 @@ impl From<FetchResponse11> for FetchResponse12 {
 impl From<FetchResponseResponses11> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses11) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic,
+            topic: older.topic.into(),
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2273,7 +2273,7 @@ impl From<FetchResponseResponsesPartitionResponses11>
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
             preferred_read_replica: older.preferred_read_replica,
-            record_set: older.record_set,
+            record_set: older.record_set.into(),
         }
     }
 }

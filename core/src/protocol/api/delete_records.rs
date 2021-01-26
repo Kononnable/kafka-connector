@@ -142,7 +142,7 @@ impl TryFrom<DeleteRecordsRequest2> for DeleteRecordsRequest0 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
         })
@@ -153,11 +153,11 @@ impl TryFrom<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics0 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequestTopics2) -> Result<Self, Self::Error> {
         Ok(DeleteRecordsRequestTopics0 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -180,7 +180,7 @@ impl TryFrom<DeleteRecordsRequest2> for DeleteRecordsRequest1 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
         })
@@ -191,11 +191,11 @@ impl TryFrom<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics1 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequestTopics2) -> Result<Self, Self::Error> {
         Ok(DeleteRecordsRequestTopics1 {
-            name: latest.name,
+            name: latest.name.into(),
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -223,7 +223,7 @@ impl From<DeleteRecordsResponse0> for DeleteRecordsResponse2 {
 impl From<DeleteRecordsResponseTopics0> for DeleteRecordsResponseTopics2 {
     fn from(older: DeleteRecordsResponseTopics0) -> Self {
         DeleteRecordsResponseTopics2 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -251,7 +251,7 @@ impl From<DeleteRecordsResponse1> for DeleteRecordsResponse2 {
 impl From<DeleteRecordsResponseTopics1> for DeleteRecordsResponseTopics2 {
     fn from(older: DeleteRecordsResponseTopics1) -> Self {
         DeleteRecordsResponseTopics2 {
-            name: older.name,
+            name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
         }
     }

@@ -159,17 +159,21 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
                     if latest_field.is_none() {
                         continue;
                     }
-
-                    let conversion = if field.ty != latest_field.unwrap().ty {
-                        let mut conversion = if field.is_simple_type && field.is_vec {
+                    let latest_field = latest_field.unwrap();
+                    let conversion = if field.ty != latest_field.ty {
+                        let mut conversion = if latest_field.is_simple_type && field.is_vec {
                             ".into_iter().collect()"
-                        } else if field.is_simple_type && !field.is_vec {
+                        } else if latest_field.is_simple_type && !field.is_vec {
                             ""
-                        } else if !field.is_simple_type && field.is_vec && !field.is_optional {
-                            ".into_iter().map(|el|el.try_into()).collect::<Result<_, Error>>()?"
-                        }  else if !field.is_simple_type && field.is_vec && field.is_optional {
+                        } else if !latest_field.is_simple_type && field.is_vec && !field.is_optional && field.is_easily_convertable{
+                            ".into_iter().map(|ele|ele.into()).collect()"
+                        }  else if !latest_field.is_simple_type && field.is_vec && field.is_optional && field.is_easily_convertable{
+                            ".map(|val|val.into_iter().map(|el|el.into()).collect()"
+                        } else if !latest_field.is_simple_type && field.is_vec && !field.is_optional && !field.is_easily_convertable{
+                            ".into_iter().map(|ele|ele.try_into()).collect::<Result<_, Error>>()?"
+                        }  else if !latest_field.is_simple_type && field.is_vec && field.is_optional && !field.is_easily_convertable{
                             ".map(|val|val.into_iter().map(|el|el.try_into()).collect::<Result<_, Error>>()).wrap_result()?"
-                        } else if field.is_easily_convertable {
+                        } else if !latest_field.is_simple_type {
                             ".into()"
                         }else {
                             ".try_into()?"
@@ -239,7 +243,10 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
                     let conversion = if field.ty != latest_field.unwrap().ty {
                         let mut conversion = if field.is_simple_type && field.is_vec {
                             ".into_iter().collect()"
-                        } else if field.is_simple_type && !field.is_vec {
+                        } else if field.is_simple_type
+                            && !field.is_vec
+                            && !latest_field.unwrap().is_easily_convertable
+                        {
                             ""
                         } else if !field.is_simple_type && field.is_vec {
                             ".into_iter().map(|el|el.into()).collect()"

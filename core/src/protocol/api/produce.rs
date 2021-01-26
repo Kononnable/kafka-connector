@@ -418,7 +418,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest0 {
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -432,7 +432,7 @@ impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData0 {
             data: latest
                 .data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -464,7 +464,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest1 {
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -478,7 +478,7 @@ impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData1 {
             data: latest
                 .data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -510,7 +510,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest2 {
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -524,7 +524,7 @@ impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData2 {
             data: latest
                 .data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -550,7 +550,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest3 {
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -564,7 +564,7 @@ impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData3 {
             data: latest
                 .data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -590,7 +590,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest4 {
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -604,7 +604,7 @@ impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData4 {
             data: latest
                 .data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -630,7 +630,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest5 {
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -644,7 +644,7 @@ impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData5 {
             data: latest
                 .data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -670,7 +670,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest6 {
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -684,7 +684,7 @@ impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData6 {
             data: latest
                 .data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -710,7 +710,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest7 {
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -724,7 +724,7 @@ impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData7 {
             data: latest
                 .data
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }

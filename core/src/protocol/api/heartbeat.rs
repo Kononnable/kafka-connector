@@ -105,9 +105,9 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest0 {
             ));
         }
         Ok(HeartbeatRequest0 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
         })
     }
 }
@@ -123,9 +123,9 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest1 {
             ));
         }
         Ok(HeartbeatRequest1 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
         })
     }
 }
@@ -141,9 +141,9 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest2 {
             ));
         }
         Ok(HeartbeatRequest2 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
         })
     }
 }
@@ -152,9 +152,9 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest3 {
     type Error = Error;
     fn try_from(latest: HeartbeatRequest4) -> Result<Self, Self::Error> {
         Ok(HeartbeatRequest3 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
             group_instance_id: latest.group_instance_id.map(|val| val),
         })
     }

@@ -187,13 +187,13 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest0 {
             ));
         }
         Ok(SyncGroupRequest0 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -203,7 +203,7 @@ impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments0 {
     type Error = Error;
     fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
         Ok(SyncGroupRequestAssignments0 {
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
             assignment: latest.assignment.into(),
         })
     }
@@ -234,13 +234,13 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest1 {
             ));
         }
         Ok(SyncGroupRequest1 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -250,7 +250,7 @@ impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments1 {
     type Error = Error;
     fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
         Ok(SyncGroupRequestAssignments1 {
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
             assignment: latest.assignment.into(),
         })
     }
@@ -281,13 +281,13 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest2 {
             ));
         }
         Ok(SyncGroupRequest2 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -297,7 +297,7 @@ impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments2 {
     type Error = Error;
     fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
         Ok(SyncGroupRequestAssignments2 {
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
             assignment: latest.assignment.into(),
         })
     }
@@ -321,14 +321,14 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest3 {
             ));
         }
         Ok(SyncGroupRequest3 {
-            group_id: latest.group_id,
+            group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
             group_instance_id: latest.group_instance_id.map(|val| val),
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -338,7 +338,7 @@ impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments3 {
     type Error = Error;
     fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
         Ok(SyncGroupRequestAssignments3 {
-            member_id: latest.member_id,
+            member_id: latest.member_id.into(),
             assignment: latest.assignment.into(),
         })
     }
@@ -369,7 +369,7 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest4 {
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }

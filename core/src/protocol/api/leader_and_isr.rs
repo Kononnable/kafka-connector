@@ -277,7 +277,7 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest0 {
             live_leaders: latest
                 .live_leaders
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             ..LeaderAndIsrRequest0::default()
         })
@@ -289,7 +289,7 @@ impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders
     fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
         Ok(LeaderAndIsrRequestLiveLeaders0 {
             broker_id: latest.broker_id,
-            host_name: latest.host_name,
+            host_name: latest.host_name.into(),
             port: latest.port,
         })
     }
@@ -318,7 +318,7 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest1 {
             live_leaders: latest
                 .live_leaders
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             ..LeaderAndIsrRequest1::default()
         })
@@ -330,7 +330,7 @@ impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders
     fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
         Ok(LeaderAndIsrRequestLiveLeaders1 {
             broker_id: latest.broker_id,
-            host_name: latest.host_name,
+            host_name: latest.host_name.into(),
             port: latest.port,
         })
     }
@@ -354,7 +354,7 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest2 {
             live_leaders: latest
                 .live_leaders
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -364,11 +364,11 @@ impl TryFrom<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestTopicStates4) -> Result<Self, Self::Error> {
         Ok(LeaderAndIsrRequestTopicStates2 {
-            topic_name: latest.topic_name,
+            topic_name: latest.topic_name.into(),
             partition_states: latest
                 .partition_states
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -413,7 +413,7 @@ impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders
     fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
         Ok(LeaderAndIsrRequestLiveLeaders2 {
             broker_id: latest.broker_id,
-            host_name: latest.host_name,
+            host_name: latest.host_name.into(),
             port: latest.port,
         })
     }
@@ -437,7 +437,7 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest3 {
             live_leaders: latest
                 .live_leaders
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -447,11 +447,11 @@ impl TryFrom<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestTopicStates4) -> Result<Self, Self::Error> {
         Ok(LeaderAndIsrRequestTopicStates3 {
-            topic_name: latest.topic_name,
+            topic_name: latest.topic_name.into(),
             partition_states: latest
                 .partition_states
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -484,7 +484,7 @@ impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders
     fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
         Ok(LeaderAndIsrRequestLiveLeaders3 {
             broker_id: latest.broker_id,
-            host_name: latest.host_name,
+            host_name: latest.host_name.into(),
             port: latest.port,
         })
     }
@@ -506,7 +506,7 @@ impl From<LeaderAndIsrResponse0> for LeaderAndIsrResponse4 {
 impl From<LeaderAndIsrResponsePartitionErrors0> for LeaderAndIsrResponsePartitionErrors4 {
     fn from(older: LeaderAndIsrResponsePartitionErrors0) -> Self {
         LeaderAndIsrResponsePartitionErrors4 {
-            topic_name: older.topic_name,
+            topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
             error_code: older.error_code,
         }
@@ -529,7 +529,7 @@ impl From<LeaderAndIsrResponse1> for LeaderAndIsrResponse4 {
 impl From<LeaderAndIsrResponsePartitionErrors1> for LeaderAndIsrResponsePartitionErrors4 {
     fn from(older: LeaderAndIsrResponsePartitionErrors1) -> Self {
         LeaderAndIsrResponsePartitionErrors4 {
-            topic_name: older.topic_name,
+            topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
             error_code: older.error_code,
         }
@@ -552,7 +552,7 @@ impl From<LeaderAndIsrResponse2> for LeaderAndIsrResponse4 {
 impl From<LeaderAndIsrResponsePartitionErrors2> for LeaderAndIsrResponsePartitionErrors4 {
     fn from(older: LeaderAndIsrResponsePartitionErrors2) -> Self {
         LeaderAndIsrResponsePartitionErrors4 {
-            topic_name: older.topic_name,
+            topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
             error_code: older.error_code,
         }
@@ -575,7 +575,7 @@ impl From<LeaderAndIsrResponse3> for LeaderAndIsrResponse4 {
 impl From<LeaderAndIsrResponsePartitionErrors3> for LeaderAndIsrResponsePartitionErrors4 {
     fn from(older: LeaderAndIsrResponsePartitionErrors3) -> Self {
         LeaderAndIsrResponsePartitionErrors4 {
-            topic_name: older.topic_name,
+            topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
             error_code: older.error_code,
         }

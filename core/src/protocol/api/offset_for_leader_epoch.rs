@@ -191,7 +191,7 @@ impl TryFrom<OffsetForLeaderEpochRequest3> for OffsetForLeaderEpochRequest0 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -205,7 +205,7 @@ impl TryFrom<OffsetForLeaderEpochRequestTopics3> for OffsetForLeaderEpochRequest
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -244,7 +244,7 @@ impl TryFrom<OffsetForLeaderEpochRequest3> for OffsetForLeaderEpochRequest1 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -258,7 +258,7 @@ impl TryFrom<OffsetForLeaderEpochRequestTopics3> for OffsetForLeaderEpochRequest
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -297,7 +297,7 @@ impl TryFrom<OffsetForLeaderEpochRequest3> for OffsetForLeaderEpochRequest2 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -311,7 +311,7 @@ impl TryFrom<OffsetForLeaderEpochRequestTopics3> for OffsetForLeaderEpochRequest
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }

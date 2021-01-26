@@ -142,7 +142,11 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest0 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
         Ok(DeleteTopicsRequest0 {
-            topic_names: latest.topic_names.into_iter().collect(),
+            topic_names: latest
+                .topic_names
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
             timeout_ms: latest.timeout_ms,
         })
     }
@@ -152,7 +156,11 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest1 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
         Ok(DeleteTopicsRequest1 {
-            topic_names: latest.topic_names.into_iter().collect(),
+            topic_names: latest
+                .topic_names
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
             timeout_ms: latest.timeout_ms,
         })
     }
@@ -162,7 +170,11 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest2 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
         Ok(DeleteTopicsRequest2 {
-            topic_names: latest.topic_names.into_iter().collect(),
+            topic_names: latest
+                .topic_names
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
             timeout_ms: latest.timeout_ms,
         })
     }
@@ -172,7 +184,11 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest3 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
         Ok(DeleteTopicsRequest3 {
-            topic_names: latest.topic_names.into_iter().collect(),
+            topic_names: latest
+                .topic_names
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
             timeout_ms: latest.timeout_ms,
         })
     }
@@ -200,7 +216,7 @@ impl From<DeleteTopicsResponse0> for DeleteTopicsResponse5 {
 impl From<DeleteTopicsResponseResponses0> for DeleteTopicsResponseResponses5 {
     fn from(older: DeleteTopicsResponseResponses0) -> Self {
         DeleteTopicsResponseResponses5 {
-            name: older.name,
+            name: older.name.into(),
             error_code: older.error_code,
             ..DeleteTopicsResponseResponses5::default()
         }
@@ -219,7 +235,7 @@ impl From<DeleteTopicsResponse1> for DeleteTopicsResponse5 {
 impl From<DeleteTopicsResponseResponses1> for DeleteTopicsResponseResponses5 {
     fn from(older: DeleteTopicsResponseResponses1) -> Self {
         DeleteTopicsResponseResponses5 {
-            name: older.name,
+            name: older.name.into(),
             error_code: older.error_code,
             ..DeleteTopicsResponseResponses5::default()
         }
@@ -238,7 +254,7 @@ impl From<DeleteTopicsResponse2> for DeleteTopicsResponse5 {
 impl From<DeleteTopicsResponseResponses2> for DeleteTopicsResponseResponses5 {
     fn from(older: DeleteTopicsResponseResponses2) -> Self {
         DeleteTopicsResponseResponses5 {
-            name: older.name,
+            name: older.name.into(),
             error_code: older.error_code,
             ..DeleteTopicsResponseResponses5::default()
         }
@@ -257,7 +273,7 @@ impl From<DeleteTopicsResponse3> for DeleteTopicsResponse5 {
 impl From<DeleteTopicsResponseResponses3> for DeleteTopicsResponseResponses5 {
     fn from(older: DeleteTopicsResponseResponses3) -> Self {
         DeleteTopicsResponseResponses5 {
-            name: older.name,
+            name: older.name.into(),
             error_code: older.error_code,
             ..DeleteTopicsResponseResponses5::default()
         }

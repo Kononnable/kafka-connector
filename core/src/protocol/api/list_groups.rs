@@ -179,8 +179,8 @@ impl From<ListGroupsResponse0> for ListGroupsResponse4 {
 impl From<ListGroupsResponseGroups0> for ListGroupsResponseGroups4 {
     fn from(older: ListGroupsResponseGroups0) -> Self {
         ListGroupsResponseGroups4 {
-            group_id: older.group_id,
-            protocol_type: older.protocol_type,
+            group_id: older.group_id.into(),
+            protocol_type: older.protocol_type.into(),
             ..ListGroupsResponseGroups4::default()
         }
     }
@@ -199,8 +199,8 @@ impl From<ListGroupsResponse1> for ListGroupsResponse4 {
 impl From<ListGroupsResponseGroups1> for ListGroupsResponseGroups4 {
     fn from(older: ListGroupsResponseGroups1) -> Self {
         ListGroupsResponseGroups4 {
-            group_id: older.group_id,
-            protocol_type: older.protocol_type,
+            group_id: older.group_id.into(),
+            protocol_type: older.protocol_type.into(),
             ..ListGroupsResponseGroups4::default()
         }
     }
@@ -219,8 +219,8 @@ impl From<ListGroupsResponse2> for ListGroupsResponse4 {
 impl From<ListGroupsResponseGroups2> for ListGroupsResponseGroups4 {
     fn from(older: ListGroupsResponseGroups2) -> Self {
         ListGroupsResponseGroups4 {
-            group_id: older.group_id,
-            protocol_type: older.protocol_type,
+            group_id: older.group_id.into(),
+            protocol_type: older.protocol_type.into(),
             ..ListGroupsResponseGroups4::default()
         }
     }

@@ -222,7 +222,7 @@ impl From<StopReplicaResponse0> for StopReplicaResponse3 {
 impl From<StopReplicaResponsePartitionErrors0> for StopReplicaResponsePartitionErrors3 {
     fn from(older: StopReplicaResponsePartitionErrors0) -> Self {
         StopReplicaResponsePartitionErrors3 {
-            topic_name: older.topic_name,
+            topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
             error_code: older.error_code,
         }
@@ -245,7 +245,7 @@ impl From<StopReplicaResponse1> for StopReplicaResponse3 {
 impl From<StopReplicaResponsePartitionErrors1> for StopReplicaResponsePartitionErrors3 {
     fn from(older: StopReplicaResponsePartitionErrors1) -> Self {
         StopReplicaResponsePartitionErrors3 {
-            topic_name: older.topic_name,
+            topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
             error_code: older.error_code,
         }

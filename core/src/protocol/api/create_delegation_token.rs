@@ -109,7 +109,7 @@ impl TryFrom<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest0 {
             renewers: latest
                 .renewers
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             max_lifetime_ms: latest.max_lifetime_ms,
         })
@@ -120,8 +120,8 @@ impl TryFrom<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenReq
     type Error = Error;
     fn try_from(latest: CreateDelegationTokenRequestRenewers2) -> Result<Self, Self::Error> {
         Ok(CreateDelegationTokenRequestRenewers0 {
-            principal_type: latest.principal_type,
-            principal_name: latest.principal_name,
+            principal_type: latest.principal_type.into(),
+            principal_name: latest.principal_name.into(),
         })
     }
 }
@@ -133,7 +133,7 @@ impl TryFrom<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest1 {
             renewers: latest
                 .renewers
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             max_lifetime_ms: latest.max_lifetime_ms,
         })
@@ -144,8 +144,8 @@ impl TryFrom<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenReq
     type Error = Error;
     fn try_from(latest: CreateDelegationTokenRequestRenewers2) -> Result<Self, Self::Error> {
         Ok(CreateDelegationTokenRequestRenewers1 {
-            principal_type: latest.principal_type,
-            principal_name: latest.principal_name,
+            principal_type: latest.principal_type.into(),
+            principal_name: latest.principal_name.into(),
         })
     }
 }
@@ -154,12 +154,12 @@ impl From<CreateDelegationTokenResponse0> for CreateDelegationTokenResponse2 {
     fn from(older: CreateDelegationTokenResponse0) -> Self {
         CreateDelegationTokenResponse2 {
             error_code: older.error_code,
-            principal_type: older.principal_type,
-            principal_name: older.principal_name,
+            principal_type: older.principal_type.into(),
+            principal_name: older.principal_name.into(),
             issue_timestamp_ms: older.issue_timestamp_ms,
             expiry_timestamp_ms: older.expiry_timestamp_ms,
             max_timestamp_ms: older.max_timestamp_ms,
-            token_id: older.token_id,
+            token_id: older.token_id.into(),
             hmac: older.hmac.into(),
             throttle_time_ms: older.throttle_time_ms,
         }
@@ -170,12 +170,12 @@ impl From<CreateDelegationTokenResponse1> for CreateDelegationTokenResponse2 {
     fn from(older: CreateDelegationTokenResponse1) -> Self {
         CreateDelegationTokenResponse2 {
             error_code: older.error_code,
-            principal_type: older.principal_type,
-            principal_name: older.principal_name,
+            principal_type: older.principal_type.into(),
+            principal_name: older.principal_name.into(),
             issue_timestamp_ms: older.issue_timestamp_ms,
             expiry_timestamp_ms: older.expiry_timestamp_ms,
             max_timestamp_ms: older.max_timestamp_ms,
-            token_id: older.token_id,
+            token_id: older.token_id.into(),
             hmac: older.hmac.into(),
             throttle_time_ms: older.throttle_time_ms,
         }

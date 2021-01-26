@@ -279,7 +279,7 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest0 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -293,7 +293,7 @@ impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics0 {
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -332,7 +332,7 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest1 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -346,7 +346,7 @@ impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics1 {
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -378,7 +378,7 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest2 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -392,7 +392,7 @@ impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics2 {
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -424,7 +424,7 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest3 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -438,7 +438,7 @@ impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics3 {
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -470,7 +470,7 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest4 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -484,7 +484,7 @@ impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics4 {
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }

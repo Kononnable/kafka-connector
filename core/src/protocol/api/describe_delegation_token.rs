@@ -142,7 +142,7 @@ impl TryFrom<DescribeDelegationTokenRequest2> for DescribeDelegationTokenRequest
             owners: latest
                 .owners
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -152,8 +152,8 @@ impl TryFrom<DescribeDelegationTokenRequestOwners2> for DescribeDelegationTokenR
     type Error = Error;
     fn try_from(latest: DescribeDelegationTokenRequestOwners2) -> Result<Self, Self::Error> {
         Ok(DescribeDelegationTokenRequestOwners0 {
-            principal_type: latest.principal_type,
-            principal_name: latest.principal_name,
+            principal_type: latest.principal_type.into(),
+            principal_name: latest.principal_name.into(),
         })
     }
 }
@@ -165,7 +165,7 @@ impl TryFrom<DescribeDelegationTokenRequest2> for DescribeDelegationTokenRequest
             owners: latest
                 .owners
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -175,8 +175,8 @@ impl TryFrom<DescribeDelegationTokenRequestOwners2> for DescribeDelegationTokenR
     type Error = Error;
     fn try_from(latest: DescribeDelegationTokenRequestOwners2) -> Result<Self, Self::Error> {
         Ok(DescribeDelegationTokenRequestOwners1 {
-            principal_type: latest.principal_type,
-            principal_name: latest.principal_name,
+            principal_type: latest.principal_type.into(),
+            principal_name: latest.principal_name.into(),
         })
     }
 }
@@ -194,12 +194,12 @@ impl From<DescribeDelegationTokenResponse0> for DescribeDelegationTokenResponse2
 impl From<DescribeDelegationTokenResponseTokens0> for DescribeDelegationTokenResponseTokens2 {
     fn from(older: DescribeDelegationTokenResponseTokens0) -> Self {
         DescribeDelegationTokenResponseTokens2 {
-            principal_type: older.principal_type,
-            principal_name: older.principal_name,
+            principal_type: older.principal_type.into(),
+            principal_name: older.principal_name.into(),
             issue_timestamp: older.issue_timestamp,
             expiry_timestamp: older.expiry_timestamp,
             max_timestamp: older.max_timestamp,
-            token_id: older.token_id,
+            token_id: older.token_id.into(),
             hmac: older.hmac.into(),
             renewers: older.renewers.into_iter().map(|el| el.into()).collect(),
         }
@@ -211,8 +211,8 @@ impl From<DescribeDelegationTokenResponseTokensRenewers0>
 {
     fn from(older: DescribeDelegationTokenResponseTokensRenewers0) -> Self {
         DescribeDelegationTokenResponseTokensRenewers2 {
-            principal_type: older.principal_type,
-            principal_name: older.principal_name,
+            principal_type: older.principal_type.into(),
+            principal_name: older.principal_name.into(),
         }
     }
 }
@@ -230,12 +230,12 @@ impl From<DescribeDelegationTokenResponse1> for DescribeDelegationTokenResponse2
 impl From<DescribeDelegationTokenResponseTokens1> for DescribeDelegationTokenResponseTokens2 {
     fn from(older: DescribeDelegationTokenResponseTokens1) -> Self {
         DescribeDelegationTokenResponseTokens2 {
-            principal_type: older.principal_type,
-            principal_name: older.principal_name,
+            principal_type: older.principal_type.into(),
+            principal_name: older.principal_name.into(),
             issue_timestamp: older.issue_timestamp,
             expiry_timestamp: older.expiry_timestamp,
             max_timestamp: older.max_timestamp,
-            token_id: older.token_id,
+            token_id: older.token_id.into(),
             hmac: older.hmac.into(),
             renewers: older.renewers.into_iter().map(|el| el.into()).collect(),
         }
@@ -247,8 +247,8 @@ impl From<DescribeDelegationTokenResponseTokensRenewers1>
 {
     fn from(older: DescribeDelegationTokenResponseTokensRenewers1) -> Self {
         DescribeDelegationTokenResponseTokensRenewers2 {
-            principal_type: older.principal_type,
-            principal_name: older.principal_name,
+            principal_type: older.principal_type.into(),
+            principal_name: older.principal_name.into(),
         }
     }
 }

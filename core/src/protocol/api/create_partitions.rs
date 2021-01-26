@@ -164,7 +164,7 @@ impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest0 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
@@ -176,12 +176,12 @@ impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics0 
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopics3) -> Result<Self, Self::Error> {
         Ok(CreatePartitionsRequestTopics0 {
-            name: latest.name,
+            name: latest.name.into(),
             count: latest.count,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -205,7 +205,7 @@ impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest1 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
@@ -217,12 +217,12 @@ impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics1 
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopics3) -> Result<Self, Self::Error> {
         Ok(CreatePartitionsRequestTopics1 {
-            name: latest.name,
+            name: latest.name.into(),
             count: latest.count,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -246,7 +246,7 @@ impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest2 {
             topics: latest
                 .topics
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
@@ -263,7 +263,7 @@ impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics2 
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|el| el.try_into())
+                .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
         })
     }
@@ -292,9 +292,9 @@ impl From<CreatePartitionsResponse0> for CreatePartitionsResponse3 {
 impl From<CreatePartitionsResponseResults0> for CreatePartitionsResponseResults3 {
     fn from(older: CreatePartitionsResponseResults0) -> Self {
         CreatePartitionsResponseResults3 {
-            name: older.name,
+            name: older.name.into(),
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
         }
     }
 }
@@ -311,9 +311,9 @@ impl From<CreatePartitionsResponse1> for CreatePartitionsResponse3 {
 impl From<CreatePartitionsResponseResults1> for CreatePartitionsResponseResults3 {
     fn from(older: CreatePartitionsResponseResults1) -> Self {
         CreatePartitionsResponseResults3 {
-            name: older.name,
+            name: older.name.into(),
             error_code: older.error_code,
-            error_message: older.error_message,
+            error_message: older.error_message.into(),
         }
     }
 }

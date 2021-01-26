@@ -159,7 +159,7 @@ impl From<ControlledShutdownResponseRemainingPartitions0>
 {
     fn from(older: ControlledShutdownResponseRemainingPartitions0) -> Self {
         ControlledShutdownResponseRemainingPartitions3 {
-            topic_name: older.topic_name,
+            topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
         }
     }
@@ -183,7 +183,7 @@ impl From<ControlledShutdownResponseRemainingPartitions1>
 {
     fn from(older: ControlledShutdownResponseRemainingPartitions1) -> Self {
         ControlledShutdownResponseRemainingPartitions3 {
-            topic_name: older.topic_name,
+            topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
         }
     }
@@ -207,7 +207,7 @@ impl From<ControlledShutdownResponseRemainingPartitions2>
 {
     fn from(older: ControlledShutdownResponseRemainingPartitions2) -> Self {
         ControlledShutdownResponseRemainingPartitions3 {
-            topic_name: older.topic_name,
+            topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
         }
     }
