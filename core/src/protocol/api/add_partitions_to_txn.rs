@@ -10,22 +10,19 @@ pub fn serialize_add_partitions_to_txn_request(
     match version {
         0 => ToBytes::serialize(&AddPartitionsToTxnRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&AddPartitionsToTxnRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_add_partitions_to_txn_response<T>(
+pub fn deserialize_add_partitions_to_txn_response(
     version: i32,
-    buf: &mut T,
-) -> AddPartitionsToTxnResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> AddPartitionsToTxnResponse {
     match version {
         0 => AddPartitionsToTxnResponse0::deserialize(buf).into(),
         1 => AddPartitionsToTxnResponse1::deserialize(buf).into(),
-        3 => AddPartitionsToTxnResponse::deserialize(buf),
+        2 => AddPartitionsToTxnResponse::deserialize(buf),
         _ => AddPartitionsToTxnResponse::deserialize(buf),
     }
 }
@@ -147,7 +144,7 @@ impl TryFrom<AddPartitionsToTxnRequestTopics2> for AddPartitionsToTxnRequestTopi
     fn try_from(latest: AddPartitionsToTxnRequestTopics2) -> Result<Self, Self::Error> {
         Ok(AddPartitionsToTxnRequestTopics0 {
             name: latest.name,
-            partitions: latest.partitions.into_iter().collect(),
+            partitions: latest.partitions,
         })
     }
 }
@@ -173,7 +170,7 @@ impl TryFrom<AddPartitionsToTxnRequestTopics2> for AddPartitionsToTxnRequestTopi
     fn try_from(latest: AddPartitionsToTxnRequestTopics2) -> Result<Self, Self::Error> {
         Ok(AddPartitionsToTxnRequestTopics1 {
             name: latest.name,
-            partitions: latest.partitions.into_iter().collect(),
+            partitions: latest.partitions,
         })
     }
 }

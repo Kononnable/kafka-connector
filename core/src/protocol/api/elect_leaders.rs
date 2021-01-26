@@ -10,19 +10,16 @@ pub fn serialize_elect_leaders_request(
     match version {
         0 => ToBytes::serialize(&ElectLeadersRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&ElectLeadersRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_elect_leaders_response<T>(version: i32, buf: &mut T) -> ElectLeadersResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_elect_leaders_response(version: i32, buf: &mut Bytes) -> ElectLeadersResponse {
     match version {
         0 => ElectLeadersResponse0::deserialize(buf).into(),
         1 => ElectLeadersResponse1::deserialize(buf).into(),
-        3 => ElectLeadersResponse::deserialize(buf),
+        2 => ElectLeadersResponse::deserialize(buf),
         _ => ElectLeadersResponse::deserialize(buf),
     }
 }
@@ -150,7 +147,7 @@ impl TryFrom<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPa
     fn try_from(latest: ElectLeadersRequestTopicPartitions2) -> Result<Self, Self::Error> {
         Ok(ElectLeadersRequestTopicPartitions0 {
             topic: latest.topic,
-            partition_id: latest.partition_id.into_iter().collect(),
+            partition_id: latest.partition_id,
         })
     }
 }
@@ -159,7 +156,7 @@ impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest1 {
     type Error = Error;
     fn try_from(latest: ElectLeadersRequest2) -> Result<Self, Self::Error> {
         Ok(ElectLeadersRequest1 {
-            election_type: latest.election_type.map(|val| val),
+            election_type: latest.election_type,
             topic_partitions: latest
                 .topic_partitions
                 .into_iter()
@@ -175,7 +172,7 @@ impl TryFrom<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPa
     fn try_from(latest: ElectLeadersRequestTopicPartitions2) -> Result<Self, Self::Error> {
         Ok(ElectLeadersRequestTopicPartitions1 {
             topic: latest.topic,
-            partition_id: latest.partition_id.into_iter().collect(),
+            partition_id: latest.partition_id,
         })
     }
 }
@@ -225,7 +222,7 @@ impl From<ElectLeadersResponse1> for ElectLeadersResponse2 {
     fn from(older: ElectLeadersResponse1) -> Self {
         ElectLeadersResponse2 {
             throttle_time_ms: older.throttle_time_ms,
-            error_code: older.error_code.map(|val| val),
+            error_code: older.error_code,
             replica_election_results: older
                 .replica_election_results
                 .into_iter()

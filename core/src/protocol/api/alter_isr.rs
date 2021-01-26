@@ -8,17 +8,14 @@ pub fn serialize_alter_isr_request(
     buf: &mut BytesMut,
 ) -> Result<(), Error> {
     match version {
-        1 => ToBytes::serialize(&data, buf),
+        0 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_alter_isr_response<T>(version: i32, buf: &mut T) -> AlterIsrResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_alter_isr_response(version: i32, buf: &mut Bytes) -> AlterIsrResponse {
     match version {
-        1 => AlterIsrResponse::deserialize(buf),
+        0 => AlterIsrResponse::deserialize(buf),
         _ => AlterIsrResponse::deserialize(buf),
     }
 }

@@ -8,20 +8,17 @@ pub fn serialize_write_txn_markers_request(
     buf: &mut BytesMut,
 ) -> Result<(), Error> {
     match version {
-        1 => ToBytes::serialize(&data, buf),
+        0 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_write_txn_markers_response<T>(
+pub fn deserialize_write_txn_markers_response(
     version: i32,
-    buf: &mut T,
-) -> WriteTxnMarkersResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> WriteTxnMarkersResponse {
     match version {
-        1 => WriteTxnMarkersResponse::deserialize(buf),
+        0 => WriteTxnMarkersResponse::deserialize(buf),
         _ => WriteTxnMarkersResponse::deserialize(buf),
     }
 }

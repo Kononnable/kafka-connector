@@ -11,23 +11,20 @@ pub fn serialize_create_partitions_request(
         0 => ToBytes::serialize(&CreatePartitionsRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&CreatePartitionsRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&CreatePartitionsRequest2::try_from(data)?, buf),
-        4 => ToBytes::serialize(&data, buf),
+        3 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_create_partitions_response<T>(
+pub fn deserialize_create_partitions_response(
     version: i32,
-    buf: &mut T,
-) -> CreatePartitionsResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> CreatePartitionsResponse {
     match version {
         0 => CreatePartitionsResponse0::deserialize(buf).into(),
         1 => CreatePartitionsResponse1::deserialize(buf).into(),
         2 => CreatePartitionsResponse2::deserialize(buf).into(),
-        4 => CreatePartitionsResponse::deserialize(buf),
+        3 => CreatePartitionsResponse::deserialize(buf),
         _ => CreatePartitionsResponse::deserialize(buf),
     }
 }
@@ -196,7 +193,7 @@ impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopicsAssignments3) -> Result<Self, Self::Error> {
         Ok(CreatePartitionsRequestTopicsAssignments0 {
-            broker_ids: latest.broker_ids.into_iter().collect(),
+            broker_ids: latest.broker_ids,
         })
     }
 }
@@ -237,7 +234,7 @@ impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopicsAssignments3) -> Result<Self, Self::Error> {
         Ok(CreatePartitionsRequestTopicsAssignments1 {
-            broker_ids: latest.broker_ids.into_iter().collect(),
+            broker_ids: latest.broker_ids,
         })
     }
 }
@@ -278,7 +275,7 @@ impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopicsAssignments3) -> Result<Self, Self::Error> {
         Ok(CreatePartitionsRequestTopicsAssignments2 {
-            broker_ids: latest.broker_ids.into_iter().collect(),
+            broker_ids: latest.broker_ids,
         })
     }
 }

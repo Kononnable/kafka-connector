@@ -9,21 +9,18 @@ pub fn serialize_alter_replica_log_dirs_request(
 ) -> Result<(), Error> {
     match version {
         0 => ToBytes::serialize(&AlterReplicaLogDirsRequest0::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
+        1 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_alter_replica_log_dirs_response<T>(
+pub fn deserialize_alter_replica_log_dirs_response(
     version: i32,
-    buf: &mut T,
-) -> AlterReplicaLogDirsResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> AlterReplicaLogDirsResponse {
     match version {
         0 => AlterReplicaLogDirsResponse0::deserialize(buf).into(),
-        2 => AlterReplicaLogDirsResponse::deserialize(buf),
+        1 => AlterReplicaLogDirsResponse::deserialize(buf),
         _ => AlterReplicaLogDirsResponse::deserialize(buf),
     }
 }
@@ -130,7 +127,7 @@ impl TryFrom<AlterReplicaLogDirsRequestDirsTopics1> for AlterReplicaLogDirsReque
     fn try_from(latest: AlterReplicaLogDirsRequestDirsTopics1) -> Result<Self, Self::Error> {
         Ok(AlterReplicaLogDirsRequestDirsTopics0 {
             name: latest.name,
-            partitions: latest.partitions.into_iter().collect(),
+            partitions: latest.partitions,
         })
     }
 }

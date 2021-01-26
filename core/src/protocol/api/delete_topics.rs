@@ -13,22 +13,19 @@ pub fn serialize_delete_topics_request(
         2 => ToBytes::serialize(&DeleteTopicsRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&DeleteTopicsRequest3::try_from(data)?, buf),
         4 => ToBytes::serialize(&DeleteTopicsRequest4::try_from(data)?, buf),
-        6 => ToBytes::serialize(&data, buf),
+        5 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_delete_topics_response<T>(version: i32, buf: &mut T) -> DeleteTopicsResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_delete_topics_response(version: i32, buf: &mut Bytes) -> DeleteTopicsResponse {
     match version {
         0 => DeleteTopicsResponse0::deserialize(buf).into(),
         1 => DeleteTopicsResponse1::deserialize(buf).into(),
         2 => DeleteTopicsResponse2::deserialize(buf).into(),
         3 => DeleteTopicsResponse3::deserialize(buf).into(),
         4 => DeleteTopicsResponse4::deserialize(buf).into(),
-        6 => DeleteTopicsResponse::deserialize(buf),
+        5 => DeleteTopicsResponse::deserialize(buf),
         _ => DeleteTopicsResponse::deserialize(buf),
     }
 }
@@ -185,7 +182,7 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest4 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
         Ok(DeleteTopicsRequest4 {
-            topic_names: latest.topic_names.into_iter().collect(),
+            topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
         })
     }
@@ -213,7 +210,7 @@ impl From<DeleteTopicsResponseResponses0> for DeleteTopicsResponseResponses5 {
 impl From<DeleteTopicsResponse1> for DeleteTopicsResponse5 {
     fn from(older: DeleteTopicsResponse1) -> Self {
         DeleteTopicsResponse5 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -232,7 +229,7 @@ impl From<DeleteTopicsResponseResponses1> for DeleteTopicsResponseResponses5 {
 impl From<DeleteTopicsResponse2> for DeleteTopicsResponse5 {
     fn from(older: DeleteTopicsResponse2) -> Self {
         DeleteTopicsResponse5 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -251,7 +248,7 @@ impl From<DeleteTopicsResponseResponses2> for DeleteTopicsResponseResponses5 {
 impl From<DeleteTopicsResponse3> for DeleteTopicsResponse5 {
     fn from(older: DeleteTopicsResponse3) -> Self {
         DeleteTopicsResponse5 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -270,7 +267,7 @@ impl From<DeleteTopicsResponseResponses3> for DeleteTopicsResponseResponses5 {
 impl From<DeleteTopicsResponse4> for DeleteTopicsResponse5 {
     fn from(older: DeleteTopicsResponse4) -> Self {
         DeleteTopicsResponse5 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
         }
     }

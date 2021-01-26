@@ -10,19 +10,16 @@ pub fn serialize_delete_acls_request(
     match version {
         0 => ToBytes::serialize(&DeleteAclsRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&DeleteAclsRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_delete_acls_response<T>(version: i32, buf: &mut T) -> DeleteAclsResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_delete_acls_response(version: i32, buf: &mut Bytes) -> DeleteAclsResponse {
     match version {
         0 => DeleteAclsResponse0::deserialize(buf).into(),
         1 => DeleteAclsResponse1::deserialize(buf).into(),
-        3 => DeleteAclsResponse::deserialize(buf),
+        2 => DeleteAclsResponse::deserialize(buf),
         _ => DeleteAclsResponse::deserialize(buf),
     }
 }
@@ -204,7 +201,7 @@ impl TryFrom<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters1 {
         Ok(DeleteAclsRequestFilters1 {
             resource_type_filter: latest.resource_type_filter,
             resource_name_filter: latest.resource_name_filter,
-            pattern_type_filter: latest.pattern_type_filter.map(|val| val),
+            pattern_type_filter: latest.pattern_type_filter,
             principal_filter: latest.principal_filter,
             host_filter: latest.host_filter,
             operation: latest.operation,
@@ -294,7 +291,7 @@ impl From<DeleteAclsResponseFilterResultsMatchingAcls1>
             error_message: older.error_message,
             resource_type: older.resource_type,
             resource_name: older.resource_name,
-            pattern_type: older.pattern_type.map(|val| val),
+            pattern_type: older.pattern_type,
             principal: older.principal,
             host: older.host,
             operation: older.operation,

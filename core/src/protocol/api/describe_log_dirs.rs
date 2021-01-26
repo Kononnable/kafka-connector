@@ -10,22 +10,19 @@ pub fn serialize_describe_log_dirs_request(
     match version {
         0 => ToBytes::serialize(&DescribeLogDirsRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&DescribeLogDirsRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_describe_log_dirs_response<T>(
+pub fn deserialize_describe_log_dirs_response(
     version: i32,
-    buf: &mut T,
-) -> DescribeLogDirsResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> DescribeLogDirsResponse {
     match version {
         0 => DescribeLogDirsResponse0::deserialize(buf).into(),
         1 => DescribeLogDirsResponse1::deserialize(buf).into(),
-        3 => DescribeLogDirsResponse::deserialize(buf),
+        2 => DescribeLogDirsResponse::deserialize(buf),
         _ => DescribeLogDirsResponse::deserialize(buf),
     }
 }
@@ -162,7 +159,7 @@ impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics0 {
     fn try_from(latest: DescribeLogDirsRequestTopics2) -> Result<Self, Self::Error> {
         Ok(DescribeLogDirsRequestTopics0 {
             topic: latest.topic,
-            partition_index: latest.partition_index.into_iter().collect(),
+            partition_index: latest.partition_index,
         })
     }
 }
@@ -185,7 +182,7 @@ impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics1 {
     fn try_from(latest: DescribeLogDirsRequestTopics2) -> Result<Self, Self::Error> {
         Ok(DescribeLogDirsRequestTopics1 {
             topic: latest.topic,
-            partition_index: latest.partition_index.into_iter().collect(),
+            partition_index: latest.partition_index,
         })
     }
 }

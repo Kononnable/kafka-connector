@@ -10,19 +10,16 @@ pub fn serialize_end_txn_request(
     match version {
         0 => ToBytes::serialize(&EndTxnRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&EndTxnRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_end_txn_response<T>(version: i32, buf: &mut T) -> EndTxnResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_end_txn_response(version: i32, buf: &mut Bytes) -> EndTxnResponse {
     match version {
         0 => EndTxnResponse0::deserialize(buf).into(),
         1 => EndTxnResponse1::deserialize(buf).into(),
-        3 => EndTxnResponse::deserialize(buf),
+        2 => EndTxnResponse::deserialize(buf),
         _ => EndTxnResponse::deserialize(buf),
     }
 }

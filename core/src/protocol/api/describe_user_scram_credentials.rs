@@ -8,20 +8,17 @@ pub fn serialize_describe_user_scram_credentials_request(
     buf: &mut BytesMut,
 ) -> Result<(), Error> {
     match version {
-        1 => ToBytes::serialize(&data, buf),
+        0 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_describe_user_scram_credentials_response<T>(
+pub fn deserialize_describe_user_scram_credentials_response(
     version: i32,
-    buf: &mut T,
-) -> DescribeUserScramCredentialsResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> DescribeUserScramCredentialsResponse {
     match version {
-        1 => DescribeUserScramCredentialsResponse::deserialize(buf),
+        0 => DescribeUserScramCredentialsResponse::deserialize(buf),
         _ => DescribeUserScramCredentialsResponse::deserialize(buf),
     }
 }

@@ -14,15 +14,12 @@ pub fn serialize_create_topics_request(
         3 => ToBytes::serialize(&CreateTopicsRequest3::try_from(data)?, buf),
         4 => ToBytes::serialize(&CreateTopicsRequest4::try_from(data)?, buf),
         5 => ToBytes::serialize(&CreateTopicsRequest5::try_from(data)?, buf),
-        7 => ToBytes::serialize(&data, buf),
+        6 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_create_topics_response<T>(version: i32, buf: &mut T) -> CreateTopicsResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_create_topics_response(version: i32, buf: &mut Bytes) -> CreateTopicsResponse {
     match version {
         0 => CreateTopicsResponse0::deserialize(buf).into(),
         1 => CreateTopicsResponse1::deserialize(buf).into(),
@@ -30,7 +27,7 @@ where
         3 => CreateTopicsResponse3::deserialize(buf).into(),
         4 => CreateTopicsResponse4::deserialize(buf).into(),
         5 => CreateTopicsResponse5::deserialize(buf).into(),
-        7 => CreateTopicsResponse::deserialize(buf),
+        6 => CreateTopicsResponse::deserialize(buf),
         _ => CreateTopicsResponse::deserialize(buf),
     }
 }
@@ -389,7 +386,7 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsAssignments0 {
             partition_index: latest.partition_index,
-            broker_ids: latest.broker_ids.into_iter().collect(),
+            broker_ids: latest.broker_ids,
         })
     }
 }
@@ -414,7 +411,7 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest1 {
                 .map(|el| el.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
-            validate_only: latest.validate_only.map(|val| val),
+            validate_only: latest.validate_only,
         })
     }
 }
@@ -445,7 +442,7 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsAssignments1 {
             partition_index: latest.partition_index,
-            broker_ids: latest.broker_ids.into_iter().collect(),
+            broker_ids: latest.broker_ids,
         })
     }
 }
@@ -470,7 +467,7 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest2 {
                 .map(|el| el.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
-            validate_only: latest.validate_only.map(|val| val),
+            validate_only: latest.validate_only,
         })
     }
 }
@@ -501,7 +498,7 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsAssignments2 {
             partition_index: latest.partition_index,
-            broker_ids: latest.broker_ids.into_iter().collect(),
+            broker_ids: latest.broker_ids,
         })
     }
 }
@@ -526,7 +523,7 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest3 {
                 .map(|el| el.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
-            validate_only: latest.validate_only.map(|val| val),
+            validate_only: latest.validate_only,
         })
     }
 }
@@ -557,7 +554,7 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsAssignments3 {
             partition_index: latest.partition_index,
-            broker_ids: latest.broker_ids.into_iter().collect(),
+            broker_ids: latest.broker_ids,
         })
     }
 }
@@ -582,7 +579,7 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest4 {
                 .map(|el| el.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
-            validate_only: latest.validate_only.map(|val| val),
+            validate_only: latest.validate_only,
         })
     }
 }
@@ -613,7 +610,7 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsAssignments4 {
             partition_index: latest.partition_index,
-            broker_ids: latest.broker_ids.into_iter().collect(),
+            broker_ids: latest.broker_ids,
         })
     }
 }
@@ -638,7 +635,7 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest5 {
                 .map(|el| el.try_into())
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
-            validate_only: latest.validate_only.map(|val| val),
+            validate_only: latest.validate_only,
         })
     }
 }
@@ -669,7 +666,7 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsAssignments5 {
             partition_index: latest.partition_index,
-            broker_ids: latest.broker_ids.into_iter().collect(),
+            broker_ids: latest.broker_ids,
         })
     }
 }
@@ -726,7 +723,7 @@ impl From<CreateTopicsResponseTopics1> for CreateTopicsResponseTopics6 {
 impl From<CreateTopicsResponse2> for CreateTopicsResponse6 {
     fn from(older: CreateTopicsResponse2) -> Self {
         CreateTopicsResponse6 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -746,7 +743,7 @@ impl From<CreateTopicsResponseTopics2> for CreateTopicsResponseTopics6 {
 impl From<CreateTopicsResponse3> for CreateTopicsResponse6 {
     fn from(older: CreateTopicsResponse3) -> Self {
         CreateTopicsResponse6 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -766,7 +763,7 @@ impl From<CreateTopicsResponseTopics3> for CreateTopicsResponseTopics6 {
 impl From<CreateTopicsResponse4> for CreateTopicsResponse6 {
     fn from(older: CreateTopicsResponse4) -> Self {
         CreateTopicsResponse6 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -786,7 +783,7 @@ impl From<CreateTopicsResponseTopics4> for CreateTopicsResponseTopics6 {
 impl From<CreateTopicsResponse5> for CreateTopicsResponse6 {
     fn from(older: CreateTopicsResponse5) -> Self {
         CreateTopicsResponse6 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -797,9 +794,9 @@ impl From<CreateTopicsResponseTopics5> for CreateTopicsResponseTopics6 {
         CreateTopicsResponseTopics6 {
             name: older.name,
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val),
-            num_partitions: older.num_partitions.map(|val| val),
-            replication_factor: older.replication_factor.map(|val| val),
+            error_message: older.error_message,
+            num_partitions: older.num_partitions,
+            replication_factor: older.replication_factor,
             configs: older
                 .configs
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),

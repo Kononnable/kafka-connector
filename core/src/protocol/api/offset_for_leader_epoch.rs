@@ -11,23 +11,20 @@ pub fn serialize_offset_for_leader_epoch_request(
         0 => ToBytes::serialize(&OffsetForLeaderEpochRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&OffsetForLeaderEpochRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&OffsetForLeaderEpochRequest2::try_from(data)?, buf),
-        4 => ToBytes::serialize(&data, buf),
+        3 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_offset_for_leader_epoch_response<T>(
+pub fn deserialize_offset_for_leader_epoch_response(
     version: i32,
-    buf: &mut T,
-) -> OffsetForLeaderEpochResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> OffsetForLeaderEpochResponse {
     match version {
         0 => OffsetForLeaderEpochResponse0::deserialize(buf).into(),
         1 => OffsetForLeaderEpochResponse1::deserialize(buf).into(),
         2 => OffsetForLeaderEpochResponse2::deserialize(buf).into(),
-        4 => OffsetForLeaderEpochResponse::deserialize(buf),
+        3 => OffsetForLeaderEpochResponse::deserialize(buf),
         _ => OffsetForLeaderEpochResponse::deserialize(buf),
     }
 }
@@ -327,7 +324,7 @@ impl TryFrom<OffsetForLeaderEpochRequestTopicsPartitions3>
     fn try_from(latest: OffsetForLeaderEpochRequestTopicsPartitions3) -> Result<Self, Self::Error> {
         Ok(OffsetForLeaderEpochRequestTopicsPartitions2 {
             partition: latest.partition,
-            current_leader_epoch: latest.current_leader_epoch.map(|val| val),
+            current_leader_epoch: latest.current_leader_epoch,
             leader_epoch: latest.leader_epoch,
         })
     }
@@ -389,7 +386,7 @@ impl From<OffsetForLeaderEpochResponseTopicsPartitions1>
         OffsetForLeaderEpochResponseTopicsPartitions3 {
             error_code: older.error_code,
             partition: older.partition,
-            leader_epoch: older.leader_epoch.map(|val| val),
+            leader_epoch: older.leader_epoch,
             end_offset: older.end_offset,
         }
     }
@@ -398,7 +395,7 @@ impl From<OffsetForLeaderEpochResponseTopicsPartitions1>
 impl From<OffsetForLeaderEpochResponse2> for OffsetForLeaderEpochResponse3 {
     fn from(older: OffsetForLeaderEpochResponse2) -> Self {
         OffsetForLeaderEpochResponse3 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -420,7 +417,7 @@ impl From<OffsetForLeaderEpochResponseTopicsPartitions2>
         OffsetForLeaderEpochResponseTopicsPartitions3 {
             error_code: older.error_code,
             partition: older.partition,
-            leader_epoch: older.leader_epoch.map(|val| val),
+            leader_epoch: older.leader_epoch,
             end_offset: older.end_offset,
         }
     }

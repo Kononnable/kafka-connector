@@ -10,22 +10,19 @@ pub fn serialize_create_delegation_token_request(
     match version {
         0 => ToBytes::serialize(&CreateDelegationTokenRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&CreateDelegationTokenRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_create_delegation_token_response<T>(
+pub fn deserialize_create_delegation_token_response(
     version: i32,
-    buf: &mut T,
-) -> CreateDelegationTokenResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> CreateDelegationTokenResponse {
     match version {
         0 => CreateDelegationTokenResponse0::deserialize(buf).into(),
         1 => CreateDelegationTokenResponse1::deserialize(buf).into(),
-        3 => CreateDelegationTokenResponse::deserialize(buf),
+        2 => CreateDelegationTokenResponse::deserialize(buf),
         _ => CreateDelegationTokenResponse::deserialize(buf),
     }
 }
@@ -75,7 +72,7 @@ pub struct CreateDelegationTokenResponse0 {
     pub expiry_timestamp_ms: Int64,
     pub max_timestamp_ms: Int64,
     pub token_id: String,
-    pub hmac: Bytes,
+    pub hmac: KafkaBytes,
     pub throttle_time_ms: Int32,
 }
 
@@ -88,7 +85,7 @@ pub struct CreateDelegationTokenResponse1 {
     pub expiry_timestamp_ms: Int64,
     pub max_timestamp_ms: Int64,
     pub token_id: String,
-    pub hmac: Bytes,
+    pub hmac: KafkaBytes,
     pub throttle_time_ms: Int32,
 }
 
@@ -163,7 +160,7 @@ impl From<CreateDelegationTokenResponse0> for CreateDelegationTokenResponse2 {
             expiry_timestamp_ms: older.expiry_timestamp_ms,
             max_timestamp_ms: older.max_timestamp_ms,
             token_id: older.token_id,
-            hmac: older.hmac,
+            hmac: older.hmac.into(),
             throttle_time_ms: older.throttle_time_ms,
         }
     }
@@ -179,7 +176,7 @@ impl From<CreateDelegationTokenResponse1> for CreateDelegationTokenResponse2 {
             expiry_timestamp_ms: older.expiry_timestamp_ms,
             max_timestamp_ms: older.max_timestamp_ms,
             token_id: older.token_id,
-            hmac: older.hmac,
+            hmac: older.hmac.into(),
             throttle_time_ms: older.throttle_time_ms,
         }
     }

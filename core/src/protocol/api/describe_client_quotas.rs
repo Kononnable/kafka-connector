@@ -8,20 +8,17 @@ pub fn serialize_describe_client_quotas_request(
     buf: &mut BytesMut,
 ) -> Result<(), Error> {
     match version {
-        1 => ToBytes::serialize(&data, buf),
+        0 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_describe_client_quotas_response<T>(
+pub fn deserialize_describe_client_quotas_response(
     version: i32,
-    buf: &mut T,
-) -> DescribeClientQuotasResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> DescribeClientQuotasResponse {
     match version {
-        1 => DescribeClientQuotasResponse::deserialize(buf),
+        0 => DescribeClientQuotasResponse::deserialize(buf),
         _ => DescribeClientQuotasResponse::deserialize(buf),
     }
 }

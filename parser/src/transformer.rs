@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    model::{ApiCall, CallType, FieldData, FieldTypeWithPayload},
+    model::{ApiCall, CallType, FieldData, FieldType, FieldTypeWithPayload},
     utils::to_upper_case,
 };
 
@@ -100,7 +100,8 @@ fn parse_vec(
                     name: field.name,
                     ty: format!("{:?}", ty),
                     is_vec: false,
-                    is_simple_type: true,
+                    is_simple_type: FieldType::is_simple_type(&ty),
+                    is_easily_convertable: FieldType::is_easily_convertable(&ty),
                     is_optional: false,
                 });
             }
@@ -109,7 +110,8 @@ fn parse_vec(
                     name: field.name,
                     ty: format!("Vec<{:?}>", ty),
                     is_vec: true,
-                    is_simple_type: true,
+                    is_simple_type: FieldType::is_simple_type(&ty),
+                    is_easily_convertable: FieldType::is_easily_convertable(&ty),
                     is_optional: false,
                 });
             }
@@ -127,6 +129,7 @@ fn parse_vec(
                     ty: format!("Vec<{}{}>", struct_name, api_version),
                     is_vec: true,
                     is_simple_type: false,
+                    is_easily_convertable: false,
                     is_optional: false,
                 });
             }
@@ -154,5 +157,6 @@ pub struct StructField<'a> {
     pub ty: String,
     pub is_vec: bool,
     pub is_simple_type: bool,
+    pub is_easily_convertable: bool,
     pub is_optional: bool,
 }

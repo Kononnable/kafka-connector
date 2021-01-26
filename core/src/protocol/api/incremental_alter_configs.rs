@@ -9,21 +9,18 @@ pub fn serialize_incremental_alter_configs_request(
 ) -> Result<(), Error> {
     match version {
         0 => ToBytes::serialize(&IncrementalAlterConfigsRequest0::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
+        1 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_incremental_alter_configs_response<T>(
+pub fn deserialize_incremental_alter_configs_response(
     version: i32,
-    buf: &mut T,
-) -> IncrementalAlterConfigsResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> IncrementalAlterConfigsResponse {
     match version {
         0 => IncrementalAlterConfigsResponse0::deserialize(buf).into(),
-        2 => IncrementalAlterConfigsResponse::deserialize(buf),
+        1 => IncrementalAlterConfigsResponse::deserialize(buf),
         _ => IncrementalAlterConfigsResponse::deserialize(buf),
     }
 }

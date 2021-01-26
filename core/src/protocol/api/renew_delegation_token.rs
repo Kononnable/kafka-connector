@@ -10,35 +10,32 @@ pub fn serialize_renew_delegation_token_request(
     match version {
         0 => ToBytes::serialize(&RenewDelegationTokenRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&RenewDelegationTokenRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_renew_delegation_token_response<T>(
+pub fn deserialize_renew_delegation_token_response(
     version: i32,
-    buf: &mut T,
-) -> RenewDelegationTokenResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> RenewDelegationTokenResponse {
     match version {
         0 => RenewDelegationTokenResponse0::deserialize(buf).into(),
         1 => RenewDelegationTokenResponse1::deserialize(buf).into(),
-        3 => RenewDelegationTokenResponse::deserialize(buf),
+        2 => RenewDelegationTokenResponse::deserialize(buf),
         _ => RenewDelegationTokenResponse::deserialize(buf),
     }
 }
 
 #[derive(Default, ToBytes)]
 pub struct RenewDelegationTokenRequest0 {
-    pub hmac: Bytes,
+    pub hmac: KafkaBytes,
     pub renew_period_ms: Int64,
 }
 
 #[derive(Default, ToBytes)]
 pub struct RenewDelegationTokenRequest1 {
-    pub hmac: Bytes,
+    pub hmac: KafkaBytes,
     pub renew_period_ms: Int64,
 }
 
@@ -73,7 +70,7 @@ impl TryFrom<RenewDelegationTokenRequest2> for RenewDelegationTokenRequest0 {
     type Error = Error;
     fn try_from(latest: RenewDelegationTokenRequest2) -> Result<Self, Self::Error> {
         Ok(RenewDelegationTokenRequest0 {
-            hmac: latest.hmac,
+            hmac: latest.hmac.into(),
             renew_period_ms: latest.renew_period_ms,
         })
     }
@@ -83,7 +80,7 @@ impl TryFrom<RenewDelegationTokenRequest2> for RenewDelegationTokenRequest1 {
     type Error = Error;
     fn try_from(latest: RenewDelegationTokenRequest2) -> Result<Self, Self::Error> {
         Ok(RenewDelegationTokenRequest1 {
-            hmac: latest.hmac,
+            hmac: latest.hmac.into(),
             renew_period_ms: latest.renew_period_ms,
         })
     }

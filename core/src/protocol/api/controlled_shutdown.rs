@@ -11,23 +11,20 @@ pub fn serialize_controlled_shutdown_request(
         0 => ToBytes::serialize(&ControlledShutdownRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&ControlledShutdownRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&ControlledShutdownRequest2::try_from(data)?, buf),
-        4 => ToBytes::serialize(&data, buf),
+        3 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_controlled_shutdown_response<T>(
+pub fn deserialize_controlled_shutdown_response(
     version: i32,
-    buf: &mut T,
-) -> ControlledShutdownResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> ControlledShutdownResponse {
     match version {
         0 => ControlledShutdownResponse0::deserialize(buf).into(),
         1 => ControlledShutdownResponse1::deserialize(buf).into(),
         2 => ControlledShutdownResponse2::deserialize(buf).into(),
-        4 => ControlledShutdownResponse::deserialize(buf),
+        3 => ControlledShutdownResponse::deserialize(buf),
         _ => ControlledShutdownResponse::deserialize(buf),
     }
 }
@@ -139,7 +136,7 @@ impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest2 {
     fn try_from(latest: ControlledShutdownRequest3) -> Result<Self, Self::Error> {
         Ok(ControlledShutdownRequest2 {
             broker_id: latest.broker_id,
-            broker_epoch: latest.broker_epoch.map(|val| val),
+            broker_epoch: latest.broker_epoch,
         })
     }
 }

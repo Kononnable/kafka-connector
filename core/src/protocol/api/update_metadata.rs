@@ -14,15 +14,15 @@ pub fn serialize_update_metadata_request(
         3 => ToBytes::serialize(&UpdateMetadataRequest3::try_from(data)?, buf),
         4 => ToBytes::serialize(&UpdateMetadataRequest4::try_from(data)?, buf),
         5 => ToBytes::serialize(&UpdateMetadataRequest5::try_from(data)?, buf),
-        7 => ToBytes::serialize(&data, buf),
+        6 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_update_metadata_response<T>(version: i32, buf: &mut T) -> UpdateMetadataResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_update_metadata_response(
+    version: i32,
+    buf: &mut Bytes,
+) -> UpdateMetadataResponse {
     match version {
         0 => UpdateMetadataResponse0::deserialize(buf).into(),
         1 => UpdateMetadataResponse1::deserialize(buf).into(),
@@ -30,7 +30,7 @@ where
         3 => UpdateMetadataResponse3::deserialize(buf).into(),
         4 => UpdateMetadataResponse4::deserialize(buf).into(),
         5 => UpdateMetadataResponse5::deserialize(buf).into(),
-        7 => UpdateMetadataResponse::deserialize(buf),
+        6 => UpdateMetadataResponse::deserialize(buf),
         _ => UpdateMetadataResponse::deserialize(buf),
     }
 }
@@ -645,7 +645,7 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest5 {
         Ok(UpdateMetadataRequest5 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            broker_epoch: latest.broker_epoch.map(|val| val),
+            broker_epoch: latest.broker_epoch,
             topic_states: latest
                 .topic_states
                 .map(|val| {
@@ -689,10 +689,10 @@ impl TryFrom<UpdateMetadataRequestTopicStatesPartitionStates6>
             controller_epoch: latest.controller_epoch,
             leader: latest.leader,
             leader_epoch: latest.leader_epoch,
-            isr: latest.isr.into_iter().collect(),
+            isr: latest.isr,
             zk_version: latest.zk_version,
-            replicas: latest.replicas.into_iter().collect(),
-            offline_replicas: latest.offline_replicas.into_iter().collect(),
+            replicas: latest.replicas,
+            offline_replicas: latest.offline_replicas,
         })
     }
 }

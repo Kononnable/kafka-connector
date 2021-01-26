@@ -12,21 +12,21 @@ pub fn serialize_init_producer_id_request(
         1 => ToBytes::serialize(&InitProducerIdRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&InitProducerIdRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&InitProducerIdRequest3::try_from(data)?, buf),
-        5 => ToBytes::serialize(&data, buf),
+        4 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_init_producer_id_response<T>(version: i32, buf: &mut T) -> InitProducerIdResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_init_producer_id_response(
+    version: i32,
+    buf: &mut Bytes,
+) -> InitProducerIdResponse {
     match version {
         0 => InitProducerIdResponse0::deserialize(buf).into(),
         1 => InitProducerIdResponse1::deserialize(buf).into(),
         2 => InitProducerIdResponse2::deserialize(buf).into(),
         3 => InitProducerIdResponse3::deserialize(buf).into(),
-        5 => InitProducerIdResponse::deserialize(buf),
+        4 => InitProducerIdResponse::deserialize(buf),
         _ => InitProducerIdResponse::deserialize(buf),
     }
 }
@@ -183,8 +183,8 @@ impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest3 {
         Ok(InitProducerIdRequest3 {
             transactional_id: latest.transactional_id,
             transaction_timeout_ms: latest.transaction_timeout_ms,
-            producer_id: latest.producer_id.map(|val| val),
-            producer_epoch: latest.producer_epoch.map(|val| val),
+            producer_id: latest.producer_id,
+            producer_epoch: latest.producer_epoch,
         })
     }
 }

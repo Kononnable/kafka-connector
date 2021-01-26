@@ -10,22 +10,19 @@ pub fn serialize_add_offsets_to_txn_request(
     match version {
         0 => ToBytes::serialize(&AddOffsetsToTxnRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&AddOffsetsToTxnRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_add_offsets_to_txn_response<T>(
+pub fn deserialize_add_offsets_to_txn_response(
     version: i32,
-    buf: &mut T,
-) -> AddOffsetsToTxnResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> AddOffsetsToTxnResponse {
     match version {
         0 => AddOffsetsToTxnResponse0::deserialize(buf).into(),
         1 => AddOffsetsToTxnResponse1::deserialize(buf).into(),
-        3 => AddOffsetsToTxnResponse::deserialize(buf),
+        2 => AddOffsetsToTxnResponse::deserialize(buf),
         _ => AddOffsetsToTxnResponse::deserialize(buf),
     }
 }

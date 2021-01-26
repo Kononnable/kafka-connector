@@ -12,21 +12,18 @@ pub fn serialize_leader_and_isr_request(
         1 => ToBytes::serialize(&LeaderAndIsrRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&LeaderAndIsrRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&LeaderAndIsrRequest3::try_from(data)?, buf),
-        5 => ToBytes::serialize(&data, buf),
+        4 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_leader_and_isr_response<T>(version: i32, buf: &mut T) -> LeaderAndIsrResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_leader_and_isr_response(version: i32, buf: &mut Bytes) -> LeaderAndIsrResponse {
     match version {
         0 => LeaderAndIsrResponse0::deserialize(buf).into(),
         1 => LeaderAndIsrResponse1::deserialize(buf).into(),
         2 => LeaderAndIsrResponse2::deserialize(buf).into(),
         3 => LeaderAndIsrResponse3::deserialize(buf).into(),
-        5 => LeaderAndIsrResponse::deserialize(buf),
+        4 => LeaderAndIsrResponse::deserialize(buf),
         _ => LeaderAndIsrResponse::deserialize(buf),
     }
 }
@@ -345,7 +342,7 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest2 {
         Ok(LeaderAndIsrRequest2 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            broker_epoch: latest.broker_epoch.map(|val| val),
+            broker_epoch: latest.broker_epoch,
             topic_states: latest
                 .topic_states
                 .map(|val| {
@@ -403,9 +400,9 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
             controller_epoch: latest.controller_epoch,
             leader: latest.leader,
             leader_epoch: latest.leader_epoch,
-            isr: latest.isr.into_iter().collect(),
+            isr: latest.isr,
             zk_version: latest.zk_version,
-            replicas: latest.replicas.into_iter().collect(),
+            replicas: latest.replicas,
             is_new: latest.is_new,
         })
     }
@@ -428,7 +425,7 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest3 {
         Ok(LeaderAndIsrRequest3 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            broker_epoch: latest.broker_epoch.map(|val| val),
+            broker_epoch: latest.broker_epoch,
             topic_states: latest
                 .topic_states
                 .map(|val| {
@@ -472,13 +469,11 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
             controller_epoch: latest.controller_epoch,
             leader: latest.leader,
             leader_epoch: latest.leader_epoch,
-            isr: latest.isr.into_iter().collect(),
+            isr: latest.isr,
             zk_version: latest.zk_version,
-            replicas: latest.replicas.into_iter().collect(),
-            adding_replicas: latest.adding_replicas.map(|val| val.into_iter().collect()),
-            removing_replicas: latest
-                .removing_replicas
-                .map(|val| val.into_iter().collect()),
+            replicas: latest.replicas,
+            adding_replicas: latest.adding_replicas,
+            removing_replicas: latest.removing_replicas,
             is_new: latest.is_new,
         })
     }

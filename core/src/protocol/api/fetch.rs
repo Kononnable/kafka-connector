@@ -20,15 +20,12 @@ pub fn serialize_fetch_request(
         9 => ToBytes::serialize(&FetchRequest9::try_from(data)?, buf),
         10 => ToBytes::serialize(&FetchRequest10::try_from(data)?, buf),
         11 => ToBytes::serialize(&FetchRequest11::try_from(data)?, buf),
-        13 => ToBytes::serialize(&data, buf),
+        12 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_fetch_response<T>(version: i32, buf: &mut T) -> FetchResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_fetch_response(version: i32, buf: &mut Bytes) -> FetchResponse {
     match version {
         0 => FetchResponse0::deserialize(buf).into(),
         1 => FetchResponse1::deserialize(buf).into(),
@@ -42,7 +39,7 @@ where
         9 => FetchResponse9::deserialize(buf).into(),
         10 => FetchResponse10::deserialize(buf).into(),
         11 => FetchResponse11::deserialize(buf).into(),
-        13 => FetchResponse::deserialize(buf),
+        12 => FetchResponse::deserialize(buf),
         _ => FetchResponse::deserialize(buf),
     }
 }
@@ -1048,7 +1045,7 @@ impl TryFrom<FetchRequest12> for FetchRequest3 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
-            max_bytes: latest.max_bytes.map(|val| val),
+            max_bytes: latest.max_bytes,
             topics: latest
                 .topics
                 .into_iter()
@@ -1127,8 +1124,8 @@ impl TryFrom<FetchRequest12> for FetchRequest4 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
-            max_bytes: latest.max_bytes.map(|val| val),
-            isolation_level: latest.isolation_level.map(|val| val),
+            max_bytes: latest.max_bytes,
+            isolation_level: latest.isolation_level,
             topics: latest
                 .topics
                 .into_iter()
@@ -1207,8 +1204,8 @@ impl TryFrom<FetchRequest12> for FetchRequest5 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
-            max_bytes: latest.max_bytes.map(|val| val),
-            isolation_level: latest.isolation_level.map(|val| val),
+            max_bytes: latest.max_bytes,
+            isolation_level: latest.isolation_level,
             topics: latest
                 .topics
                 .into_iter()
@@ -1252,7 +1249,7 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions5 {
         Ok(FetchRequestTopicsPartitions5 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
-            log_start_offset: latest.log_start_offset.map(|val| val),
+            log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
         })
     }
@@ -1281,8 +1278,8 @@ impl TryFrom<FetchRequest12> for FetchRequest6 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
-            max_bytes: latest.max_bytes.map(|val| val),
-            isolation_level: latest.isolation_level.map(|val| val),
+            max_bytes: latest.max_bytes,
+            isolation_level: latest.isolation_level,
             topics: latest
                 .topics
                 .into_iter()
@@ -1326,7 +1323,7 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions6 {
         Ok(FetchRequestTopicsPartitions6 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
-            log_start_offset: latest.log_start_offset.map(|val| val),
+            log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
         })
     }
@@ -1342,10 +1339,10 @@ impl TryFrom<FetchRequest12> for FetchRequest7 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
-            max_bytes: latest.max_bytes.map(|val| val),
-            isolation_level: latest.isolation_level.map(|val| val),
-            session_id: latest.session_id.map(|val| val),
-            session_epoch: latest.session_epoch.map(|val| val),
+            max_bytes: latest.max_bytes,
+            isolation_level: latest.isolation_level,
+            session_id: latest.session_id,
+            session_epoch: latest.session_epoch,
             topics: latest
                 .topics
                 .into_iter()
@@ -1397,7 +1394,7 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions7 {
         Ok(FetchRequestTopicsPartitions7 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
-            log_start_offset: latest.log_start_offset.map(|val| val),
+            log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
         })
     }
@@ -1408,7 +1405,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
         Ok(FetchRequestForgottenTopicsData7 {
             topic: latest.topic,
-            partitions: latest.partitions.into_iter().collect(),
+            partitions: latest.partitions,
         })
     }
 }
@@ -1423,10 +1420,10 @@ impl TryFrom<FetchRequest12> for FetchRequest8 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
-            max_bytes: latest.max_bytes.map(|val| val),
-            isolation_level: latest.isolation_level.map(|val| val),
-            session_id: latest.session_id.map(|val| val),
-            session_epoch: latest.session_epoch.map(|val| val),
+            max_bytes: latest.max_bytes,
+            isolation_level: latest.isolation_level,
+            session_id: latest.session_id,
+            session_epoch: latest.session_epoch,
             topics: latest
                 .topics
                 .into_iter()
@@ -1478,7 +1475,7 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions8 {
         Ok(FetchRequestTopicsPartitions8 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
-            log_start_offset: latest.log_start_offset.map(|val| val),
+            log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
         })
     }
@@ -1489,7 +1486,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
         Ok(FetchRequestForgottenTopicsData8 {
             topic: latest.topic,
-            partitions: latest.partitions.into_iter().collect(),
+            partitions: latest.partitions,
         })
     }
 }
@@ -1504,10 +1501,10 @@ impl TryFrom<FetchRequest12> for FetchRequest9 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
-            max_bytes: latest.max_bytes.map(|val| val),
-            isolation_level: latest.isolation_level.map(|val| val),
-            session_id: latest.session_id.map(|val| val),
-            session_epoch: latest.session_epoch.map(|val| val),
+            max_bytes: latest.max_bytes,
+            isolation_level: latest.isolation_level,
+            session_id: latest.session_id,
+            session_epoch: latest.session_epoch,
             topics: latest
                 .topics
                 .into_iter()
@@ -1551,9 +1548,9 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions9 {
         }
         Ok(FetchRequestTopicsPartitions9 {
             partition: latest.partition,
-            current_leader_epoch: latest.current_leader_epoch.map(|val| val),
+            current_leader_epoch: latest.current_leader_epoch,
             fetch_offset: latest.fetch_offset,
-            log_start_offset: latest.log_start_offset.map(|val| val),
+            log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
         })
     }
@@ -1564,7 +1561,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
         Ok(FetchRequestForgottenTopicsData9 {
             topic: latest.topic,
-            partitions: latest.partitions.into_iter().collect(),
+            partitions: latest.partitions,
         })
     }
 }
@@ -1579,10 +1576,10 @@ impl TryFrom<FetchRequest12> for FetchRequest10 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
-            max_bytes: latest.max_bytes.map(|val| val),
-            isolation_level: latest.isolation_level.map(|val| val),
-            session_id: latest.session_id.map(|val| val),
-            session_epoch: latest.session_epoch.map(|val| val),
+            max_bytes: latest.max_bytes,
+            isolation_level: latest.isolation_level,
+            session_id: latest.session_id,
+            session_epoch: latest.session_epoch,
             topics: latest
                 .topics
                 .into_iter()
@@ -1626,9 +1623,9 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions10 
         }
         Ok(FetchRequestTopicsPartitions10 {
             partition: latest.partition,
-            current_leader_epoch: latest.current_leader_epoch.map(|val| val),
+            current_leader_epoch: latest.current_leader_epoch,
             fetch_offset: latest.fetch_offset,
-            log_start_offset: latest.log_start_offset.map(|val| val),
+            log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
         })
     }
@@ -1639,7 +1636,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
         Ok(FetchRequestForgottenTopicsData10 {
             topic: latest.topic,
-            partitions: latest.partitions.into_iter().collect(),
+            partitions: latest.partitions,
         })
     }
 }
@@ -1651,10 +1648,10 @@ impl TryFrom<FetchRequest12> for FetchRequest11 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
-            max_bytes: latest.max_bytes.map(|val| val),
-            isolation_level: latest.isolation_level.map(|val| val),
-            session_id: latest.session_id.map(|val| val),
-            session_epoch: latest.session_epoch.map(|val| val),
+            max_bytes: latest.max_bytes,
+            isolation_level: latest.isolation_level,
+            session_id: latest.session_id,
+            session_epoch: latest.session_epoch,
             topics: latest
                 .topics
                 .into_iter()
@@ -1699,9 +1696,9 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions11 
         }
         Ok(FetchRequestTopicsPartitions11 {
             partition: latest.partition,
-            current_leader_epoch: latest.current_leader_epoch.map(|val| val),
+            current_leader_epoch: latest.current_leader_epoch,
             fetch_offset: latest.fetch_offset,
-            log_start_offset: latest.log_start_offset.map(|val| val),
+            log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
         })
     }
@@ -1712,7 +1709,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
         Ok(FetchRequestForgottenTopicsData11 {
             topic: latest.topic,
-            partitions: latest.partitions.into_iter().collect(),
+            partitions: latest.partitions,
         })
     }
 }
@@ -1756,7 +1753,7 @@ impl From<FetchResponseResponsesPartitionResponses0>
 impl From<FetchResponse1> for FetchResponse12 {
     fn from(older: FetchResponse1) -> Self {
         FetchResponse12 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
             ..FetchResponse12::default()
         }
@@ -1793,7 +1790,7 @@ impl From<FetchResponseResponsesPartitionResponses1>
 impl From<FetchResponse2> for FetchResponse12 {
     fn from(older: FetchResponse2) -> Self {
         FetchResponse12 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
             ..FetchResponse12::default()
         }
@@ -1830,7 +1827,7 @@ impl From<FetchResponseResponsesPartitionResponses2>
 impl From<FetchResponse3> for FetchResponse12 {
     fn from(older: FetchResponse3) -> Self {
         FetchResponse12 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
             ..FetchResponse12::default()
         }
@@ -1867,7 +1864,7 @@ impl From<FetchResponseResponsesPartitionResponses3>
 impl From<FetchResponse4> for FetchResponse12 {
     fn from(older: FetchResponse4) -> Self {
         FetchResponse12 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
             ..FetchResponse12::default()
         }
@@ -1895,7 +1892,7 @@ impl From<FetchResponseResponsesPartitionResponses4>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            last_stable_offset: older.last_stable_offset.map(|val| val),
+            last_stable_offset: older.last_stable_offset,
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
@@ -1919,7 +1916,7 @@ impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions4>
 impl From<FetchResponse5> for FetchResponse12 {
     fn from(older: FetchResponse5) -> Self {
         FetchResponse12 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
             ..FetchResponse12::default()
         }
@@ -1947,8 +1944,8 @@ impl From<FetchResponseResponsesPartitionResponses5>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            last_stable_offset: older.last_stable_offset.map(|val| val),
-            log_start_offset: older.log_start_offset.map(|val| val),
+            last_stable_offset: older.last_stable_offset,
+            log_start_offset: older.log_start_offset,
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
@@ -1972,7 +1969,7 @@ impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions5>
 impl From<FetchResponse6> for FetchResponse12 {
     fn from(older: FetchResponse6) -> Self {
         FetchResponse12 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
             ..FetchResponse12::default()
         }
@@ -2000,8 +1997,8 @@ impl From<FetchResponseResponsesPartitionResponses6>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            last_stable_offset: older.last_stable_offset.map(|val| val),
-            log_start_offset: older.log_start_offset.map(|val| val),
+            last_stable_offset: older.last_stable_offset,
+            log_start_offset: older.log_start_offset,
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
@@ -2025,9 +2022,9 @@ impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions6>
 impl From<FetchResponse7> for FetchResponse12 {
     fn from(older: FetchResponse7) -> Self {
         FetchResponse12 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
-            error_code: older.error_code.map(|val| val),
-            session_id: older.session_id.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
+            error_code: older.error_code,
+            session_id: older.session_id,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -2054,8 +2051,8 @@ impl From<FetchResponseResponsesPartitionResponses7>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            last_stable_offset: older.last_stable_offset.map(|val| val),
-            log_start_offset: older.log_start_offset.map(|val| val),
+            last_stable_offset: older.last_stable_offset,
+            log_start_offset: older.log_start_offset,
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
@@ -2079,9 +2076,9 @@ impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions7>
 impl From<FetchResponse8> for FetchResponse12 {
     fn from(older: FetchResponse8) -> Self {
         FetchResponse12 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
-            error_code: older.error_code.map(|val| val),
-            session_id: older.session_id.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
+            error_code: older.error_code,
+            session_id: older.session_id,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -2108,8 +2105,8 @@ impl From<FetchResponseResponsesPartitionResponses8>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            last_stable_offset: older.last_stable_offset.map(|val| val),
-            log_start_offset: older.log_start_offset.map(|val| val),
+            last_stable_offset: older.last_stable_offset,
+            log_start_offset: older.log_start_offset,
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
@@ -2133,9 +2130,9 @@ impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions8>
 impl From<FetchResponse9> for FetchResponse12 {
     fn from(older: FetchResponse9) -> Self {
         FetchResponse12 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
-            error_code: older.error_code.map(|val| val),
-            session_id: older.session_id.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
+            error_code: older.error_code,
+            session_id: older.session_id,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -2162,8 +2159,8 @@ impl From<FetchResponseResponsesPartitionResponses9>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            last_stable_offset: older.last_stable_offset.map(|val| val),
-            log_start_offset: older.log_start_offset.map(|val| val),
+            last_stable_offset: older.last_stable_offset,
+            log_start_offset: older.log_start_offset,
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
@@ -2187,9 +2184,9 @@ impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions9>
 impl From<FetchResponse10> for FetchResponse12 {
     fn from(older: FetchResponse10) -> Self {
         FetchResponse12 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
-            error_code: older.error_code.map(|val| val),
-            session_id: older.session_id.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
+            error_code: older.error_code,
+            session_id: older.session_id,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -2216,8 +2213,8 @@ impl From<FetchResponseResponsesPartitionResponses10>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            last_stable_offset: older.last_stable_offset.map(|val| val),
-            log_start_offset: older.log_start_offset.map(|val| val),
+            last_stable_offset: older.last_stable_offset,
+            log_start_offset: older.log_start_offset,
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
@@ -2241,9 +2238,9 @@ impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions10>
 impl From<FetchResponse11> for FetchResponse12 {
     fn from(older: FetchResponse11) -> Self {
         FetchResponse12 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
-            error_code: older.error_code.map(|val| val),
-            session_id: older.session_id.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
+            error_code: older.error_code,
+            session_id: older.session_id,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -2270,12 +2267,12 @@ impl From<FetchResponseResponsesPartitionResponses11>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            last_stable_offset: older.last_stable_offset.map(|val| val),
-            log_start_offset: older.log_start_offset.map(|val| val),
+            last_stable_offset: older.last_stable_offset,
+            log_start_offset: older.log_start_offset,
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            preferred_read_replica: older.preferred_read_replica.map(|val| val),
+            preferred_read_replica: older.preferred_read_replica,
             record_set: older.record_set,
         }
     }

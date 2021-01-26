@@ -17,15 +17,12 @@ pub fn serialize_metadata_request(
         6 => ToBytes::serialize(&MetadataRequest6::try_from(data)?, buf),
         7 => ToBytes::serialize(&MetadataRequest7::try_from(data)?, buf),
         8 => ToBytes::serialize(&MetadataRequest8::try_from(data)?, buf),
-        10 => ToBytes::serialize(&data, buf),
+        9 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_metadata_response<T>(version: i32, buf: &mut T) -> MetadataResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_metadata_response(version: i32, buf: &mut Bytes) -> MetadataResponse {
     match version {
         0 => MetadataResponse0::deserialize(buf).into(),
         1 => MetadataResponse1::deserialize(buf).into(),
@@ -36,7 +33,7 @@ where
         6 => MetadataResponse6::deserialize(buf).into(),
         7 => MetadataResponse7::deserialize(buf).into(),
         8 => MetadataResponse8::deserialize(buf).into(),
-        10 => MetadataResponse::deserialize(buf),
+        9 => MetadataResponse::deserialize(buf),
         _ => MetadataResponse::deserialize(buf),
     }
 }
@@ -682,7 +679,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest4 {
                 .into_iter()
                 .map(|el| el.try_into())
                 .collect::<Result<_, Error>>()?,
-            allow_auto_topic_creation: latest.allow_auto_topic_creation.map(|val| val),
+            allow_auto_topic_creation: latest.allow_auto_topic_creation,
         })
     }
 }
@@ -717,7 +714,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest5 {
                 .into_iter()
                 .map(|el| el.try_into())
                 .collect::<Result<_, Error>>()?,
-            allow_auto_topic_creation: latest.allow_auto_topic_creation.map(|val| val),
+            allow_auto_topic_creation: latest.allow_auto_topic_creation,
         })
     }
 }
@@ -752,7 +749,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest6 {
                 .into_iter()
                 .map(|el| el.try_into())
                 .collect::<Result<_, Error>>()?,
-            allow_auto_topic_creation: latest.allow_auto_topic_creation.map(|val| val),
+            allow_auto_topic_creation: latest.allow_auto_topic_creation,
         })
     }
 }
@@ -787,7 +784,7 @@ impl TryFrom<MetadataRequest9> for MetadataRequest7 {
                 .into_iter()
                 .map(|el| el.try_into())
                 .collect::<Result<_, Error>>()?,
-            allow_auto_topic_creation: latest.allow_auto_topic_creation.map(|val| val),
+            allow_auto_topic_creation: latest.allow_auto_topic_creation,
         })
     }
 }
@@ -808,13 +805,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest8 {
                 .into_iter()
                 .map(|el| el.try_into())
                 .collect::<Result<_, Error>>()?,
-            allow_auto_topic_creation: latest.allow_auto_topic_creation.map(|val| val),
-            include_cluster_authorized_operations: latest
-                .include_cluster_authorized_operations
-                .map(|val| val),
-            include_topic_authorized_operations: latest
-                .include_topic_authorized_operations
-                .map(|val| val),
+            allow_auto_topic_creation: latest.allow_auto_topic_creation,
+            include_cluster_authorized_operations: latest.include_cluster_authorized_operations,
+            include_topic_authorized_operations: latest.include_topic_authorized_operations,
         })
     }
 }
@@ -864,8 +857,8 @@ impl From<MetadataResponseTopicsPartitions0> for MetadataResponseTopicsPartition
             error_code: older.error_code,
             partition_index: older.partition_index,
             leader_id: older.leader_id,
-            replica_nodes: older.replica_nodes.into_iter().collect(),
-            isr_nodes: older.isr_nodes.into_iter().collect(),
+            replica_nodes: older.replica_nodes,
+            isr_nodes: older.isr_nodes,
             ..MetadataResponseTopicsPartitions9::default()
         }
     }
@@ -875,7 +868,7 @@ impl From<MetadataResponse1> for MetadataResponse9 {
     fn from(older: MetadataResponse1) -> Self {
         MetadataResponse9 {
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
-            controller_id: older.controller_id.map(|val| val),
+            controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
         }
@@ -898,7 +891,7 @@ impl From<MetadataResponseTopics1> for MetadataResponseTopics9 {
         MetadataResponseTopics9 {
             error_code: older.error_code,
             name: older.name,
-            is_internal: older.is_internal.map(|val| val),
+            is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
         }
@@ -911,8 +904,8 @@ impl From<MetadataResponseTopicsPartitions1> for MetadataResponseTopicsPartition
             error_code: older.error_code,
             partition_index: older.partition_index,
             leader_id: older.leader_id,
-            replica_nodes: older.replica_nodes.into_iter().collect(),
-            isr_nodes: older.isr_nodes.into_iter().collect(),
+            replica_nodes: older.replica_nodes,
+            isr_nodes: older.isr_nodes,
             ..MetadataResponseTopicsPartitions9::default()
         }
     }
@@ -923,7 +916,7 @@ impl From<MetadataResponse2> for MetadataResponse9 {
         MetadataResponse9 {
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
             cluster_id: older.cluster_id.map(|val| val),
-            controller_id: older.controller_id.map(|val| val),
+            controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
         }
@@ -946,7 +939,7 @@ impl From<MetadataResponseTopics2> for MetadataResponseTopics9 {
         MetadataResponseTopics9 {
             error_code: older.error_code,
             name: older.name,
-            is_internal: older.is_internal.map(|val| val),
+            is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
         }
@@ -959,8 +952,8 @@ impl From<MetadataResponseTopicsPartitions2> for MetadataResponseTopicsPartition
             error_code: older.error_code,
             partition_index: older.partition_index,
             leader_id: older.leader_id,
-            replica_nodes: older.replica_nodes.into_iter().collect(),
-            isr_nodes: older.isr_nodes.into_iter().collect(),
+            replica_nodes: older.replica_nodes,
+            isr_nodes: older.isr_nodes,
             ..MetadataResponseTopicsPartitions9::default()
         }
     }
@@ -969,10 +962,10 @@ impl From<MetadataResponseTopicsPartitions2> for MetadataResponseTopicsPartition
 impl From<MetadataResponse3> for MetadataResponse9 {
     fn from(older: MetadataResponse3) -> Self {
         MetadataResponse9 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
             cluster_id: older.cluster_id.map(|val| val),
-            controller_id: older.controller_id.map(|val| val),
+            controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
         }
@@ -995,7 +988,7 @@ impl From<MetadataResponseTopics3> for MetadataResponseTopics9 {
         MetadataResponseTopics9 {
             error_code: older.error_code,
             name: older.name,
-            is_internal: older.is_internal.map(|val| val),
+            is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
         }
@@ -1008,8 +1001,8 @@ impl From<MetadataResponseTopicsPartitions3> for MetadataResponseTopicsPartition
             error_code: older.error_code,
             partition_index: older.partition_index,
             leader_id: older.leader_id,
-            replica_nodes: older.replica_nodes.into_iter().collect(),
-            isr_nodes: older.isr_nodes.into_iter().collect(),
+            replica_nodes: older.replica_nodes,
+            isr_nodes: older.isr_nodes,
             ..MetadataResponseTopicsPartitions9::default()
         }
     }
@@ -1018,10 +1011,10 @@ impl From<MetadataResponseTopicsPartitions3> for MetadataResponseTopicsPartition
 impl From<MetadataResponse4> for MetadataResponse9 {
     fn from(older: MetadataResponse4) -> Self {
         MetadataResponse9 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
             cluster_id: older.cluster_id.map(|val| val),
-            controller_id: older.controller_id.map(|val| val),
+            controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
         }
@@ -1044,7 +1037,7 @@ impl From<MetadataResponseTopics4> for MetadataResponseTopics9 {
         MetadataResponseTopics9 {
             error_code: older.error_code,
             name: older.name,
-            is_internal: older.is_internal.map(|val| val),
+            is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
         }
@@ -1057,8 +1050,8 @@ impl From<MetadataResponseTopicsPartitions4> for MetadataResponseTopicsPartition
             error_code: older.error_code,
             partition_index: older.partition_index,
             leader_id: older.leader_id,
-            replica_nodes: older.replica_nodes.into_iter().collect(),
-            isr_nodes: older.isr_nodes.into_iter().collect(),
+            replica_nodes: older.replica_nodes,
+            isr_nodes: older.isr_nodes,
             ..MetadataResponseTopicsPartitions9::default()
         }
     }
@@ -1067,10 +1060,10 @@ impl From<MetadataResponseTopicsPartitions4> for MetadataResponseTopicsPartition
 impl From<MetadataResponse5> for MetadataResponse9 {
     fn from(older: MetadataResponse5) -> Self {
         MetadataResponse9 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
             cluster_id: older.cluster_id.map(|val| val),
-            controller_id: older.controller_id.map(|val| val),
+            controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
         }
@@ -1093,7 +1086,7 @@ impl From<MetadataResponseTopics5> for MetadataResponseTopics9 {
         MetadataResponseTopics9 {
             error_code: older.error_code,
             name: older.name,
-            is_internal: older.is_internal.map(|val| val),
+            is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
         }
@@ -1106,9 +1099,9 @@ impl From<MetadataResponseTopicsPartitions5> for MetadataResponseTopicsPartition
             error_code: older.error_code,
             partition_index: older.partition_index,
             leader_id: older.leader_id,
-            replica_nodes: older.replica_nodes.into_iter().collect(),
-            isr_nodes: older.isr_nodes.into_iter().collect(),
-            offline_replicas: older.offline_replicas.map(|val| val.into_iter().collect()),
+            replica_nodes: older.replica_nodes,
+            isr_nodes: older.isr_nodes,
+            offline_replicas: older.offline_replicas,
             ..MetadataResponseTopicsPartitions9::default()
         }
     }
@@ -1117,10 +1110,10 @@ impl From<MetadataResponseTopicsPartitions5> for MetadataResponseTopicsPartition
 impl From<MetadataResponse6> for MetadataResponse9 {
     fn from(older: MetadataResponse6) -> Self {
         MetadataResponse9 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
             cluster_id: older.cluster_id.map(|val| val),
-            controller_id: older.controller_id.map(|val| val),
+            controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
         }
@@ -1143,7 +1136,7 @@ impl From<MetadataResponseTopics6> for MetadataResponseTopics9 {
         MetadataResponseTopics9 {
             error_code: older.error_code,
             name: older.name,
-            is_internal: older.is_internal.map(|val| val),
+            is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
         }
@@ -1156,9 +1149,9 @@ impl From<MetadataResponseTopicsPartitions6> for MetadataResponseTopicsPartition
             error_code: older.error_code,
             partition_index: older.partition_index,
             leader_id: older.leader_id,
-            replica_nodes: older.replica_nodes.into_iter().collect(),
-            isr_nodes: older.isr_nodes.into_iter().collect(),
-            offline_replicas: older.offline_replicas.map(|val| val.into_iter().collect()),
+            replica_nodes: older.replica_nodes,
+            isr_nodes: older.isr_nodes,
+            offline_replicas: older.offline_replicas,
             ..MetadataResponseTopicsPartitions9::default()
         }
     }
@@ -1167,10 +1160,10 @@ impl From<MetadataResponseTopicsPartitions6> for MetadataResponseTopicsPartition
 impl From<MetadataResponse7> for MetadataResponse9 {
     fn from(older: MetadataResponse7) -> Self {
         MetadataResponse9 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
             cluster_id: older.cluster_id.map(|val| val),
-            controller_id: older.controller_id.map(|val| val),
+            controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponse9::default()
         }
@@ -1193,7 +1186,7 @@ impl From<MetadataResponseTopics7> for MetadataResponseTopics9 {
         MetadataResponseTopics9 {
             error_code: older.error_code,
             name: older.name,
-            is_internal: older.is_internal.map(|val| val),
+            is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..MetadataResponseTopics9::default()
         }
@@ -1206,10 +1199,10 @@ impl From<MetadataResponseTopicsPartitions7> for MetadataResponseTopicsPartition
             error_code: older.error_code,
             partition_index: older.partition_index,
             leader_id: older.leader_id,
-            leader_epoch: older.leader_epoch.map(|val| val),
-            replica_nodes: older.replica_nodes.into_iter().collect(),
-            isr_nodes: older.isr_nodes.into_iter().collect(),
-            offline_replicas: older.offline_replicas.map(|val| val.into_iter().collect()),
+            leader_epoch: older.leader_epoch,
+            replica_nodes: older.replica_nodes,
+            isr_nodes: older.isr_nodes,
+            offline_replicas: older.offline_replicas,
         }
     }
 }
@@ -1217,12 +1210,12 @@ impl From<MetadataResponseTopicsPartitions7> for MetadataResponseTopicsPartition
 impl From<MetadataResponse8> for MetadataResponse9 {
     fn from(older: MetadataResponse8) -> Self {
         MetadataResponse9 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             brokers: older.brokers.into_iter().map(|el| el.into()).collect(),
             cluster_id: older.cluster_id.map(|val| val),
-            controller_id: older.controller_id.map(|val| val),
+            controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
-            cluster_authorized_operations: older.cluster_authorized_operations.map(|val| val),
+            cluster_authorized_operations: older.cluster_authorized_operations,
         }
     }
 }
@@ -1243,9 +1236,9 @@ impl From<MetadataResponseTopics8> for MetadataResponseTopics9 {
         MetadataResponseTopics9 {
             error_code: older.error_code,
             name: older.name,
-            is_internal: older.is_internal.map(|val| val),
+            is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
-            topic_authorized_operations: older.topic_authorized_operations.map(|val| val),
+            topic_authorized_operations: older.topic_authorized_operations,
         }
     }
 }
@@ -1256,10 +1249,10 @@ impl From<MetadataResponseTopicsPartitions8> for MetadataResponseTopicsPartition
             error_code: older.error_code,
             partition_index: older.partition_index,
             leader_id: older.leader_id,
-            leader_epoch: older.leader_epoch.map(|val| val),
-            replica_nodes: older.replica_nodes.into_iter().collect(),
-            isr_nodes: older.isr_nodes.into_iter().collect(),
-            offline_replicas: older.offline_replicas.map(|val| val.into_iter().collect()),
+            leader_epoch: older.leader_epoch,
+            replica_nodes: older.replica_nodes,
+            isr_nodes: older.isr_nodes,
+            offline_replicas: older.offline_replicas,
         }
     }
 }

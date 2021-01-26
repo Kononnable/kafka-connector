@@ -11,20 +11,17 @@ pub fn serialize_stop_replica_request(
         0 => ToBytes::serialize(&StopReplicaRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&StopReplicaRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&StopReplicaRequest2::try_from(data)?, buf),
-        4 => ToBytes::serialize(&data, buf),
+        3 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_stop_replica_response<T>(version: i32, buf: &mut T) -> StopReplicaResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_stop_replica_response(version: i32, buf: &mut Bytes) -> StopReplicaResponse {
     match version {
         0 => StopReplicaResponse0::deserialize(buf).into(),
         1 => StopReplicaResponse1::deserialize(buf).into(),
         2 => StopReplicaResponse2::deserialize(buf).into(),
-        4 => StopReplicaResponse::deserialize(buf),
+        3 => StopReplicaResponse::deserialize(buf),
         _ => StopReplicaResponse::deserialize(buf),
     }
 }
@@ -184,7 +181,7 @@ impl TryFrom<StopReplicaRequest3> for StopReplicaRequest1 {
         Ok(StopReplicaRequest1 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            broker_epoch: latest.broker_epoch.map(|val| val),
+            broker_epoch: latest.broker_epoch,
             ..StopReplicaRequest1::default()
         })
     }
@@ -203,7 +200,7 @@ impl TryFrom<StopReplicaRequest3> for StopReplicaRequest2 {
         Ok(StopReplicaRequest2 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
-            broker_epoch: latest.broker_epoch.map(|val| val),
+            broker_epoch: latest.broker_epoch,
             ..StopReplicaRequest2::default()
         })
     }

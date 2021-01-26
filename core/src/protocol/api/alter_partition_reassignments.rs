@@ -8,20 +8,17 @@ pub fn serialize_alter_partition_reassignments_request(
     buf: &mut BytesMut,
 ) -> Result<(), Error> {
     match version {
-        1 => ToBytes::serialize(&data, buf),
+        0 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_alter_partition_reassignments_response<T>(
+pub fn deserialize_alter_partition_reassignments_response(
     version: i32,
-    buf: &mut T,
-) -> AlterPartitionReassignmentsResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> AlterPartitionReassignmentsResponse {
     match version {
-        1 => AlterPartitionReassignmentsResponse::deserialize(buf),
+        0 => AlterPartitionReassignmentsResponse::deserialize(buf),
         _ => AlterPartitionReassignmentsResponse::deserialize(buf),
     }
 }

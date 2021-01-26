@@ -16,15 +16,12 @@ pub fn serialize_produce_request(
         5 => ToBytes::serialize(&ProduceRequest5::try_from(data)?, buf),
         6 => ToBytes::serialize(&ProduceRequest6::try_from(data)?, buf),
         7 => ToBytes::serialize(&ProduceRequest7::try_from(data)?, buf),
-        9 => ToBytes::serialize(&data, buf),
+        8 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_produce_response<T>(version: i32, buf: &mut T) -> ProduceResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_produce_response(version: i32, buf: &mut Bytes) -> ProduceResponse {
     match version {
         0 => ProduceResponse0::deserialize(buf).into(),
         1 => ProduceResponse1::deserialize(buf).into(),
@@ -34,7 +31,7 @@ where
         5 => ProduceResponse5::deserialize(buf).into(),
         6 => ProduceResponse6::deserialize(buf).into(),
         7 => ProduceResponse7::deserialize(buf).into(),
-        9 => ProduceResponse::deserialize(buf),
+        8 => ProduceResponse::deserialize(buf),
         _ => ProduceResponse::deserialize(buf),
     }
 }
@@ -547,7 +544,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest3 {
     type Error = Error;
     fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
         Ok(ProduceRequest3 {
-            transactional_id: latest.transactional_id.map(|val| val),
+            transactional_id: latest.transactional_id,
             acks: latest.acks,
             timeout: latest.timeout,
             topic_data: latest
@@ -587,7 +584,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest4 {
     type Error = Error;
     fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
         Ok(ProduceRequest4 {
-            transactional_id: latest.transactional_id.map(|val| val),
+            transactional_id: latest.transactional_id,
             acks: latest.acks,
             timeout: latest.timeout,
             topic_data: latest
@@ -627,7 +624,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest5 {
     type Error = Error;
     fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
         Ok(ProduceRequest5 {
-            transactional_id: latest.transactional_id.map(|val| val),
+            transactional_id: latest.transactional_id,
             acks: latest.acks,
             timeout: latest.timeout,
             topic_data: latest
@@ -667,7 +664,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest6 {
     type Error = Error;
     fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
         Ok(ProduceRequest6 {
-            transactional_id: latest.transactional_id.map(|val| val),
+            transactional_id: latest.transactional_id,
             acks: latest.acks,
             timeout: latest.timeout,
             topic_data: latest
@@ -707,7 +704,7 @@ impl TryFrom<ProduceRequest8> for ProduceRequest7 {
     type Error = Error;
     fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
         Ok(ProduceRequest7 {
-            transactional_id: latest.transactional_id.map(|val| val),
+            transactional_id: latest.transactional_id,
             acks: latest.acks,
             timeout: latest.timeout,
             topic_data: latest
@@ -782,7 +779,7 @@ impl From<ProduceResponse1> for ProduceResponse8 {
     fn from(older: ProduceResponse1) -> Self {
         ProduceResponse8 {
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
         }
     }
 }
@@ -817,7 +814,7 @@ impl From<ProduceResponse2> for ProduceResponse8 {
     fn from(older: ProduceResponse2) -> Self {
         ProduceResponse8 {
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
         }
     }
 }
@@ -843,7 +840,7 @@ impl From<ProduceResponseResponsesPartitionResponses2>
             partition: older.partition,
             error_code: older.error_code,
             base_offset: older.base_offset,
-            log_append_time: older.log_append_time.map(|val| val),
+            log_append_time: older.log_append_time,
             ..ProduceResponseResponsesPartitionResponses8::default()
         }
     }
@@ -853,7 +850,7 @@ impl From<ProduceResponse3> for ProduceResponse8 {
     fn from(older: ProduceResponse3) -> Self {
         ProduceResponse8 {
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
         }
     }
 }
@@ -879,7 +876,7 @@ impl From<ProduceResponseResponsesPartitionResponses3>
             partition: older.partition,
             error_code: older.error_code,
             base_offset: older.base_offset,
-            log_append_time: older.log_append_time.map(|val| val),
+            log_append_time: older.log_append_time,
             ..ProduceResponseResponsesPartitionResponses8::default()
         }
     }
@@ -889,7 +886,7 @@ impl From<ProduceResponse4> for ProduceResponse8 {
     fn from(older: ProduceResponse4) -> Self {
         ProduceResponse8 {
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
         }
     }
 }
@@ -915,7 +912,7 @@ impl From<ProduceResponseResponsesPartitionResponses4>
             partition: older.partition,
             error_code: older.error_code,
             base_offset: older.base_offset,
-            log_append_time: older.log_append_time.map(|val| val),
+            log_append_time: older.log_append_time,
             ..ProduceResponseResponsesPartitionResponses8::default()
         }
     }
@@ -925,7 +922,7 @@ impl From<ProduceResponse5> for ProduceResponse8 {
     fn from(older: ProduceResponse5) -> Self {
         ProduceResponse8 {
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
         }
     }
 }
@@ -951,8 +948,8 @@ impl From<ProduceResponseResponsesPartitionResponses5>
             partition: older.partition,
             error_code: older.error_code,
             base_offset: older.base_offset,
-            log_append_time: older.log_append_time.map(|val| val),
-            log_start_offset: older.log_start_offset.map(|val| val),
+            log_append_time: older.log_append_time,
+            log_start_offset: older.log_start_offset,
             ..ProduceResponseResponsesPartitionResponses8::default()
         }
     }
@@ -962,7 +959,7 @@ impl From<ProduceResponse6> for ProduceResponse8 {
     fn from(older: ProduceResponse6) -> Self {
         ProduceResponse8 {
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
         }
     }
 }
@@ -988,8 +985,8 @@ impl From<ProduceResponseResponsesPartitionResponses6>
             partition: older.partition,
             error_code: older.error_code,
             base_offset: older.base_offset,
-            log_append_time: older.log_append_time.map(|val| val),
-            log_start_offset: older.log_start_offset.map(|val| val),
+            log_append_time: older.log_append_time,
+            log_start_offset: older.log_start_offset,
             ..ProduceResponseResponsesPartitionResponses8::default()
         }
     }
@@ -999,7 +996,7 @@ impl From<ProduceResponse7> for ProduceResponse8 {
     fn from(older: ProduceResponse7) -> Self {
         ProduceResponse8 {
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
         }
     }
 }
@@ -1025,8 +1022,8 @@ impl From<ProduceResponseResponsesPartitionResponses7>
             partition: older.partition,
             error_code: older.error_code,
             base_offset: older.base_offset,
-            log_append_time: older.log_append_time.map(|val| val),
-            log_start_offset: older.log_start_offset.map(|val| val),
+            log_append_time: older.log_append_time,
+            log_start_offset: older.log_start_offset,
             ..ProduceResponseResponsesPartitionResponses8::default()
         }
     }

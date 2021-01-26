@@ -16,15 +16,12 @@ pub fn serialize_offset_commit_request(
         5 => ToBytes::serialize(&OffsetCommitRequest5::try_from(data)?, buf),
         6 => ToBytes::serialize(&OffsetCommitRequest6::try_from(data)?, buf),
         7 => ToBytes::serialize(&OffsetCommitRequest7::try_from(data)?, buf),
-        9 => ToBytes::serialize(&data, buf),
+        8 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_offset_commit_response<T>(version: i32, buf: &mut T) -> OffsetCommitResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_offset_commit_response(version: i32, buf: &mut Bytes) -> OffsetCommitResponse {
     match version {
         0 => OffsetCommitResponse0::deserialize(buf).into(),
         1 => OffsetCommitResponse1::deserialize(buf).into(),
@@ -34,7 +31,7 @@ where
         5 => OffsetCommitResponse5::deserialize(buf).into(),
         6 => OffsetCommitResponse6::deserialize(buf).into(),
         7 => OffsetCommitResponse7::deserialize(buf).into(),
-        9 => OffsetCommitResponse::deserialize(buf),
+        8 => OffsetCommitResponse::deserialize(buf),
         _ => OffsetCommitResponse::deserialize(buf),
     }
 }
@@ -473,7 +470,7 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest1 {
         }
         Ok(OffsetCommitRequest1 {
             group_id: latest.group_id,
-            generation_id: latest.generation_id.map(|val| val),
+            generation_id: latest.generation_id,
             member_id: latest.member_id.map(|val| val),
             topics: latest
                 .topics
@@ -529,7 +526,7 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest2 {
         }
         Ok(OffsetCommitRequest2 {
             group_id: latest.group_id,
-            generation_id: latest.generation_id.map(|val| val),
+            generation_id: latest.generation_id,
             member_id: latest.member_id.map(|val| val),
             topics: latest
                 .topics
@@ -585,7 +582,7 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest3 {
         }
         Ok(OffsetCommitRequest3 {
             group_id: latest.group_id,
-            generation_id: latest.generation_id.map(|val| val),
+            generation_id: latest.generation_id,
             member_id: latest.member_id.map(|val| val),
             topics: latest
                 .topics
@@ -641,7 +638,7 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest4 {
         }
         Ok(OffsetCommitRequest4 {
             group_id: latest.group_id,
-            generation_id: latest.generation_id.map(|val| val),
+            generation_id: latest.generation_id,
             member_id: latest.member_id.map(|val| val),
             topics: latest
                 .topics
@@ -697,7 +694,7 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest5 {
         }
         Ok(OffsetCommitRequest5 {
             group_id: latest.group_id,
-            generation_id: latest.generation_id.map(|val| val),
+            generation_id: latest.generation_id,
             member_id: latest.member_id.map(|val| val),
             topics: latest
                 .topics
@@ -752,7 +749,7 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest6 {
         }
         Ok(OffsetCommitRequest6 {
             group_id: latest.group_id,
-            generation_id: latest.generation_id.map(|val| val),
+            generation_id: latest.generation_id,
             member_id: latest.member_id.map(|val| val),
             topics: latest
                 .topics
@@ -783,7 +780,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions6 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_leader_epoch: latest.committed_leader_epoch.map(|val| val),
+            committed_leader_epoch: latest.committed_leader_epoch,
             committed_metadata: latest.committed_metadata,
         })
     }
@@ -794,7 +791,7 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest7 {
     fn try_from(latest: OffsetCommitRequest8) -> Result<Self, Self::Error> {
         Ok(OffsetCommitRequest7 {
             group_id: latest.group_id,
-            generation_id: latest.generation_id.map(|val| val),
+            generation_id: latest.generation_id,
             member_id: latest.member_id.map(|val| val),
             group_instance_id: latest.group_instance_id.map(|val| val),
             topics: latest
@@ -826,7 +823,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions7 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_leader_epoch: latest.committed_leader_epoch.map(|val| val),
+            committed_leader_epoch: latest.committed_leader_epoch,
             committed_metadata: latest.committed_metadata,
         })
     }
@@ -916,7 +913,7 @@ impl From<OffsetCommitResponseTopicsPartitions2> for OffsetCommitResponseTopicsP
 impl From<OffsetCommitResponse3> for OffsetCommitResponse8 {
     fn from(older: OffsetCommitResponse3) -> Self {
         OffsetCommitResponse8 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -943,7 +940,7 @@ impl From<OffsetCommitResponseTopicsPartitions3> for OffsetCommitResponseTopicsP
 impl From<OffsetCommitResponse4> for OffsetCommitResponse8 {
     fn from(older: OffsetCommitResponse4) -> Self {
         OffsetCommitResponse8 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -970,7 +967,7 @@ impl From<OffsetCommitResponseTopicsPartitions4> for OffsetCommitResponseTopicsP
 impl From<OffsetCommitResponse5> for OffsetCommitResponse8 {
     fn from(older: OffsetCommitResponse5) -> Self {
         OffsetCommitResponse8 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -997,7 +994,7 @@ impl From<OffsetCommitResponseTopicsPartitions5> for OffsetCommitResponseTopicsP
 impl From<OffsetCommitResponse6> for OffsetCommitResponse8 {
     fn from(older: OffsetCommitResponse6) -> Self {
         OffsetCommitResponse8 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -1024,7 +1021,7 @@ impl From<OffsetCommitResponseTopicsPartitions6> for OffsetCommitResponseTopicsP
 impl From<OffsetCommitResponse7> for OffsetCommitResponse8 {
     fn from(older: OffsetCommitResponse7) -> Self {
         OffsetCommitResponse8 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }

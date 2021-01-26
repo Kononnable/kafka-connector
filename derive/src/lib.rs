@@ -62,7 +62,7 @@ pub fn from_bytes(input: TokenStream) -> TokenStream {
     let deserialization = generate_deserialize(&input.data);
     let expanded = quote! {
         impl #impl_generics FromBytes for #name #ty_generics #where_clause {
-            fn deserialize<T>(buf: &mut T)-> Self where T: Iterator<Item=u8> {
+            fn deserialize(buf:  &mut Bytes) -> Self {
                 #name {
                     #deserialization
                 }

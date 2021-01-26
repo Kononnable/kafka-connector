@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use bytes::BytesMut;
+use bytes::{Bytes, BytesMut};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
@@ -82,12 +82,12 @@ impl BrokerClient {
         let mut size: [u8; 4] = [0, 0, 0, 0];
         self.connection.read_exact(&mut size).await.unwrap();
         let cap = i32::from_be_bytes(size);
-        let mut buf2 = vec![0; cap as usize];
+        let mut buf2 = BytesMut::with_capacity(cap as usize);
         self.connection.read_exact(&mut buf2).await.unwrap();
-        let mut x = buf2.iter().copied();
-        let response_header = HeaderResponse::deserialize(&mut x);
+        let mut buf2 = Bytes::from(buf2);
+        let response_header = HeaderResponse::deserialize(&mut buf2);
         self.last_correlation = response_header.correlation;
-        let response = deserialize_api_versions_response(0, &mut x);
+        let response = deserialize_api_versions_response(0, &mut buf2);
         // TODO read last corelation
         if response.error_code != 0 {
             todo!("")

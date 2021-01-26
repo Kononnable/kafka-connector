@@ -12,21 +12,18 @@ pub fn serialize_leave_group_request(
         1 => ToBytes::serialize(&LeaveGroupRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&LeaveGroupRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&LeaveGroupRequest3::try_from(data)?, buf),
-        5 => ToBytes::serialize(&data, buf),
+        4 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_leave_group_response<T>(version: i32, buf: &mut T) -> LeaveGroupResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_leave_group_response(version: i32, buf: &mut Bytes) -> LeaveGroupResponse {
     match version {
         0 => LeaveGroupResponse0::deserialize(buf).into(),
         1 => LeaveGroupResponse1::deserialize(buf).into(),
         2 => LeaveGroupResponse2::deserialize(buf).into(),
         3 => LeaveGroupResponse3::deserialize(buf).into(),
-        5 => LeaveGroupResponse::deserialize(buf),
+        4 => LeaveGroupResponse::deserialize(buf),
         _ => LeaveGroupResponse::deserialize(buf),
     }
 }
@@ -196,7 +193,7 @@ impl From<LeaveGroupResponse0> for LeaveGroupResponse4 {
 impl From<LeaveGroupResponse1> for LeaveGroupResponse4 {
     fn from(older: LeaveGroupResponse1) -> Self {
         LeaveGroupResponse4 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             ..LeaveGroupResponse4::default()
         }
@@ -206,7 +203,7 @@ impl From<LeaveGroupResponse1> for LeaveGroupResponse4 {
 impl From<LeaveGroupResponse2> for LeaveGroupResponse4 {
     fn from(older: LeaveGroupResponse2) -> Self {
         LeaveGroupResponse4 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             ..LeaveGroupResponse4::default()
         }
@@ -216,7 +213,7 @@ impl From<LeaveGroupResponse2> for LeaveGroupResponse4 {
 impl From<LeaveGroupResponse3> for LeaveGroupResponse4 {
     fn from(older: LeaveGroupResponse3) -> Self {
         LeaveGroupResponse4 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             members: older
                 .members

@@ -10,19 +10,16 @@ pub fn serialize_delete_groups_request(
     match version {
         0 => ToBytes::serialize(&DeleteGroupsRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&DeleteGroupsRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_delete_groups_response<T>(version: i32, buf: &mut T) -> DeleteGroupsResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_delete_groups_response(version: i32, buf: &mut Bytes) -> DeleteGroupsResponse {
     match version {
         0 => DeleteGroupsResponse0::deserialize(buf).into(),
         1 => DeleteGroupsResponse1::deserialize(buf).into(),
-        3 => DeleteGroupsResponse::deserialize(buf),
+        2 => DeleteGroupsResponse::deserialize(buf),
         _ => DeleteGroupsResponse::deserialize(buf),
     }
 }

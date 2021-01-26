@@ -11,23 +11,20 @@ pub fn serialize_describe_configs_request(
         0 => ToBytes::serialize(&DescribeConfigsRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&DescribeConfigsRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&DescribeConfigsRequest2::try_from(data)?, buf),
-        4 => ToBytes::serialize(&data, buf),
+        3 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_describe_configs_response<T>(
+pub fn deserialize_describe_configs_response(
     version: i32,
-    buf: &mut T,
-) -> DescribeConfigsResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> DescribeConfigsResponse {
     match version {
         0 => DescribeConfigsResponse0::deserialize(buf).into(),
         1 => DescribeConfigsResponse1::deserialize(buf).into(),
         2 => DescribeConfigsResponse2::deserialize(buf).into(),
-        4 => DescribeConfigsResponse::deserialize(buf),
+        3 => DescribeConfigsResponse::deserialize(buf),
         _ => DescribeConfigsResponse::deserialize(buf),
     }
 }
@@ -239,7 +236,7 @@ impl TryFrom<DescribeConfigsRequestResources3> for DescribeConfigsRequestResourc
         Ok(DescribeConfigsRequestResources0 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,
-            configuration_keys: latest.configuration_keys.into_iter().collect(),
+            configuration_keys: latest.configuration_keys,
         })
     }
 }
@@ -260,7 +257,7 @@ impl TryFrom<DescribeConfigsRequest3> for DescribeConfigsRequest1 {
                 .into_iter()
                 .map(|el| el.try_into())
                 .collect::<Result<_, Error>>()?,
-            include_synonyms: latest.include_synonyms.map(|val| val),
+            include_synonyms: latest.include_synonyms,
         })
     }
 }
@@ -271,7 +268,7 @@ impl TryFrom<DescribeConfigsRequestResources3> for DescribeConfigsRequestResourc
         Ok(DescribeConfigsRequestResources1 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,
-            configuration_keys: latest.configuration_keys.into_iter().collect(),
+            configuration_keys: latest.configuration_keys,
         })
     }
 }
@@ -292,7 +289,7 @@ impl TryFrom<DescribeConfigsRequest3> for DescribeConfigsRequest2 {
                 .into_iter()
                 .map(|el| el.try_into())
                 .collect::<Result<_, Error>>()?,
-            include_synonyms: latest.include_synonyms.map(|val| val),
+            include_synonyms: latest.include_synonyms,
         })
     }
 }
@@ -303,7 +300,7 @@ impl TryFrom<DescribeConfigsRequestResources3> for DescribeConfigsRequestResourc
         Ok(DescribeConfigsRequestResources2 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,
-            configuration_keys: latest.configuration_keys.into_iter().collect(),
+            configuration_keys: latest.configuration_keys,
         })
     }
 }
@@ -368,7 +365,7 @@ impl From<DescribeConfigsResponseResultsConfigs1> for DescribeConfigsResponseRes
             name: older.name,
             value: older.value,
             read_only: older.read_only,
-            config_source: older.config_source.map(|val| val),
+            config_source: older.config_source,
             is_sensitive: older.is_sensitive,
             synonyms: older
                 .synonyms
@@ -417,7 +414,7 @@ impl From<DescribeConfigsResponseResultsConfigs2> for DescribeConfigsResponseRes
             name: older.name,
             value: older.value,
             read_only: older.read_only,
-            config_source: older.config_source.map(|val| val),
+            config_source: older.config_source,
             is_sensitive: older.is_sensitive,
             synonyms: older
                 .synonyms

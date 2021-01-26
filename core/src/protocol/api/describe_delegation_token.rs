@@ -10,22 +10,19 @@ pub fn serialize_describe_delegation_token_request(
     match version {
         0 => ToBytes::serialize(&DescribeDelegationTokenRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&DescribeDelegationTokenRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_describe_delegation_token_response<T>(
+pub fn deserialize_describe_delegation_token_response(
     version: i32,
-    buf: &mut T,
-) -> DescribeDelegationTokenResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> DescribeDelegationTokenResponse {
     match version {
         0 => DescribeDelegationTokenResponse0::deserialize(buf).into(),
         1 => DescribeDelegationTokenResponse1::deserialize(buf).into(),
-        3 => DescribeDelegationTokenResponse::deserialize(buf),
+        2 => DescribeDelegationTokenResponse::deserialize(buf),
         _ => DescribeDelegationTokenResponse::deserialize(buf),
     }
 }
@@ -78,7 +75,7 @@ pub struct DescribeDelegationTokenResponseTokens0 {
     pub expiry_timestamp: Int64,
     pub max_timestamp: Int64,
     pub token_id: String,
-    pub hmac: Bytes,
+    pub hmac: KafkaBytes,
     pub renewers: Vec<DescribeDelegationTokenResponseTokensRenewers0>,
 }
 
@@ -103,7 +100,7 @@ pub struct DescribeDelegationTokenResponseTokens1 {
     pub expiry_timestamp: Int64,
     pub max_timestamp: Int64,
     pub token_id: String,
-    pub hmac: Bytes,
+    pub hmac: KafkaBytes,
     pub renewers: Vec<DescribeDelegationTokenResponseTokensRenewers1>,
 }
 
@@ -203,7 +200,7 @@ impl From<DescribeDelegationTokenResponseTokens0> for DescribeDelegationTokenRes
             expiry_timestamp: older.expiry_timestamp,
             max_timestamp: older.max_timestamp,
             token_id: older.token_id,
-            hmac: older.hmac,
+            hmac: older.hmac.into(),
             renewers: older.renewers.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -239,7 +236,7 @@ impl From<DescribeDelegationTokenResponseTokens1> for DescribeDelegationTokenRes
             expiry_timestamp: older.expiry_timestamp,
             max_timestamp: older.max_timestamp,
             token_id: older.token_id,
-            hmac: older.hmac,
+            hmac: older.hmac.into(),
             renewers: older.renewers.into_iter().map(|el| el.into()).collect(),
         }
     }

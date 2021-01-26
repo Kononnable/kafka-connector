@@ -13,22 +13,22 @@ pub fn serialize_describe_groups_request(
         2 => ToBytes::serialize(&DescribeGroupsRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&DescribeGroupsRequest3::try_from(data)?, buf),
         4 => ToBytes::serialize(&DescribeGroupsRequest4::try_from(data)?, buf),
-        6 => ToBytes::serialize(&data, buf),
+        5 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_describe_groups_response<T>(version: i32, buf: &mut T) -> DescribeGroupsResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_describe_groups_response(
+    version: i32,
+    buf: &mut Bytes,
+) -> DescribeGroupsResponse {
     match version {
         0 => DescribeGroupsResponse0::deserialize(buf).into(),
         1 => DescribeGroupsResponse1::deserialize(buf).into(),
         2 => DescribeGroupsResponse2::deserialize(buf).into(),
         3 => DescribeGroupsResponse3::deserialize(buf).into(),
         4 => DescribeGroupsResponse4::deserialize(buf).into(),
-        6 => DescribeGroupsResponse::deserialize(buf),
+        5 => DescribeGroupsResponse::deserialize(buf),
         _ => DescribeGroupsResponse::deserialize(buf),
     }
 }
@@ -86,8 +86,8 @@ pub struct DescribeGroupsResponseGroupsMembers0 {
     pub member_id: String,
     pub client_id: String,
     pub client_host: String,
-    pub member_metadata: Bytes,
-    pub member_assignment: Bytes,
+    pub member_metadata: KafkaBytes,
+    pub member_assignment: KafkaBytes,
 }
 
 #[derive(Default, FromBytes)]
@@ -111,8 +111,8 @@ pub struct DescribeGroupsResponseGroupsMembers1 {
     pub member_id: String,
     pub client_id: String,
     pub client_host: String,
-    pub member_metadata: Bytes,
-    pub member_assignment: Bytes,
+    pub member_metadata: KafkaBytes,
+    pub member_assignment: KafkaBytes,
 }
 
 #[derive(Default, FromBytes)]
@@ -136,8 +136,8 @@ pub struct DescribeGroupsResponseGroupsMembers2 {
     pub member_id: String,
     pub client_id: String,
     pub client_host: String,
-    pub member_metadata: Bytes,
-    pub member_assignment: Bytes,
+    pub member_metadata: KafkaBytes,
+    pub member_assignment: KafkaBytes,
 }
 
 #[derive(Default, FromBytes)]
@@ -162,8 +162,8 @@ pub struct DescribeGroupsResponseGroupsMembers3 {
     pub member_id: String,
     pub client_id: String,
     pub client_host: String,
-    pub member_metadata: Bytes,
-    pub member_assignment: Bytes,
+    pub member_metadata: KafkaBytes,
+    pub member_assignment: KafkaBytes,
 }
 
 #[derive(Default, FromBytes)]
@@ -189,8 +189,8 @@ pub struct DescribeGroupsResponseGroupsMembers4 {
     pub group_instance_id: Optional<NullableString>,
     pub client_id: String,
     pub client_host: String,
-    pub member_metadata: Bytes,
-    pub member_assignment: Bytes,
+    pub member_metadata: KafkaBytes,
+    pub member_assignment: KafkaBytes,
 }
 
 #[derive(Default, FromBytes)]
@@ -273,7 +273,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest3 {
     fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
         Ok(DescribeGroupsRequest3 {
             groups: latest.groups.into_iter().collect(),
-            include_authorized_operations: latest.include_authorized_operations.map(|val| val),
+            include_authorized_operations: latest.include_authorized_operations,
         })
     }
 }
@@ -283,7 +283,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest4 {
     fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
         Ok(DescribeGroupsRequest4 {
             groups: latest.groups.into_iter().collect(),
-            include_authorized_operations: latest.include_authorized_operations.map(|val| val),
+            include_authorized_operations: latest.include_authorized_operations,
         })
     }
 }
@@ -317,8 +317,8 @@ impl From<DescribeGroupsResponseGroupsMembers0> for DescribeGroupsResponseGroups
             member_id: older.member_id,
             client_id: older.client_id,
             client_host: older.client_host,
-            member_metadata: older.member_metadata,
-            member_assignment: older.member_assignment,
+            member_metadata: older.member_metadata.into(),
+            member_assignment: older.member_assignment.into(),
             ..DescribeGroupsResponseGroupsMembers5::default()
         }
     }
@@ -327,7 +327,7 @@ impl From<DescribeGroupsResponseGroupsMembers0> for DescribeGroupsResponseGroups
 impl From<DescribeGroupsResponse1> for DescribeGroupsResponse5 {
     fn from(older: DescribeGroupsResponse1) -> Self {
         DescribeGroupsResponse5 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -353,8 +353,8 @@ impl From<DescribeGroupsResponseGroupsMembers1> for DescribeGroupsResponseGroups
             member_id: older.member_id,
             client_id: older.client_id,
             client_host: older.client_host,
-            member_metadata: older.member_metadata,
-            member_assignment: older.member_assignment,
+            member_metadata: older.member_metadata.into(),
+            member_assignment: older.member_assignment.into(),
             ..DescribeGroupsResponseGroupsMembers5::default()
         }
     }
@@ -363,7 +363,7 @@ impl From<DescribeGroupsResponseGroupsMembers1> for DescribeGroupsResponseGroups
 impl From<DescribeGroupsResponse2> for DescribeGroupsResponse5 {
     fn from(older: DescribeGroupsResponse2) -> Self {
         DescribeGroupsResponse5 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -389,8 +389,8 @@ impl From<DescribeGroupsResponseGroupsMembers2> for DescribeGroupsResponseGroups
             member_id: older.member_id,
             client_id: older.client_id,
             client_host: older.client_host,
-            member_metadata: older.member_metadata,
-            member_assignment: older.member_assignment,
+            member_metadata: older.member_metadata.into(),
+            member_assignment: older.member_assignment.into(),
             ..DescribeGroupsResponseGroupsMembers5::default()
         }
     }
@@ -399,7 +399,7 @@ impl From<DescribeGroupsResponseGroupsMembers2> for DescribeGroupsResponseGroups
 impl From<DescribeGroupsResponse3> for DescribeGroupsResponse5 {
     fn from(older: DescribeGroupsResponse3) -> Self {
         DescribeGroupsResponse5 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -414,7 +414,7 @@ impl From<DescribeGroupsResponseGroups3> for DescribeGroupsResponseGroups5 {
             protocol_type: older.protocol_type,
             protocol_data: older.protocol_data,
             members: older.members.into_iter().map(|el| el.into()).collect(),
-            authorized_operations: older.authorized_operations.map(|val| val),
+            authorized_operations: older.authorized_operations,
         }
     }
 }
@@ -425,8 +425,8 @@ impl From<DescribeGroupsResponseGroupsMembers3> for DescribeGroupsResponseGroups
             member_id: older.member_id,
             client_id: older.client_id,
             client_host: older.client_host,
-            member_metadata: older.member_metadata,
-            member_assignment: older.member_assignment,
+            member_metadata: older.member_metadata.into(),
+            member_assignment: older.member_assignment.into(),
             ..DescribeGroupsResponseGroupsMembers5::default()
         }
     }
@@ -435,7 +435,7 @@ impl From<DescribeGroupsResponseGroupsMembers3> for DescribeGroupsResponseGroups
 impl From<DescribeGroupsResponse4> for DescribeGroupsResponse5 {
     fn from(older: DescribeGroupsResponse4) -> Self {
         DescribeGroupsResponse5 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -450,7 +450,7 @@ impl From<DescribeGroupsResponseGroups4> for DescribeGroupsResponseGroups5 {
             protocol_type: older.protocol_type,
             protocol_data: older.protocol_data,
             members: older.members.into_iter().map(|el| el.into()).collect(),
-            authorized_operations: older.authorized_operations.map(|val| val),
+            authorized_operations: older.authorized_operations,
         }
     }
 }
@@ -462,8 +462,8 @@ impl From<DescribeGroupsResponseGroupsMembers4> for DescribeGroupsResponseGroups
             group_instance_id: older.group_instance_id.map(|val| val),
             client_id: older.client_id,
             client_host: older.client_host,
-            member_metadata: older.member_metadata,
-            member_assignment: older.member_assignment,
+            member_metadata: older.member_metadata.into(),
+            member_assignment: older.member_assignment.into(),
         }
     }
 }

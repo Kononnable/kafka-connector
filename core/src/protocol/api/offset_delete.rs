@@ -8,17 +8,14 @@ pub fn serialize_offset_delete_request(
     buf: &mut BytesMut,
 ) -> Result<(), Error> {
     match version {
-        1 => ToBytes::serialize(&data, buf),
+        0 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_offset_delete_response<T>(version: i32, buf: &mut T) -> OffsetDeleteResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_offset_delete_response(version: i32, buf: &mut Bytes) -> OffsetDeleteResponse {
     match version {
-        1 => OffsetDeleteResponse::deserialize(buf),
+        0 => OffsetDeleteResponse::deserialize(buf),
         _ => OffsetDeleteResponse::deserialize(buf),
     }
 }

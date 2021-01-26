@@ -10,19 +10,16 @@ pub fn serialize_delete_records_request(
     match version {
         0 => ToBytes::serialize(&DeleteRecordsRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&DeleteRecordsRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_delete_records_response<T>(version: i32, buf: &mut T) -> DeleteRecordsResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_delete_records_response(version: i32, buf: &mut Bytes) -> DeleteRecordsResponse {
     match version {
         0 => DeleteRecordsResponse0::deserialize(buf).into(),
         1 => DeleteRecordsResponse1::deserialize(buf).into(),
-        3 => DeleteRecordsResponse::deserialize(buf),
+        2 => DeleteRecordsResponse::deserialize(buf),
         _ => DeleteRecordsResponse::deserialize(buf),
     }
 }

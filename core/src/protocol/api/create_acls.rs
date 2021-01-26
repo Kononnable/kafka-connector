@@ -10,19 +10,16 @@ pub fn serialize_create_acls_request(
     match version {
         0 => ToBytes::serialize(&CreateAclsRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&CreateAclsRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_create_acls_response<T>(version: i32, buf: &mut T) -> CreateAclsResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_create_acls_response(version: i32, buf: &mut Bytes) -> CreateAclsResponse {
     match version {
         0 => CreateAclsResponse0::deserialize(buf).into(),
         1 => CreateAclsResponse1::deserialize(buf).into(),
-        3 => CreateAclsResponse::deserialize(buf),
+        2 => CreateAclsResponse::deserialize(buf),
         _ => CreateAclsResponse::deserialize(buf),
     }
 }
@@ -163,7 +160,7 @@ impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations1 {
         Ok(CreateAclsRequestCreations1 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,
-            resource_pattern_type: latest.resource_pattern_type.map(|val| val),
+            resource_pattern_type: latest.resource_pattern_type,
             principal: latest.principal,
             host: latest.host,
             operation: latest.operation,

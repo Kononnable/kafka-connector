@@ -12,21 +12,18 @@ pub fn serialize_list_groups_request(
         1 => ToBytes::serialize(&ListGroupsRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&ListGroupsRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&ListGroupsRequest3::try_from(data)?, buf),
-        5 => ToBytes::serialize(&data, buf),
+        4 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_list_groups_response<T>(version: i32, buf: &mut T) -> ListGroupsResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_list_groups_response(version: i32, buf: &mut Bytes) -> ListGroupsResponse {
     match version {
         0 => ListGroupsResponse0::deserialize(buf).into(),
         1 => ListGroupsResponse1::deserialize(buf).into(),
         2 => ListGroupsResponse2::deserialize(buf).into(),
         3 => ListGroupsResponse3::deserialize(buf).into(),
-        5 => ListGroupsResponse::deserialize(buf),
+        4 => ListGroupsResponse::deserialize(buf),
         _ => ListGroupsResponse::deserialize(buf),
     }
 }
@@ -192,7 +189,7 @@ impl From<ListGroupsResponseGroups0> for ListGroupsResponseGroups4 {
 impl From<ListGroupsResponse1> for ListGroupsResponse4 {
     fn from(older: ListGroupsResponse1) -> Self {
         ListGroupsResponse4 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
@@ -212,7 +209,7 @@ impl From<ListGroupsResponseGroups1> for ListGroupsResponseGroups4 {
 impl From<ListGroupsResponse2> for ListGroupsResponse4 {
     fn from(older: ListGroupsResponse2) -> Self {
         ListGroupsResponse4 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }
@@ -232,7 +229,7 @@ impl From<ListGroupsResponseGroups2> for ListGroupsResponseGroups4 {
 impl From<ListGroupsResponse3> for ListGroupsResponse4 {
     fn from(older: ListGroupsResponse3) -> Self {
         ListGroupsResponse4 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
         }

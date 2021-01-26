@@ -42,7 +42,7 @@ impl FromStr for CallType {
 #[derive(Debug)]
 pub enum FieldType {
     Boolean,
-    Bytes,
+    KafkaBytes,
     Int8,
     Int16,
     Int32,
@@ -61,7 +61,7 @@ impl FieldType {
     fn try_from_str(ty: &str) -> anyhow::Result<FieldType> {
         let ret_val = match ty {
             "BOOLEAN" => FieldType::Boolean,
-            "BYTES" => FieldType::Bytes,
+            "BYTES" => FieldType::KafkaBytes,
             "INT8" => FieldType::Int8,
             "INT16" => FieldType::Int16,
             "INT32" => FieldType::Int32,
@@ -81,6 +81,44 @@ impl FieldType {
 
     pub fn is_common_type(ty: &str) -> bool {
         FieldType::try_from_str(ty).is_ok()
+    }
+    pub fn is_simple_type(&self) -> bool {
+        match self {
+            FieldType::Int8
+            | FieldType::Int16
+            | FieldType::Int32
+            | FieldType::Int64
+            | FieldType::Float64
+            | FieldType::String
+            | FieldType::Boolean => true,
+            // TODO:
+            FieldType::Records
+            | FieldType::NullableString
+            | FieldType::CompactString
+            | FieldType::CompactNullableString
+            | FieldType::CompactRecords => true,
+
+            FieldType::KafkaBytes | FieldType::CompactBytes => false,
+        }
+    }
+    pub fn is_easily_convertable(&self) -> bool {
+        match self {
+            FieldType::Int8
+            | FieldType::Int16
+            | FieldType::Int32
+            | FieldType::Int64
+            | FieldType::Float64
+            | FieldType::String
+            | FieldType::KafkaBytes
+            | FieldType::CompactBytes
+            | FieldType::Boolean => true,
+            // TODO:
+            FieldType::Records
+            | FieldType::NullableString
+            | FieldType::CompactString
+            | FieldType::CompactNullableString
+            | FieldType::CompactRecords => true,
+        }
     }
 }
 

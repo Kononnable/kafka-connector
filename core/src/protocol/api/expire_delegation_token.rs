@@ -10,35 +10,32 @@ pub fn serialize_expire_delegation_token_request(
     match version {
         0 => ToBytes::serialize(&ExpireDelegationTokenRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&ExpireDelegationTokenRequest1::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
+        2 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_expire_delegation_token_response<T>(
+pub fn deserialize_expire_delegation_token_response(
     version: i32,
-    buf: &mut T,
-) -> ExpireDelegationTokenResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> ExpireDelegationTokenResponse {
     match version {
         0 => ExpireDelegationTokenResponse0::deserialize(buf).into(),
         1 => ExpireDelegationTokenResponse1::deserialize(buf).into(),
-        3 => ExpireDelegationTokenResponse::deserialize(buf),
+        2 => ExpireDelegationTokenResponse::deserialize(buf),
         _ => ExpireDelegationTokenResponse::deserialize(buf),
     }
 }
 
 #[derive(Default, ToBytes)]
 pub struct ExpireDelegationTokenRequest0 {
-    pub hmac: Bytes,
+    pub hmac: KafkaBytes,
     pub expiry_time_period_ms: Int64,
 }
 
 #[derive(Default, ToBytes)]
 pub struct ExpireDelegationTokenRequest1 {
-    pub hmac: Bytes,
+    pub hmac: KafkaBytes,
     pub expiry_time_period_ms: Int64,
 }
 
@@ -73,7 +70,7 @@ impl TryFrom<ExpireDelegationTokenRequest2> for ExpireDelegationTokenRequest0 {
     type Error = Error;
     fn try_from(latest: ExpireDelegationTokenRequest2) -> Result<Self, Self::Error> {
         Ok(ExpireDelegationTokenRequest0 {
-            hmac: latest.hmac,
+            hmac: latest.hmac.into(),
             expiry_time_period_ms: latest.expiry_time_period_ms,
         })
     }
@@ -83,7 +80,7 @@ impl TryFrom<ExpireDelegationTokenRequest2> for ExpireDelegationTokenRequest1 {
     type Error = Error;
     fn try_from(latest: ExpireDelegationTokenRequest2) -> Result<Self, Self::Error> {
         Ok(ExpireDelegationTokenRequest1 {
-            hmac: latest.hmac,
+            hmac: latest.hmac.into(),
             expiry_time_period_ms: latest.expiry_time_period_ms,
         })
     }

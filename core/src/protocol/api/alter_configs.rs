@@ -9,18 +9,15 @@ pub fn serialize_alter_configs_request(
 ) -> Result<(), Error> {
     match version {
         0 => ToBytes::serialize(&AlterConfigsRequest0::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
+        1 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_alter_configs_response<T>(version: i32, buf: &mut T) -> AlterConfigsResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_alter_configs_response(version: i32, buf: &mut Bytes) -> AlterConfigsResponse {
     match version {
         0 => AlterConfigsResponse0::deserialize(buf).into(),
-        2 => AlterConfigsResponse::deserialize(buf),
+        1 => AlterConfigsResponse::deserialize(buf),
         _ => AlterConfigsResponse::deserialize(buf),
     }
 }

@@ -113,18 +113,19 @@ pub enum ApiNumbers {
 }
 
 mod prelude {
+    pub use super::super::custom_types::compact_bytes::CompactBytes;
     pub use super::super::error::Error;
     pub use super::super::from_bytes::FromBytes;
     pub use super::super::optional::Optional;
     pub use super::super::to_bytes::ToBytes;
-    pub use bytes::BytesMut;
+    pub use bytes::{Bytes, BytesMut};
     pub use kafka_connector_derive::FromBytes;
     pub use kafka_connector_derive::ToBytes;
     pub use std::convert::TryFrom;
     pub use std::convert::TryInto;
 
     pub type Boolean = bool;
-    pub type Bytes = Vec<u8>;
+    pub type KafkaBytes = Vec<u8>;
     pub type Int8 = i8;
     pub type Int16 = i16;
     pub type Int32 = i32;
@@ -137,5 +138,4 @@ mod prelude {
     pub type CompactNullableString = String;
     pub type CompactRecords = i64;
     pub type Records = i64;
-    pub type CompactBytes = Vec<u8>;
 }

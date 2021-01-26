@@ -13,22 +13,19 @@ pub fn serialize_list_offsets_request(
         2 => ToBytes::serialize(&ListOffsetsRequest2::try_from(data)?, buf),
         3 => ToBytes::serialize(&ListOffsetsRequest3::try_from(data)?, buf),
         4 => ToBytes::serialize(&ListOffsetsRequest4::try_from(data)?, buf),
-        6 => ToBytes::serialize(&data, buf),
+        5 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_list_offsets_response<T>(version: i32, buf: &mut T) -> ListOffsetsResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_list_offsets_response(version: i32, buf: &mut Bytes) -> ListOffsetsResponse {
     match version {
         0 => ListOffsetsResponse0::deserialize(buf).into(),
         1 => ListOffsetsResponse1::deserialize(buf).into(),
         2 => ListOffsetsResponse2::deserialize(buf).into(),
         3 => ListOffsetsResponse3::deserialize(buf).into(),
         4 => ListOffsetsResponse4::deserialize(buf).into(),
-        6 => ListOffsetsResponse::deserialize(buf),
+        5 => ListOffsetsResponse::deserialize(buf),
         _ => ListOffsetsResponse::deserialize(buf),
     }
 }
@@ -377,7 +374,7 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest2 {
     fn try_from(latest: ListOffsetsRequest5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequest2 {
             replica_id: latest.replica_id,
-            isolation_level: latest.isolation_level.map(|val| val),
+            isolation_level: latest.isolation_level,
             topics: latest
                 .topics
                 .into_iter()
@@ -423,7 +420,7 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest3 {
     fn try_from(latest: ListOffsetsRequest5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequest3 {
             replica_id: latest.replica_id,
-            isolation_level: latest.isolation_level.map(|val| val),
+            isolation_level: latest.isolation_level,
             topics: latest
                 .topics
                 .into_iter()
@@ -469,7 +466,7 @@ impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest4 {
     fn try_from(latest: ListOffsetsRequest5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequest4 {
             replica_id: latest.replica_id,
-            isolation_level: latest.isolation_level.map(|val| val),
+            isolation_level: latest.isolation_level,
             topics: latest
                 .topics
                 .into_iter()
@@ -498,7 +495,7 @@ impl TryFrom<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPa
     fn try_from(latest: ListOffsetsRequestTopicsPartitions5) -> Result<Self, Self::Error> {
         Ok(ListOffsetsRequestTopicsPartitions4 {
             partition_index: latest.partition_index,
-            current_leader_epoch: latest.current_leader_epoch.map(|val| val),
+            current_leader_epoch: latest.current_leader_epoch,
             timestamp: latest.timestamp,
         })
     }
@@ -555,8 +552,8 @@ impl From<ListOffsetsResponseTopicsPartitions1> for ListOffsetsResponseTopicsPar
         ListOffsetsResponseTopicsPartitions5 {
             partition_index: older.partition_index,
             error_code: older.error_code,
-            timestamp: older.timestamp.map(|val| val),
-            offset: older.offset.map(|val| val),
+            timestamp: older.timestamp,
+            offset: older.offset,
             ..ListOffsetsResponseTopicsPartitions5::default()
         }
     }
@@ -565,7 +562,7 @@ impl From<ListOffsetsResponseTopicsPartitions1> for ListOffsetsResponseTopicsPar
 impl From<ListOffsetsResponse2> for ListOffsetsResponse5 {
     fn from(older: ListOffsetsResponse2) -> Self {
         ListOffsetsResponse5 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -585,8 +582,8 @@ impl From<ListOffsetsResponseTopicsPartitions2> for ListOffsetsResponseTopicsPar
         ListOffsetsResponseTopicsPartitions5 {
             partition_index: older.partition_index,
             error_code: older.error_code,
-            timestamp: older.timestamp.map(|val| val),
-            offset: older.offset.map(|val| val),
+            timestamp: older.timestamp,
+            offset: older.offset,
             ..ListOffsetsResponseTopicsPartitions5::default()
         }
     }
@@ -595,7 +592,7 @@ impl From<ListOffsetsResponseTopicsPartitions2> for ListOffsetsResponseTopicsPar
 impl From<ListOffsetsResponse3> for ListOffsetsResponse5 {
     fn from(older: ListOffsetsResponse3) -> Self {
         ListOffsetsResponse5 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -615,8 +612,8 @@ impl From<ListOffsetsResponseTopicsPartitions3> for ListOffsetsResponseTopicsPar
         ListOffsetsResponseTopicsPartitions5 {
             partition_index: older.partition_index,
             error_code: older.error_code,
-            timestamp: older.timestamp.map(|val| val),
-            offset: older.offset.map(|val| val),
+            timestamp: older.timestamp,
+            offset: older.offset,
             ..ListOffsetsResponseTopicsPartitions5::default()
         }
     }
@@ -625,7 +622,7 @@ impl From<ListOffsetsResponseTopicsPartitions3> for ListOffsetsResponseTopicsPar
 impl From<ListOffsetsResponse4> for ListOffsetsResponse5 {
     fn from(older: ListOffsetsResponse4) -> Self {
         ListOffsetsResponse5 {
-            throttle_time_ms: older.throttle_time_ms.map(|val| val),
+            throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
         }
     }
@@ -645,9 +642,9 @@ impl From<ListOffsetsResponseTopicsPartitions4> for ListOffsetsResponseTopicsPar
         ListOffsetsResponseTopicsPartitions5 {
             partition_index: older.partition_index,
             error_code: older.error_code,
-            timestamp: older.timestamp.map(|val| val),
-            offset: older.offset.map(|val| val),
-            leader_epoch: older.leader_epoch.map(|val| val),
+            timestamp: older.timestamp,
+            offset: older.offset,
+            leader_epoch: older.leader_epoch,
         }
     }
 }

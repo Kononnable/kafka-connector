@@ -11,23 +11,20 @@ pub fn serialize_txn_offset_commit_request(
         0 => ToBytes::serialize(&TxnOffsetCommitRequest0::try_from(data)?, buf),
         1 => ToBytes::serialize(&TxnOffsetCommitRequest1::try_from(data)?, buf),
         2 => ToBytes::serialize(&TxnOffsetCommitRequest2::try_from(data)?, buf),
-        4 => ToBytes::serialize(&data, buf),
+        3 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_txn_offset_commit_response<T>(
+pub fn deserialize_txn_offset_commit_response(
     version: i32,
-    buf: &mut T,
-) -> TxnOffsetCommitResponse
-where
-    T: Iterator<Item = u8>,
-{
+    buf: &mut Bytes,
+) -> TxnOffsetCommitResponse {
     match version {
         0 => TxnOffsetCommitResponse0::deserialize(buf).into(),
         1 => TxnOffsetCommitResponse1::deserialize(buf).into(),
         2 => TxnOffsetCommitResponse2::deserialize(buf).into(),
-        4 => TxnOffsetCommitResponse::deserialize(buf),
+        3 => TxnOffsetCommitResponse::deserialize(buf),
         _ => TxnOffsetCommitResponse::deserialize(buf),
     }
 }
@@ -395,7 +392,7 @@ impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequest
         Ok(TxnOffsetCommitRequestTopicsPartitions2 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_leader_epoch: latest.committed_leader_epoch.map(|val| val),
+            committed_leader_epoch: latest.committed_leader_epoch,
             committed_metadata: latest.committed_metadata,
         })
     }

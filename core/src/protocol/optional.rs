@@ -1,26 +1,18 @@
 use std::convert::TryInto;
 
-use bytes::BytesMut;
+use bytes::{Bytes, BytesMut};
 
 use super::{error::Error, from_bytes::FromBytes, to_bytes::ToBytes};
 
 ///Fields not supported by some old kafka version
-pub enum Optional<T>
-// TODO: remove requirement of default
-// where
-//     T: Default,
-{
+pub enum Optional<T> {
     Some(T),
     None,
 }
 
-impl<T> Optional<T>
-// where
-//     T: Default,
-{
+impl<T> Optional<T> {
     pub fn map<F, U>(self, func: F) -> Optional<U>
     where
-        // U: Default,
         F: FnOnce(T) -> U,
     {
         match self {
@@ -83,12 +75,9 @@ where
 }
 impl<T> FromBytes for Optional<T>
 where
-    T: FromBytes + Default,
+    T: FromBytes,
 {
-    fn deserialize<R>(buf: &mut R) -> Self
-    where
-        R: Iterator<Item = u8>,
-    {
+    fn deserialize(buf: &mut Bytes) -> Self {
         Optional::Some(T::deserialize(buf))
     }
 }

@@ -8,17 +8,17 @@ pub fn serialize_update_features_request(
     buf: &mut BytesMut,
 ) -> Result<(), Error> {
     match version {
-        1 => ToBytes::serialize(&data, buf),
+        0 => ToBytes::serialize(&data, buf),
         _ => ToBytes::serialize(&data, buf),
     }
     Ok(())
 }
-pub fn deserialize_update_features_response<T>(version: i32, buf: &mut T) -> UpdateFeaturesResponse
-where
-    T: Iterator<Item = u8>,
-{
+pub fn deserialize_update_features_response(
+    version: i32,
+    buf: &mut Bytes,
+) -> UpdateFeaturesResponse {
     match version {
-        1 => UpdateFeaturesResponse::deserialize(buf),
+        0 => UpdateFeaturesResponse::deserialize(buf),
         _ => UpdateFeaturesResponse::deserialize(buf),
     }
 }

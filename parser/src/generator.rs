@@ -58,7 +58,7 @@ fn serialize_api_request(requests: &[Vec<ApiStructDefinition>]) -> String {
     }
     fn_def.push_str(&format!(
         "        {} => ToBytes::serialize(&data,buf),\n",
-        requests.len()
+        requests.len() - 1
     ));
     fn_def.push_str("        _ => ToBytes::serialize(&data,buf),\n");
     fn_def.push_str("    }\n");
@@ -71,7 +71,7 @@ fn deserialize_api_response(responses: &[Vec<ApiStructDefinition>]) -> String {
     let main_struct = responses.first().unwrap().first().unwrap();
     let struct_name = &main_struct.name;
     let mut fn_def = format!(
-        "pub fn deserialize_{}<T>(version:i32, buf: &mut T) -> {} where T: Iterator<Item=u8> {{\n",
+        "pub fn deserialize_{}(version:i32, buf: &mut Bytes) -> {} {{\n",
         to_snake_case(struct_name),
         struct_name
     );
@@ -84,7 +84,7 @@ fn deserialize_api_response(responses: &[Vec<ApiStructDefinition>]) -> String {
     }
     fn_def.push_str(&format!(
         "        {} => {}::deserialize(buf),\n",
-        responses.len(),
+        responses.len() - 1,
         struct_name
     ));
     fn_def.push_str(&format!(
@@ -152,30 +152,36 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
                 }
                 impl_def.push_str(&format!("        Ok({}{}{{\n", call.name, call.version));
                 for field in &call.fields {
-                    if latest
+                    let latest_field = latest
                         .fields
                         .iter()
-                        .find(|latest_field| latest_field.name == field.name)
-                        .is_none()
-                    {
+                        .find(|latest_field| latest_field.name == field.name);
+                    if latest_field.is_none() {
                         continue;
                     }
 
-                    let mut conversion = if field.is_simple_type && field.is_vec {
-                        ".into_iter().collect()"
-                    } else if field.is_simple_type && !field.is_vec {
-                        ""
-                    } else if !field.is_simple_type && field.is_vec && !field.is_optional {
-                        ".into_iter().map(|el|el.try_into()).collect::<Result<_, Error>>()?"
-                    }  else if !field.is_simple_type && field.is_vec && field.is_optional {
-                        ".map(|val|val.into_iter().map(|el|el.try_into()).collect::<Result<_, Error>>()).wrap_result()?"
+                    let conversion = if field.ty != latest_field.unwrap().ty {
+                        let mut conversion = if field.is_simple_type && field.is_vec {
+                            ".into_iter().collect()"
+                        } else if field.is_simple_type && !field.is_vec {
+                            ""
+                        } else if !field.is_simple_type && field.is_vec && !field.is_optional {
+                            ".into_iter().map(|el|el.try_into()).collect::<Result<_, Error>>()?"
+                        }  else if !field.is_simple_type && field.is_vec && field.is_optional {
+                            ".map(|val|val.into_iter().map(|el|el.try_into()).collect::<Result<_, Error>>()).wrap_result()?"
+                        } else if field.is_easily_convertable {
+                            ".into()"
+                        }else {
+                            ".try_into()?"
+                        }
+                        .to_owned();
+                        if field.is_optional && (field.is_simple_type || !field.is_vec) {
+                            conversion = format!(".map(|val|val{})", conversion);
+                        }
+                        conversion
                     } else {
-                        ".try_into()?"
-                    }
-                    .to_owned();
-                    if field.is_optional && (field.is_simple_type || !field.is_vec) {
-                        conversion = format!(".map(|val|val{})", conversion);
-                    }
+                        "".to_owned()
+                    };
 
                     impl_def.push_str(&format!(
                         "            {}: latest.{}{},\n",
@@ -223,29 +229,31 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
                 ));
                 impl_def.push_str(&format!("        {}{}{{\n", latest.name, latest.version));
                 for field in &call.fields {
-                    if latest
+                    let latest_field = latest
                         .fields
                         .iter()
-                        .find(|latest_field| latest_field.name == field.name)
-                        .is_none()
-                    {
+                        .find(|latest_field| latest_field.name == field.name);
+                    if latest_field.is_none() {
                         continue;
                     }
-
-                    let mut conversion = if field.is_simple_type && field.is_vec {
-                        ".into_iter().collect()"
-                    } else if field.is_simple_type && !field.is_vec {
-                        ""
-                    } else if !field.is_simple_type && field.is_vec {
-                        ".into_iter().map(|el|el.into()).collect()"
+                    let conversion = if field.ty != latest_field.unwrap().ty {
+                        let mut conversion = if field.is_simple_type && field.is_vec {
+                            ".into_iter().collect()"
+                        } else if field.is_simple_type && !field.is_vec {
+                            ""
+                        } else if !field.is_simple_type && field.is_vec {
+                            ".into_iter().map(|el|el.into()).collect()"
+                        } else {
+                            ".into()"
+                        }
+                        .to_owned();
+                        if field.is_optional {
+                            conversion = format!(".map(|val|val{})", conversion);
+                        }
+                        conversion
                     } else {
-                        ".into()"
-                    }
-                    .to_owned();
-                    if field.is_optional {
-                        conversion = format!(".map(|val|val{})", conversion);
-                    }
-
+                        "".to_owned()
+                    };
                     impl_def.push_str(&format!(
                         "            {}: older.{}{},\n",
                         field.name, field.name, conversion
