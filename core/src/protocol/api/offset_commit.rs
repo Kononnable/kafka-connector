@@ -453,7 +453,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions0 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata,
+            committed_metadata: latest.committed_metadata.into(),
         })
     }
 }
@@ -508,7 +508,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions1 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata,
+            committed_metadata: latest.committed_metadata.into(),
             ..OffsetCommitRequestTopicsPartitions1::default()
         })
     }
@@ -565,7 +565,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions2 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata,
+            committed_metadata: latest.committed_metadata.into(),
         })
     }
 }
@@ -621,7 +621,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions3 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata,
+            committed_metadata: latest.committed_metadata.into(),
         })
     }
 }
@@ -677,7 +677,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions4 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata,
+            committed_metadata: latest.committed_metadata.into(),
         })
     }
 }
@@ -732,7 +732,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions5 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata,
+            committed_metadata: latest.committed_metadata.into(),
         })
     }
 }
@@ -781,7 +781,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
             committed_leader_epoch: latest.committed_leader_epoch,
-            committed_metadata: latest.committed_metadata,
+            committed_metadata: latest.committed_metadata.into(),
         })
     }
 }
@@ -793,7 +793,7 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest7 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
             member_id: latest.member_id.map(|val| val.into()),
-            group_instance_id: latest.group_instance_id.map(|val| val),
+            group_instance_id: latest.group_instance_id.map(|val| val.into()),
             topics: latest
                 .topics
                 .into_iter()
@@ -824,7 +824,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
             committed_leader_epoch: latest.committed_leader_epoch,
-            committed_metadata: latest.committed_metadata,
+            committed_metadata: latest.committed_metadata.into(),
         })
     }
 }

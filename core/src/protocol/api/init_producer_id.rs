@@ -123,7 +123,7 @@ impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest0 {
             ));
         }
         Ok(InitProducerIdRequest0 {
-            transactional_id: latest.transactional_id,
+            transactional_id: latest.transactional_id.into(),
             transaction_timeout_ms: latest.transaction_timeout_ms,
         })
     }
@@ -147,7 +147,7 @@ impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest1 {
             ));
         }
         Ok(InitProducerIdRequest1 {
-            transactional_id: latest.transactional_id,
+            transactional_id: latest.transactional_id.into(),
             transaction_timeout_ms: latest.transaction_timeout_ms,
         })
     }

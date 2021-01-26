@@ -1,6 +1,7 @@
 use bytes::{BufMut, Bytes, BytesMut};
 
 pub mod compact_bytes;
+pub mod compact_nullable_string;
 pub mod compact_string;
 
 pub type Boolean = bool;
@@ -10,10 +11,9 @@ pub type Int16 = i16;
 pub type Int32 = i32;
 pub type Int64 = i64;
 pub type Float64 = f64;
+pub type NullableString = Option<String>;
 
 // TODO:
-pub type NullableString = String;
-pub type CompactNullableString = String;
 pub type CompactRecords = i64;
 pub type Records = i64;
 

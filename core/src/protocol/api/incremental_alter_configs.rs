@@ -134,7 +134,7 @@ impl TryFrom<IncrementalAlterConfigsRequestResourcesConfigs1>
         Ok(IncrementalAlterConfigsRequestResourcesConfigs0 {
             name: latest.name.into(),
             config_operation: latest.config_operation,
-            value: latest.value,
+            value: latest.value.into(),
         })
     }
 }

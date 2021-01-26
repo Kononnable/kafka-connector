@@ -176,7 +176,7 @@ impl TryFrom<LeaveGroupRequestMembers4> for LeaveGroupRequestMembers3 {
     fn try_from(latest: LeaveGroupRequestMembers4) -> Result<Self, Self::Error> {
         Ok(LeaveGroupRequestMembers3 {
             member_id: latest.member_id.into(),
-            group_instance_id: latest.group_instance_id,
+            group_instance_id: latest.group_instance_id.into(),
         })
     }
 }

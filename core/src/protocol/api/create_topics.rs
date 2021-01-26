@@ -396,7 +396,7 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsConfigs0 {
             name: latest.name.into(),
-            value: latest.value,
+            value: latest.value.into(),
         })
     }
 }
@@ -452,7 +452,7 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsConfigs1 {
             name: latest.name.into(),
-            value: latest.value,
+            value: latest.value.into(),
         })
     }
 }
@@ -508,7 +508,7 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsConfigs2 {
             name: latest.name.into(),
-            value: latest.value,
+            value: latest.value.into(),
         })
     }
 }
@@ -564,7 +564,7 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsConfigs3 {
             name: latest.name.into(),
-            value: latest.value,
+            value: latest.value.into(),
         })
     }
 }
@@ -620,7 +620,7 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
         Ok(CreateTopicsRequestTopicsConfigs4 {
             name: latest.name.into(),
-            value: latest.value,
+            value: latest.value.into(),
         })
     }
 }

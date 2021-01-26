@@ -490,7 +490,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
                         .collect::<Result<_, Error>>()
                 })
                 .wrap_result()?,
-            rack: latest.rack.map(|val| val),
+            rack: latest.rack.map(|val| val.into()),
         })
     }
 }
@@ -558,7 +558,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
                         .collect::<Result<_, Error>>()
                 })
                 .wrap_result()?,
-            rack: latest.rack.map(|val| val),
+            rack: latest.rack.map(|val| val.into()),
         })
     }
 }
@@ -620,7 +620,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
                         .collect::<Result<_, Error>>()
                 })
                 .wrap_result()?,
-            rack: latest.rack.map(|val| val),
+            rack: latest.rack.map(|val| val.into()),
         })
     }
 }
@@ -710,7 +710,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
                         .collect::<Result<_, Error>>()
                 })
                 .wrap_result()?,
-            rack: latest.rack.map(|val| val),
+            rack: latest.rack.map(|val| val.into()),
         })
     }
 }

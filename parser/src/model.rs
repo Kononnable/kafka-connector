@@ -92,12 +92,12 @@ impl FieldType {
             | FieldType::String
             | FieldType::Boolean => true,
             // TODO:
-            FieldType::Records
-            | FieldType::NullableString
-            | FieldType::CompactNullableString
-            | FieldType::CompactRecords => true,
+            FieldType::Records | FieldType::NullableString | FieldType::CompactRecords => true,
 
-            FieldType::KafkaBytes | FieldType::CompactBytes | FieldType::CompactString => false,
+            FieldType::KafkaBytes
+            | FieldType::CompactBytes
+            | FieldType::CompactString
+            | FieldType::CompactNullableString => false,
         }
     }
     pub fn is_easily_convertable(&self) -> bool {

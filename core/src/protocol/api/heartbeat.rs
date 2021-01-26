@@ -155,7 +155,7 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest3 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
             member_id: latest.member_id.into(),
-            group_instance_id: latest.group_instance_id.map(|val| val),
+            group_instance_id: latest.group_instance_id.map(|val| val.into()),
         })
     }
 }

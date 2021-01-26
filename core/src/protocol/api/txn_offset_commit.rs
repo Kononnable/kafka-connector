@@ -259,7 +259,7 @@ impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequest
         Ok(TxnOffsetCommitRequestTopicsPartitions0 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata,
+            committed_metadata: latest.committed_metadata.into(),
         })
     }
 }
@@ -329,7 +329,7 @@ impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequest
         Ok(TxnOffsetCommitRequestTopicsPartitions1 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata,
+            committed_metadata: latest.committed_metadata.into(),
         })
     }
 }
@@ -393,7 +393,7 @@ impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequest
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
             committed_leader_epoch: latest.committed_leader_epoch,
-            committed_metadata: latest.committed_metadata,
+            committed_metadata: latest.committed_metadata.into(),
         })
     }
 }

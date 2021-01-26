@@ -139,9 +139,9 @@ impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest0 {
         }
         Ok(DescribeAclsRequest0 {
             resource_type_filter: latest.resource_type_filter,
-            resource_name_filter: latest.resource_name_filter,
-            principal_filter: latest.principal_filter,
-            host_filter: latest.host_filter,
+            resource_name_filter: latest.resource_name_filter.into(),
+            principal_filter: latest.principal_filter.into(),
+            host_filter: latest.host_filter.into(),
             operation: latest.operation,
             permission_type: latest.permission_type,
         })
@@ -153,10 +153,10 @@ impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest1 {
     fn try_from(latest: DescribeAclsRequest2) -> Result<Self, Self::Error> {
         Ok(DescribeAclsRequest1 {
             resource_type_filter: latest.resource_type_filter,
-            resource_name_filter: latest.resource_name_filter,
+            resource_name_filter: latest.resource_name_filter.into(),
             pattern_type_filter: latest.pattern_type_filter,
-            principal_filter: latest.principal_filter,
-            host_filter: latest.host_filter,
+            principal_filter: latest.principal_filter.into(),
+            host_filter: latest.host_filter.into(),
             operation: latest.operation,
             permission_type: latest.permission_type,
         })

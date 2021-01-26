@@ -491,7 +491,7 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest5 {
             session_timeout_ms: latest.session_timeout_ms,
             rebalance_timeout_ms: latest.rebalance_timeout_ms,
             member_id: latest.member_id.into(),
-            group_instance_id: latest.group_instance_id.map(|val| val),
+            group_instance_id: latest.group_instance_id.map(|val| val.into()),
             protocol_type: latest.protocol_type.into(),
             protocols: latest
                 .protocols

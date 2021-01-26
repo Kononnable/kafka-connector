@@ -114,6 +114,7 @@ pub enum ApiNumbers {
 
 mod prelude {
     pub use super::super::custom_types::compact_bytes::CompactBytes;
+    pub use super::super::custom_types::compact_nullable_string::CompactNullableString;
     pub use super::super::custom_types::compact_string::CompactString;
     pub use super::super::custom_types::*;
     pub use super::super::error::Error;
