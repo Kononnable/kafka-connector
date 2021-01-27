@@ -28,28 +28,28 @@ pub fn deserialize_heartbeat_response(version: i32, buf: &mut Bytes) -> Heartbea
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct HeartbeatRequest0 {
     pub group_id: String,
     pub generation_id: Int32,
     pub member_id: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct HeartbeatRequest1 {
     pub group_id: String,
     pub generation_id: Int32,
     pub member_id: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct HeartbeatRequest2 {
     pub group_id: String,
     pub generation_id: Int32,
     pub member_id: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct HeartbeatRequest3 {
     pub group_id: String,
     pub generation_id: Int32,
@@ -57,7 +57,7 @@ pub struct HeartbeatRequest3 {
     pub group_instance_id: Optional<NullableString>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct HeartbeatRequest4 {
     pub group_id: CompactString,
     pub generation_id: Int32,
@@ -65,30 +65,30 @@ pub struct HeartbeatRequest4 {
     pub group_instance_id: Optional<CompactNullableString>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct HeartbeatResponse0 {
     pub error_code: Int16,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct HeartbeatResponse1 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct HeartbeatResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct HeartbeatResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct HeartbeatResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,

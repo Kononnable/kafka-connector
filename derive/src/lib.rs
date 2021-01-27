@@ -17,7 +17,9 @@ pub fn to_bytes(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         impl #impl_generics ToBytes for #name #ty_generics #where_clause {
             fn serialize(&self, buf:&mut bytes::BytesMut) {
+                trace!("Serializing {:#?}", self);
                 #serialization
+                trace!("Serialization finished {:#?}", self);
             }
         }
     };
@@ -60,12 +62,16 @@ pub fn from_bytes(input: TokenStream) -> TokenStream {
     let generics = add_trait_bounds(input.generics);
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
     let deserialization = generate_deserialize(&input.data);
+    let type_name = format!("{}", name);
     let expanded = quote! {
         impl #impl_generics FromBytes for #name #ty_generics #where_clause {
             fn deserialize(buf:  &mut Bytes) -> Self {
-                #name {
+                trace!("Deserializing {}",#type_name);
+                let ret_val = #name {
                     #deserialization
-                }
+                };
+                trace!("Deserialization finished {:#?}", ret_val);
+                ret_val
             }
         }
     };
@@ -78,8 +84,12 @@ fn generate_deserialize(data: &Data) -> quote::__private::TokenStream {
             Fields::Named(ref fields) => {
                 let recurse = fields.named.iter().map(|f| {
                     let name = &f.ident;
+                    let f_name = format!("{}", name.clone().unwrap());
                     quote_spanned! {f.span()=>
-                        #name: FromBytes::deserialize(buf),
+                        #name: {
+                            trace!("Deserializing field {}",#f_name);
+                            FromBytes::deserialize(buf)
+                        },
                     }
                 });
                 quote! {

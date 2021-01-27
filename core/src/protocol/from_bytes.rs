@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use bytes::Bytes;
 
 pub trait FromBytes {
@@ -5,7 +7,7 @@ pub trait FromBytes {
 }
 impl<R> FromBytes for Vec<R>
 where
-    R: FromBytes,
+    R: FromBytes + Debug,
 {
     fn deserialize(buf: &mut Bytes) -> Self {
         let mut slice = buf.split_to(4).into_iter();

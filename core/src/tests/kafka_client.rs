@@ -6,6 +6,7 @@ const BROKER: &str = "127.0.0.1:9092";
 
 #[tokio::test]
 async fn should_connect_to_kafka() -> Result<()> {
+    env_logger::init();
     KafkaClient::new(BROKER).await?;
     Ok(())
 }

@@ -23,17 +23,17 @@ pub fn deserialize_describe_user_scram_credentials_response(
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeUserScramCredentialsRequest0 {
     pub users: Vec<DescribeUserScramCredentialsRequestUsers0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeUserScramCredentialsRequestUsers0 {
     pub name: CompactString,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeUserScramCredentialsResponse0 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
@@ -41,7 +41,7 @@ pub struct DescribeUserScramCredentialsResponse0 {
     pub results: Vec<DescribeUserScramCredentialsResponseResults0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeUserScramCredentialsResponseResults0 {
     pub user: CompactString,
     pub error_code: Int16,
@@ -49,7 +49,7 @@ pub struct DescribeUserScramCredentialsResponseResults0 {
     pub credential_infos: Vec<DescribeUserScramCredentialsResponseResultsCredentialInfos0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeUserScramCredentialsResponseResultsCredentialInfos0 {
     pub mechanism: Int8,
     pub iterations: Int32,

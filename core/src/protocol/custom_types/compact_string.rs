@@ -4,6 +4,7 @@ use crate::protocol::{from_bytes::FromBytes, to_bytes::ToBytes};
 
 use super::{deserialize_unsigned_varint_32, serialize_unsigned_varint_32};
 
+#[derive(Debug)]
 pub struct CompactString {
     pub value: String,
 }

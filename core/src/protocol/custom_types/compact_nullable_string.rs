@@ -6,6 +6,7 @@ use super::{
     compact_string::CompactString, deserialize_unsigned_varint_32, serialize_unsigned_varint_32,
 };
 
+#[derive(Debug)]
 pub struct CompactNullableString {
     pub value: Option<String>,
 }

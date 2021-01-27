@@ -38,91 +38,91 @@ pub fn deserialize_metadata_response(version: i32, buf: &mut Bytes) -> MetadataR
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequest0 {
     pub topics: Vec<MetadataRequestTopics0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequestTopics0 {
     pub name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequest1 {
     pub topics: Vec<MetadataRequestTopics1>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequestTopics1 {
     pub name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequest2 {
     pub topics: Vec<MetadataRequestTopics2>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequestTopics2 {
     pub name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequest3 {
     pub topics: Vec<MetadataRequestTopics3>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequestTopics3 {
     pub name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequest4 {
     pub topics: Vec<MetadataRequestTopics4>,
     pub allow_auto_topic_creation: Optional<Boolean>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequestTopics4 {
     pub name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequest5 {
     pub topics: Vec<MetadataRequestTopics5>,
     pub allow_auto_topic_creation: Optional<Boolean>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequestTopics5 {
     pub name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequest6 {
     pub topics: Vec<MetadataRequestTopics6>,
     pub allow_auto_topic_creation: Optional<Boolean>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequestTopics6 {
     pub name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequest7 {
     pub topics: Vec<MetadataRequestTopics7>,
     pub allow_auto_topic_creation: Optional<Boolean>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequestTopics7 {
     pub name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequest8 {
     pub topics: Vec<MetadataRequestTopics8>,
     pub allow_auto_topic_creation: Optional<Boolean>,
@@ -130,12 +130,12 @@ pub struct MetadataRequest8 {
     pub include_topic_authorized_operations: Optional<Boolean>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequestTopics8 {
     pub name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequest9 {
     pub topics: Vec<MetadataRequestTopics9>,
     pub allow_auto_topic_creation: Optional<Boolean>,
@@ -143,32 +143,32 @@ pub struct MetadataRequest9 {
     pub include_topic_authorized_operations: Optional<Boolean>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequestTopics9 {
     pub name: CompactString,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponse0 {
     pub brokers: Vec<MetadataResponseBrokers0>,
     pub topics: Vec<MetadataResponseTopics0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseBrokers0 {
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopics0 {
     pub error_code: Int16,
     pub name: String,
     pub partitions: Vec<MetadataResponseTopicsPartitions0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopicsPartitions0 {
     pub error_code: Int16,
     pub partition_index: Int32,
@@ -177,14 +177,14 @@ pub struct MetadataResponseTopicsPartitions0 {
     pub isr_nodes: Vec<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponse1 {
     pub brokers: Vec<MetadataResponseBrokers1>,
     pub controller_id: Optional<Int32>,
     pub topics: Vec<MetadataResponseTopics1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseBrokers1 {
     pub node_id: Int32,
     pub host: String,
@@ -192,7 +192,7 @@ pub struct MetadataResponseBrokers1 {
     pub rack: Optional<NullableString>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopics1 {
     pub error_code: Int16,
     pub name: String,
@@ -200,7 +200,7 @@ pub struct MetadataResponseTopics1 {
     pub partitions: Vec<MetadataResponseTopicsPartitions1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopicsPartitions1 {
     pub error_code: Int16,
     pub partition_index: Int32,
@@ -209,7 +209,7 @@ pub struct MetadataResponseTopicsPartitions1 {
     pub isr_nodes: Vec<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponse2 {
     pub brokers: Vec<MetadataResponseBrokers2>,
     pub cluster_id: Optional<NullableString>,
@@ -217,7 +217,7 @@ pub struct MetadataResponse2 {
     pub topics: Vec<MetadataResponseTopics2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseBrokers2 {
     pub node_id: Int32,
     pub host: String,
@@ -225,7 +225,7 @@ pub struct MetadataResponseBrokers2 {
     pub rack: Optional<NullableString>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopics2 {
     pub error_code: Int16,
     pub name: String,
@@ -233,7 +233,7 @@ pub struct MetadataResponseTopics2 {
     pub partitions: Vec<MetadataResponseTopicsPartitions2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopicsPartitions2 {
     pub error_code: Int16,
     pub partition_index: Int32,
@@ -242,7 +242,7 @@ pub struct MetadataResponseTopicsPartitions2 {
     pub isr_nodes: Vec<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub brokers: Vec<MetadataResponseBrokers3>,
@@ -251,7 +251,7 @@ pub struct MetadataResponse3 {
     pub topics: Vec<MetadataResponseTopics3>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseBrokers3 {
     pub node_id: Int32,
     pub host: String,
@@ -259,7 +259,7 @@ pub struct MetadataResponseBrokers3 {
     pub rack: Optional<NullableString>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopics3 {
     pub error_code: Int16,
     pub name: String,
@@ -267,7 +267,7 @@ pub struct MetadataResponseTopics3 {
     pub partitions: Vec<MetadataResponseTopicsPartitions3>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopicsPartitions3 {
     pub error_code: Int16,
     pub partition_index: Int32,
@@ -276,7 +276,7 @@ pub struct MetadataResponseTopicsPartitions3 {
     pub isr_nodes: Vec<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub brokers: Vec<MetadataResponseBrokers4>,
@@ -285,7 +285,7 @@ pub struct MetadataResponse4 {
     pub topics: Vec<MetadataResponseTopics4>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseBrokers4 {
     pub node_id: Int32,
     pub host: String,
@@ -293,7 +293,7 @@ pub struct MetadataResponseBrokers4 {
     pub rack: Optional<NullableString>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopics4 {
     pub error_code: Int16,
     pub name: String,
@@ -301,7 +301,7 @@ pub struct MetadataResponseTopics4 {
     pub partitions: Vec<MetadataResponseTopicsPartitions4>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopicsPartitions4 {
     pub error_code: Int16,
     pub partition_index: Int32,
@@ -310,7 +310,7 @@ pub struct MetadataResponseTopicsPartitions4 {
     pub isr_nodes: Vec<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub brokers: Vec<MetadataResponseBrokers5>,
@@ -319,7 +319,7 @@ pub struct MetadataResponse5 {
     pub topics: Vec<MetadataResponseTopics5>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseBrokers5 {
     pub node_id: Int32,
     pub host: String,
@@ -327,7 +327,7 @@ pub struct MetadataResponseBrokers5 {
     pub rack: Optional<NullableString>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopics5 {
     pub error_code: Int16,
     pub name: String,
@@ -335,7 +335,7 @@ pub struct MetadataResponseTopics5 {
     pub partitions: Vec<MetadataResponseTopicsPartitions5>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopicsPartitions5 {
     pub error_code: Int16,
     pub partition_index: Int32,
@@ -345,7 +345,7 @@ pub struct MetadataResponseTopicsPartitions5 {
     pub offline_replicas: Optional<Vec<Int32>>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponse6 {
     pub throttle_time_ms: Optional<Int32>,
     pub brokers: Vec<MetadataResponseBrokers6>,
@@ -354,7 +354,7 @@ pub struct MetadataResponse6 {
     pub topics: Vec<MetadataResponseTopics6>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseBrokers6 {
     pub node_id: Int32,
     pub host: String,
@@ -362,7 +362,7 @@ pub struct MetadataResponseBrokers6 {
     pub rack: Optional<NullableString>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopics6 {
     pub error_code: Int16,
     pub name: String,
@@ -370,7 +370,7 @@ pub struct MetadataResponseTopics6 {
     pub partitions: Vec<MetadataResponseTopicsPartitions6>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopicsPartitions6 {
     pub error_code: Int16,
     pub partition_index: Int32,
@@ -380,7 +380,7 @@ pub struct MetadataResponseTopicsPartitions6 {
     pub offline_replicas: Optional<Vec<Int32>>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponse7 {
     pub throttle_time_ms: Optional<Int32>,
     pub brokers: Vec<MetadataResponseBrokers7>,
@@ -389,7 +389,7 @@ pub struct MetadataResponse7 {
     pub topics: Vec<MetadataResponseTopics7>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseBrokers7 {
     pub node_id: Int32,
     pub host: String,
@@ -397,7 +397,7 @@ pub struct MetadataResponseBrokers7 {
     pub rack: Optional<NullableString>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopics7 {
     pub error_code: Int16,
     pub name: String,
@@ -405,7 +405,7 @@ pub struct MetadataResponseTopics7 {
     pub partitions: Vec<MetadataResponseTopicsPartitions7>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopicsPartitions7 {
     pub error_code: Int16,
     pub partition_index: Int32,
@@ -416,7 +416,7 @@ pub struct MetadataResponseTopicsPartitions7 {
     pub offline_replicas: Optional<Vec<Int32>>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponse8 {
     pub throttle_time_ms: Optional<Int32>,
     pub brokers: Vec<MetadataResponseBrokers8>,
@@ -426,7 +426,7 @@ pub struct MetadataResponse8 {
     pub cluster_authorized_operations: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseBrokers8 {
     pub node_id: Int32,
     pub host: String,
@@ -434,7 +434,7 @@ pub struct MetadataResponseBrokers8 {
     pub rack: Optional<NullableString>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopics8 {
     pub error_code: Int16,
     pub name: String,
@@ -443,7 +443,7 @@ pub struct MetadataResponseTopics8 {
     pub topic_authorized_operations: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopicsPartitions8 {
     pub error_code: Int16,
     pub partition_index: Int32,
@@ -454,7 +454,7 @@ pub struct MetadataResponseTopicsPartitions8 {
     pub offline_replicas: Optional<Vec<Int32>>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponse9 {
     pub throttle_time_ms: Optional<Int32>,
     pub brokers: Vec<MetadataResponseBrokers9>,
@@ -464,7 +464,7 @@ pub struct MetadataResponse9 {
     pub cluster_authorized_operations: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseBrokers9 {
     pub node_id: Int32,
     pub host: CompactString,
@@ -472,7 +472,7 @@ pub struct MetadataResponseBrokers9 {
     pub rack: Optional<CompactNullableString>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopics9 {
     pub error_code: Int16,
     pub name: CompactString,
@@ -481,7 +481,7 @@ pub struct MetadataResponseTopics9 {
     pub topic_authorized_operations: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct MetadataResponseTopicsPartitions9 {
     pub error_code: Int16,
     pub partition_index: Int32,

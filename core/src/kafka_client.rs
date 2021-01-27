@@ -82,8 +82,9 @@ impl BrokerClient {
         let mut size: [u8; 4] = [0, 0, 0, 0];
         self.connection.read_exact(&mut size).await.unwrap();
         let cap = i32::from_be_bytes(size);
-        let mut buf2 = BytesMut::with_capacity(cap as usize);
+        let mut buf2 = vec![0; cap as usize];
         self.connection.read_exact(&mut buf2).await.unwrap();
+
         let mut buf2 = Bytes::from(buf2);
         let response_header = HeaderResponse::deserialize(&mut buf2);
         self.last_correlation = response_header.correlation;
@@ -97,7 +98,6 @@ impl BrokerClient {
             self.supported_versions
                 .insert(api_key.api_key, (api_key.min_version, api_key.max_version));
         }
-        println!("{:#?}", self.supported_versions);
     }
 }
 

@@ -33,45 +33,45 @@ pub fn deserialize_describe_groups_response(
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeGroupsRequest0 {
     pub groups: Vec<String>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeGroupsRequest1 {
     pub groups: Vec<String>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeGroupsRequest2 {
     pub groups: Vec<String>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeGroupsRequest3 {
     pub groups: Vec<String>,
     pub include_authorized_operations: Optional<Boolean>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeGroupsRequest4 {
     pub groups: Vec<String>,
     pub include_authorized_operations: Optional<Boolean>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeGroupsRequest5 {
     pub groups: Vec<CompactString>,
     pub include_authorized_operations: Optional<Boolean>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponse0 {
     pub groups: Vec<DescribeGroupsResponseGroups0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponseGroups0 {
     pub error_code: Int16,
     pub group_id: String,
@@ -81,7 +81,7 @@ pub struct DescribeGroupsResponseGroups0 {
     pub members: Vec<DescribeGroupsResponseGroupsMembers0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponseGroupsMembers0 {
     pub member_id: String,
     pub client_id: String,
@@ -90,13 +90,13 @@ pub struct DescribeGroupsResponseGroupsMembers0 {
     pub member_assignment: KafkaBytes,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponse1 {
     pub throttle_time_ms: Optional<Int32>,
     pub groups: Vec<DescribeGroupsResponseGroups1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponseGroups1 {
     pub error_code: Int16,
     pub group_id: String,
@@ -106,7 +106,7 @@ pub struct DescribeGroupsResponseGroups1 {
     pub members: Vec<DescribeGroupsResponseGroupsMembers1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponseGroupsMembers1 {
     pub member_id: String,
     pub client_id: String,
@@ -115,13 +115,13 @@ pub struct DescribeGroupsResponseGroupsMembers1 {
     pub member_assignment: KafkaBytes,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub groups: Vec<DescribeGroupsResponseGroups2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponseGroups2 {
     pub error_code: Int16,
     pub group_id: String,
@@ -131,7 +131,7 @@ pub struct DescribeGroupsResponseGroups2 {
     pub members: Vec<DescribeGroupsResponseGroupsMembers2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponseGroupsMembers2 {
     pub member_id: String,
     pub client_id: String,
@@ -140,13 +140,13 @@ pub struct DescribeGroupsResponseGroupsMembers2 {
     pub member_assignment: KafkaBytes,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub groups: Vec<DescribeGroupsResponseGroups3>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponseGroups3 {
     pub error_code: Int16,
     pub group_id: String,
@@ -157,7 +157,7 @@ pub struct DescribeGroupsResponseGroups3 {
     pub authorized_operations: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponseGroupsMembers3 {
     pub member_id: String,
     pub client_id: String,
@@ -166,13 +166,13 @@ pub struct DescribeGroupsResponseGroupsMembers3 {
     pub member_assignment: KafkaBytes,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub groups: Vec<DescribeGroupsResponseGroups4>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponseGroups4 {
     pub error_code: Int16,
     pub group_id: String,
@@ -183,7 +183,7 @@ pub struct DescribeGroupsResponseGroups4 {
     pub authorized_operations: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponseGroupsMembers4 {
     pub member_id: String,
     pub group_instance_id: Optional<NullableString>,
@@ -193,13 +193,13 @@ pub struct DescribeGroupsResponseGroupsMembers4 {
     pub member_assignment: KafkaBytes,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub groups: Vec<DescribeGroupsResponseGroups5>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponseGroups5 {
     pub error_code: Int16,
     pub group_id: CompactString,
@@ -210,7 +210,7 @@ pub struct DescribeGroupsResponseGroups5 {
     pub authorized_operations: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeGroupsResponseGroupsMembers5 {
     pub member_id: CompactString,
     pub group_instance_id: Optional<CompactNullableString>,

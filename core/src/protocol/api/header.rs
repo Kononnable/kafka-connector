@@ -1,9 +1,11 @@
+use std::fmt::Debug;
+
 use super::prelude::*;
 
 #[derive(Debug, FromBytes)]
 pub struct KafkaResponse<R>
 where
-    R: FromBytes,
+    R: FromBytes + Debug,
 {
     pub header: HeaderResponse,
     pub response: R,
@@ -12,7 +14,7 @@ where
 #[derive(Debug, ToBytes)]
 pub struct KafkaRequest<R>
 where
-    R: ToBytes,
+    R: ToBytes + Debug,
 {
     pub header: HeaderRequest,
     pub response: R,

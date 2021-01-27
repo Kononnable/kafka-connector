@@ -20,20 +20,20 @@ pub fn deserialize_alter_isr_response(version: i32, buf: &mut Bytes) -> AlterIsr
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct AlterIsrRequest0 {
     pub broker_id: Int32,
     pub broker_epoch: Int64,
     pub topics: Vec<AlterIsrRequestTopics0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct AlterIsrRequestTopics0 {
     pub name: CompactString,
     pub partitions: Vec<AlterIsrRequestTopicsPartitions0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct AlterIsrRequestTopicsPartitions0 {
     pub partition_index: Int32,
     pub leader_epoch: Int32,
@@ -41,20 +41,20 @@ pub struct AlterIsrRequestTopicsPartitions0 {
     pub current_isr_version: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct AlterIsrResponse0 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
     pub topics: Vec<AlterIsrResponseTopics0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct AlterIsrResponseTopics0 {
     pub name: CompactString,
     pub partitions: Vec<AlterIsrResponseTopicsPartitions0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct AlterIsrResponseTopicsPartitions0 {
     pub partition_index: Int32,
     pub error_code: Int16,

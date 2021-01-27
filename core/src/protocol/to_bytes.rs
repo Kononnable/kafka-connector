@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use bytes::{BufMut, BytesMut};
 
 pub trait ToBytes {
@@ -56,7 +58,7 @@ impl ToBytes for f64 {
 }
 impl<T> ToBytes for Vec<T>
 where
-    T: ToBytes,
+    T: ToBytes + Debug,
 {
     fn serialize(&self, buf: &mut BytesMut) {
         buf.put_i32(self.len() as i32);

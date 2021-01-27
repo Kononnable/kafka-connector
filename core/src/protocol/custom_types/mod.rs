@@ -14,8 +14,8 @@ pub type Float64 = f64;
 pub type NullableString = Option<String>;
 
 // TODO:
-pub type CompactRecords = i64;
-pub type Records = i64;
+pub type CompactRecords = KafkaBytes;
+pub type Records = KafkaBytes;
 
 pub fn deserialize_unsigned_varint_32(buf: &mut Bytes) -> u32 {
     let mut no_of_bytes = 0;

@@ -22,23 +22,23 @@ pub fn deserialize_sasl_handshake_response(version: i32, buf: &mut Bytes) -> Sas
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct SaslHandshakeRequest0 {
     pub mechanism: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct SaslHandshakeRequest1 {
     pub mechanism: String,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct SaslHandshakeResponse0 {
     pub error_code: Int16,
     pub mechanisms: Vec<String>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct SaslHandshakeResponse1 {
     pub error_code: Int16,
     pub mechanisms: Vec<String>,

@@ -36,64 +36,64 @@ pub fn deserialize_produce_response(version: i32, buf: &mut Bytes) -> ProduceRes
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequest0 {
     pub acks: Int16,
     pub timeout: Int32,
     pub topic_data: Vec<ProduceRequestTopicData0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicData0 {
     pub topic: String,
     pub data: Vec<ProduceRequestTopicDataData0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicDataData0 {
     pub partition: Int32,
     pub record_set: Records,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequest1 {
     pub acks: Int16,
     pub timeout: Int32,
     pub topic_data: Vec<ProduceRequestTopicData1>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicData1 {
     pub topic: String,
     pub data: Vec<ProduceRequestTopicDataData1>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicDataData1 {
     pub partition: Int32,
     pub record_set: Records,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequest2 {
     pub acks: Int16,
     pub timeout: Int32,
     pub topic_data: Vec<ProduceRequestTopicData2>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicData2 {
     pub topic: String,
     pub data: Vec<ProduceRequestTopicDataData2>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicDataData2 {
     pub partition: Int32,
     pub record_set: Records,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequest3 {
     pub transactional_id: Optional<NullableString>,
     pub acks: Int16,
@@ -101,19 +101,19 @@ pub struct ProduceRequest3 {
     pub topic_data: Vec<ProduceRequestTopicData3>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicData3 {
     pub topic: String,
     pub data: Vec<ProduceRequestTopicDataData3>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicDataData3 {
     pub partition: Int32,
     pub record_set: Records,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequest4 {
     pub transactional_id: Optional<NullableString>,
     pub acks: Int16,
@@ -121,19 +121,19 @@ pub struct ProduceRequest4 {
     pub topic_data: Vec<ProduceRequestTopicData4>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicData4 {
     pub topic: String,
     pub data: Vec<ProduceRequestTopicDataData4>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicDataData4 {
     pub partition: Int32,
     pub record_set: Records,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequest5 {
     pub transactional_id: Optional<NullableString>,
     pub acks: Int16,
@@ -141,19 +141,19 @@ pub struct ProduceRequest5 {
     pub topic_data: Vec<ProduceRequestTopicData5>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicData5 {
     pub topic: String,
     pub data: Vec<ProduceRequestTopicDataData5>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicDataData5 {
     pub partition: Int32,
     pub record_set: Records,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequest6 {
     pub transactional_id: Optional<NullableString>,
     pub acks: Int16,
@@ -161,19 +161,19 @@ pub struct ProduceRequest6 {
     pub topic_data: Vec<ProduceRequestTopicData6>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicData6 {
     pub topic: String,
     pub data: Vec<ProduceRequestTopicDataData6>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicDataData6 {
     pub partition: Int32,
     pub record_set: Records,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequest7 {
     pub transactional_id: Optional<NullableString>,
     pub acks: Int16,
@@ -181,19 +181,19 @@ pub struct ProduceRequest7 {
     pub topic_data: Vec<ProduceRequestTopicData7>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicData7 {
     pub topic: String,
     pub data: Vec<ProduceRequestTopicDataData7>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicDataData7 {
     pub partition: Int32,
     pub record_set: Records,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequest8 {
     pub transactional_id: Optional<NullableString>,
     pub acks: Int16,
@@ -201,68 +201,68 @@ pub struct ProduceRequest8 {
     pub topic_data: Vec<ProduceRequestTopicData8>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicData8 {
     pub topic: String,
     pub data: Vec<ProduceRequestTopicDataData8>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequestTopicDataData8 {
     pub partition: Int32,
     pub record_set: Records,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponse0 {
     pub responses: Vec<ProduceResponseResponses0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponses0 {
     pub topic: String,
     pub partition_responses: Vec<ProduceResponseResponsesPartitionResponses0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponsesPartitionResponses0 {
     pub partition: Int32,
     pub error_code: Int16,
     pub base_offset: Int64,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponse1 {
     pub responses: Vec<ProduceResponseResponses1>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponses1 {
     pub topic: String,
     pub partition_responses: Vec<ProduceResponseResponsesPartitionResponses1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponsesPartitionResponses1 {
     pub partition: Int32,
     pub error_code: Int16,
     pub base_offset: Int64,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponse2 {
     pub responses: Vec<ProduceResponseResponses2>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponses2 {
     pub topic: String,
     pub partition_responses: Vec<ProduceResponseResponsesPartitionResponses2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponsesPartitionResponses2 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -270,19 +270,19 @@ pub struct ProduceResponseResponsesPartitionResponses2 {
     pub log_append_time: Optional<Int64>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponse3 {
     pub responses: Vec<ProduceResponseResponses3>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponses3 {
     pub topic: String,
     pub partition_responses: Vec<ProduceResponseResponsesPartitionResponses3>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponsesPartitionResponses3 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -290,19 +290,19 @@ pub struct ProduceResponseResponsesPartitionResponses3 {
     pub log_append_time: Optional<Int64>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponse4 {
     pub responses: Vec<ProduceResponseResponses4>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponses4 {
     pub topic: String,
     pub partition_responses: Vec<ProduceResponseResponsesPartitionResponses4>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponsesPartitionResponses4 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -310,19 +310,19 @@ pub struct ProduceResponseResponsesPartitionResponses4 {
     pub log_append_time: Optional<Int64>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponse5 {
     pub responses: Vec<ProduceResponseResponses5>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponses5 {
     pub topic: String,
     pub partition_responses: Vec<ProduceResponseResponsesPartitionResponses5>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponsesPartitionResponses5 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -331,19 +331,19 @@ pub struct ProduceResponseResponsesPartitionResponses5 {
     pub log_start_offset: Optional<Int64>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponse6 {
     pub responses: Vec<ProduceResponseResponses6>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponses6 {
     pub topic: String,
     pub partition_responses: Vec<ProduceResponseResponsesPartitionResponses6>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponsesPartitionResponses6 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -352,19 +352,19 @@ pub struct ProduceResponseResponsesPartitionResponses6 {
     pub log_start_offset: Optional<Int64>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponse7 {
     pub responses: Vec<ProduceResponseResponses7>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponses7 {
     pub topic: String,
     pub partition_responses: Vec<ProduceResponseResponsesPartitionResponses7>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponsesPartitionResponses7 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -373,19 +373,19 @@ pub struct ProduceResponseResponsesPartitionResponses7 {
     pub log_start_offset: Optional<Int64>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponse8 {
     pub responses: Vec<ProduceResponseResponses8>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponses8 {
     pub topic: String,
     pub partition_responses: Vec<ProduceResponseResponsesPartitionResponses8>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponsesPartitionResponses8 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -396,7 +396,7 @@ pub struct ProduceResponseResponsesPartitionResponses8 {
     pub error_message: Optional<NullableString>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ProduceResponseResponsesPartitionResponsesRecordErrors8 {
     pub batch_index: Int32,
     pub batch_index_error_message: NullableString,

@@ -23,25 +23,25 @@ pub fn deserialize_alter_partition_reassignments_response(
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct AlterPartitionReassignmentsRequest0 {
     pub timeout_ms: Int32,
     pub topics: Vec<AlterPartitionReassignmentsRequestTopics0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct AlterPartitionReassignmentsRequestTopics0 {
     pub name: CompactString,
     pub partitions: Vec<AlterPartitionReassignmentsRequestTopicsPartitions0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct AlterPartitionReassignmentsRequestTopicsPartitions0 {
     pub partition_index: Int32,
     pub replicas: Vec<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct AlterPartitionReassignmentsResponse0 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
@@ -49,13 +49,13 @@ pub struct AlterPartitionReassignmentsResponse0 {
     pub responses: Vec<AlterPartitionReassignmentsResponseResponses0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct AlterPartitionReassignmentsResponseResponses0 {
     pub name: CompactString,
     pub partitions: Vec<AlterPartitionReassignmentsResponseResponsesPartitions0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct AlterPartitionReassignmentsResponseResponsesPartitions0 {
     pub partition_index: Int32,
     pub error_code: Int16,

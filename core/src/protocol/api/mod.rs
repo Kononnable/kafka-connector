@@ -124,6 +124,7 @@ mod prelude {
     pub use bytes::{Bytes, BytesMut};
     pub use kafka_connector_derive::FromBytes;
     pub use kafka_connector_derive::ToBytes;
+    pub use log::trace;
     pub use std::convert::TryFrom;
     pub use std::convert::TryInto;
 }

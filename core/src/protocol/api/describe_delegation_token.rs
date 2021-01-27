@@ -27,47 +27,47 @@ pub fn deserialize_describe_delegation_token_response(
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeDelegationTokenRequest0 {
     pub owners: Vec<DescribeDelegationTokenRequestOwners0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeDelegationTokenRequestOwners0 {
     pub principal_type: String,
     pub principal_name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeDelegationTokenRequest1 {
     pub owners: Vec<DescribeDelegationTokenRequestOwners1>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeDelegationTokenRequestOwners1 {
     pub principal_type: String,
     pub principal_name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeDelegationTokenRequest2 {
     pub owners: Vec<DescribeDelegationTokenRequestOwners2>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeDelegationTokenRequestOwners2 {
     pub principal_type: CompactString,
     pub principal_name: CompactString,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeDelegationTokenResponse0 {
     pub error_code: Int16,
     pub tokens: Vec<DescribeDelegationTokenResponseTokens0>,
     pub throttle_time_ms: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeDelegationTokenResponseTokens0 {
     pub principal_type: String,
     pub principal_name: String,
@@ -79,20 +79,20 @@ pub struct DescribeDelegationTokenResponseTokens0 {
     pub renewers: Vec<DescribeDelegationTokenResponseTokensRenewers0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeDelegationTokenResponseTokensRenewers0 {
     pub principal_type: String,
     pub principal_name: String,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeDelegationTokenResponse1 {
     pub error_code: Int16,
     pub tokens: Vec<DescribeDelegationTokenResponseTokens1>,
     pub throttle_time_ms: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeDelegationTokenResponseTokens1 {
     pub principal_type: String,
     pub principal_name: String,
@@ -104,20 +104,20 @@ pub struct DescribeDelegationTokenResponseTokens1 {
     pub renewers: Vec<DescribeDelegationTokenResponseTokensRenewers1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeDelegationTokenResponseTokensRenewers1 {
     pub principal_type: String,
     pub principal_name: String,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeDelegationTokenResponse2 {
     pub error_code: Int16,
     pub tokens: Vec<DescribeDelegationTokenResponseTokens2>,
     pub throttle_time_ms: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeDelegationTokenResponseTokens2 {
     pub principal_type: CompactString,
     pub principal_name: CompactString,
@@ -129,7 +129,7 @@ pub struct DescribeDelegationTokenResponseTokens2 {
     pub renewers: Vec<DescribeDelegationTokenResponseTokensRenewers2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeDelegationTokenResponseTokensRenewers2 {
     pub principal_type: CompactString,
     pub principal_name: CompactString,

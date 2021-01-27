@@ -24,12 +24,12 @@ pub fn deserialize_delete_acls_response(version: i32, buf: &mut Bytes) -> Delete
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DeleteAclsRequest0 {
     pub filters: Vec<DeleteAclsRequestFilters0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DeleteAclsRequestFilters0 {
     pub resource_type_filter: Int8,
     pub resource_name_filter: NullableString,
@@ -39,12 +39,12 @@ pub struct DeleteAclsRequestFilters0 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DeleteAclsRequest1 {
     pub filters: Vec<DeleteAclsRequestFilters1>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DeleteAclsRequestFilters1 {
     pub resource_type_filter: Int8,
     pub resource_name_filter: NullableString,
@@ -55,12 +55,12 @@ pub struct DeleteAclsRequestFilters1 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DeleteAclsRequest2 {
     pub filters: Vec<DeleteAclsRequestFilters2>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DeleteAclsRequestFilters2 {
     pub resource_type_filter: Int8,
     pub resource_name_filter: CompactNullableString,
@@ -71,20 +71,20 @@ pub struct DeleteAclsRequestFilters2 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DeleteAclsResponse0 {
     pub throttle_time_ms: Int32,
     pub filter_results: Vec<DeleteAclsResponseFilterResults0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DeleteAclsResponseFilterResults0 {
     pub error_code: Int16,
     pub error_message: NullableString,
     pub matching_acls: Vec<DeleteAclsResponseFilterResultsMatchingAcls0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DeleteAclsResponseFilterResultsMatchingAcls0 {
     pub error_code: Int16,
     pub error_message: NullableString,
@@ -96,20 +96,20 @@ pub struct DeleteAclsResponseFilterResultsMatchingAcls0 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DeleteAclsResponse1 {
     pub throttle_time_ms: Int32,
     pub filter_results: Vec<DeleteAclsResponseFilterResults1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DeleteAclsResponseFilterResults1 {
     pub error_code: Int16,
     pub error_message: NullableString,
     pub matching_acls: Vec<DeleteAclsResponseFilterResultsMatchingAcls1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DeleteAclsResponseFilterResultsMatchingAcls1 {
     pub error_code: Int16,
     pub error_message: NullableString,
@@ -122,20 +122,20 @@ pub struct DeleteAclsResponseFilterResultsMatchingAcls1 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DeleteAclsResponse2 {
     pub throttle_time_ms: Int32,
     pub filter_results: Vec<DeleteAclsResponseFilterResults2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DeleteAclsResponseFilterResults2 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,
     pub matching_acls: Vec<DeleteAclsResponseFilterResultsMatchingAcls2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DeleteAclsResponseFilterResultsMatchingAcls2 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,

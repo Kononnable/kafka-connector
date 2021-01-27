@@ -29,71 +29,71 @@ pub fn deserialize_controlled_shutdown_response(
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ControlledShutdownRequest0 {
     pub broker_id: Int32,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ControlledShutdownRequest1 {
     pub broker_id: Int32,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ControlledShutdownRequest2 {
     pub broker_id: Int32,
     pub broker_epoch: Optional<Int64>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ControlledShutdownRequest3 {
     pub broker_id: Int32,
     pub broker_epoch: Optional<Int64>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ControlledShutdownResponse0 {
     pub error_code: Int16,
     pub remaining_partitions: Vec<ControlledShutdownResponseRemainingPartitions0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ControlledShutdownResponseRemainingPartitions0 {
     pub topic_name: String,
     pub partition_index: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ControlledShutdownResponse1 {
     pub error_code: Int16,
     pub remaining_partitions: Vec<ControlledShutdownResponseRemainingPartitions1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ControlledShutdownResponseRemainingPartitions1 {
     pub topic_name: String,
     pub partition_index: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ControlledShutdownResponse2 {
     pub error_code: Int16,
     pub remaining_partitions: Vec<ControlledShutdownResponseRemainingPartitions2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ControlledShutdownResponseRemainingPartitions2 {
     pub topic_name: String,
     pub partition_index: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ControlledShutdownResponse3 {
     pub error_code: Int16,
     pub remaining_partitions: Vec<ControlledShutdownResponseRemainingPartitions3>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ControlledShutdownResponseRemainingPartitions3 {
     pub topic_name: CompactString,
     pub partition_index: Int32,

@@ -23,19 +23,19 @@ pub fn deserialize_alter_user_scram_credentials_response(
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct AlterUserScramCredentialsRequest0 {
     pub deletions: Vec<AlterUserScramCredentialsRequestDeletions0>,
     pub upsertions: Vec<AlterUserScramCredentialsRequestUpsertions0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct AlterUserScramCredentialsRequestDeletions0 {
     pub name: CompactString,
     pub mechanism: Int8,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct AlterUserScramCredentialsRequestUpsertions0 {
     pub name: CompactString,
     pub mechanism: Int8,
@@ -44,13 +44,13 @@ pub struct AlterUserScramCredentialsRequestUpsertions0 {
     pub salted_password: CompactBytes,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct AlterUserScramCredentialsResponse0 {
     pub throttle_time_ms: Int32,
     pub results: Vec<AlterUserScramCredentialsResponseResults0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct AlterUserScramCredentialsResponseResults0 {
     pub user: CompactString,
     pub error_code: Int16,

@@ -27,39 +27,39 @@ pub fn deserialize_expire_delegation_token_response(
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ExpireDelegationTokenRequest0 {
     pub hmac: KafkaBytes,
     pub expiry_time_period_ms: Int64,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ExpireDelegationTokenRequest1 {
     pub hmac: KafkaBytes,
     pub expiry_time_period_ms: Int64,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ExpireDelegationTokenRequest2 {
     pub hmac: CompactBytes,
     pub expiry_time_period_ms: Int64,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ExpireDelegationTokenResponse0 {
     pub error_code: Int16,
     pub expiry_timestamp_ms: Int64,
     pub throttle_time_ms: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ExpireDelegationTokenResponse1 {
     pub error_code: Int16,
     pub expiry_timestamp_ms: Int64,
     pub throttle_time_ms: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ExpireDelegationTokenResponse2 {
     pub error_code: Int16,
     pub expiry_timestamp_ms: Int64,

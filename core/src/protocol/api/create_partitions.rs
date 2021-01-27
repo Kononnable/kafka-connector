@@ -29,128 +29,128 @@ pub fn deserialize_create_partitions_response(
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreatePartitionsRequest0 {
     pub topics: Vec<CreatePartitionsRequestTopics0>,
     pub timeout_ms: Int32,
     pub validate_only: Boolean,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreatePartitionsRequestTopics0 {
     pub name: String,
     pub count: Int32,
     pub assignments: Vec<CreatePartitionsRequestTopicsAssignments0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreatePartitionsRequestTopicsAssignments0 {
     pub broker_ids: Vec<Int32>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreatePartitionsRequest1 {
     pub topics: Vec<CreatePartitionsRequestTopics1>,
     pub timeout_ms: Int32,
     pub validate_only: Boolean,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreatePartitionsRequestTopics1 {
     pub name: String,
     pub count: Int32,
     pub assignments: Vec<CreatePartitionsRequestTopicsAssignments1>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreatePartitionsRequestTopicsAssignments1 {
     pub broker_ids: Vec<Int32>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreatePartitionsRequest2 {
     pub topics: Vec<CreatePartitionsRequestTopics2>,
     pub timeout_ms: Int32,
     pub validate_only: Boolean,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreatePartitionsRequestTopics2 {
     pub name: CompactString,
     pub count: Int32,
     pub assignments: Vec<CreatePartitionsRequestTopicsAssignments2>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreatePartitionsRequestTopicsAssignments2 {
     pub broker_ids: Vec<Int32>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreatePartitionsRequest3 {
     pub topics: Vec<CreatePartitionsRequestTopics3>,
     pub timeout_ms: Int32,
     pub validate_only: Boolean,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreatePartitionsRequestTopics3 {
     pub name: CompactString,
     pub count: Int32,
     pub assignments: Vec<CreatePartitionsRequestTopicsAssignments3>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreatePartitionsRequestTopicsAssignments3 {
     pub broker_ids: Vec<Int32>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct CreatePartitionsResponse0 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreatePartitionsResponseResults0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct CreatePartitionsResponseResults0 {
     pub name: String,
     pub error_code: Int16,
     pub error_message: NullableString,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct CreatePartitionsResponse1 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreatePartitionsResponseResults1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct CreatePartitionsResponseResults1 {
     pub name: String,
     pub error_code: Int16,
     pub error_message: NullableString,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct CreatePartitionsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreatePartitionsResponseResults2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct CreatePartitionsResponseResults2 {
     pub name: CompactString,
     pub error_code: Int16,
     pub error_message: CompactNullableString,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct CreatePartitionsResponse3 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreatePartitionsResponseResults3>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct CreatePartitionsResponseResults3 {
     pub name: CompactString,
     pub error_code: Int16,

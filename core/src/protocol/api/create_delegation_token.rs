@@ -27,43 +27,43 @@ pub fn deserialize_create_delegation_token_response(
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreateDelegationTokenRequest0 {
     pub renewers: Vec<CreateDelegationTokenRequestRenewers0>,
     pub max_lifetime_ms: Int64,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreateDelegationTokenRequestRenewers0 {
     pub principal_type: String,
     pub principal_name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreateDelegationTokenRequest1 {
     pub renewers: Vec<CreateDelegationTokenRequestRenewers1>,
     pub max_lifetime_ms: Int64,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreateDelegationTokenRequestRenewers1 {
     pub principal_type: String,
     pub principal_name: String,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreateDelegationTokenRequest2 {
     pub renewers: Vec<CreateDelegationTokenRequestRenewers2>,
     pub max_lifetime_ms: Int64,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct CreateDelegationTokenRequestRenewers2 {
     pub principal_type: CompactString,
     pub principal_name: CompactString,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct CreateDelegationTokenResponse0 {
     pub error_code: Int16,
     pub principal_type: String,
@@ -76,7 +76,7 @@ pub struct CreateDelegationTokenResponse0 {
     pub throttle_time_ms: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct CreateDelegationTokenResponse1 {
     pub error_code: Int16,
     pub principal_type: String,
@@ -89,7 +89,7 @@ pub struct CreateDelegationTokenResponse1 {
     pub throttle_time_ms: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct CreateDelegationTokenResponse2 {
     pub error_code: Int16,
     pub principal_type: CompactString,

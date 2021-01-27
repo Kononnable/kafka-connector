@@ -29,7 +29,7 @@ pub fn deserialize_txn_offset_commit_response(
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequest0 {
     pub transactional_id: String,
     pub group_id: String,
@@ -38,20 +38,20 @@ pub struct TxnOffsetCommitRequest0 {
     pub topics: Vec<TxnOffsetCommitRequestTopics0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequestTopics0 {
     pub name: String,
     pub partitions: Vec<TxnOffsetCommitRequestTopicsPartitions0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequestTopicsPartitions0 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
     pub committed_metadata: NullableString,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequest1 {
     pub transactional_id: String,
     pub group_id: String,
@@ -60,20 +60,20 @@ pub struct TxnOffsetCommitRequest1 {
     pub topics: Vec<TxnOffsetCommitRequestTopics1>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequestTopics1 {
     pub name: String,
     pub partitions: Vec<TxnOffsetCommitRequestTopicsPartitions1>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequestTopicsPartitions1 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
     pub committed_metadata: NullableString,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequest2 {
     pub transactional_id: String,
     pub group_id: String,
@@ -82,13 +82,13 @@ pub struct TxnOffsetCommitRequest2 {
     pub topics: Vec<TxnOffsetCommitRequestTopics2>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequestTopics2 {
     pub name: String,
     pub partitions: Vec<TxnOffsetCommitRequestTopicsPartitions2>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequestTopicsPartitions2 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
@@ -96,7 +96,7 @@ pub struct TxnOffsetCommitRequestTopicsPartitions2 {
     pub committed_metadata: NullableString,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequest3 {
     pub transactional_id: CompactString,
     pub group_id: CompactString,
@@ -108,13 +108,13 @@ pub struct TxnOffsetCommitRequest3 {
     pub topics: Vec<TxnOffsetCommitRequestTopics3>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequestTopics3 {
     pub name: CompactString,
     pub partitions: Vec<TxnOffsetCommitRequestTopicsPartitions3>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequestTopicsPartitions3 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
@@ -122,73 +122,73 @@ pub struct TxnOffsetCommitRequestTopicsPartitions3 {
     pub committed_metadata: CompactNullableString,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct TxnOffsetCommitResponse0 {
     pub throttle_time_ms: Int32,
     pub topics: Vec<TxnOffsetCommitResponseTopics0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct TxnOffsetCommitResponseTopics0 {
     pub name: String,
     pub partitions: Vec<TxnOffsetCommitResponseTopicsPartitions0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct TxnOffsetCommitResponseTopicsPartitions0 {
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct TxnOffsetCommitResponse1 {
     pub throttle_time_ms: Int32,
     pub topics: Vec<TxnOffsetCommitResponseTopics1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct TxnOffsetCommitResponseTopics1 {
     pub name: String,
     pub partitions: Vec<TxnOffsetCommitResponseTopicsPartitions1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct TxnOffsetCommitResponseTopicsPartitions1 {
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct TxnOffsetCommitResponse2 {
     pub throttle_time_ms: Int32,
     pub topics: Vec<TxnOffsetCommitResponseTopics2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct TxnOffsetCommitResponseTopics2 {
     pub name: String,
     pub partitions: Vec<TxnOffsetCommitResponseTopicsPartitions2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct TxnOffsetCommitResponseTopicsPartitions2 {
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct TxnOffsetCommitResponse3 {
     pub throttle_time_ms: Int32,
     pub topics: Vec<TxnOffsetCommitResponseTopics3>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct TxnOffsetCommitResponseTopics3 {
     pub name: CompactString,
     pub partitions: Vec<TxnOffsetCommitResponseTopicsPartitions3>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct TxnOffsetCommitResponseTopicsPartitions3 {
     pub partition_index: Int32,
     pub error_code: Int16,

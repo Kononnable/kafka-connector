@@ -28,82 +28,82 @@ pub fn deserialize_list_groups_response(version: i32, buf: &mut Bytes) -> ListGr
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ListGroupsRequest0 {}
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ListGroupsRequest1 {}
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ListGroupsRequest2 {}
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ListGroupsRequest3 {}
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct ListGroupsRequest4 {
     pub states_filter: Optional<Vec<CompactString>>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ListGroupsResponse0 {
     pub error_code: Int16,
     pub groups: Vec<ListGroupsResponseGroups0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ListGroupsResponseGroups0 {
     pub group_id: String,
     pub protocol_type: String,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ListGroupsResponse1 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub groups: Vec<ListGroupsResponseGroups1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ListGroupsResponseGroups1 {
     pub group_id: String,
     pub protocol_type: String,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ListGroupsResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub groups: Vec<ListGroupsResponseGroups2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ListGroupsResponseGroups2 {
     pub group_id: String,
     pub protocol_type: String,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ListGroupsResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub groups: Vec<ListGroupsResponseGroups3>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ListGroupsResponseGroups3 {
     pub group_id: CompactString,
     pub protocol_type: CompactString,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ListGroupsResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub groups: Vec<ListGroupsResponseGroups4>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct ListGroupsResponseGroups4 {
     pub group_id: CompactString,
     pub protocol_type: CompactString,

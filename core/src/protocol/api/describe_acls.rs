@@ -24,7 +24,7 @@ pub fn deserialize_describe_acls_response(version: i32, buf: &mut Bytes) -> Desc
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeAclsRequest0 {
     pub resource_type_filter: Int8,
     pub resource_name_filter: NullableString,
@@ -34,7 +34,7 @@ pub struct DescribeAclsRequest0 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeAclsRequest1 {
     pub resource_type_filter: Int8,
     pub resource_name_filter: NullableString,
@@ -45,7 +45,7 @@ pub struct DescribeAclsRequest1 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeAclsRequest2 {
     pub resource_type_filter: Int8,
     pub resource_name_filter: CompactNullableString,
@@ -56,7 +56,7 @@ pub struct DescribeAclsRequest2 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeAclsResponse0 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
@@ -64,14 +64,14 @@ pub struct DescribeAclsResponse0 {
     pub resources: Vec<DescribeAclsResponseResources0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeAclsResponseResources0 {
     pub resource_type: Int8,
     pub resource_name: String,
     pub acls: Vec<DescribeAclsResponseResourcesAcls0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeAclsResponseResourcesAcls0 {
     pub principal: String,
     pub host: String,
@@ -79,7 +79,7 @@ pub struct DescribeAclsResponseResourcesAcls0 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeAclsResponse1 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
@@ -87,7 +87,7 @@ pub struct DescribeAclsResponse1 {
     pub resources: Vec<DescribeAclsResponseResources1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeAclsResponseResources1 {
     pub resource_type: Int8,
     pub resource_name: String,
@@ -95,7 +95,7 @@ pub struct DescribeAclsResponseResources1 {
     pub acls: Vec<DescribeAclsResponseResourcesAcls1>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeAclsResponseResourcesAcls1 {
     pub principal: String,
     pub host: String,
@@ -103,7 +103,7 @@ pub struct DescribeAclsResponseResourcesAcls1 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeAclsResponse2 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
@@ -111,7 +111,7 @@ pub struct DescribeAclsResponse2 {
     pub resources: Vec<DescribeAclsResponseResources2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeAclsResponseResources2 {
     pub resource_type: Int8,
     pub resource_name: CompactString,
@@ -119,7 +119,7 @@ pub struct DescribeAclsResponseResources2 {
     pub acls: Vec<DescribeAclsResponseResourcesAcls2>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeAclsResponseResourcesAcls2 {
     pub principal: CompactString,
     pub host: CompactString,

@@ -23,20 +23,20 @@ pub fn deserialize_describe_client_quotas_response(
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeClientQuotasRequest0 {
     pub components: Vec<DescribeClientQuotasRequestComponents0>,
     pub strict: Boolean,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct DescribeClientQuotasRequestComponents0 {
     pub entity_type: String,
     pub match_type: Int8,
     pub match_: NullableString,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeClientQuotasResponse0 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
@@ -44,19 +44,19 @@ pub struct DescribeClientQuotasResponse0 {
     pub entries: Vec<DescribeClientQuotasResponseEntries0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeClientQuotasResponseEntries0 {
     pub entity: Vec<DescribeClientQuotasResponseEntriesEntity0>,
     pub values: Vec<DescribeClientQuotasResponseEntriesValues0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeClientQuotasResponseEntriesEntity0 {
     pub entity_type: String,
     pub entity_name: NullableString,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct DescribeClientQuotasResponseEntriesValues0 {
     pub key: String,
     pub value: Float64,

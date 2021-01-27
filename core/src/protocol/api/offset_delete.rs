@@ -20,37 +20,37 @@ pub fn deserialize_offset_delete_response(version: i32, buf: &mut Bytes) -> Offs
     }
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct OffsetDeleteRequest0 {
     pub group_id: String,
     pub topics: Vec<OffsetDeleteRequestTopics0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct OffsetDeleteRequestTopics0 {
     pub name: String,
     pub partitions: Vec<OffsetDeleteRequestTopicsPartitions0>,
 }
 
-#[derive(Default, ToBytes)]
+#[derive(Default, Debug, ToBytes)]
 pub struct OffsetDeleteRequestTopicsPartitions0 {
     pub partition_index: Int32,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct OffsetDeleteResponse0 {
     pub error_code: Int16,
     pub throttle_time_ms: Int32,
     pub topics: Vec<OffsetDeleteResponseTopics0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct OffsetDeleteResponseTopics0 {
     pub name: String,
     pub partitions: Vec<OffsetDeleteResponseTopicsPartitions0>,
 }
 
-#[derive(Default, FromBytes)]
+#[derive(Default, Debug, FromBytes)]
 pub struct OffsetDeleteResponseTopicsPartitions0 {
     pub partition_index: Int32,
     pub error_code: Int16,
