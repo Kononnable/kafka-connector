@@ -10,14 +10,7 @@ where
     R: FromBytes + Debug,
 {
     fn deserialize(buf: &mut Bytes) -> Self {
-        let mut slice = buf.split_to(4).into_iter();
-        let len: [u8; 4] = [
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-        ];
-        let cap = i32::from_be_bytes(len);
+        let cap: i32 = FromBytes::deserialize(buf);
         let mut ret = Vec::with_capacity(cap as usize);
         for _i in 0..cap {
             let element = FromBytes::deserialize(buf);

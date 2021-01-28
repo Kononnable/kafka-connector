@@ -62,6 +62,9 @@ where
 {
     fn serialize(&self, buf: &mut BytesMut) {
         buf.put_i32(self.len() as i32);
+        for element in self {
+            element.serialize(buf);
+        }
     }
 }
 impl ToBytes for Vec<u8> {

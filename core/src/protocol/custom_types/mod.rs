@@ -1,8 +1,15 @@
-use bytes::{BufMut, Bytes, BytesMut};
+use self::record_batch::RecordBatch;
 
 pub mod compact_bytes;
 pub mod compact_nullable_string;
 pub mod compact_string;
+pub mod record_batch;
+pub mod unsigned_varint32;
+pub mod unsigned_varint64;
+pub mod zig_zag_varint32;
+pub mod zig_zag_varint64;
+pub mod zig_zag_vec;
+pub mod zig_zag_string;
 
 pub type Boolean = bool;
 pub type KafkaBytes = Vec<u8>;
@@ -14,20 +21,5 @@ pub type Float64 = f64;
 pub type NullableString = Option<String>;
 
 // TODO:
-pub type CompactRecords = KafkaBytes;
-pub type Records = KafkaBytes;
-
-pub fn deserialize_unsigned_varint_32(buf: &mut Bytes) -> u32 {
-    let mut no_of_bytes = 0;
-    while unsigned_varint::decode::is_last(buf.get(no_of_bytes).copied().unwrap()) {
-        no_of_bytes += 1;
-    }
-
-    let len_slice = buf.split_to(no_of_bytes + 1);
-    unsigned_varint::decode::u32(&len_slice).unwrap().0 - 1
-}
-pub fn serialize_unsigned_varint_32(value: u32, buf: &mut BytesMut) {
-    let mut t_buf = [0u8; 5];
-    let len = unsigned_varint::encode::u32((value + 1) as u32, &mut t_buf);
-    buf.put_slice(len);
-}
+pub type Records = RecordBatch;
+pub type CompactRecords = RecordBatch;

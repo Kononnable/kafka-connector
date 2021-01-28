@@ -2,7 +2,7 @@ use bytes::{BufMut, Bytes, BytesMut};
 
 use crate::protocol::{from_bytes::FromBytes, to_bytes::ToBytes};
 
-use super::{deserialize_unsigned_varint_32, serialize_unsigned_varint_32};
+use super::unsigned_varint32::UnsignedVarInt32;
 
 #[derive(Debug)]
 pub struct CompactBytes {
@@ -10,16 +10,17 @@ pub struct CompactBytes {
 }
 impl FromBytes for CompactBytes {
     fn deserialize(buf: &mut Bytes) -> Self {
-        let len = deserialize_unsigned_varint_32(buf);
+        let len = UnsignedVarInt32::deserialize(buf);
         CompactBytes {
-            value: buf.split_to(len as usize).into_iter().collect(),
+            value: buf.split_to(len.value as usize).into_iter().collect(),
         }
     }
 }
 
 impl ToBytes for CompactBytes {
     fn serialize(&self, buf: &mut BytesMut) {
-        serialize_unsigned_varint_32((self.value.len() + 1) as u32, buf);
+        let len = UnsignedVarInt32::new(self.value.len() as u32 + 1);
+        len.serialize(buf);
         buf.put_slice(self.value.as_slice());
     }
 }

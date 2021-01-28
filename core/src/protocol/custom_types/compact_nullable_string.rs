@@ -2,9 +2,7 @@ use bytes::{BufMut, Bytes, BytesMut};
 
 use crate::protocol::{from_bytes::FromBytes, to_bytes::ToBytes};
 
-use super::{
-    compact_string::CompactString, deserialize_unsigned_varint_32, serialize_unsigned_varint_32,
-};
+use super::{compact_string::CompactString, unsigned_varint32::UnsignedVarInt32};
 
 #[derive(Debug)]
 pub struct CompactNullableString {
@@ -12,12 +10,12 @@ pub struct CompactNullableString {
 }
 impl FromBytes for CompactNullableString {
     fn deserialize(buf: &mut Bytes) -> Self {
-        let len = deserialize_unsigned_varint_32(buf);
-        if len == 0 {
+        let len = UnsignedVarInt32::deserialize(buf);
+        if len.value == 0 {
             return CompactNullableString { value: None };
         }
-        let slice = buf.split_to(len as usize).into_iter();
-        let data: Vec<u8> = slice.take(len as usize).collect();
+        let slice = buf.split_to(len.value as usize).into_iter();
+        let data: Vec<u8> = slice.take(len.value as usize).collect();
         let value = String::from_utf8_lossy(&data).to_string();
         CompactNullableString { value: Some(value) }
     }
@@ -27,7 +25,8 @@ impl ToBytes for CompactNullableString {
     fn serialize(&self, buf: &mut BytesMut) {
         match &self.value {
             Some(str) => {
-                serialize_unsigned_varint_32((str.len() + 1) as u32, buf);
+                let len = UnsignedVarInt32::new(str.len() as u32 + 1);
+                len.serialize(buf);
                 buf.put_slice(&str.as_bytes());
             }
             None => {}

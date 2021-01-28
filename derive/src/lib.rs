@@ -17,9 +17,9 @@ pub fn to_bytes(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         impl #impl_generics ToBytes for #name #ty_generics #where_clause {
             fn serialize(&self, buf:&mut bytes::BytesMut) {
-                trace!("Serializing {:#?}", self);
+                log::trace!("Serializing {:#?}", self);
                 #serialization
-                trace!("Serialization finished {:#?}", self);
+                log::trace!("Serialization finished {:#?}", self);
             }
         }
     };
@@ -66,11 +66,11 @@ pub fn from_bytes(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         impl #impl_generics FromBytes for #name #ty_generics #where_clause {
             fn deserialize(buf:  &mut Bytes) -> Self {
-                trace!("Deserializing {}",#type_name);
+                log::trace!("Deserializing {}",#type_name);
                 let ret_val = #name {
                     #deserialization
                 };
-                trace!("Deserialization finished {:#?}", ret_val);
+                log::trace!("Deserialization finished {:#?}", ret_val);
                 ret_val
             }
         }
@@ -87,7 +87,7 @@ fn generate_deserialize(data: &Data) -> quote::__private::TokenStream {
                     let f_name = format!("{}", name.clone().unwrap());
                     quote_spanned! {f.span()=>
                         #name: {
-                            trace!("Deserializing field {}",#f_name);
+                            log::trace!("Deserializing field {}",#f_name);
                             FromBytes::deserialize(buf)
                         },
                     }
