@@ -1,6 +1,6 @@
 use bytes::{ Bytes, BytesMut};
 
-use crate::protocol::{from_bytes::FromBytes, to_bytes::ToBytes};
+use crate::{from_bytes::FromBytes, to_bytes::ToBytes};
 
 use super::unsigned_varint64::{ UnsignedVarInt64};
 

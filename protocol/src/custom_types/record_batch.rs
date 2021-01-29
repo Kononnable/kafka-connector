@@ -1,7 +1,7 @@
 use bytes::{Bytes, BytesMut};
 use std::fmt::Debug;
 
-use crate::protocol::{from_bytes::FromBytes, to_bytes::ToBytes};
+use crate::{from_bytes::FromBytes, to_bytes::ToBytes};
 use kafka_connector_derive::FromBytes;
 use kafka_connector_derive::ToBytes;
 

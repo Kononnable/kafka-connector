@@ -1,6 +1,6 @@
 use bytes::{BufMut, Bytes, BytesMut};
 
-use crate::protocol::{from_bytes::FromBytes, to_bytes::ToBytes};
+use crate::{from_bytes::FromBytes, to_bytes::ToBytes};
 
 pub fn deserialize_unsigned_varint_32(buf: &mut Bytes) -> u32 {
     let mut no_of_bytes = 0;

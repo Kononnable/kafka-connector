@@ -6,10 +6,10 @@ pub mod compact_string;
 pub mod record_batch;
 pub mod unsigned_varint32;
 pub mod unsigned_varint64;
+pub mod zig_zag_string;
 pub mod zig_zag_varint32;
 pub mod zig_zag_varint64;
 pub mod zig_zag_vec;
-pub mod zig_zag_string;
 
 pub type Boolean = bool;
 pub type KafkaBytes = Vec<u8>;
@@ -19,7 +19,7 @@ pub type Int32 = i32;
 pub type Int64 = i64;
 pub type Float64 = f64;
 pub type NullableString = Option<String>;
+pub type Records = RecordBatch;
 
 // TODO:
-pub type Records = RecordBatch;
 pub type CompactRecords = RecordBatch;

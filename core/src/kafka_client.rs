@@ -8,7 +8,7 @@ use tokio::{
 
 use thiserror::Error as DeriveError;
 
-use crate::protocol::{
+use kafka_connector_protocol::{
     api::{
         api_versions::{
             deserialize_api_versions_response, serialize_api_versions_request, ApiVersionsRequest,

@@ -398,12 +398,10 @@ dependencies = [
  "anyhow",
  "bytes",
  "env_logger",
- "kafka-connector-derive",
+ "kafka-connector-protocol",
  "log",
  "thiserror",
  "tokio",
- "tokio-stream",
- "unsigned-varint",
 ]
 
 [[package]]
@@ -412,6 +410,17 @@ version = "0.1.0"
 dependencies = [
  "quote",
  "syn",
+]
+
+[[package]]
+name = "kafka-connector-protocol"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "kafka-connector-derive",
+ "log",
+ "thiserror",
+ "unsigned-varint",
 ]
 
 [[package]]

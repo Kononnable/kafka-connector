@@ -7,12 +7,10 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 anyhow = "1.0.38"
-tokio = {version ="1.0.1", features=["rt-multi-thread","net","macros","io-util"]}
-tokio-stream = "0.1.2"
 bytes = "1.0.1"
-kafka-connector-derive = {version="0.1.0", path = "./../derive"}
+tokio = {version ="1.0.1", features=["rt-multi-thread","net","macros","io-util"]}
+kafka-connector-protocol = {version="0.1.0", path = "./../protocol"}
 thiserror = "1.0.23"
-unsigned-varint = "0.6.0"
 log = "0.4.13"
 
 [dev-dependencies]
