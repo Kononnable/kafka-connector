@@ -29,53 +29,53 @@ impl ApiCall for IncrementalAlterConfigsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct IncrementalAlterConfigsRequest0 {
     pub resources: Vec<IncrementalAlterConfigsRequestResources0>,
     pub validate_only: Boolean,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct IncrementalAlterConfigsRequestResources0 {
     pub resource_type: Int8,
     pub resource_name: String,
     pub configs: Vec<IncrementalAlterConfigsRequestResourcesConfigs0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct IncrementalAlterConfigsRequestResourcesConfigs0 {
     pub name: String,
     pub config_operation: Int8,
     pub value: NullableString,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct IncrementalAlterConfigsRequest1 {
     pub resources: Vec<IncrementalAlterConfigsRequestResources1>,
     pub validate_only: Boolean,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct IncrementalAlterConfigsRequestResources1 {
     pub resource_type: Int8,
     pub resource_name: CompactString,
     pub configs: Vec<IncrementalAlterConfigsRequestResourcesConfigs1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct IncrementalAlterConfigsRequestResourcesConfigs1 {
     pub name: CompactString,
     pub config_operation: Int8,
     pub value: CompactNullableString,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct IncrementalAlterConfigsResponse0 {
     pub throttle_time_ms: Int32,
     pub responses: Vec<IncrementalAlterConfigsResponseResponses0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct IncrementalAlterConfigsResponseResponses0 {
     pub error_code: Int16,
     pub error_message: NullableString,
@@ -83,13 +83,13 @@ pub struct IncrementalAlterConfigsResponseResponses0 {
     pub resource_name: String,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct IncrementalAlterConfigsResponse1 {
     pub throttle_time_ms: Int32,
     pub responses: Vec<IncrementalAlterConfigsResponseResponses1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct IncrementalAlterConfigsResponseResponses1 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,

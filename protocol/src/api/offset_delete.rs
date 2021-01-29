@@ -27,37 +27,37 @@ impl ApiCall for OffsetDeleteRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetDeleteRequest0 {
     pub group_id: String,
     pub topics: Vec<OffsetDeleteRequestTopics0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetDeleteRequestTopics0 {
     pub name: String,
     pub partitions: Vec<OffsetDeleteRequestTopicsPartitions0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetDeleteRequestTopicsPartitions0 {
     pub partition_index: Int32,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetDeleteResponse0 {
     pub error_code: Int16,
     pub throttle_time_ms: Int32,
     pub topics: Vec<OffsetDeleteResponseTopics0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetDeleteResponseTopics0 {
     pub name: String,
     pub partitions: Vec<OffsetDeleteResponseTopicsPartitions0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetDeleteResponseTopicsPartitions0 {
     pub partition_index: Int32,
     pub error_code: Int16,

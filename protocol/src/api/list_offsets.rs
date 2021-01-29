@@ -37,151 +37,151 @@ impl ApiCall for ListOffsetsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequest0 {
     pub replica_id: Int32,
     pub topics: Vec<ListOffsetsRequestTopics0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopics0 {
     pub name: String,
     pub partitions: Vec<ListOffsetsRequestTopicsPartitions0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopicsPartitions0 {
     pub partition_index: Int32,
     pub timestamp: Int64,
     pub max_num_offsets: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequest1 {
     pub replica_id: Int32,
     pub topics: Vec<ListOffsetsRequestTopics1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopics1 {
     pub name: String,
     pub partitions: Vec<ListOffsetsRequestTopicsPartitions1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopicsPartitions1 {
     pub partition_index: Int32,
     pub timestamp: Int64,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequest2 {
     pub replica_id: Int32,
     pub isolation_level: Optional<Int8>,
     pub topics: Vec<ListOffsetsRequestTopics2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopics2 {
     pub name: String,
     pub partitions: Vec<ListOffsetsRequestTopicsPartitions2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopicsPartitions2 {
     pub partition_index: Int32,
     pub timestamp: Int64,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequest3 {
     pub replica_id: Int32,
     pub isolation_level: Optional<Int8>,
     pub topics: Vec<ListOffsetsRequestTopics3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopics3 {
     pub name: String,
     pub partitions: Vec<ListOffsetsRequestTopicsPartitions3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopicsPartitions3 {
     pub partition_index: Int32,
     pub timestamp: Int64,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequest4 {
     pub replica_id: Int32,
     pub isolation_level: Optional<Int8>,
     pub topics: Vec<ListOffsetsRequestTopics4>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopics4 {
     pub name: String,
     pub partitions: Vec<ListOffsetsRequestTopicsPartitions4>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopicsPartitions4 {
     pub partition_index: Int32,
     pub current_leader_epoch: Optional<Int32>,
     pub timestamp: Int64,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequest5 {
     pub replica_id: Int32,
     pub isolation_level: Optional<Int8>,
     pub topics: Vec<ListOffsetsRequestTopics5>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopics5 {
     pub name: String,
     pub partitions: Vec<ListOffsetsRequestTopicsPartitions5>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopicsPartitions5 {
     pub partition_index: Int32,
     pub current_leader_epoch: Optional<Int32>,
     pub timestamp: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponse0 {
     pub topics: Vec<ListOffsetsResponseTopics0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponseTopics0 {
     pub name: String,
     pub partitions: Vec<ListOffsetsResponseTopicsPartitions0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponseTopicsPartitions0 {
     pub partition_index: Int32,
     pub error_code: Int16,
     pub old_style_offsets: Vec<Int64>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponse1 {
     pub topics: Vec<ListOffsetsResponseTopics1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponseTopics1 {
     pub name: String,
     pub partitions: Vec<ListOffsetsResponseTopicsPartitions1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponseTopicsPartitions1 {
     pub partition_index: Int32,
     pub error_code: Int16,
@@ -189,19 +189,19 @@ pub struct ListOffsetsResponseTopicsPartitions1 {
     pub offset: Optional<Int64>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<ListOffsetsResponseTopics2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponseTopics2 {
     pub name: String,
     pub partitions: Vec<ListOffsetsResponseTopicsPartitions2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponseTopicsPartitions2 {
     pub partition_index: Int32,
     pub error_code: Int16,
@@ -209,19 +209,19 @@ pub struct ListOffsetsResponseTopicsPartitions2 {
     pub offset: Optional<Int64>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<ListOffsetsResponseTopics3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponseTopics3 {
     pub name: String,
     pub partitions: Vec<ListOffsetsResponseTopicsPartitions3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponseTopicsPartitions3 {
     pub partition_index: Int32,
     pub error_code: Int16,
@@ -229,19 +229,19 @@ pub struct ListOffsetsResponseTopicsPartitions3 {
     pub offset: Optional<Int64>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<ListOffsetsResponseTopics4>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponseTopics4 {
     pub name: String,
     pub partitions: Vec<ListOffsetsResponseTopicsPartitions4>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponseTopicsPartitions4 {
     pub partition_index: Int32,
     pub error_code: Int16,
@@ -250,19 +250,19 @@ pub struct ListOffsetsResponseTopicsPartitions4 {
     pub leader_epoch: Optional<Int32>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<ListOffsetsResponseTopics5>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponseTopics5 {
     pub name: String,
     pub partitions: Vec<ListOffsetsResponseTopicsPartitions5>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponseTopicsPartitions5 {
     pub partition_index: Int32,
     pub error_code: Int16,

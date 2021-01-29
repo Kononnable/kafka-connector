@@ -27,17 +27,17 @@ impl ApiCall for DescribeUserScramCredentialsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeUserScramCredentialsRequest0 {
     pub users: Vec<DescribeUserScramCredentialsRequestUsers0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeUserScramCredentialsRequestUsers0 {
     pub name: CompactString,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeUserScramCredentialsResponse0 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
@@ -45,7 +45,7 @@ pub struct DescribeUserScramCredentialsResponse0 {
     pub results: Vec<DescribeUserScramCredentialsResponseResults0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeUserScramCredentialsResponseResults0 {
     pub user: CompactString,
     pub error_code: Int16,
@@ -53,7 +53,7 @@ pub struct DescribeUserScramCredentialsResponseResults0 {
     pub credential_infos: Vec<DescribeUserScramCredentialsResponseResultsCredentialInfos0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeUserScramCredentialsResponseResultsCredentialInfos0 {
     pub mechanism: Int8,
     pub iterations: Int32,

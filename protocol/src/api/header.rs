@@ -25,7 +25,7 @@ pub struct HeaderRequest {
     pub api_key: Int16,
     pub api_version: Int16,
     pub correlation_id: Int32,
-    pub client_id: String,
+    pub client_id: Option<String>,
 }
 
 impl HeaderRequest {
@@ -39,7 +39,7 @@ impl HeaderRequest {
             api_key,
             api_version,
             correlation_id,
-            client_id,
+            client_id: Some(client_id),
         }
     }
 }

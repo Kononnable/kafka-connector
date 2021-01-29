@@ -31,7 +31,7 @@ impl ApiCall for AddPartitionsToTxnRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AddPartitionsToTxnRequest0 {
     pub transactional_id: String,
     pub producer_id: Int64,
@@ -39,13 +39,13 @@ pub struct AddPartitionsToTxnRequest0 {
     pub topics: Vec<AddPartitionsToTxnRequestTopics0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AddPartitionsToTxnRequestTopics0 {
     pub name: String,
     pub partitions: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AddPartitionsToTxnRequest1 {
     pub transactional_id: String,
     pub producer_id: Int64,
@@ -53,13 +53,13 @@ pub struct AddPartitionsToTxnRequest1 {
     pub topics: Vec<AddPartitionsToTxnRequestTopics1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AddPartitionsToTxnRequestTopics1 {
     pub name: String,
     pub partitions: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AddPartitionsToTxnRequest2 {
     pub transactional_id: String,
     pub producer_id: Int64,
@@ -67,61 +67,61 @@ pub struct AddPartitionsToTxnRequest2 {
     pub topics: Vec<AddPartitionsToTxnRequestTopics2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AddPartitionsToTxnRequestTopics2 {
     pub name: String,
     pub partitions: Vec<Int32>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AddPartitionsToTxnResponse0 {
     pub throttle_time_ms: Int32,
     pub results: Vec<AddPartitionsToTxnResponseResults0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AddPartitionsToTxnResponseResults0 {
     pub name: String,
     pub results: Vec<AddPartitionsToTxnResponseResultsResults0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AddPartitionsToTxnResponseResultsResults0 {
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AddPartitionsToTxnResponse1 {
     pub throttle_time_ms: Int32,
     pub results: Vec<AddPartitionsToTxnResponseResults1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AddPartitionsToTxnResponseResults1 {
     pub name: String,
     pub results: Vec<AddPartitionsToTxnResponseResultsResults1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AddPartitionsToTxnResponseResultsResults1 {
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AddPartitionsToTxnResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<AddPartitionsToTxnResponseResults2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AddPartitionsToTxnResponseResults2 {
     pub name: String,
     pub results: Vec<AddPartitionsToTxnResponseResultsResults2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AddPartitionsToTxnResponseResultsResults2 {
     pub partition_index: Int32,
     pub error_code: Int16,

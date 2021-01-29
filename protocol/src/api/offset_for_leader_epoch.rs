@@ -33,107 +33,107 @@ impl ApiCall for OffsetForLeaderEpochRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequest0 {
     pub topics: Vec<OffsetForLeaderEpochRequestTopics0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequestTopics0 {
     pub topic: String,
     pub partitions: Vec<OffsetForLeaderEpochRequestTopicsPartitions0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequestTopicsPartitions0 {
     pub partition: Int32,
     pub leader_epoch: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequest1 {
     pub topics: Vec<OffsetForLeaderEpochRequestTopics1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequestTopics1 {
     pub topic: String,
     pub partitions: Vec<OffsetForLeaderEpochRequestTopicsPartitions1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequestTopicsPartitions1 {
     pub partition: Int32,
     pub leader_epoch: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequest2 {
     pub topics: Vec<OffsetForLeaderEpochRequestTopics2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequestTopics2 {
     pub topic: String,
     pub partitions: Vec<OffsetForLeaderEpochRequestTopicsPartitions2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequestTopicsPartitions2 {
     pub partition: Int32,
     pub current_leader_epoch: Optional<Int32>,
     pub leader_epoch: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequest3 {
     pub replica_id: Optional<Int32>,
     pub topics: Vec<OffsetForLeaderEpochRequestTopics3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequestTopics3 {
     pub topic: String,
     pub partitions: Vec<OffsetForLeaderEpochRequestTopicsPartitions3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequestTopicsPartitions3 {
     pub partition: Int32,
     pub current_leader_epoch: Optional<Int32>,
     pub leader_epoch: Int32,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponse0 {
     pub topics: Vec<OffsetForLeaderEpochResponseTopics0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponseTopics0 {
     pub topic: String,
     pub partitions: Vec<OffsetForLeaderEpochResponseTopicsPartitions0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponseTopicsPartitions0 {
     pub error_code: Int16,
     pub partition: Int32,
     pub end_offset: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponse1 {
     pub topics: Vec<OffsetForLeaderEpochResponseTopics1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponseTopics1 {
     pub topic: String,
     pub partitions: Vec<OffsetForLeaderEpochResponseTopicsPartitions1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponseTopicsPartitions1 {
     pub error_code: Int16,
     pub partition: Int32,
@@ -141,19 +141,19 @@ pub struct OffsetForLeaderEpochResponseTopicsPartitions1 {
     pub end_offset: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<OffsetForLeaderEpochResponseTopics2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponseTopics2 {
     pub topic: String,
     pub partitions: Vec<OffsetForLeaderEpochResponseTopicsPartitions2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponseTopicsPartitions2 {
     pub error_code: Int16,
     pub partition: Int32,
@@ -161,19 +161,19 @@ pub struct OffsetForLeaderEpochResponseTopicsPartitions2 {
     pub end_offset: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<OffsetForLeaderEpochResponseTopics3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponseTopics3 {
     pub topic: String,
     pub partitions: Vec<OffsetForLeaderEpochResponseTopicsPartitions3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponseTopicsPartitions3 {
     pub error_code: Int16,
     pub partition: Int32,

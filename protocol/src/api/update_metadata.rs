@@ -39,7 +39,7 @@ impl ApiCall for UpdateMetadataRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequest0 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -47,7 +47,7 @@ pub struct UpdateMetadataRequest0 {
     pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestUngroupedPartitionStates0 {
     pub topic_name: String,
     pub partition_index: Int32,
@@ -59,14 +59,14 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates0 {
     pub replicas: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers0 {
     pub id: Int32,
     pub v0_host: String,
     pub v0_port: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequest1 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -74,7 +74,7 @@ pub struct UpdateMetadataRequest1 {
     pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestUngroupedPartitionStates1 {
     pub topic_name: String,
     pub partition_index: Int32,
@@ -86,20 +86,20 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates1 {
     pub replicas: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers1 {
     pub id: Int32,
     pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints1>>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints1 {
     pub port: Int32,
     pub host: String,
     pub security_protocol: Int16,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequest2 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -107,7 +107,7 @@ pub struct UpdateMetadataRequest2 {
     pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestUngroupedPartitionStates2 {
     pub topic_name: String,
     pub partition_index: Int32,
@@ -119,21 +119,21 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates2 {
     pub replicas: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers2 {
     pub id: Int32,
     pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints2>>,
     pub rack: Optional<NullableString>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints2 {
     pub port: Int32,
     pub host: String,
     pub security_protocol: Int16,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequest3 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -141,7 +141,7 @@ pub struct UpdateMetadataRequest3 {
     pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestUngroupedPartitionStates3 {
     pub topic_name: String,
     pub partition_index: Int32,
@@ -153,14 +153,14 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates3 {
     pub replicas: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers3 {
     pub id: Int32,
     pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints3>>,
     pub rack: Optional<NullableString>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints3 {
     pub port: Int32,
     pub host: String,
@@ -168,7 +168,7 @@ pub struct UpdateMetadataRequestLiveBrokersEndpoints3 {
     pub security_protocol: Int16,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequest4 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -176,7 +176,7 @@ pub struct UpdateMetadataRequest4 {
     pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers4>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestUngroupedPartitionStates4 {
     pub topic_name: String,
     pub partition_index: Int32,
@@ -189,14 +189,14 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates4 {
     pub offline_replicas: Optional<Vec<Int32>>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers4 {
     pub id: Int32,
     pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints4>>,
     pub rack: Optional<NullableString>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints4 {
     pub port: Int32,
     pub host: String,
@@ -204,7 +204,7 @@ pub struct UpdateMetadataRequestLiveBrokersEndpoints4 {
     pub security_protocol: Int16,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequest5 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -213,13 +213,13 @@ pub struct UpdateMetadataRequest5 {
     pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers5>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestTopicStates5 {
     pub topic_name: String,
     pub partition_states: Vec<UpdateMetadataRequestTopicStatesPartitionStates5>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestTopicStatesPartitionStates5 {
     pub partition_index: Int32,
     pub controller_epoch: Int32,
@@ -231,14 +231,14 @@ pub struct UpdateMetadataRequestTopicStatesPartitionStates5 {
     pub offline_replicas: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers5 {
     pub id: Int32,
     pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints5>>,
     pub rack: Optional<NullableString>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints5 {
     pub port: Int32,
     pub host: String,
@@ -246,7 +246,7 @@ pub struct UpdateMetadataRequestLiveBrokersEndpoints5 {
     pub security_protocol: Int16,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequest6 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -255,13 +255,13 @@ pub struct UpdateMetadataRequest6 {
     pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers6>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestTopicStates6 {
     pub topic_name: CompactString,
     pub partition_states: Vec<UpdateMetadataRequestTopicStatesPartitionStates6>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestTopicStatesPartitionStates6 {
     pub partition_index: Int32,
     pub controller_epoch: Int32,
@@ -273,14 +273,14 @@ pub struct UpdateMetadataRequestTopicStatesPartitionStates6 {
     pub offline_replicas: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers6 {
     pub id: Int32,
     pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints6>>,
     pub rack: Optional<CompactNullableString>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints6 {
     pub port: Int32,
     pub host: CompactString,
@@ -288,37 +288,37 @@ pub struct UpdateMetadataRequestLiveBrokersEndpoints6 {
     pub security_protocol: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct UpdateMetadataResponse0 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct UpdateMetadataResponse1 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct UpdateMetadataResponse2 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct UpdateMetadataResponse3 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct UpdateMetadataResponse4 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct UpdateMetadataResponse5 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct UpdateMetadataResponse6 {
     pub error_code: Int16,
 }

@@ -31,111 +31,111 @@ impl ApiCall for DeleteRecordsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequest0 {
     pub topics: Vec<DeleteRecordsRequestTopics0>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequestTopics0 {
     pub name: String,
     pub partitions: Vec<DeleteRecordsRequestTopicsPartitions0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequestTopicsPartitions0 {
     pub partition_index: Int32,
     pub offset: Int64,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequest1 {
     pub topics: Vec<DeleteRecordsRequestTopics1>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequestTopics1 {
     pub name: String,
     pub partitions: Vec<DeleteRecordsRequestTopicsPartitions1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequestTopicsPartitions1 {
     pub partition_index: Int32,
     pub offset: Int64,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequest2 {
     pub topics: Vec<DeleteRecordsRequestTopics2>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequestTopics2 {
     pub name: CompactString,
     pub partitions: Vec<DeleteRecordsRequestTopicsPartitions2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequestTopicsPartitions2 {
     pub partition_index: Int32,
     pub offset: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteRecordsResponse0 {
     pub throttle_time_ms: Int32,
     pub topics: Vec<DeleteRecordsResponseTopics0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteRecordsResponseTopics0 {
     pub name: String,
     pub partitions: Vec<DeleteRecordsResponseTopicsPartitions0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteRecordsResponseTopicsPartitions0 {
     pub partition_index: Int32,
     pub low_watermark: Int64,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteRecordsResponse1 {
     pub throttle_time_ms: Int32,
     pub topics: Vec<DeleteRecordsResponseTopics1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteRecordsResponseTopics1 {
     pub name: String,
     pub partitions: Vec<DeleteRecordsResponseTopicsPartitions1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteRecordsResponseTopicsPartitions1 {
     pub partition_index: Int32,
     pub low_watermark: Int64,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteRecordsResponse2 {
     pub throttle_time_ms: Int32,
     pub topics: Vec<DeleteRecordsResponseTopics2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteRecordsResponseTopics2 {
     pub name: CompactString,
     pub partitions: Vec<DeleteRecordsResponseTopicsPartitions2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteRecordsResponseTopicsPartitions2 {
     pub partition_index: Int32,
     pub low_watermark: Int64,

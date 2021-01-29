@@ -33,65 +33,65 @@ impl ApiCall for DescribeConfigsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeConfigsRequest0 {
     pub resources: Vec<DescribeConfigsRequestResources0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeConfigsRequestResources0 {
     pub resource_type: Int8,
     pub resource_name: String,
     pub configuration_keys: Vec<String>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeConfigsRequest1 {
     pub resources: Vec<DescribeConfigsRequestResources1>,
     pub include_synonyms: Optional<Boolean>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeConfigsRequestResources1 {
     pub resource_type: Int8,
     pub resource_name: String,
     pub configuration_keys: Vec<String>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeConfigsRequest2 {
     pub resources: Vec<DescribeConfigsRequestResources2>,
     pub include_synonyms: Optional<Boolean>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeConfigsRequestResources2 {
     pub resource_type: Int8,
     pub resource_name: String,
     pub configuration_keys: Vec<String>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeConfigsRequest3 {
     pub resources: Vec<DescribeConfigsRequestResources3>,
     pub include_synonyms: Optional<Boolean>,
     pub include_documentation: Optional<Boolean>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeConfigsRequestResources3 {
     pub resource_type: Int8,
     pub resource_name: String,
     pub configuration_keys: Vec<String>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponse0 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DescribeConfigsResponseResults0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponseResults0 {
     pub error_code: Int16,
     pub error_message: NullableString,
@@ -100,7 +100,7 @@ pub struct DescribeConfigsResponseResults0 {
     pub configs: Vec<DescribeConfigsResponseResultsConfigs0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponseResultsConfigs0 {
     pub name: String,
     pub value: NullableString,
@@ -109,13 +109,13 @@ pub struct DescribeConfigsResponseResultsConfigs0 {
     pub is_sensitive: Boolean,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponse1 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DescribeConfigsResponseResults1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponseResults1 {
     pub error_code: Int16,
     pub error_message: NullableString,
@@ -124,7 +124,7 @@ pub struct DescribeConfigsResponseResults1 {
     pub configs: Vec<DescribeConfigsResponseResultsConfigs1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponseResultsConfigs1 {
     pub name: String,
     pub value: NullableString,
@@ -134,20 +134,20 @@ pub struct DescribeConfigsResponseResultsConfigs1 {
     pub synonyms: Optional<Vec<DescribeConfigsResponseResultsConfigsSynonyms1>>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponseResultsConfigsSynonyms1 {
     pub name: String,
     pub value: NullableString,
     pub source: Int8,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DescribeConfigsResponseResults2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponseResults2 {
     pub error_code: Int16,
     pub error_message: NullableString,
@@ -156,7 +156,7 @@ pub struct DescribeConfigsResponseResults2 {
     pub configs: Vec<DescribeConfigsResponseResultsConfigs2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponseResultsConfigs2 {
     pub name: String,
     pub value: NullableString,
@@ -166,20 +166,20 @@ pub struct DescribeConfigsResponseResultsConfigs2 {
     pub synonyms: Optional<Vec<DescribeConfigsResponseResultsConfigsSynonyms2>>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponseResultsConfigsSynonyms2 {
     pub name: String,
     pub value: NullableString,
     pub source: Int8,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponse3 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DescribeConfigsResponseResults3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponseResults3 {
     pub error_code: Int16,
     pub error_message: NullableString,
@@ -188,7 +188,7 @@ pub struct DescribeConfigsResponseResults3 {
     pub configs: Vec<DescribeConfigsResponseResultsConfigs3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponseResultsConfigs3 {
     pub name: String,
     pub value: NullableString,
@@ -200,7 +200,7 @@ pub struct DescribeConfigsResponseResultsConfigs3 {
     pub documentation: Optional<NullableString>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeConfigsResponseResultsConfigsSynonyms3 {
     pub name: String,
     pub value: NullableString,

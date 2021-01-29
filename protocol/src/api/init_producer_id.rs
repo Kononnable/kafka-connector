@@ -35,25 +35,25 @@ impl ApiCall for InitProducerIdRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct InitProducerIdRequest0 {
     pub transactional_id: NullableString,
     pub transaction_timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct InitProducerIdRequest1 {
     pub transactional_id: NullableString,
     pub transaction_timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct InitProducerIdRequest2 {
     pub transactional_id: CompactNullableString,
     pub transaction_timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct InitProducerIdRequest3 {
     pub transactional_id: CompactNullableString,
     pub transaction_timeout_ms: Int32,
@@ -61,7 +61,7 @@ pub struct InitProducerIdRequest3 {
     pub producer_epoch: Optional<Int16>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct InitProducerIdRequest4 {
     pub transactional_id: CompactNullableString,
     pub transaction_timeout_ms: Int32,
@@ -69,7 +69,7 @@ pub struct InitProducerIdRequest4 {
     pub producer_epoch: Optional<Int16>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct InitProducerIdResponse0 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
@@ -77,7 +77,7 @@ pub struct InitProducerIdResponse0 {
     pub producer_epoch: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct InitProducerIdResponse1 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
@@ -85,7 +85,7 @@ pub struct InitProducerIdResponse1 {
     pub producer_epoch: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct InitProducerIdResponse2 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
@@ -93,7 +93,7 @@ pub struct InitProducerIdResponse2 {
     pub producer_epoch: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct InitProducerIdResponse3 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
@@ -101,7 +101,7 @@ pub struct InitProducerIdResponse3 {
     pub producer_epoch: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct InitProducerIdResponse4 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,

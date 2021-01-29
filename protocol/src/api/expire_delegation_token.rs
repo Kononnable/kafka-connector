@@ -31,39 +31,39 @@ impl ApiCall for ExpireDelegationTokenRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ExpireDelegationTokenRequest0 {
     pub hmac: KafkaBytes,
     pub expiry_time_period_ms: Int64,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ExpireDelegationTokenRequest1 {
     pub hmac: KafkaBytes,
     pub expiry_time_period_ms: Int64,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ExpireDelegationTokenRequest2 {
     pub hmac: CompactBytes,
     pub expiry_time_period_ms: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ExpireDelegationTokenResponse0 {
     pub error_code: Int16,
     pub expiry_timestamp_ms: Int64,
     pub throttle_time_ms: Int32,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ExpireDelegationTokenResponse1 {
     pub error_code: Int16,
     pub expiry_timestamp_ms: Int64,
     pub throttle_time_ms: Int32,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ExpireDelegationTokenResponse2 {
     pub error_code: Int16,
     pub expiry_timestamp_ms: Int64,

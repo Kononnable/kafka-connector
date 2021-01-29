@@ -41,7 +41,7 @@ impl ApiCall for JoinGroupRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequest0 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
@@ -50,13 +50,13 @@ pub struct JoinGroupRequest0 {
     pub protocols: Vec<JoinGroupRequestProtocols0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequestProtocols0 {
     pub name: String,
     pub metadata: KafkaBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequest1 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
@@ -66,13 +66,13 @@ pub struct JoinGroupRequest1 {
     pub protocols: Vec<JoinGroupRequestProtocols1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequestProtocols1 {
     pub name: String,
     pub metadata: KafkaBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequest2 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
@@ -82,13 +82,13 @@ pub struct JoinGroupRequest2 {
     pub protocols: Vec<JoinGroupRequestProtocols2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequestProtocols2 {
     pub name: String,
     pub metadata: KafkaBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequest3 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
@@ -98,13 +98,13 @@ pub struct JoinGroupRequest3 {
     pub protocols: Vec<JoinGroupRequestProtocols3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequestProtocols3 {
     pub name: String,
     pub metadata: KafkaBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequest4 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
@@ -114,13 +114,13 @@ pub struct JoinGroupRequest4 {
     pub protocols: Vec<JoinGroupRequestProtocols4>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequestProtocols4 {
     pub name: String,
     pub metadata: KafkaBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequest5 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
@@ -131,13 +131,13 @@ pub struct JoinGroupRequest5 {
     pub protocols: Vec<JoinGroupRequestProtocols5>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequestProtocols5 {
     pub name: String,
     pub metadata: KafkaBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequest6 {
     pub group_id: CompactString,
     pub session_timeout_ms: Int32,
@@ -148,13 +148,13 @@ pub struct JoinGroupRequest6 {
     pub protocols: Vec<JoinGroupRequestProtocols6>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequestProtocols6 {
     pub name: CompactString,
     pub metadata: CompactBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequest7 {
     pub group_id: CompactString,
     pub session_timeout_ms: Int32,
@@ -165,13 +165,13 @@ pub struct JoinGroupRequest7 {
     pub protocols: Vec<JoinGroupRequestProtocols7>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequestProtocols7 {
     pub name: CompactString,
     pub metadata: CompactBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse0 {
     pub error_code: Int16,
     pub generation_id: Int32,
@@ -181,13 +181,13 @@ pub struct JoinGroupResponse0 {
     pub members: Vec<JoinGroupResponseMembers0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponseMembers0 {
     pub member_id: String,
     pub metadata: KafkaBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse1 {
     pub error_code: Int16,
     pub generation_id: Int32,
@@ -197,13 +197,13 @@ pub struct JoinGroupResponse1 {
     pub members: Vec<JoinGroupResponseMembers1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponseMembers1 {
     pub member_id: String,
     pub metadata: KafkaBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
@@ -214,13 +214,13 @@ pub struct JoinGroupResponse2 {
     pub members: Vec<JoinGroupResponseMembers2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponseMembers2 {
     pub member_id: String,
     pub metadata: KafkaBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
@@ -231,13 +231,13 @@ pub struct JoinGroupResponse3 {
     pub members: Vec<JoinGroupResponseMembers3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponseMembers3 {
     pub member_id: String,
     pub metadata: KafkaBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
@@ -248,13 +248,13 @@ pub struct JoinGroupResponse4 {
     pub members: Vec<JoinGroupResponseMembers4>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponseMembers4 {
     pub member_id: String,
     pub metadata: KafkaBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
@@ -265,14 +265,14 @@ pub struct JoinGroupResponse5 {
     pub members: Vec<JoinGroupResponseMembers5>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponseMembers5 {
     pub member_id: String,
     pub group_instance_id: Optional<NullableString>,
     pub metadata: KafkaBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse6 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
@@ -283,14 +283,14 @@ pub struct JoinGroupResponse6 {
     pub members: Vec<JoinGroupResponseMembers6>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponseMembers6 {
     pub member_id: CompactString,
     pub group_instance_id: Optional<CompactNullableString>,
     pub metadata: CompactBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse7 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
@@ -302,7 +302,7 @@ pub struct JoinGroupResponse7 {
     pub members: Vec<JoinGroupResponseMembers7>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponseMembers7 {
     pub member_id: CompactString,
     pub group_instance_id: Optional<CompactNullableString>,

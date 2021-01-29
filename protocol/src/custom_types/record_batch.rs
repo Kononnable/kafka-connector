@@ -9,7 +9,7 @@ use super::{
     zig_zag_string::ZigZagString, zig_zag_varint64::ZigZagVarInt64, zig_zag_vec::ZigZagVec,
 };
 
-#[derive(Debug, Default, FromBytes)]
+#[derive(Debug, Default, FromBytes, Clone)]
 pub struct RecordBatch {
     pub base_offset: i64,
     pub batch_length: i32,
@@ -25,7 +25,7 @@ pub struct RecordBatch {
     pub base_sequence: i32,
     pub records: Vec<Record>,
 }
-#[derive(Debug, Default, FromBytes)]
+#[derive(Debug, Default, FromBytes, Clone)]
 pub struct Record {
     pub length: ZigZagVarInt64,
     pub attributes: i8,
@@ -36,7 +36,7 @@ pub struct Record {
     pub headers: ZigZagVec<Header>,
 }
 
-#[derive(Debug, Default, ToBytes, FromBytes)]
+#[derive(Debug, Default, ToBytes, FromBytes, Clone)]
 pub struct Header {
     pub key: ZigZagString,
     pub value: ZigZagVec<u8>,

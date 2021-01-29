@@ -117,10 +117,10 @@ mod prelude {
     pub use super::super::custom_types::compact_bytes::CompactBytes;
     pub use super::super::custom_types::compact_nullable_string::CompactNullableString;
     pub use super::super::custom_types::compact_string::CompactString;
+    pub use super::super::custom_types::optional::Optional;
     pub use super::super::custom_types::*;
     pub use super::super::error::Error;
     pub use super::super::from_bytes::FromBytes;
-    pub use super::super::optional::Optional;
     pub use super::super::to_bytes::ToBytes;
     pub use super::super::ApiCall;
     pub use super::ApiNumbers;

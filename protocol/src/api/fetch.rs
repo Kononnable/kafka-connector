@@ -51,7 +51,7 @@ impl ApiCall for FetchRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest0 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -59,20 +59,20 @@ pub struct FetchRequest0 {
     pub topics: Vec<FetchRequestTopics0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics0 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions0 {
     pub partition: Int32,
     pub fetch_offset: Int64,
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest1 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -80,20 +80,20 @@ pub struct FetchRequest1 {
     pub topics: Vec<FetchRequestTopics1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics1 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions1 {
     pub partition: Int32,
     pub fetch_offset: Int64,
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest2 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -101,20 +101,20 @@ pub struct FetchRequest2 {
     pub topics: Vec<FetchRequestTopics2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics2 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions2 {
     pub partition: Int32,
     pub fetch_offset: Int64,
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest3 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -123,20 +123,20 @@ pub struct FetchRequest3 {
     pub topics: Vec<FetchRequestTopics3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics3 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions3 {
     pub partition: Int32,
     pub fetch_offset: Int64,
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest4 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -146,20 +146,20 @@ pub struct FetchRequest4 {
     pub topics: Vec<FetchRequestTopics4>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics4 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions4>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions4 {
     pub partition: Int32,
     pub fetch_offset: Int64,
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest5 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -169,13 +169,13 @@ pub struct FetchRequest5 {
     pub topics: Vec<FetchRequestTopics5>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics5 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions5>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions5 {
     pub partition: Int32,
     pub fetch_offset: Int64,
@@ -183,7 +183,7 @@ pub struct FetchRequestTopicsPartitions5 {
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest6 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -193,13 +193,13 @@ pub struct FetchRequest6 {
     pub topics: Vec<FetchRequestTopics6>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics6 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions6>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions6 {
     pub partition: Int32,
     pub fetch_offset: Int64,
@@ -207,7 +207,7 @@ pub struct FetchRequestTopicsPartitions6 {
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest7 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -220,13 +220,13 @@ pub struct FetchRequest7 {
     pub forgotten_topics_data: Optional<Vec<FetchRequestForgottenTopicsData7>>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics7 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions7>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions7 {
     pub partition: Int32,
     pub fetch_offset: Int64,
@@ -234,13 +234,13 @@ pub struct FetchRequestTopicsPartitions7 {
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestForgottenTopicsData7 {
     pub topic: String,
     pub partitions: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest8 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -253,13 +253,13 @@ pub struct FetchRequest8 {
     pub forgotten_topics_data: Optional<Vec<FetchRequestForgottenTopicsData8>>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics8 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions8>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions8 {
     pub partition: Int32,
     pub fetch_offset: Int64,
@@ -267,13 +267,13 @@ pub struct FetchRequestTopicsPartitions8 {
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestForgottenTopicsData8 {
     pub topic: String,
     pub partitions: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest9 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -286,13 +286,13 @@ pub struct FetchRequest9 {
     pub forgotten_topics_data: Optional<Vec<FetchRequestForgottenTopicsData9>>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics9 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions9>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions9 {
     pub partition: Int32,
     pub current_leader_epoch: Optional<Int32>,
@@ -301,13 +301,13 @@ pub struct FetchRequestTopicsPartitions9 {
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestForgottenTopicsData9 {
     pub topic: String,
     pub partitions: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest10 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -320,13 +320,13 @@ pub struct FetchRequest10 {
     pub forgotten_topics_data: Optional<Vec<FetchRequestForgottenTopicsData10>>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics10 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions10>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions10 {
     pub partition: Int32,
     pub current_leader_epoch: Optional<Int32>,
@@ -335,13 +335,13 @@ pub struct FetchRequestTopicsPartitions10 {
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestForgottenTopicsData10 {
     pub topic: String,
     pub partitions: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest11 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -355,13 +355,13 @@ pub struct FetchRequest11 {
     pub rack_id: Optional<String>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics11 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions11>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions11 {
     pub partition: Int32,
     pub current_leader_epoch: Optional<Int32>,
@@ -370,13 +370,13 @@ pub struct FetchRequestTopicsPartitions11 {
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestForgottenTopicsData11 {
     pub topic: String,
     pub partitions: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequest12 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
@@ -390,13 +390,13 @@ pub struct FetchRequest12 {
     pub rack_id: Optional<CompactString>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics12 {
     pub topic: CompactString,
     pub partitions: Vec<FetchRequestTopicsPartitions12>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions12 {
     pub partition: Int32,
     pub current_leader_epoch: Optional<Int32>,
@@ -406,24 +406,24 @@ pub struct FetchRequestTopicsPartitions12 {
     pub partition_max_bytes: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestForgottenTopicsData12 {
     pub topic: CompactString,
     pub partitions: Vec<Int32>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse0 {
     pub responses: Vec<FetchResponseResponses0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses0 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses0 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -431,19 +431,19 @@ pub struct FetchResponseResponsesPartitionResponses0 {
     pub record_set: Records,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse1 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<FetchResponseResponses1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses1 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses1 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -451,19 +451,19 @@ pub struct FetchResponseResponsesPartitionResponses1 {
     pub record_set: Records,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<FetchResponseResponses2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses2 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses2 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -471,19 +471,19 @@ pub struct FetchResponseResponsesPartitionResponses2 {
     pub record_set: Records,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<FetchResponseResponses3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses3 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses3 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -491,19 +491,19 @@ pub struct FetchResponseResponsesPartitionResponses3 {
     pub record_set: Records,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<FetchResponseResponses4>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses4 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses4>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses4 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -514,25 +514,25 @@ pub struct FetchResponseResponsesPartitionResponses4 {
     pub record_set: Records,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions4 {
     pub producer_id: Int64,
     pub first_offset: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<FetchResponseResponses5>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses5 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses5>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses5 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -544,25 +544,25 @@ pub struct FetchResponseResponsesPartitionResponses5 {
     pub record_set: Records,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions5 {
     pub producer_id: Int64,
     pub first_offset: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse6 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<FetchResponseResponses6>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses6 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses6>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses6 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -574,13 +574,13 @@ pub struct FetchResponseResponsesPartitionResponses6 {
     pub record_set: Records,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions6 {
     pub producer_id: Int64,
     pub first_offset: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse7 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Optional<Int16>,
@@ -588,13 +588,13 @@ pub struct FetchResponse7 {
     pub responses: Vec<FetchResponseResponses7>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses7 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses7>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses7 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -606,13 +606,13 @@ pub struct FetchResponseResponsesPartitionResponses7 {
     pub record_set: Records,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions7 {
     pub producer_id: Int64,
     pub first_offset: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse8 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Optional<Int16>,
@@ -620,13 +620,13 @@ pub struct FetchResponse8 {
     pub responses: Vec<FetchResponseResponses8>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses8 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses8>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses8 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -638,13 +638,13 @@ pub struct FetchResponseResponsesPartitionResponses8 {
     pub record_set: Records,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions8 {
     pub producer_id: Int64,
     pub first_offset: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse9 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Optional<Int16>,
@@ -652,13 +652,13 @@ pub struct FetchResponse9 {
     pub responses: Vec<FetchResponseResponses9>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses9 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses9>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses9 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -670,13 +670,13 @@ pub struct FetchResponseResponsesPartitionResponses9 {
     pub record_set: Records,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions9 {
     pub producer_id: Int64,
     pub first_offset: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse10 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Optional<Int16>,
@@ -684,13 +684,13 @@ pub struct FetchResponse10 {
     pub responses: Vec<FetchResponseResponses10>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses10 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses10>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses10 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -702,13 +702,13 @@ pub struct FetchResponseResponsesPartitionResponses10 {
     pub record_set: Records,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions10 {
     pub producer_id: Int64,
     pub first_offset: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse11 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Optional<Int16>,
@@ -716,13 +716,13 @@ pub struct FetchResponse11 {
     pub responses: Vec<FetchResponseResponses11>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses11 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses11>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses11 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -735,13 +735,13 @@ pub struct FetchResponseResponsesPartitionResponses11 {
     pub record_set: Records,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions11 {
     pub producer_id: Int64,
     pub first_offset: Int64,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse12 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Optional<Int16>,
@@ -749,13 +749,13 @@ pub struct FetchResponse12 {
     pub responses: Vec<FetchResponseResponses12>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses12 {
     pub topic: CompactString,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses12>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponses12 {
     pub partition: Int32,
     pub error_code: Int16,
@@ -768,7 +768,7 @@ pub struct FetchResponseResponsesPartitionResponses12 {
     pub record_set: CompactRecords,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions12 {
     pub producer_id: Int64,
     pub first_offset: Int64,

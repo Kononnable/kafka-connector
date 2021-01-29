@@ -4,7 +4,7 @@ use crate::{from_bytes::FromBytes, to_bytes::ToBytes};
 
 use super::unsigned_varint32::UnsignedVarInt32;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CompactBytes {
     pub value: Vec<u8>,
 }

@@ -41,115 +41,115 @@ impl ApiCall for OffsetFetchRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequest0 {
     pub group_id: String,
     pub topics: Vec<OffsetFetchRequestTopics0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics0 {
     pub name: String,
     pub partition_indexes: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequest1 {
     pub group_id: String,
     pub topics: Vec<OffsetFetchRequestTopics1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics1 {
     pub name: String,
     pub partition_indexes: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequest2 {
     pub group_id: String,
     pub topics: Vec<OffsetFetchRequestTopics2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics2 {
     pub name: String,
     pub partition_indexes: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequest3 {
     pub group_id: String,
     pub topics: Vec<OffsetFetchRequestTopics3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics3 {
     pub name: String,
     pub partition_indexes: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequest4 {
     pub group_id: String,
     pub topics: Vec<OffsetFetchRequestTopics4>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics4 {
     pub name: String,
     pub partition_indexes: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequest5 {
     pub group_id: String,
     pub topics: Vec<OffsetFetchRequestTopics5>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics5 {
     pub name: String,
     pub partition_indexes: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequest6 {
     pub group_id: CompactString,
     pub topics: Vec<OffsetFetchRequestTopics6>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics6 {
     pub name: CompactString,
     pub partition_indexes: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequest7 {
     pub group_id: CompactString,
     pub topics: Vec<OffsetFetchRequestTopics7>,
     pub require_stable: Optional<Boolean>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics7 {
     pub name: CompactString,
     pub partition_indexes: Vec<Int32>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse0 {
     pub topics: Vec<OffsetFetchResponseTopics0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics0 {
     pub name: String,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopicsPartitions0 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
@@ -157,18 +157,18 @@ pub struct OffsetFetchResponseTopicsPartitions0 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse1 {
     pub topics: Vec<OffsetFetchResponseTopics1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics1 {
     pub name: String,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopicsPartitions1 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
@@ -176,19 +176,19 @@ pub struct OffsetFetchResponseTopicsPartitions1 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse2 {
     pub topics: Vec<OffsetFetchResponseTopics2>,
     pub error_code: Optional<Int16>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics2 {
     pub name: String,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopicsPartitions2 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
@@ -196,20 +196,20 @@ pub struct OffsetFetchResponseTopicsPartitions2 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<OffsetFetchResponseTopics3>,
     pub error_code: Optional<Int16>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics3 {
     pub name: String,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopicsPartitions3 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
@@ -217,20 +217,20 @@ pub struct OffsetFetchResponseTopicsPartitions3 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<OffsetFetchResponseTopics4>,
     pub error_code: Optional<Int16>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics4 {
     pub name: String,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions4>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopicsPartitions4 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
@@ -238,20 +238,20 @@ pub struct OffsetFetchResponseTopicsPartitions4 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<OffsetFetchResponseTopics5>,
     pub error_code: Optional<Int16>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics5 {
     pub name: String,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions5>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopicsPartitions5 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
@@ -260,20 +260,20 @@ pub struct OffsetFetchResponseTopicsPartitions5 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse6 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<OffsetFetchResponseTopics6>,
     pub error_code: Optional<Int16>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics6 {
     pub name: CompactString,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions6>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopicsPartitions6 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
@@ -282,20 +282,20 @@ pub struct OffsetFetchResponseTopicsPartitions6 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse7 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<OffsetFetchResponseTopics7>,
     pub error_code: Optional<Int16>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics7 {
     pub name: CompactString,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions7>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopicsPartitions7 {
     pub partition_index: Int32,
     pub committed_offset: Int64,

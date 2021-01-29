@@ -31,7 +31,7 @@ impl ApiCall for EndTxnRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct EndTxnRequest0 {
     pub transactional_id: String,
     pub producer_id: Int64,
@@ -39,7 +39,7 @@ pub struct EndTxnRequest0 {
     pub committed: Boolean,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct EndTxnRequest1 {
     pub transactional_id: String,
     pub producer_id: Int64,
@@ -47,7 +47,7 @@ pub struct EndTxnRequest1 {
     pub committed: Boolean,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct EndTxnRequest2 {
     pub transactional_id: String,
     pub producer_id: Int64,
@@ -55,19 +55,19 @@ pub struct EndTxnRequest2 {
     pub committed: Boolean,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct EndTxnResponse0 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct EndTxnResponse1 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct EndTxnResponse2 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,

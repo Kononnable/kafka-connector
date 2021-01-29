@@ -27,12 +27,12 @@ impl ApiCall for WriteTxnMarkersRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct WriteTxnMarkersRequest0 {
     pub markers: Vec<WriteTxnMarkersRequestMarkers0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct WriteTxnMarkersRequestMarkers0 {
     pub producer_id: Int64,
     pub producer_epoch: Int16,
@@ -41,30 +41,30 @@ pub struct WriteTxnMarkersRequestMarkers0 {
     pub coordinator_epoch: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct WriteTxnMarkersRequestMarkersTopics0 {
     pub name: String,
     pub partition_indexes: Vec<Int32>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct WriteTxnMarkersResponse0 {
     pub markers: Vec<WriteTxnMarkersResponseMarkers0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct WriteTxnMarkersResponseMarkers0 {
     pub producer_id: Int64,
     pub topics: Vec<WriteTxnMarkersResponseMarkersTopics0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct WriteTxnMarkersResponseMarkersTopics0 {
     pub name: String,
     pub partitions: Vec<WriteTxnMarkersResponseMarkersTopicsPartitions0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct WriteTxnMarkersResponseMarkersTopicsPartitions0 {
     pub partition_index: Int32,
     pub error_code: Int16,

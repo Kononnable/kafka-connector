@@ -37,108 +37,108 @@ impl ApiCall for DeleteTopicsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteTopicsRequest0 {
     pub topic_names: Vec<String>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteTopicsRequest1 {
     pub topic_names: Vec<String>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteTopicsRequest2 {
     pub topic_names: Vec<String>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteTopicsRequest3 {
     pub topic_names: Vec<String>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteTopicsRequest4 {
     pub topic_names: Vec<CompactString>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteTopicsRequest5 {
     pub topic_names: Vec<CompactString>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponse0 {
     pub responses: Vec<DeleteTopicsResponseResponses0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponseResponses0 {
     pub name: String,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponse1 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<DeleteTopicsResponseResponses1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponseResponses1 {
     pub name: String,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<DeleteTopicsResponseResponses2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponseResponses2 {
     pub name: String,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<DeleteTopicsResponseResponses3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponseResponses3 {
     pub name: String,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<DeleteTopicsResponseResponses4>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponseResponses4 {
     pub name: CompactString,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<DeleteTopicsResponseResponses5>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponseResponses5 {
     pub name: CompactString,
     pub error_code: Int16,

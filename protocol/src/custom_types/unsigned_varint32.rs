@@ -9,15 +9,16 @@ pub fn deserialize_unsigned_varint_32(buf: &mut Bytes) -> u32 {
     }
     assert!(no_of_bytes < 6);
     let len_slice = buf.split_to(no_of_bytes + 1);
-    unsigned_varint::decode::u32(&len_slice).unwrap().0 - 1
+    unsigned_varint::decode::u32(&len_slice).unwrap().0
 }
 pub fn serialize_unsigned_varint_32(value: u32, buf: &mut BytesMut) {
     let mut t_buf = [0u8; 5];
-    let len = unsigned_varint::encode::u32((value + 1) as u32, &mut t_buf);
+    let len = unsigned_varint::encode::u32(value, &mut t_buf);
+    println!("XX {:?} {}", len, len.len());
     buf.put_slice(len);
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnsignedVarInt32 {
     pub value: u32,
 }

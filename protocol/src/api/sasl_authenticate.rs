@@ -31,29 +31,29 @@ impl ApiCall for SaslAuthenticateRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SaslAuthenticateRequest0 {
     pub auth_bytes: KafkaBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SaslAuthenticateRequest1 {
     pub auth_bytes: KafkaBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SaslAuthenticateRequest2 {
     pub auth_bytes: CompactBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct SaslAuthenticateResponse0 {
     pub error_code: Int16,
     pub error_message: NullableString,
     pub auth_bytes: KafkaBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct SaslAuthenticateResponse1 {
     pub error_code: Int16,
     pub error_message: NullableString,
@@ -61,7 +61,7 @@ pub struct SaslAuthenticateResponse1 {
     pub session_lifetime_ms: Optional<Int64>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct SaslAuthenticateResponse2 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,

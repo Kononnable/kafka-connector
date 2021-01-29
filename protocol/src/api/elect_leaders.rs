@@ -31,97 +31,97 @@ impl ApiCall for ElectLeadersRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ElectLeadersRequest0 {
     pub topic_partitions: Vec<ElectLeadersRequestTopicPartitions0>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ElectLeadersRequestTopicPartitions0 {
     pub topic: String,
     pub partition_id: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ElectLeadersRequest1 {
     pub election_type: Optional<Int8>,
     pub topic_partitions: Vec<ElectLeadersRequestTopicPartitions1>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ElectLeadersRequestTopicPartitions1 {
     pub topic: String,
     pub partition_id: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ElectLeadersRequest2 {
     pub election_type: Optional<Int8>,
     pub topic_partitions: Vec<ElectLeadersRequestTopicPartitions2>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ElectLeadersRequestTopicPartitions2 {
     pub topic: CompactString,
     pub partition_id: Vec<Int32>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponse0 {
     pub throttle_time_ms: Int32,
     pub replica_election_results: Vec<ElectLeadersResponseReplicaElectionResults0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponseReplicaElectionResults0 {
     pub topic: String,
     pub partition_result: Vec<ElectLeadersResponseReplicaElectionResultsPartitionResult0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponseReplicaElectionResultsPartitionResult0 {
     pub partition_id: Int32,
     pub error_code: Int16,
     pub error_message: NullableString,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponse1 {
     pub throttle_time_ms: Int32,
     pub error_code: Optional<Int16>,
     pub replica_election_results: Vec<ElectLeadersResponseReplicaElectionResults1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponseReplicaElectionResults1 {
     pub topic: String,
     pub partition_result: Vec<ElectLeadersResponseReplicaElectionResultsPartitionResult1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponseReplicaElectionResultsPartitionResult1 {
     pub partition_id: Int32,
     pub error_code: Int16,
     pub error_message: NullableString,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponse2 {
     pub throttle_time_ms: Int32,
     pub error_code: Optional<Int16>,
     pub replica_election_results: Vec<ElectLeadersResponseReplicaElectionResults2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponseReplicaElectionResults2 {
     pub topic: CompactString,
     pub partition_result: Vec<ElectLeadersResponseReplicaElectionResultsPartitionResult2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponseReplicaElectionResultsPartitionResult2 {
     pub partition_id: Int32,
     pub error_code: Int16,

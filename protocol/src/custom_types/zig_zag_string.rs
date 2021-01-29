@@ -5,7 +5,7 @@ use crate::{from_bytes::FromBytes, to_bytes::ToBytes};
 
 use super::zig_zag_varint32::ZigZagVarInt32;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct ZigZagString {
     value: String,
 }

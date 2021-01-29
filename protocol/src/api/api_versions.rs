@@ -33,70 +33,70 @@ impl ApiCall for ApiVersionsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ApiVersionsRequest0 {}
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ApiVersionsRequest1 {}
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ApiVersionsRequest2 {}
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct ApiVersionsRequest3 {
     pub client_software_name: Optional<CompactString>,
     pub client_software_version: Optional<CompactString>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ApiVersionsResponse0 {
     pub error_code: Int16,
     pub api_keys: Vec<ApiVersionsResponseApiKeys0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ApiVersionsResponseApiKeys0 {
     pub api_key: Int16,
     pub min_version: Int16,
     pub max_version: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ApiVersionsResponse1 {
     pub error_code: Int16,
     pub api_keys: Vec<ApiVersionsResponseApiKeys1>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ApiVersionsResponseApiKeys1 {
     pub api_key: Int16,
     pub min_version: Int16,
     pub max_version: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ApiVersionsResponse2 {
     pub error_code: Int16,
     pub api_keys: Vec<ApiVersionsResponseApiKeys2>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ApiVersionsResponseApiKeys2 {
     pub api_key: Int16,
     pub min_version: Int16,
     pub max_version: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ApiVersionsResponse3 {
     pub error_code: Int16,
     pub api_keys: Vec<ApiVersionsResponseApiKeys3>,
     pub throttle_time_ms: Optional<Int32>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct ApiVersionsResponseApiKeys3 {
     pub api_key: Int16,
     pub min_version: Int16,

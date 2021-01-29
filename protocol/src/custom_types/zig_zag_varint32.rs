@@ -12,7 +12,7 @@ pub fn encode_zig_zag_32(n: i32) -> u32 {
     ((n << 1) ^ (n >> 31)) as u32
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ZigZagVarInt32 {
     pub value: i32,
 }

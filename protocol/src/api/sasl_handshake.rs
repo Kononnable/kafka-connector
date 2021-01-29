@@ -29,23 +29,23 @@ impl ApiCall for SaslHandshakeRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SaslHandshakeRequest0 {
     pub mechanism: String,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SaslHandshakeRequest1 {
     pub mechanism: String,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct SaslHandshakeResponse0 {
     pub error_code: Int16,
     pub mechanisms: Vec<String>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct SaslHandshakeResponse1 {
     pub error_code: Int16,
     pub mechanisms: Vec<String>,

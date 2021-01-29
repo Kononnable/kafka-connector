@@ -37,7 +37,7 @@ impl ApiCall for SyncGroupRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequest0 {
     pub group_id: String,
     pub generation_id: Int32,
@@ -45,13 +45,13 @@ pub struct SyncGroupRequest0 {
     pub assignments: Vec<SyncGroupRequestAssignments0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequestAssignments0 {
     pub member_id: String,
     pub assignment: KafkaBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequest1 {
     pub group_id: String,
     pub generation_id: Int32,
@@ -59,13 +59,13 @@ pub struct SyncGroupRequest1 {
     pub assignments: Vec<SyncGroupRequestAssignments1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequestAssignments1 {
     pub member_id: String,
     pub assignment: KafkaBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequest2 {
     pub group_id: String,
     pub generation_id: Int32,
@@ -73,13 +73,13 @@ pub struct SyncGroupRequest2 {
     pub assignments: Vec<SyncGroupRequestAssignments2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequestAssignments2 {
     pub member_id: String,
     pub assignment: KafkaBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequest3 {
     pub group_id: String,
     pub generation_id: Int32,
@@ -88,13 +88,13 @@ pub struct SyncGroupRequest3 {
     pub assignments: Vec<SyncGroupRequestAssignments3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequestAssignments3 {
     pub member_id: String,
     pub assignment: KafkaBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequest4 {
     pub group_id: CompactString,
     pub generation_id: Int32,
@@ -103,13 +103,13 @@ pub struct SyncGroupRequest4 {
     pub assignments: Vec<SyncGroupRequestAssignments4>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequestAssignments4 {
     pub member_id: CompactString,
     pub assignment: CompactBytes,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequest5 {
     pub group_id: CompactString,
     pub generation_id: Int32,
@@ -120,47 +120,47 @@ pub struct SyncGroupRequest5 {
     pub assignments: Vec<SyncGroupRequestAssignments5>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequestAssignments5 {
     pub member_id: CompactString,
     pub assignment: CompactBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct SyncGroupResponse0 {
     pub error_code: Int16,
     pub assignment: KafkaBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct SyncGroupResponse1 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub assignment: KafkaBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct SyncGroupResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub assignment: KafkaBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct SyncGroupResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub assignment: KafkaBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct SyncGroupResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub assignment: CompactBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct SyncGroupResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,

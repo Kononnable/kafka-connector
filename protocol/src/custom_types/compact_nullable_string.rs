@@ -4,7 +4,7 @@ use crate::{from_bytes::FromBytes, to_bytes::ToBytes};
 
 use super::{compact_string::CompactString, unsigned_varint32::UnsignedVarInt32};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CompactNullableString {
     pub value: Option<String>,
 }

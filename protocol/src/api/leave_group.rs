@@ -35,87 +35,87 @@ impl ApiCall for LeaveGroupRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequest0 {
     pub group_id: String,
     pub member_id: String,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequest1 {
     pub group_id: String,
     pub member_id: String,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequest2 {
     pub group_id: String,
     pub member_id: String,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequest3 {
     pub group_id: String,
     pub members: Optional<Vec<LeaveGroupRequestMembers3>>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequestMembers3 {
     pub member_id: String,
     pub group_instance_id: NullableString,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequest4 {
     pub group_id: CompactString,
     pub members: Optional<Vec<LeaveGroupRequestMembers4>>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequestMembers4 {
     pub member_id: CompactString,
     pub group_instance_id: CompactNullableString,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaveGroupResponse0 {
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaveGroupResponse1 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaveGroupResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaveGroupResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub members: Optional<Vec<LeaveGroupResponseMembers3>>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaveGroupResponseMembers3 {
     pub member_id: String,
     pub group_instance_id: NullableString,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaveGroupResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub members: Optional<Vec<LeaveGroupResponseMembers4>>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaveGroupResponseMembers4 {
     pub member_id: CompactString,
     pub group_instance_id: CompactNullableString,

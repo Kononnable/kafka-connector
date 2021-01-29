@@ -3,6 +3,7 @@ use self::record_batch::RecordBatch;
 pub mod compact_bytes;
 pub mod compact_nullable_string;
 pub mod compact_string;
+pub mod optional;
 pub mod record_batch;
 pub mod unsigned_varint32;
 pub mod unsigned_varint64;

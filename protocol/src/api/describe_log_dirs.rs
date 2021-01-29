@@ -31,59 +31,59 @@ impl ApiCall for DescribeLogDirsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequest0 {
     pub topics: Vec<DescribeLogDirsRequestTopics0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequestTopics0 {
     pub topic: String,
     pub partition_index: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequest1 {
     pub topics: Vec<DescribeLogDirsRequestTopics1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequestTopics1 {
     pub topic: String,
     pub partition_index: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequest2 {
     pub topics: Vec<DescribeLogDirsRequestTopics2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequestTopics2 {
     pub topic: CompactString,
     pub partition_index: Vec<Int32>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponse0 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DescribeLogDirsResponseResults0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResults0 {
     pub error_code: Int16,
     pub log_dir: String,
     pub topics: Vec<DescribeLogDirsResponseResultsTopics0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResultsTopics0 {
     pub name: String,
     pub partitions: Vec<DescribeLogDirsResponseResultsTopicsPartitions0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResultsTopicsPartitions0 {
     pub partition_index: Int32,
     pub partition_size: Int64,
@@ -91,26 +91,26 @@ pub struct DescribeLogDirsResponseResultsTopicsPartitions0 {
     pub is_future_key: Boolean,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponse1 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DescribeLogDirsResponseResults1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResults1 {
     pub error_code: Int16,
     pub log_dir: String,
     pub topics: Vec<DescribeLogDirsResponseResultsTopics1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResultsTopics1 {
     pub name: String,
     pub partitions: Vec<DescribeLogDirsResponseResultsTopicsPartitions1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResultsTopicsPartitions1 {
     pub partition_index: Int32,
     pub partition_size: Int64,
@@ -118,26 +118,26 @@ pub struct DescribeLogDirsResponseResultsTopicsPartitions1 {
     pub is_future_key: Boolean,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DescribeLogDirsResponseResults2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResults2 {
     pub error_code: Int16,
     pub log_dir: CompactString,
     pub topics: Vec<DescribeLogDirsResponseResultsTopics2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResultsTopics2 {
     pub name: CompactString,
     pub partitions: Vec<DescribeLogDirsResponseResultsTopicsPartitions2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResultsTopicsPartitions2 {
     pub partition_index: Int32,
     pub partition_size: Int64,

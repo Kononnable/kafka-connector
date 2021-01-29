@@ -31,7 +31,7 @@ impl ApiCall for AddOffsetsToTxnRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AddOffsetsToTxnRequest0 {
     pub transactional_id: String,
     pub producer_id: Int64,
@@ -39,7 +39,7 @@ pub struct AddOffsetsToTxnRequest0 {
     pub group_id: String,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AddOffsetsToTxnRequest1 {
     pub transactional_id: String,
     pub producer_id: Int64,
@@ -47,7 +47,7 @@ pub struct AddOffsetsToTxnRequest1 {
     pub group_id: String,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AddOffsetsToTxnRequest2 {
     pub transactional_id: String,
     pub producer_id: Int64,
@@ -55,19 +55,19 @@ pub struct AddOffsetsToTxnRequest2 {
     pub group_id: String,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AddOffsetsToTxnResponse0 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AddOffsetsToTxnResponse1 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AddOffsetsToTxnResponse2 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,

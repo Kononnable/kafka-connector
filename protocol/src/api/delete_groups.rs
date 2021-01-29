@@ -31,52 +31,52 @@ impl ApiCall for DeleteGroupsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteGroupsRequest0 {
     pub groups_names: Vec<String>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteGroupsRequest1 {
     pub groups_names: Vec<String>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteGroupsRequest2 {
     pub groups_names: Vec<CompactString>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteGroupsResponse0 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DeleteGroupsResponseResults0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteGroupsResponseResults0 {
     pub group_id: String,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteGroupsResponse1 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DeleteGroupsResponseResults1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteGroupsResponseResults1 {
     pub group_id: String,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteGroupsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DeleteGroupsResponseResults2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteGroupsResponseResults2 {
     pub group_id: CompactString,
     pub error_code: Int16,

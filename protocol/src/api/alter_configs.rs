@@ -29,51 +29,51 @@ impl ApiCall for AlterConfigsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterConfigsRequest0 {
     pub resources: Vec<AlterConfigsRequestResources0>,
     pub validate_only: Boolean,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterConfigsRequestResources0 {
     pub resource_type: Int8,
     pub resource_name: String,
     pub configs: Vec<AlterConfigsRequestResourcesConfigs0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterConfigsRequestResourcesConfigs0 {
     pub name: String,
     pub value: NullableString,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterConfigsRequest1 {
     pub resources: Vec<AlterConfigsRequestResources1>,
     pub validate_only: Boolean,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterConfigsRequestResources1 {
     pub resource_type: Int8,
     pub resource_name: String,
     pub configs: Vec<AlterConfigsRequestResourcesConfigs1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterConfigsRequestResourcesConfigs1 {
     pub name: String,
     pub value: NullableString,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterConfigsResponse0 {
     pub throttle_time_ms: Int32,
     pub responses: Vec<AlterConfigsResponseResponses0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterConfigsResponseResponses0 {
     pub error_code: Int16,
     pub error_message: NullableString,
@@ -81,13 +81,13 @@ pub struct AlterConfigsResponseResponses0 {
     pub resource_name: String,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterConfigsResponse1 {
     pub throttle_time_ms: Int32,
     pub responses: Vec<AlterConfigsResponseResponses1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterConfigsResponseResponses1 {
     pub error_code: Int16,
     pub error_message: NullableString,

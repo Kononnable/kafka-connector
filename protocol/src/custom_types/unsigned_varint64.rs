@@ -17,7 +17,7 @@ pub fn serialize_unsigned_varint_64(value: u64, buf: &mut BytesMut) {
     buf.put_slice(len);
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnsignedVarInt64 {
     pub value: u64,
 }

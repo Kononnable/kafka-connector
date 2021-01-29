@@ -35,7 +35,7 @@ impl ApiCall for LeaderAndIsrRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequest0 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -43,7 +43,7 @@ pub struct LeaderAndIsrRequest0 {
     pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestUngroupedPartitionStates0 {
     pub topic_name: String,
     pub partition_index: Int32,
@@ -55,14 +55,14 @@ pub struct LeaderAndIsrRequestUngroupedPartitionStates0 {
     pub replicas: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestLiveLeaders0 {
     pub broker_id: Int32,
     pub host_name: String,
     pub port: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequest1 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -70,7 +70,7 @@ pub struct LeaderAndIsrRequest1 {
     pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestUngroupedPartitionStates1 {
     pub topic_name: String,
     pub partition_index: Int32,
@@ -83,14 +83,14 @@ pub struct LeaderAndIsrRequestUngroupedPartitionStates1 {
     pub is_new: Optional<Boolean>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestLiveLeaders1 {
     pub broker_id: Int32,
     pub host_name: String,
     pub port: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequest2 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -99,13 +99,13 @@ pub struct LeaderAndIsrRequest2 {
     pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestTopicStates2 {
     pub topic_name: String,
     pub partition_states: Vec<LeaderAndIsrRequestTopicStatesPartitionStates2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestTopicStatesPartitionStates2 {
     pub partition_index: Int32,
     pub controller_epoch: Int32,
@@ -117,14 +117,14 @@ pub struct LeaderAndIsrRequestTopicStatesPartitionStates2 {
     pub is_new: Boolean,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestLiveLeaders2 {
     pub broker_id: Int32,
     pub host_name: String,
     pub port: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequest3 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -133,13 +133,13 @@ pub struct LeaderAndIsrRequest3 {
     pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestTopicStates3 {
     pub topic_name: String,
     pub partition_states: Vec<LeaderAndIsrRequestTopicStatesPartitionStates3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestTopicStatesPartitionStates3 {
     pub partition_index: Int32,
     pub controller_epoch: Int32,
@@ -153,14 +153,14 @@ pub struct LeaderAndIsrRequestTopicStatesPartitionStates3 {
     pub is_new: Boolean,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestLiveLeaders3 {
     pub broker_id: Int32,
     pub host_name: String,
     pub port: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequest4 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -169,13 +169,13 @@ pub struct LeaderAndIsrRequest4 {
     pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders4>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestTopicStates4 {
     pub topic_name: CompactString,
     pub partition_states: Vec<LeaderAndIsrRequestTopicStatesPartitionStates4>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestTopicStatesPartitionStates4 {
     pub partition_index: Int32,
     pub controller_epoch: Int32,
@@ -189,72 +189,72 @@ pub struct LeaderAndIsrRequestTopicStatesPartitionStates4 {
     pub is_new: Boolean,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestLiveLeaders4 {
     pub broker_id: Int32,
     pub host_name: CompactString,
     pub port: Int32,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaderAndIsrResponse0 {
     pub error_code: Int16,
     pub partition_errors: Vec<LeaderAndIsrResponsePartitionErrors0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaderAndIsrResponsePartitionErrors0 {
     pub topic_name: String,
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaderAndIsrResponse1 {
     pub error_code: Int16,
     pub partition_errors: Vec<LeaderAndIsrResponsePartitionErrors1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaderAndIsrResponsePartitionErrors1 {
     pub topic_name: String,
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaderAndIsrResponse2 {
     pub error_code: Int16,
     pub partition_errors: Vec<LeaderAndIsrResponsePartitionErrors2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaderAndIsrResponsePartitionErrors2 {
     pub topic_name: String,
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaderAndIsrResponse3 {
     pub error_code: Int16,
     pub partition_errors: Vec<LeaderAndIsrResponsePartitionErrors3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaderAndIsrResponsePartitionErrors3 {
     pub topic_name: String,
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaderAndIsrResponse4 {
     pub error_code: Int16,
     pub partition_errors: Vec<LeaderAndIsrResponsePartitionErrors4>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaderAndIsrResponsePartitionErrors4 {
     pub topic_name: CompactString,
     pub partition_index: Int32,

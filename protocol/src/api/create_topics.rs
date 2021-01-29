@@ -39,13 +39,13 @@ impl ApiCall for CreateTopicsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequest0 {
     pub topics: Vec<CreateTopicsRequestTopics0>,
     pub timeout_ms: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopics0 {
     pub name: String,
     pub num_partitions: Int32,
@@ -54,26 +54,26 @@ pub struct CreateTopicsRequestTopics0 {
     pub configs: Vec<CreateTopicsRequestTopicsConfigs0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsAssignments0 {
     pub partition_index: Int32,
     pub broker_ids: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsConfigs0 {
     pub name: String,
     pub value: NullableString,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequest1 {
     pub topics: Vec<CreateTopicsRequestTopics1>,
     pub timeout_ms: Int32,
     pub validate_only: Optional<Boolean>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopics1 {
     pub name: String,
     pub num_partitions: Int32,
@@ -82,26 +82,26 @@ pub struct CreateTopicsRequestTopics1 {
     pub configs: Vec<CreateTopicsRequestTopicsConfigs1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsAssignments1 {
     pub partition_index: Int32,
     pub broker_ids: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsConfigs1 {
     pub name: String,
     pub value: NullableString,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequest2 {
     pub topics: Vec<CreateTopicsRequestTopics2>,
     pub timeout_ms: Int32,
     pub validate_only: Optional<Boolean>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopics2 {
     pub name: String,
     pub num_partitions: Int32,
@@ -110,26 +110,26 @@ pub struct CreateTopicsRequestTopics2 {
     pub configs: Vec<CreateTopicsRequestTopicsConfigs2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsAssignments2 {
     pub partition_index: Int32,
     pub broker_ids: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsConfigs2 {
     pub name: String,
     pub value: NullableString,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequest3 {
     pub topics: Vec<CreateTopicsRequestTopics3>,
     pub timeout_ms: Int32,
     pub validate_only: Optional<Boolean>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopics3 {
     pub name: String,
     pub num_partitions: Int32,
@@ -138,26 +138,26 @@ pub struct CreateTopicsRequestTopics3 {
     pub configs: Vec<CreateTopicsRequestTopicsConfigs3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsAssignments3 {
     pub partition_index: Int32,
     pub broker_ids: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsConfigs3 {
     pub name: String,
     pub value: NullableString,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequest4 {
     pub topics: Vec<CreateTopicsRequestTopics4>,
     pub timeout_ms: Int32,
     pub validate_only: Optional<Boolean>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopics4 {
     pub name: String,
     pub num_partitions: Int32,
@@ -166,26 +166,26 @@ pub struct CreateTopicsRequestTopics4 {
     pub configs: Vec<CreateTopicsRequestTopicsConfigs4>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsAssignments4 {
     pub partition_index: Int32,
     pub broker_ids: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsConfigs4 {
     pub name: String,
     pub value: NullableString,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequest5 {
     pub topics: Vec<CreateTopicsRequestTopics5>,
     pub timeout_ms: Int32,
     pub validate_only: Optional<Boolean>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopics5 {
     pub name: CompactString,
     pub num_partitions: Int32,
@@ -194,26 +194,26 @@ pub struct CreateTopicsRequestTopics5 {
     pub configs: Vec<CreateTopicsRequestTopicsConfigs5>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsAssignments5 {
     pub partition_index: Int32,
     pub broker_ids: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsConfigs5 {
     pub name: CompactString,
     pub value: CompactNullableString,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequest6 {
     pub topics: Vec<CreateTopicsRequestTopics6>,
     pub timeout_ms: Int32,
     pub validate_only: Optional<Boolean>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopics6 {
     pub name: CompactString,
     pub num_partitions: Int32,
@@ -222,87 +222,87 @@ pub struct CreateTopicsRequestTopics6 {
     pub configs: Vec<CreateTopicsRequestTopicsConfigs6>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsAssignments6 {
     pub partition_index: Int32,
     pub broker_ids: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsConfigs6 {
     pub name: CompactString,
     pub value: CompactNullableString,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponse0 {
     pub topics: Vec<CreateTopicsResponseTopics0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopics0 {
     pub name: String,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponse1 {
     pub topics: Vec<CreateTopicsResponseTopics1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopics1 {
     pub name: String,
     pub error_code: Int16,
     pub error_message: Optional<NullableString>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<CreateTopicsResponseTopics2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopics2 {
     pub name: String,
     pub error_code: Int16,
     pub error_message: Optional<NullableString>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<CreateTopicsResponseTopics3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopics3 {
     pub name: String,
     pub error_code: Int16,
     pub error_message: Optional<NullableString>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<CreateTopicsResponseTopics4>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopics4 {
     pub name: String,
     pub error_code: Int16,
     pub error_message: Optional<NullableString>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<CreateTopicsResponseTopics5>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopics5 {
     pub name: CompactString,
     pub error_code: Int16,
@@ -312,7 +312,7 @@ pub struct CreateTopicsResponseTopics5 {
     pub configs: Optional<Vec<CreateTopicsResponseTopicsConfigs5>>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopicsConfigs5 {
     pub name: CompactString,
     pub value: CompactNullableString,
@@ -321,13 +321,13 @@ pub struct CreateTopicsResponseTopicsConfigs5 {
     pub is_sensitive: Boolean,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponse6 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<CreateTopicsResponseTopics6>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopics6 {
     pub name: CompactString,
     pub error_code: Int16,
@@ -337,7 +337,7 @@ pub struct CreateTopicsResponseTopics6 {
     pub configs: Optional<Vec<CreateTopicsResponseTopicsConfigs6>>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopicsConfigs6 {
     pub name: CompactString,
     pub value: CompactNullableString,

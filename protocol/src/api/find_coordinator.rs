@@ -33,30 +33,30 @@ impl ApiCall for FindCoordinatorRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FindCoordinatorRequest0 {
     pub key: String,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FindCoordinatorRequest1 {
     pub key: String,
     pub key_type: Optional<Int8>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FindCoordinatorRequest2 {
     pub key: String,
     pub key_type: Optional<Int8>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct FindCoordinatorRequest3 {
     pub key: CompactString,
     pub key_type: Optional<Int8>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FindCoordinatorResponse0 {
     pub error_code: Int16,
     pub node_id: Int32,
@@ -64,7 +64,7 @@ pub struct FindCoordinatorResponse0 {
     pub port: Int32,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FindCoordinatorResponse1 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
@@ -74,7 +74,7 @@ pub struct FindCoordinatorResponse1 {
     pub port: Int32,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FindCoordinatorResponse2 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
@@ -84,7 +84,7 @@ pub struct FindCoordinatorResponse2 {
     pub port: Int32,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct FindCoordinatorResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,

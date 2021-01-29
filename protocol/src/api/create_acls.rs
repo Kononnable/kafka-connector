@@ -31,12 +31,12 @@ impl ApiCall for CreateAclsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateAclsRequest0 {
     pub creations: Vec<CreateAclsRequestCreations0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateAclsRequestCreations0 {
     pub resource_type: Int8,
     pub resource_name: String,
@@ -46,12 +46,12 @@ pub struct CreateAclsRequestCreations0 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateAclsRequest1 {
     pub creations: Vec<CreateAclsRequestCreations1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateAclsRequestCreations1 {
     pub resource_type: Int8,
     pub resource_name: String,
@@ -62,12 +62,12 @@ pub struct CreateAclsRequestCreations1 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateAclsRequest2 {
     pub creations: Vec<CreateAclsRequestCreations2>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateAclsRequestCreations2 {
     pub resource_type: Int8,
     pub resource_name: CompactString,
@@ -78,37 +78,37 @@ pub struct CreateAclsRequestCreations2 {
     pub permission_type: Int8,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateAclsResponse0 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreateAclsResponseResults0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateAclsResponseResults0 {
     pub error_code: Int16,
     pub error_message: NullableString,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateAclsResponse1 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreateAclsResponseResults1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateAclsResponseResults1 {
     pub error_code: Int16,
     pub error_message: NullableString,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateAclsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreateAclsResponseResults2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateAclsResponseResults2 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,

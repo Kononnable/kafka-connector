@@ -118,7 +118,7 @@ fn genrate_struct(api_call: &ApiStructDefinition, is_request: bool) -> String {
     let struct_name = format!("{}{}", api_call.name, api_call.version);
 
     let derive_bytes = if is_request { "ToBytes" } else { "FromBytes" };
-    let derive = format!("#[derive(Default,Debug,{})]\n", derive_bytes);
+    let derive = format!("#[derive(Default,Debug,Clone,{})]\n", derive_bytes);
     let struct_name_with_version = format!("pub struct {} {{ \n", struct_name);
     let fields = api_call
         .fields

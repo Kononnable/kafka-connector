@@ -33,7 +33,7 @@ impl ApiCall for StopReplicaRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequest0 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -41,13 +41,13 @@ pub struct StopReplicaRequest0 {
     pub ungrouped_partitions: Vec<StopReplicaRequestUngroupedPartitions0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequestUngroupedPartitions0 {
     pub topic_name: String,
     pub partition_index: Int32,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequest1 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -56,13 +56,13 @@ pub struct StopReplicaRequest1 {
     pub topics: Optional<Vec<StopReplicaRequestTopics1>>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequestTopics1 {
     pub name: String,
     pub partition_indexes: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequest2 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -71,13 +71,13 @@ pub struct StopReplicaRequest2 {
     pub topics: Optional<Vec<StopReplicaRequestTopics2>>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequestTopics2 {
     pub name: CompactString,
     pub partition_indexes: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequest3 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
@@ -85,65 +85,65 @@ pub struct StopReplicaRequest3 {
     pub topic_states: Optional<Vec<StopReplicaRequestTopicStates3>>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequestTopicStates3 {
     pub topic_name: CompactString,
     pub partition_states: Vec<StopReplicaRequestTopicStatesPartitionStates3>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequestTopicStatesPartitionStates3 {
     pub partition_index: Int32,
     pub leader_epoch: Int32,
     pub delete_partition: Boolean,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct StopReplicaResponse0 {
     pub error_code: Int16,
     pub partition_errors: Vec<StopReplicaResponsePartitionErrors0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct StopReplicaResponsePartitionErrors0 {
     pub topic_name: String,
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct StopReplicaResponse1 {
     pub error_code: Int16,
     pub partition_errors: Vec<StopReplicaResponsePartitionErrors1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct StopReplicaResponsePartitionErrors1 {
     pub topic_name: String,
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct StopReplicaResponse2 {
     pub error_code: Int16,
     pub partition_errors: Vec<StopReplicaResponsePartitionErrors2>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct StopReplicaResponsePartitionErrors2 {
     pub topic_name: CompactString,
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct StopReplicaResponse3 {
     pub error_code: Int16,
     pub partition_errors: Vec<StopReplicaResponsePartitionErrors3>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct StopReplicaResponsePartitionErrors3 {
     pub topic_name: CompactString,
     pub partition_index: Int32,

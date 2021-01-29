@@ -2,10 +2,10 @@ use std::convert::TryInto;
 
 use bytes::{Bytes, BytesMut};
 
-use super::{error::Error, from_bytes::FromBytes, to_bytes::ToBytes};
+use crate::{error::Error, from_bytes::FromBytes, to_bytes::ToBytes};
 
 ///Fields not supported by some old kafka version
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Optional<T> {
     Some(T),
     None,

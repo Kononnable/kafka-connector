@@ -12,7 +12,7 @@ pub fn encode_zig_zag_64(n: i64) -> u64 {
     ((n << 1) ^ (n >> 63)) as u64
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ZigZagVarInt64 {
     pub value: i64,
 }

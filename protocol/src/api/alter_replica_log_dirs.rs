@@ -29,71 +29,71 @@ impl ApiCall for AlterReplicaLogDirsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterReplicaLogDirsRequest0 {
     pub dirs: Vec<AlterReplicaLogDirsRequestDirs0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterReplicaLogDirsRequestDirs0 {
     pub path: String,
     pub topics: Vec<AlterReplicaLogDirsRequestDirsTopics0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterReplicaLogDirsRequestDirsTopics0 {
     pub name: String,
     pub partitions: Vec<Int32>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterReplicaLogDirsRequest1 {
     pub dirs: Vec<AlterReplicaLogDirsRequestDirs1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterReplicaLogDirsRequestDirs1 {
     pub path: String,
     pub topics: Vec<AlterReplicaLogDirsRequestDirsTopics1>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterReplicaLogDirsRequestDirsTopics1 {
     pub name: String,
     pub partitions: Vec<Int32>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterReplicaLogDirsResponse0 {
     pub throttle_time_ms: Int32,
     pub results: Vec<AlterReplicaLogDirsResponseResults0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterReplicaLogDirsResponseResults0 {
     pub topic_name: String,
     pub partitions: Vec<AlterReplicaLogDirsResponseResultsPartitions0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterReplicaLogDirsResponseResultsPartitions0 {
     pub partition_index: Int32,
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterReplicaLogDirsResponse1 {
     pub throttle_time_ms: Int32,
     pub results: Vec<AlterReplicaLogDirsResponseResults1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterReplicaLogDirsResponseResults1 {
     pub topic_name: String,
     pub partitions: Vec<AlterReplicaLogDirsResponseResultsPartitions1>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterReplicaLogDirsResponseResultsPartitions1 {
     pub partition_index: Int32,
     pub error_code: Int16,

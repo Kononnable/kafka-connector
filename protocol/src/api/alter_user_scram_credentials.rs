@@ -27,19 +27,19 @@ impl ApiCall for AlterUserScramCredentialsRequest {
         }
     }
 }
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterUserScramCredentialsRequest0 {
     pub deletions: Vec<AlterUserScramCredentialsRequestDeletions0>,
     pub upsertions: Vec<AlterUserScramCredentialsRequestUpsertions0>,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterUserScramCredentialsRequestDeletions0 {
     pub name: CompactString,
     pub mechanism: Int8,
 }
 
-#[derive(Default, Debug, ToBytes)]
+#[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterUserScramCredentialsRequestUpsertions0 {
     pub name: CompactString,
     pub mechanism: Int8,
@@ -48,13 +48,13 @@ pub struct AlterUserScramCredentialsRequestUpsertions0 {
     pub salted_password: CompactBytes,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterUserScramCredentialsResponse0 {
     pub throttle_time_ms: Int32,
     pub results: Vec<AlterUserScramCredentialsResponseResults0>,
 }
 
-#[derive(Default, Debug, FromBytes)]
+#[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterUserScramCredentialsResponseResults0 {
     pub user: CompactString,
     pub error_code: Int16,
