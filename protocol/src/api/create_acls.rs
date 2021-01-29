@@ -2,28 +2,35 @@ use super::prelude::*;
 
 pub type CreateAclsRequest = CreateAclsRequest2;
 pub type CreateAclsResponse = CreateAclsResponse2;
-pub fn serialize_create_acls_request(
-    data: CreateAclsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&CreateAclsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&CreateAclsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for CreateAclsRequest {
+    type Response = CreateAclsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_create_acls_response(version: i32, buf: &mut Bytes) -> CreateAclsResponse {
-    match version {
-        0 => CreateAclsResponse0::deserialize(buf).into(),
-        1 => CreateAclsResponse1::deserialize(buf).into(),
-        2 => CreateAclsResponse::deserialize(buf),
-        _ => CreateAclsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::CreateAcls
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&CreateAclsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&CreateAclsRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> CreateAclsResponse {
+        match version {
+            0 => CreateAclsResponse0::deserialize(buf).into(),
+            1 => CreateAclsResponse1::deserialize(buf).into(),
+            2 => CreateAclsResponse::deserialize(buf),
+            _ => CreateAclsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct CreateAclsRequest0 {
     pub creations: Vec<CreateAclsRequestCreations0>,

@@ -2,39 +2,43 @@ use super::prelude::*;
 
 pub type UpdateMetadataRequest = UpdateMetadataRequest6;
 pub type UpdateMetadataResponse = UpdateMetadataResponse6;
-pub fn serialize_update_metadata_request(
-    data: UpdateMetadataRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&UpdateMetadataRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&UpdateMetadataRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&UpdateMetadataRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&UpdateMetadataRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&UpdateMetadataRequest4::try_from(data)?, buf),
-        5 => ToBytes::serialize(&UpdateMetadataRequest5::try_from(data)?, buf),
-        6 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for UpdateMetadataRequest {
+    type Response = UpdateMetadataResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_update_metadata_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> UpdateMetadataResponse {
-    match version {
-        0 => UpdateMetadataResponse0::deserialize(buf).into(),
-        1 => UpdateMetadataResponse1::deserialize(buf).into(),
-        2 => UpdateMetadataResponse2::deserialize(buf).into(),
-        3 => UpdateMetadataResponse3::deserialize(buf).into(),
-        4 => UpdateMetadataResponse4::deserialize(buf).into(),
-        5 => UpdateMetadataResponse5::deserialize(buf).into(),
-        6 => UpdateMetadataResponse::deserialize(buf),
-        _ => UpdateMetadataResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        6
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::UpdateMetadata
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&UpdateMetadataRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&UpdateMetadataRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&UpdateMetadataRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&UpdateMetadataRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&UpdateMetadataRequest4::try_from(self)?, buf),
+            5 => ToBytes::serialize(&UpdateMetadataRequest5::try_from(self)?, buf),
+            6 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> UpdateMetadataResponse {
+        match version {
+            0 => UpdateMetadataResponse0::deserialize(buf).into(),
+            1 => UpdateMetadataResponse1::deserialize(buf).into(),
+            2 => UpdateMetadataResponse2::deserialize(buf).into(),
+            3 => UpdateMetadataResponse3::deserialize(buf).into(),
+            4 => UpdateMetadataResponse4::deserialize(buf).into(),
+            5 => UpdateMetadataResponse5::deserialize(buf).into(),
+            6 => UpdateMetadataResponse::deserialize(buf),
+            _ => UpdateMetadataResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct UpdateMetadataRequest0 {
     pub controller_id: Int32,

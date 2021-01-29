@@ -2,48 +2,55 @@ use super::prelude::*;
 
 pub type FetchRequest = FetchRequest12;
 pub type FetchResponse = FetchResponse12;
-pub fn serialize_fetch_request(
-    data: FetchRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&FetchRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&FetchRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&FetchRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&FetchRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&FetchRequest4::try_from(data)?, buf),
-        5 => ToBytes::serialize(&FetchRequest5::try_from(data)?, buf),
-        6 => ToBytes::serialize(&FetchRequest6::try_from(data)?, buf),
-        7 => ToBytes::serialize(&FetchRequest7::try_from(data)?, buf),
-        8 => ToBytes::serialize(&FetchRequest8::try_from(data)?, buf),
-        9 => ToBytes::serialize(&FetchRequest9::try_from(data)?, buf),
-        10 => ToBytes::serialize(&FetchRequest10::try_from(data)?, buf),
-        11 => ToBytes::serialize(&FetchRequest11::try_from(data)?, buf),
-        12 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for FetchRequest {
+    type Response = FetchResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_fetch_response(version: i32, buf: &mut Bytes) -> FetchResponse {
-    match version {
-        0 => FetchResponse0::deserialize(buf).into(),
-        1 => FetchResponse1::deserialize(buf).into(),
-        2 => FetchResponse2::deserialize(buf).into(),
-        3 => FetchResponse3::deserialize(buf).into(),
-        4 => FetchResponse4::deserialize(buf).into(),
-        5 => FetchResponse5::deserialize(buf).into(),
-        6 => FetchResponse6::deserialize(buf).into(),
-        7 => FetchResponse7::deserialize(buf).into(),
-        8 => FetchResponse8::deserialize(buf).into(),
-        9 => FetchResponse9::deserialize(buf).into(),
-        10 => FetchResponse10::deserialize(buf).into(),
-        11 => FetchResponse11::deserialize(buf).into(),
-        12 => FetchResponse::deserialize(buf),
-        _ => FetchResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        12
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::Fetch
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&FetchRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&FetchRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&FetchRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&FetchRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&FetchRequest4::try_from(self)?, buf),
+            5 => ToBytes::serialize(&FetchRequest5::try_from(self)?, buf),
+            6 => ToBytes::serialize(&FetchRequest6::try_from(self)?, buf),
+            7 => ToBytes::serialize(&FetchRequest7::try_from(self)?, buf),
+            8 => ToBytes::serialize(&FetchRequest8::try_from(self)?, buf),
+            9 => ToBytes::serialize(&FetchRequest9::try_from(self)?, buf),
+            10 => ToBytes::serialize(&FetchRequest10::try_from(self)?, buf),
+            11 => ToBytes::serialize(&FetchRequest11::try_from(self)?, buf),
+            12 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> FetchResponse {
+        match version {
+            0 => FetchResponse0::deserialize(buf).into(),
+            1 => FetchResponse1::deserialize(buf).into(),
+            2 => FetchResponse2::deserialize(buf).into(),
+            3 => FetchResponse3::deserialize(buf).into(),
+            4 => FetchResponse4::deserialize(buf).into(),
+            5 => FetchResponse5::deserialize(buf).into(),
+            6 => FetchResponse6::deserialize(buf).into(),
+            7 => FetchResponse7::deserialize(buf).into(),
+            8 => FetchResponse8::deserialize(buf).into(),
+            9 => FetchResponse9::deserialize(buf).into(),
+            10 => FetchResponse10::deserialize(buf).into(),
+            11 => FetchResponse11::deserialize(buf).into(),
+            12 => FetchResponse::deserialize(buf),
+            _ => FetchResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct FetchRequest0 {
     pub replica_id: Int32,

@@ -2,36 +2,43 @@ use super::prelude::*;
 
 pub type CreateTopicsRequest = CreateTopicsRequest6;
 pub type CreateTopicsResponse = CreateTopicsResponse6;
-pub fn serialize_create_topics_request(
-    data: CreateTopicsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&CreateTopicsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&CreateTopicsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&CreateTopicsRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&CreateTopicsRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&CreateTopicsRequest4::try_from(data)?, buf),
-        5 => ToBytes::serialize(&CreateTopicsRequest5::try_from(data)?, buf),
-        6 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for CreateTopicsRequest {
+    type Response = CreateTopicsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_create_topics_response(version: i32, buf: &mut Bytes) -> CreateTopicsResponse {
-    match version {
-        0 => CreateTopicsResponse0::deserialize(buf).into(),
-        1 => CreateTopicsResponse1::deserialize(buf).into(),
-        2 => CreateTopicsResponse2::deserialize(buf).into(),
-        3 => CreateTopicsResponse3::deserialize(buf).into(),
-        4 => CreateTopicsResponse4::deserialize(buf).into(),
-        5 => CreateTopicsResponse5::deserialize(buf).into(),
-        6 => CreateTopicsResponse::deserialize(buf),
-        _ => CreateTopicsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        6
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::CreateTopics
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&CreateTopicsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&CreateTopicsRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&CreateTopicsRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&CreateTopicsRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&CreateTopicsRequest4::try_from(self)?, buf),
+            5 => ToBytes::serialize(&CreateTopicsRequest5::try_from(self)?, buf),
+            6 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> CreateTopicsResponse {
+        match version {
+            0 => CreateTopicsResponse0::deserialize(buf).into(),
+            1 => CreateTopicsResponse1::deserialize(buf).into(),
+            2 => CreateTopicsResponse2::deserialize(buf).into(),
+            3 => CreateTopicsResponse3::deserialize(buf).into(),
+            4 => CreateTopicsResponse4::deserialize(buf).into(),
+            5 => CreateTopicsResponse5::deserialize(buf).into(),
+            6 => CreateTopicsResponse::deserialize(buf),
+            _ => CreateTopicsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct CreateTopicsRequest0 {
     pub topics: Vec<CreateTopicsRequestTopics0>,

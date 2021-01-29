@@ -2,32 +2,39 @@ use super::prelude::*;
 
 pub type HeartbeatRequest = HeartbeatRequest4;
 pub type HeartbeatResponse = HeartbeatResponse4;
-pub fn serialize_heartbeat_request(
-    data: HeartbeatRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&HeartbeatRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&HeartbeatRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&HeartbeatRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&HeartbeatRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for HeartbeatRequest {
+    type Response = HeartbeatResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_heartbeat_response(version: i32, buf: &mut Bytes) -> HeartbeatResponse {
-    match version {
-        0 => HeartbeatResponse0::deserialize(buf).into(),
-        1 => HeartbeatResponse1::deserialize(buf).into(),
-        2 => HeartbeatResponse2::deserialize(buf).into(),
-        3 => HeartbeatResponse3::deserialize(buf).into(),
-        4 => HeartbeatResponse::deserialize(buf),
-        _ => HeartbeatResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        4
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::Heartbeat
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&HeartbeatRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&HeartbeatRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&HeartbeatRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&HeartbeatRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> HeartbeatResponse {
+        match version {
+            0 => HeartbeatResponse0::deserialize(buf).into(),
+            1 => HeartbeatResponse1::deserialize(buf).into(),
+            2 => HeartbeatResponse2::deserialize(buf).into(),
+            3 => HeartbeatResponse3::deserialize(buf).into(),
+            4 => HeartbeatResponse::deserialize(buf),
+            _ => HeartbeatResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct HeartbeatRequest0 {
     pub group_id: String,

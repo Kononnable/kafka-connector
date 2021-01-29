@@ -2,32 +2,39 @@ use super::prelude::*;
 
 pub type ListGroupsRequest = ListGroupsRequest4;
 pub type ListGroupsResponse = ListGroupsResponse4;
-pub fn serialize_list_groups_request(
-    data: ListGroupsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&ListGroupsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&ListGroupsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&ListGroupsRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&ListGroupsRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for ListGroupsRequest {
+    type Response = ListGroupsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_list_groups_response(version: i32, buf: &mut Bytes) -> ListGroupsResponse {
-    match version {
-        0 => ListGroupsResponse0::deserialize(buf).into(),
-        1 => ListGroupsResponse1::deserialize(buf).into(),
-        2 => ListGroupsResponse2::deserialize(buf).into(),
-        3 => ListGroupsResponse3::deserialize(buf).into(),
-        4 => ListGroupsResponse::deserialize(buf),
-        _ => ListGroupsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        4
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::ListGroups
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&ListGroupsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&ListGroupsRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&ListGroupsRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&ListGroupsRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> ListGroupsResponse {
+        match version {
+            0 => ListGroupsResponse0::deserialize(buf).into(),
+            1 => ListGroupsResponse1::deserialize(buf).into(),
+            2 => ListGroupsResponse2::deserialize(buf).into(),
+            3 => ListGroupsResponse3::deserialize(buf).into(),
+            4 => ListGroupsResponse::deserialize(buf),
+            _ => ListGroupsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct ListGroupsRequest0 {}
 

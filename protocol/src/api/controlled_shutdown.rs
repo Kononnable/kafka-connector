@@ -2,33 +2,37 @@ use super::prelude::*;
 
 pub type ControlledShutdownRequest = ControlledShutdownRequest3;
 pub type ControlledShutdownResponse = ControlledShutdownResponse3;
-pub fn serialize_controlled_shutdown_request(
-    data: ControlledShutdownRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&ControlledShutdownRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&ControlledShutdownRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&ControlledShutdownRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for ControlledShutdownRequest {
+    type Response = ControlledShutdownResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_controlled_shutdown_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> ControlledShutdownResponse {
-    match version {
-        0 => ControlledShutdownResponse0::deserialize(buf).into(),
-        1 => ControlledShutdownResponse1::deserialize(buf).into(),
-        2 => ControlledShutdownResponse2::deserialize(buf).into(),
-        3 => ControlledShutdownResponse::deserialize(buf),
-        _ => ControlledShutdownResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        3
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::ControlledShutdown
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&ControlledShutdownRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&ControlledShutdownRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&ControlledShutdownRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> ControlledShutdownResponse {
+        match version {
+            0 => ControlledShutdownResponse0::deserialize(buf).into(),
+            1 => ControlledShutdownResponse1::deserialize(buf).into(),
+            2 => ControlledShutdownResponse2::deserialize(buf).into(),
+            3 => ControlledShutdownResponse::deserialize(buf),
+            _ => ControlledShutdownResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct ControlledShutdownRequest0 {
     pub broker_id: Int32,

@@ -2,28 +2,35 @@ use super::prelude::*;
 
 pub type DeleteRecordsRequest = DeleteRecordsRequest2;
 pub type DeleteRecordsResponse = DeleteRecordsResponse2;
-pub fn serialize_delete_records_request(
-    data: DeleteRecordsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&DeleteRecordsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&DeleteRecordsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for DeleteRecordsRequest {
+    type Response = DeleteRecordsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_delete_records_response(version: i32, buf: &mut Bytes) -> DeleteRecordsResponse {
-    match version {
-        0 => DeleteRecordsResponse0::deserialize(buf).into(),
-        1 => DeleteRecordsResponse1::deserialize(buf).into(),
-        2 => DeleteRecordsResponse::deserialize(buf),
-        _ => DeleteRecordsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::DeleteRecords
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&DeleteRecordsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&DeleteRecordsRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> DeleteRecordsResponse {
+        match version {
+            0 => DeleteRecordsResponse0::deserialize(buf).into(),
+            1 => DeleteRecordsResponse1::deserialize(buf).into(),
+            2 => DeleteRecordsResponse::deserialize(buf),
+            _ => DeleteRecordsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct DeleteRecordsRequest0 {
     pub topics: Vec<DeleteRecordsRequestTopics0>,

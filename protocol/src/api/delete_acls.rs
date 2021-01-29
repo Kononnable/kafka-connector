@@ -2,28 +2,35 @@ use super::prelude::*;
 
 pub type DeleteAclsRequest = DeleteAclsRequest2;
 pub type DeleteAclsResponse = DeleteAclsResponse2;
-pub fn serialize_delete_acls_request(
-    data: DeleteAclsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&DeleteAclsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&DeleteAclsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for DeleteAclsRequest {
+    type Response = DeleteAclsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_delete_acls_response(version: i32, buf: &mut Bytes) -> DeleteAclsResponse {
-    match version {
-        0 => DeleteAclsResponse0::deserialize(buf).into(),
-        1 => DeleteAclsResponse1::deserialize(buf).into(),
-        2 => DeleteAclsResponse::deserialize(buf),
-        _ => DeleteAclsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::DeleteAcls
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&DeleteAclsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&DeleteAclsRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> DeleteAclsResponse {
+        match version {
+            0 => DeleteAclsResponse0::deserialize(buf).into(),
+            1 => DeleteAclsResponse1::deserialize(buf).into(),
+            2 => DeleteAclsResponse::deserialize(buf),
+            _ => DeleteAclsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct DeleteAclsRequest0 {
     pub filters: Vec<DeleteAclsRequestFilters0>,

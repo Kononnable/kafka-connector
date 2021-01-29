@@ -2,34 +2,41 @@ use super::prelude::*;
 
 pub type DeleteTopicsRequest = DeleteTopicsRequest5;
 pub type DeleteTopicsResponse = DeleteTopicsResponse5;
-pub fn serialize_delete_topics_request(
-    data: DeleteTopicsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&DeleteTopicsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&DeleteTopicsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&DeleteTopicsRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&DeleteTopicsRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&DeleteTopicsRequest4::try_from(data)?, buf),
-        5 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for DeleteTopicsRequest {
+    type Response = DeleteTopicsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_delete_topics_response(version: i32, buf: &mut Bytes) -> DeleteTopicsResponse {
-    match version {
-        0 => DeleteTopicsResponse0::deserialize(buf).into(),
-        1 => DeleteTopicsResponse1::deserialize(buf).into(),
-        2 => DeleteTopicsResponse2::deserialize(buf).into(),
-        3 => DeleteTopicsResponse3::deserialize(buf).into(),
-        4 => DeleteTopicsResponse4::deserialize(buf).into(),
-        5 => DeleteTopicsResponse::deserialize(buf),
-        _ => DeleteTopicsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        5
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::DeleteTopics
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&DeleteTopicsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&DeleteTopicsRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&DeleteTopicsRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&DeleteTopicsRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&DeleteTopicsRequest4::try_from(self)?, buf),
+            5 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> DeleteTopicsResponse {
+        match version {
+            0 => DeleteTopicsResponse0::deserialize(buf).into(),
+            1 => DeleteTopicsResponse1::deserialize(buf).into(),
+            2 => DeleteTopicsResponse2::deserialize(buf).into(),
+            3 => DeleteTopicsResponse3::deserialize(buf).into(),
+            4 => DeleteTopicsResponse4::deserialize(buf).into(),
+            5 => DeleteTopicsResponse::deserialize(buf),
+            _ => DeleteTopicsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct DeleteTopicsRequest0 {
     pub topic_names: Vec<String>,

@@ -2,27 +2,31 @@ use super::prelude::*;
 
 pub type DescribeClientQuotasRequest = DescribeClientQuotasRequest0;
 pub type DescribeClientQuotasResponse = DescribeClientQuotasResponse0;
-pub fn serialize_describe_client_quotas_request(
-    data: DescribeClientQuotasRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for DescribeClientQuotasRequest {
+    type Response = DescribeClientQuotasResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_describe_client_quotas_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> DescribeClientQuotasResponse {
-    match version {
-        0 => DescribeClientQuotasResponse::deserialize(buf),
-        _ => DescribeClientQuotasResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        0
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::DescribeClientQuotas
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> DescribeClientQuotasResponse {
+        match version {
+            0 => DescribeClientQuotasResponse::deserialize(buf),
+            _ => DescribeClientQuotasResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct DescribeClientQuotasRequest0 {
     pub components: Vec<DescribeClientQuotasRequestComponents0>,

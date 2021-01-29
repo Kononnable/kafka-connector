@@ -2,24 +2,31 @@ use super::prelude::*;
 
 pub type AlterIsrRequest = AlterIsrRequest0;
 pub type AlterIsrResponse = AlterIsrResponse0;
-pub fn serialize_alter_isr_request(
-    data: AlterIsrRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for AlterIsrRequest {
+    type Response = AlterIsrResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_alter_isr_response(version: i32, buf: &mut Bytes) -> AlterIsrResponse {
-    match version {
-        0 => AlterIsrResponse::deserialize(buf),
-        _ => AlterIsrResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        0
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::AlterIsr
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> AlterIsrResponse {
+        match version {
+            0 => AlterIsrResponse::deserialize(buf),
+            _ => AlterIsrResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct AlterIsrRequest0 {
     pub broker_id: Int32,

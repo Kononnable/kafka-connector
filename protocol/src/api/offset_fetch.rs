@@ -2,38 +2,45 @@ use super::prelude::*;
 
 pub type OffsetFetchRequest = OffsetFetchRequest7;
 pub type OffsetFetchResponse = OffsetFetchResponse7;
-pub fn serialize_offset_fetch_request(
-    data: OffsetFetchRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&OffsetFetchRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&OffsetFetchRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&OffsetFetchRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&OffsetFetchRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&OffsetFetchRequest4::try_from(data)?, buf),
-        5 => ToBytes::serialize(&OffsetFetchRequest5::try_from(data)?, buf),
-        6 => ToBytes::serialize(&OffsetFetchRequest6::try_from(data)?, buf),
-        7 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for OffsetFetchRequest {
+    type Response = OffsetFetchResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_offset_fetch_response(version: i32, buf: &mut Bytes) -> OffsetFetchResponse {
-    match version {
-        0 => OffsetFetchResponse0::deserialize(buf).into(),
-        1 => OffsetFetchResponse1::deserialize(buf).into(),
-        2 => OffsetFetchResponse2::deserialize(buf).into(),
-        3 => OffsetFetchResponse3::deserialize(buf).into(),
-        4 => OffsetFetchResponse4::deserialize(buf).into(),
-        5 => OffsetFetchResponse5::deserialize(buf).into(),
-        6 => OffsetFetchResponse6::deserialize(buf).into(),
-        7 => OffsetFetchResponse::deserialize(buf),
-        _ => OffsetFetchResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        7
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::OffsetFetch
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&OffsetFetchRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&OffsetFetchRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&OffsetFetchRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&OffsetFetchRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&OffsetFetchRequest4::try_from(self)?, buf),
+            5 => ToBytes::serialize(&OffsetFetchRequest5::try_from(self)?, buf),
+            6 => ToBytes::serialize(&OffsetFetchRequest6::try_from(self)?, buf),
+            7 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> OffsetFetchResponse {
+        match version {
+            0 => OffsetFetchResponse0::deserialize(buf).into(),
+            1 => OffsetFetchResponse1::deserialize(buf).into(),
+            2 => OffsetFetchResponse2::deserialize(buf).into(),
+            3 => OffsetFetchResponse3::deserialize(buf).into(),
+            4 => OffsetFetchResponse4::deserialize(buf).into(),
+            5 => OffsetFetchResponse5::deserialize(buf).into(),
+            6 => OffsetFetchResponse6::deserialize(buf).into(),
+            7 => OffsetFetchResponse::deserialize(buf),
+            _ => OffsetFetchResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct OffsetFetchRequest0 {
     pub group_id: String,

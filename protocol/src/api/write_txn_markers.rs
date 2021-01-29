@@ -2,27 +2,31 @@ use super::prelude::*;
 
 pub type WriteTxnMarkersRequest = WriteTxnMarkersRequest0;
 pub type WriteTxnMarkersResponse = WriteTxnMarkersResponse0;
-pub fn serialize_write_txn_markers_request(
-    data: WriteTxnMarkersRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for WriteTxnMarkersRequest {
+    type Response = WriteTxnMarkersResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_write_txn_markers_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> WriteTxnMarkersResponse {
-    match version {
-        0 => WriteTxnMarkersResponse::deserialize(buf),
-        _ => WriteTxnMarkersResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        0
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::WriteTxnMarkers
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> WriteTxnMarkersResponse {
+        match version {
+            0 => WriteTxnMarkersResponse::deserialize(buf),
+            _ => WriteTxnMarkersResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct WriteTxnMarkersRequest0 {
     pub markers: Vec<WriteTxnMarkersRequestMarkers0>,

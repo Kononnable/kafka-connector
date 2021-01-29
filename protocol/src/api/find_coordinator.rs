@@ -2,33 +2,37 @@ use super::prelude::*;
 
 pub type FindCoordinatorRequest = FindCoordinatorRequest3;
 pub type FindCoordinatorResponse = FindCoordinatorResponse3;
-pub fn serialize_find_coordinator_request(
-    data: FindCoordinatorRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&FindCoordinatorRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&FindCoordinatorRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&FindCoordinatorRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for FindCoordinatorRequest {
+    type Response = FindCoordinatorResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_find_coordinator_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> FindCoordinatorResponse {
-    match version {
-        0 => FindCoordinatorResponse0::deserialize(buf).into(),
-        1 => FindCoordinatorResponse1::deserialize(buf).into(),
-        2 => FindCoordinatorResponse2::deserialize(buf).into(),
-        3 => FindCoordinatorResponse::deserialize(buf),
-        _ => FindCoordinatorResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        3
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::FindCoordinator
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&FindCoordinatorRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&FindCoordinatorRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&FindCoordinatorRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> FindCoordinatorResponse {
+        match version {
+            0 => FindCoordinatorResponse0::deserialize(buf).into(),
+            1 => FindCoordinatorResponse1::deserialize(buf).into(),
+            2 => FindCoordinatorResponse2::deserialize(buf).into(),
+            3 => FindCoordinatorResponse::deserialize(buf),
+            _ => FindCoordinatorResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct FindCoordinatorRequest0 {
     pub key: String,

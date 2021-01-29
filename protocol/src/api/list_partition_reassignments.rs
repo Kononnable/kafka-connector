@@ -2,27 +2,31 @@ use super::prelude::*;
 
 pub type ListPartitionReassignmentsRequest = ListPartitionReassignmentsRequest0;
 pub type ListPartitionReassignmentsResponse = ListPartitionReassignmentsResponse0;
-pub fn serialize_list_partition_reassignments_request(
-    data: ListPartitionReassignmentsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for ListPartitionReassignmentsRequest {
+    type Response = ListPartitionReassignmentsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_list_partition_reassignments_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> ListPartitionReassignmentsResponse {
-    match version {
-        0 => ListPartitionReassignmentsResponse::deserialize(buf),
-        _ => ListPartitionReassignmentsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        0
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::ListPartitionReassignments
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> ListPartitionReassignmentsResponse {
+        match version {
+            0 => ListPartitionReassignmentsResponse::deserialize(buf),
+            _ => ListPartitionReassignmentsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct ListPartitionReassignmentsRequest0 {
     pub timeout_ms: Int32,

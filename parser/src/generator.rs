@@ -1,17 +1,13 @@
-use crate::{
-    transformer::{ApiEndpoint, ApiStructDefinition, StructField},
-    utils::to_snake_case,
-};
+use crate::transformer::{ApiEndpoint, ApiStructDefinition, StructField};
 
-pub fn generate_content(api_call: ApiEndpoint) -> String {
+pub fn generate_content(api_call: ApiEndpoint, api_name: &str) -> String {
     let use_statements = "use super::prelude::*;\n";
     let request_type_alias =
         generate_type_alias(api_call.requests.last().unwrap().first().unwrap());
     let response_type_alias =
         generate_type_alias(api_call.responses.last().unwrap().first().unwrap());
 
-    let request_version_call = serialize_api_request(&api_call.requests);
-    let response_version_call = deserialize_api_response(&api_call.responses);
+    let api_struct = generate_api_struct(&api_call, api_name);
 
     let structs = api_call
         .requests
@@ -29,38 +25,61 @@ pub fn generate_content(api_call: ApiEndpoint) -> String {
     let from_latest_impl = genetate_impl_from_latest(api_call.requests);
     let to_latest_impl = genetate_impl_to_latest(api_call.responses);
     format!(
-        "{}\n{}{}{}{}{}\n{}\n{}",
+        "{}\n{}{}{}{}\n{}\n{}",
         use_statements,
         request_type_alias,
         response_type_alias,
-        request_version_call,
-        response_version_call,
+        api_struct,
         structs,
         from_latest_impl,
         to_latest_impl
     )
 }
 
+fn generate_api_struct(api_call: &ApiEndpoint, api_name: &str) -> String {
+    let mut def = format!("impl ApiCall for {}Request {{\n", api_name);
+    def.push_str(&format!("type Response = {}Response;\n", api_name));
+    let min_version = 0;
+    let max_version = api_call.requests.len() - 1;
+    def.push_str(&format!(
+        "fn get_min_supported_version()->i16{{\n{}\n}}\n",
+        min_version
+    ));
+    def.push_str(&format!(
+        "fn get_max_supported_version()->i16{{\n{}\n}}\n",
+        max_version
+    ));
+    def.push_str(&format!(
+        "fn get_api_key()->ApiNumbers{{\nApiNumbers::{}\n}}\n",
+        api_name
+    ));
+
+    let request_version_call = serialize_api_request(&api_call.requests);
+    let response_version_call = deserialize_api_response(&api_call.responses);
+    def.push_str(&format!(
+        "{}{}}}",
+        request_version_call, response_version_call
+    ));
+    def
+}
+
 fn serialize_api_request(requests: &[Vec<ApiStructDefinition>]) -> String {
     let main_struct = requests.first().unwrap().first().unwrap();
     let struct_name = &main_struct.name;
-    let mut fn_def = format!(
-        "pub fn serialize_{}(data:{},version:i32, buf: &mut BytesMut) -> Result<(),Error> {{\n",
-        to_snake_case(struct_name),
-        struct_name
-    );
+    let mut fn_def =
+        "fn serialize(self,version:i16, buf: &mut BytesMut) -> Result<(),Error> {\n".to_owned();
     fn_def.push_str("    match version {\n");
     for version in 0..requests.len() - 1 {
         fn_def.push_str(&format!(
-            "        {} => ToBytes::serialize(&{}{}::try_from(data)?,buf),\n",
+            "        {} => ToBytes::serialize(&{}{}::try_from(self)?,buf),\n",
             version, struct_name, version
         ));
     }
     fn_def.push_str(&format!(
-        "        {} => ToBytes::serialize(&data,buf),\n",
+        "        {} => ToBytes::serialize(&self,buf),\n",
         requests.len() - 1
     ));
-    fn_def.push_str("        _ => ToBytes::serialize(&data,buf),\n");
+    fn_def.push_str("        _ => ToBytes::serialize(&self,buf),\n");
     fn_def.push_str("    }\n");
     fn_def.push_str("    Ok(())\n");
     fn_def.push_str("}\n");
@@ -71,8 +90,7 @@ fn deserialize_api_response(responses: &[Vec<ApiStructDefinition>]) -> String {
     let main_struct = responses.first().unwrap().first().unwrap();
     let struct_name = &main_struct.name;
     let mut fn_def = format!(
-        "pub fn deserialize_{}(version:i32, buf: &mut Bytes) -> {} {{\n",
-        to_snake_case(struct_name),
+        "fn deserialize_response(version:i16, buf: &mut Bytes) -> {} {{\n",
         struct_name
     );
     fn_def.push_str("    match version {\n");

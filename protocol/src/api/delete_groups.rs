@@ -2,28 +2,35 @@ use super::prelude::*;
 
 pub type DeleteGroupsRequest = DeleteGroupsRequest2;
 pub type DeleteGroupsResponse = DeleteGroupsResponse2;
-pub fn serialize_delete_groups_request(
-    data: DeleteGroupsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&DeleteGroupsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&DeleteGroupsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for DeleteGroupsRequest {
+    type Response = DeleteGroupsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_delete_groups_response(version: i32, buf: &mut Bytes) -> DeleteGroupsResponse {
-    match version {
-        0 => DeleteGroupsResponse0::deserialize(buf).into(),
-        1 => DeleteGroupsResponse1::deserialize(buf).into(),
-        2 => DeleteGroupsResponse::deserialize(buf),
-        _ => DeleteGroupsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::DeleteGroups
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&DeleteGroupsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&DeleteGroupsRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> DeleteGroupsResponse {
+        match version {
+            0 => DeleteGroupsResponse0::deserialize(buf).into(),
+            1 => DeleteGroupsResponse1::deserialize(buf).into(),
+            2 => DeleteGroupsResponse::deserialize(buf),
+            _ => DeleteGroupsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct DeleteGroupsRequest0 {
     pub groups_names: Vec<String>,

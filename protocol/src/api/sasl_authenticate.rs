@@ -2,31 +2,35 @@ use super::prelude::*;
 
 pub type SaslAuthenticateRequest = SaslAuthenticateRequest2;
 pub type SaslAuthenticateResponse = SaslAuthenticateResponse2;
-pub fn serialize_sasl_authenticate_request(
-    data: SaslAuthenticateRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&SaslAuthenticateRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&SaslAuthenticateRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for SaslAuthenticateRequest {
+    type Response = SaslAuthenticateResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_sasl_authenticate_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> SaslAuthenticateResponse {
-    match version {
-        0 => SaslAuthenticateResponse0::deserialize(buf).into(),
-        1 => SaslAuthenticateResponse1::deserialize(buf).into(),
-        2 => SaslAuthenticateResponse::deserialize(buf),
-        _ => SaslAuthenticateResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::SaslAuthenticate
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&SaslAuthenticateRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&SaslAuthenticateRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> SaslAuthenticateResponse {
+        match version {
+            0 => SaslAuthenticateResponse0::deserialize(buf).into(),
+            1 => SaslAuthenticateResponse1::deserialize(buf).into(),
+            2 => SaslAuthenticateResponse::deserialize(buf),
+            _ => SaslAuthenticateResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct SaslAuthenticateRequest0 {
     pub auth_bytes: KafkaBytes,

@@ -2,29 +2,33 @@ use super::prelude::*;
 
 pub type IncrementalAlterConfigsRequest = IncrementalAlterConfigsRequest1;
 pub type IncrementalAlterConfigsResponse = IncrementalAlterConfigsResponse1;
-pub fn serialize_incremental_alter_configs_request(
-    data: IncrementalAlterConfigsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&IncrementalAlterConfigsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for IncrementalAlterConfigsRequest {
+    type Response = IncrementalAlterConfigsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_incremental_alter_configs_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> IncrementalAlterConfigsResponse {
-    match version {
-        0 => IncrementalAlterConfigsResponse0::deserialize(buf).into(),
-        1 => IncrementalAlterConfigsResponse::deserialize(buf),
-        _ => IncrementalAlterConfigsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        1
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::IncrementalAlterConfigs
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&IncrementalAlterConfigsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> IncrementalAlterConfigsResponse {
+        match version {
+            0 => IncrementalAlterConfigsResponse0::deserialize(buf).into(),
+            1 => IncrementalAlterConfigsResponse::deserialize(buf),
+            _ => IncrementalAlterConfigsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct IncrementalAlterConfigsRequest0 {
     pub resources: Vec<IncrementalAlterConfigsRequestResources0>,

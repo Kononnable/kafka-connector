@@ -2,40 +2,47 @@ use super::prelude::*;
 
 pub type ProduceRequest = ProduceRequest8;
 pub type ProduceResponse = ProduceResponse8;
-pub fn serialize_produce_request(
-    data: ProduceRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&ProduceRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&ProduceRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&ProduceRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&ProduceRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&ProduceRequest4::try_from(data)?, buf),
-        5 => ToBytes::serialize(&ProduceRequest5::try_from(data)?, buf),
-        6 => ToBytes::serialize(&ProduceRequest6::try_from(data)?, buf),
-        7 => ToBytes::serialize(&ProduceRequest7::try_from(data)?, buf),
-        8 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for ProduceRequest {
+    type Response = ProduceResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_produce_response(version: i32, buf: &mut Bytes) -> ProduceResponse {
-    match version {
-        0 => ProduceResponse0::deserialize(buf).into(),
-        1 => ProduceResponse1::deserialize(buf).into(),
-        2 => ProduceResponse2::deserialize(buf).into(),
-        3 => ProduceResponse3::deserialize(buf).into(),
-        4 => ProduceResponse4::deserialize(buf).into(),
-        5 => ProduceResponse5::deserialize(buf).into(),
-        6 => ProduceResponse6::deserialize(buf).into(),
-        7 => ProduceResponse7::deserialize(buf).into(),
-        8 => ProduceResponse::deserialize(buf),
-        _ => ProduceResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        8
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::Produce
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&ProduceRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&ProduceRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&ProduceRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&ProduceRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&ProduceRequest4::try_from(self)?, buf),
+            5 => ToBytes::serialize(&ProduceRequest5::try_from(self)?, buf),
+            6 => ToBytes::serialize(&ProduceRequest6::try_from(self)?, buf),
+            7 => ToBytes::serialize(&ProduceRequest7::try_from(self)?, buf),
+            8 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> ProduceResponse {
+        match version {
+            0 => ProduceResponse0::deserialize(buf).into(),
+            1 => ProduceResponse1::deserialize(buf).into(),
+            2 => ProduceResponse2::deserialize(buf).into(),
+            3 => ProduceResponse3::deserialize(buf).into(),
+            4 => ProduceResponse4::deserialize(buf).into(),
+            5 => ProduceResponse5::deserialize(buf).into(),
+            6 => ProduceResponse6::deserialize(buf).into(),
+            7 => ProduceResponse7::deserialize(buf).into(),
+            8 => ProduceResponse::deserialize(buf),
+            _ => ProduceResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct ProduceRequest0 {
     pub acks: Int16,

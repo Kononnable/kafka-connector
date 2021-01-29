@@ -2,30 +2,37 @@ use super::prelude::*;
 
 pub type StopReplicaRequest = StopReplicaRequest3;
 pub type StopReplicaResponse = StopReplicaResponse3;
-pub fn serialize_stop_replica_request(
-    data: StopReplicaRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&StopReplicaRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&StopReplicaRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&StopReplicaRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for StopReplicaRequest {
+    type Response = StopReplicaResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_stop_replica_response(version: i32, buf: &mut Bytes) -> StopReplicaResponse {
-    match version {
-        0 => StopReplicaResponse0::deserialize(buf).into(),
-        1 => StopReplicaResponse1::deserialize(buf).into(),
-        2 => StopReplicaResponse2::deserialize(buf).into(),
-        3 => StopReplicaResponse::deserialize(buf),
-        _ => StopReplicaResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        3
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::StopReplica
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&StopReplicaRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&StopReplicaRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&StopReplicaRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> StopReplicaResponse {
+        match version {
+            0 => StopReplicaResponse0::deserialize(buf).into(),
+            1 => StopReplicaResponse1::deserialize(buf).into(),
+            2 => StopReplicaResponse2::deserialize(buf).into(),
+            3 => StopReplicaResponse::deserialize(buf),
+            _ => StopReplicaResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct StopReplicaRequest0 {
     pub controller_id: Int32,

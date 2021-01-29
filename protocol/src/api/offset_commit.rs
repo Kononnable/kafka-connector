@@ -2,40 +2,47 @@ use super::prelude::*;
 
 pub type OffsetCommitRequest = OffsetCommitRequest8;
 pub type OffsetCommitResponse = OffsetCommitResponse8;
-pub fn serialize_offset_commit_request(
-    data: OffsetCommitRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&OffsetCommitRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&OffsetCommitRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&OffsetCommitRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&OffsetCommitRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&OffsetCommitRequest4::try_from(data)?, buf),
-        5 => ToBytes::serialize(&OffsetCommitRequest5::try_from(data)?, buf),
-        6 => ToBytes::serialize(&OffsetCommitRequest6::try_from(data)?, buf),
-        7 => ToBytes::serialize(&OffsetCommitRequest7::try_from(data)?, buf),
-        8 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for OffsetCommitRequest {
+    type Response = OffsetCommitResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_offset_commit_response(version: i32, buf: &mut Bytes) -> OffsetCommitResponse {
-    match version {
-        0 => OffsetCommitResponse0::deserialize(buf).into(),
-        1 => OffsetCommitResponse1::deserialize(buf).into(),
-        2 => OffsetCommitResponse2::deserialize(buf).into(),
-        3 => OffsetCommitResponse3::deserialize(buf).into(),
-        4 => OffsetCommitResponse4::deserialize(buf).into(),
-        5 => OffsetCommitResponse5::deserialize(buf).into(),
-        6 => OffsetCommitResponse6::deserialize(buf).into(),
-        7 => OffsetCommitResponse7::deserialize(buf).into(),
-        8 => OffsetCommitResponse::deserialize(buf),
-        _ => OffsetCommitResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        8
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::OffsetCommit
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&OffsetCommitRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&OffsetCommitRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&OffsetCommitRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&OffsetCommitRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&OffsetCommitRequest4::try_from(self)?, buf),
+            5 => ToBytes::serialize(&OffsetCommitRequest5::try_from(self)?, buf),
+            6 => ToBytes::serialize(&OffsetCommitRequest6::try_from(self)?, buf),
+            7 => ToBytes::serialize(&OffsetCommitRequest7::try_from(self)?, buf),
+            8 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> OffsetCommitResponse {
+        match version {
+            0 => OffsetCommitResponse0::deserialize(buf).into(),
+            1 => OffsetCommitResponse1::deserialize(buf).into(),
+            2 => OffsetCommitResponse2::deserialize(buf).into(),
+            3 => OffsetCommitResponse3::deserialize(buf).into(),
+            4 => OffsetCommitResponse4::deserialize(buf).into(),
+            5 => OffsetCommitResponse5::deserialize(buf).into(),
+            6 => OffsetCommitResponse6::deserialize(buf).into(),
+            7 => OffsetCommitResponse7::deserialize(buf).into(),
+            8 => OffsetCommitResponse::deserialize(buf),
+            _ => OffsetCommitResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct OffsetCommitRequest0 {
     pub group_id: String,

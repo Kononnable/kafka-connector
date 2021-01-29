@@ -2,24 +2,31 @@ use super::prelude::*;
 
 pub type OffsetDeleteRequest = OffsetDeleteRequest0;
 pub type OffsetDeleteResponse = OffsetDeleteResponse0;
-pub fn serialize_offset_delete_request(
-    data: OffsetDeleteRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for OffsetDeleteRequest {
+    type Response = OffsetDeleteResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_offset_delete_response(version: i32, buf: &mut Bytes) -> OffsetDeleteResponse {
-    match version {
-        0 => OffsetDeleteResponse::deserialize(buf),
-        _ => OffsetDeleteResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        0
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::OffsetDelete
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> OffsetDeleteResponse {
+        match version {
+            0 => OffsetDeleteResponse::deserialize(buf),
+            _ => OffsetDeleteResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct OffsetDeleteRequest0 {
     pub group_id: String,

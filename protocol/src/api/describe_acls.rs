@@ -2,28 +2,35 @@ use super::prelude::*;
 
 pub type DescribeAclsRequest = DescribeAclsRequest2;
 pub type DescribeAclsResponse = DescribeAclsResponse2;
-pub fn serialize_describe_acls_request(
-    data: DescribeAclsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&DescribeAclsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&DescribeAclsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for DescribeAclsRequest {
+    type Response = DescribeAclsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_describe_acls_response(version: i32, buf: &mut Bytes) -> DescribeAclsResponse {
-    match version {
-        0 => DescribeAclsResponse0::deserialize(buf).into(),
-        1 => DescribeAclsResponse1::deserialize(buf).into(),
-        2 => DescribeAclsResponse::deserialize(buf),
-        _ => DescribeAclsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::DescribeAcls
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&DescribeAclsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&DescribeAclsRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> DescribeAclsResponse {
+        match version {
+            0 => DescribeAclsResponse0::deserialize(buf).into(),
+            1 => DescribeAclsResponse1::deserialize(buf).into(),
+            2 => DescribeAclsResponse::deserialize(buf),
+            _ => DescribeAclsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct DescribeAclsRequest0 {
     pub resource_type_filter: Int8,

@@ -2,35 +2,39 @@ use super::prelude::*;
 
 pub type InitProducerIdRequest = InitProducerIdRequest4;
 pub type InitProducerIdResponse = InitProducerIdResponse4;
-pub fn serialize_init_producer_id_request(
-    data: InitProducerIdRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&InitProducerIdRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&InitProducerIdRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&InitProducerIdRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&InitProducerIdRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for InitProducerIdRequest {
+    type Response = InitProducerIdResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_init_producer_id_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> InitProducerIdResponse {
-    match version {
-        0 => InitProducerIdResponse0::deserialize(buf).into(),
-        1 => InitProducerIdResponse1::deserialize(buf).into(),
-        2 => InitProducerIdResponse2::deserialize(buf).into(),
-        3 => InitProducerIdResponse3::deserialize(buf).into(),
-        4 => InitProducerIdResponse::deserialize(buf),
-        _ => InitProducerIdResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        4
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::InitProducerId
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&InitProducerIdRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&InitProducerIdRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&InitProducerIdRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&InitProducerIdRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> InitProducerIdResponse {
+        match version {
+            0 => InitProducerIdResponse0::deserialize(buf).into(),
+            1 => InitProducerIdResponse1::deserialize(buf).into(),
+            2 => InitProducerIdResponse2::deserialize(buf).into(),
+            3 => InitProducerIdResponse3::deserialize(buf).into(),
+            4 => InitProducerIdResponse::deserialize(buf),
+            _ => InitProducerIdResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct InitProducerIdRequest0 {
     pub transactional_id: NullableString,

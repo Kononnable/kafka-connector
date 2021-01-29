@@ -2,27 +2,31 @@ use super::prelude::*;
 
 pub type AlterUserScramCredentialsRequest = AlterUserScramCredentialsRequest0;
 pub type AlterUserScramCredentialsResponse = AlterUserScramCredentialsResponse0;
-pub fn serialize_alter_user_scram_credentials_request(
-    data: AlterUserScramCredentialsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for AlterUserScramCredentialsRequest {
+    type Response = AlterUserScramCredentialsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_alter_user_scram_credentials_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> AlterUserScramCredentialsResponse {
-    match version {
-        0 => AlterUserScramCredentialsResponse::deserialize(buf),
-        _ => AlterUserScramCredentialsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        0
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::AlterUserScramCredentials
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> AlterUserScramCredentialsResponse {
+        match version {
+            0 => AlterUserScramCredentialsResponse::deserialize(buf),
+            _ => AlterUserScramCredentialsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct AlterUserScramCredentialsRequest0 {
     pub deletions: Vec<AlterUserScramCredentialsRequestDeletions0>,

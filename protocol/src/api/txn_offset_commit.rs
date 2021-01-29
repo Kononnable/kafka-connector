@@ -2,33 +2,37 @@ use super::prelude::*;
 
 pub type TxnOffsetCommitRequest = TxnOffsetCommitRequest3;
 pub type TxnOffsetCommitResponse = TxnOffsetCommitResponse3;
-pub fn serialize_txn_offset_commit_request(
-    data: TxnOffsetCommitRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&TxnOffsetCommitRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&TxnOffsetCommitRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&TxnOffsetCommitRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for TxnOffsetCommitRequest {
+    type Response = TxnOffsetCommitResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_txn_offset_commit_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> TxnOffsetCommitResponse {
-    match version {
-        0 => TxnOffsetCommitResponse0::deserialize(buf).into(),
-        1 => TxnOffsetCommitResponse1::deserialize(buf).into(),
-        2 => TxnOffsetCommitResponse2::deserialize(buf).into(),
-        3 => TxnOffsetCommitResponse::deserialize(buf),
-        _ => TxnOffsetCommitResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        3
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::TxnOffsetCommit
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&TxnOffsetCommitRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&TxnOffsetCommitRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&TxnOffsetCommitRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> TxnOffsetCommitResponse {
+        match version {
+            0 => TxnOffsetCommitResponse0::deserialize(buf).into(),
+            1 => TxnOffsetCommitResponse1::deserialize(buf).into(),
+            2 => TxnOffsetCommitResponse2::deserialize(buf).into(),
+            3 => TxnOffsetCommitResponse::deserialize(buf),
+            _ => TxnOffsetCommitResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct TxnOffsetCommitRequest0 {
     pub transactional_id: String,

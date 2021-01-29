@@ -2,33 +2,37 @@ use super::prelude::*;
 
 pub type DescribeConfigsRequest = DescribeConfigsRequest3;
 pub type DescribeConfigsResponse = DescribeConfigsResponse3;
-pub fn serialize_describe_configs_request(
-    data: DescribeConfigsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&DescribeConfigsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&DescribeConfigsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&DescribeConfigsRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for DescribeConfigsRequest {
+    type Response = DescribeConfigsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_describe_configs_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> DescribeConfigsResponse {
-    match version {
-        0 => DescribeConfigsResponse0::deserialize(buf).into(),
-        1 => DescribeConfigsResponse1::deserialize(buf).into(),
-        2 => DescribeConfigsResponse2::deserialize(buf).into(),
-        3 => DescribeConfigsResponse::deserialize(buf),
-        _ => DescribeConfigsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        3
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::DescribeConfigs
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&DescribeConfigsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&DescribeConfigsRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&DescribeConfigsRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> DescribeConfigsResponse {
+        match version {
+            0 => DescribeConfigsResponse0::deserialize(buf).into(),
+            1 => DescribeConfigsResponse1::deserialize(buf).into(),
+            2 => DescribeConfigsResponse2::deserialize(buf).into(),
+            3 => DescribeConfigsResponse::deserialize(buf),
+            _ => DescribeConfigsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct DescribeConfigsRequest0 {
     pub resources: Vec<DescribeConfigsRequestResources0>,

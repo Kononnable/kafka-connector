@@ -2,29 +2,33 @@ use super::prelude::*;
 
 pub type AlterReplicaLogDirsRequest = AlterReplicaLogDirsRequest1;
 pub type AlterReplicaLogDirsResponse = AlterReplicaLogDirsResponse1;
-pub fn serialize_alter_replica_log_dirs_request(
-    data: AlterReplicaLogDirsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&AlterReplicaLogDirsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for AlterReplicaLogDirsRequest {
+    type Response = AlterReplicaLogDirsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_alter_replica_log_dirs_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> AlterReplicaLogDirsResponse {
-    match version {
-        0 => AlterReplicaLogDirsResponse0::deserialize(buf).into(),
-        1 => AlterReplicaLogDirsResponse::deserialize(buf),
-        _ => AlterReplicaLogDirsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        1
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::AlterReplicaLogDirs
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&AlterReplicaLogDirsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> AlterReplicaLogDirsResponse {
+        match version {
+            0 => AlterReplicaLogDirsResponse0::deserialize(buf).into(),
+            1 => AlterReplicaLogDirsResponse::deserialize(buf),
+            _ => AlterReplicaLogDirsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct AlterReplicaLogDirsRequest0 {
     pub dirs: Vec<AlterReplicaLogDirsRequestDirs0>,

@@ -2,31 +2,35 @@ use super::prelude::*;
 
 pub type ExpireDelegationTokenRequest = ExpireDelegationTokenRequest2;
 pub type ExpireDelegationTokenResponse = ExpireDelegationTokenResponse2;
-pub fn serialize_expire_delegation_token_request(
-    data: ExpireDelegationTokenRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&ExpireDelegationTokenRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&ExpireDelegationTokenRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for ExpireDelegationTokenRequest {
+    type Response = ExpireDelegationTokenResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_expire_delegation_token_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> ExpireDelegationTokenResponse {
-    match version {
-        0 => ExpireDelegationTokenResponse0::deserialize(buf).into(),
-        1 => ExpireDelegationTokenResponse1::deserialize(buf).into(),
-        2 => ExpireDelegationTokenResponse::deserialize(buf),
-        _ => ExpireDelegationTokenResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::ExpireDelegationToken
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&ExpireDelegationTokenRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&ExpireDelegationTokenRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> ExpireDelegationTokenResponse {
+        match version {
+            0 => ExpireDelegationTokenResponse0::deserialize(buf).into(),
+            1 => ExpireDelegationTokenResponse1::deserialize(buf).into(),
+            2 => ExpireDelegationTokenResponse::deserialize(buf),
+            _ => ExpireDelegationTokenResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct ExpireDelegationTokenRequest0 {
     pub hmac: KafkaBytes,

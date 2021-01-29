@@ -2,34 +2,41 @@ use super::prelude::*;
 
 pub type SyncGroupRequest = SyncGroupRequest5;
 pub type SyncGroupResponse = SyncGroupResponse5;
-pub fn serialize_sync_group_request(
-    data: SyncGroupRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&SyncGroupRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&SyncGroupRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&SyncGroupRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&SyncGroupRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&SyncGroupRequest4::try_from(data)?, buf),
-        5 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for SyncGroupRequest {
+    type Response = SyncGroupResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_sync_group_response(version: i32, buf: &mut Bytes) -> SyncGroupResponse {
-    match version {
-        0 => SyncGroupResponse0::deserialize(buf).into(),
-        1 => SyncGroupResponse1::deserialize(buf).into(),
-        2 => SyncGroupResponse2::deserialize(buf).into(),
-        3 => SyncGroupResponse3::deserialize(buf).into(),
-        4 => SyncGroupResponse4::deserialize(buf).into(),
-        5 => SyncGroupResponse::deserialize(buf),
-        _ => SyncGroupResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        5
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::SyncGroup
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&SyncGroupRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&SyncGroupRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&SyncGroupRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&SyncGroupRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&SyncGroupRequest4::try_from(self)?, buf),
+            5 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> SyncGroupResponse {
+        match version {
+            0 => SyncGroupResponse0::deserialize(buf).into(),
+            1 => SyncGroupResponse1::deserialize(buf).into(),
+            2 => SyncGroupResponse2::deserialize(buf).into(),
+            3 => SyncGroupResponse3::deserialize(buf).into(),
+            4 => SyncGroupResponse4::deserialize(buf).into(),
+            5 => SyncGroupResponse::deserialize(buf),
+            _ => SyncGroupResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct SyncGroupRequest0 {
     pub group_id: String,

@@ -2,37 +2,41 @@ use super::prelude::*;
 
 pub type DescribeGroupsRequest = DescribeGroupsRequest5;
 pub type DescribeGroupsResponse = DescribeGroupsResponse5;
-pub fn serialize_describe_groups_request(
-    data: DescribeGroupsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&DescribeGroupsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&DescribeGroupsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&DescribeGroupsRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&DescribeGroupsRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&DescribeGroupsRequest4::try_from(data)?, buf),
-        5 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for DescribeGroupsRequest {
+    type Response = DescribeGroupsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_describe_groups_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> DescribeGroupsResponse {
-    match version {
-        0 => DescribeGroupsResponse0::deserialize(buf).into(),
-        1 => DescribeGroupsResponse1::deserialize(buf).into(),
-        2 => DescribeGroupsResponse2::deserialize(buf).into(),
-        3 => DescribeGroupsResponse3::deserialize(buf).into(),
-        4 => DescribeGroupsResponse4::deserialize(buf).into(),
-        5 => DescribeGroupsResponse::deserialize(buf),
-        _ => DescribeGroupsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        5
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::DescribeGroups
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&DescribeGroupsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&DescribeGroupsRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&DescribeGroupsRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&DescribeGroupsRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&DescribeGroupsRequest4::try_from(self)?, buf),
+            5 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> DescribeGroupsResponse {
+        match version {
+            0 => DescribeGroupsResponse0::deserialize(buf).into(),
+            1 => DescribeGroupsResponse1::deserialize(buf).into(),
+            2 => DescribeGroupsResponse2::deserialize(buf).into(),
+            3 => DescribeGroupsResponse3::deserialize(buf).into(),
+            4 => DescribeGroupsResponse4::deserialize(buf).into(),
+            5 => DescribeGroupsResponse::deserialize(buf),
+            _ => DescribeGroupsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct DescribeGroupsRequest0 {
     pub groups: Vec<String>,

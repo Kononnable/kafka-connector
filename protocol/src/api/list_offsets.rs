@@ -2,34 +2,41 @@ use super::prelude::*;
 
 pub type ListOffsetsRequest = ListOffsetsRequest5;
 pub type ListOffsetsResponse = ListOffsetsResponse5;
-pub fn serialize_list_offsets_request(
-    data: ListOffsetsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&ListOffsetsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&ListOffsetsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&ListOffsetsRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&ListOffsetsRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&ListOffsetsRequest4::try_from(data)?, buf),
-        5 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for ListOffsetsRequest {
+    type Response = ListOffsetsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_list_offsets_response(version: i32, buf: &mut Bytes) -> ListOffsetsResponse {
-    match version {
-        0 => ListOffsetsResponse0::deserialize(buf).into(),
-        1 => ListOffsetsResponse1::deserialize(buf).into(),
-        2 => ListOffsetsResponse2::deserialize(buf).into(),
-        3 => ListOffsetsResponse3::deserialize(buf).into(),
-        4 => ListOffsetsResponse4::deserialize(buf).into(),
-        5 => ListOffsetsResponse::deserialize(buf),
-        _ => ListOffsetsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        5
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::ListOffsets
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&ListOffsetsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&ListOffsetsRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&ListOffsetsRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&ListOffsetsRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&ListOffsetsRequest4::try_from(self)?, buf),
+            5 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> ListOffsetsResponse {
+        match version {
+            0 => ListOffsetsResponse0::deserialize(buf).into(),
+            1 => ListOffsetsResponse1::deserialize(buf).into(),
+            2 => ListOffsetsResponse2::deserialize(buf).into(),
+            3 => ListOffsetsResponse3::deserialize(buf).into(),
+            4 => ListOffsetsResponse4::deserialize(buf).into(),
+            5 => ListOffsetsResponse::deserialize(buf),
+            _ => ListOffsetsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct ListOffsetsRequest0 {
     pub replica_id: Int32,

@@ -2,31 +2,35 @@ use super::prelude::*;
 
 pub type AddOffsetsToTxnRequest = AddOffsetsToTxnRequest2;
 pub type AddOffsetsToTxnResponse = AddOffsetsToTxnResponse2;
-pub fn serialize_add_offsets_to_txn_request(
-    data: AddOffsetsToTxnRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&AddOffsetsToTxnRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&AddOffsetsToTxnRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for AddOffsetsToTxnRequest {
+    type Response = AddOffsetsToTxnResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_add_offsets_to_txn_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> AddOffsetsToTxnResponse {
-    match version {
-        0 => AddOffsetsToTxnResponse0::deserialize(buf).into(),
-        1 => AddOffsetsToTxnResponse1::deserialize(buf).into(),
-        2 => AddOffsetsToTxnResponse::deserialize(buf),
-        _ => AddOffsetsToTxnResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::AddOffsetsToTxn
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&AddOffsetsToTxnRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&AddOffsetsToTxnRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> AddOffsetsToTxnResponse {
+        match version {
+            0 => AddOffsetsToTxnResponse0::deserialize(buf).into(),
+            1 => AddOffsetsToTxnResponse1::deserialize(buf).into(),
+            2 => AddOffsetsToTxnResponse::deserialize(buf),
+            _ => AddOffsetsToTxnResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct AddOffsetsToTxnRequest0 {
     pub transactional_id: String,

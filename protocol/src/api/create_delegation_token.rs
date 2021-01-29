@@ -2,31 +2,35 @@ use super::prelude::*;
 
 pub type CreateDelegationTokenRequest = CreateDelegationTokenRequest2;
 pub type CreateDelegationTokenResponse = CreateDelegationTokenResponse2;
-pub fn serialize_create_delegation_token_request(
-    data: CreateDelegationTokenRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&CreateDelegationTokenRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&CreateDelegationTokenRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for CreateDelegationTokenRequest {
+    type Response = CreateDelegationTokenResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_create_delegation_token_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> CreateDelegationTokenResponse {
-    match version {
-        0 => CreateDelegationTokenResponse0::deserialize(buf).into(),
-        1 => CreateDelegationTokenResponse1::deserialize(buf).into(),
-        2 => CreateDelegationTokenResponse::deserialize(buf),
-        _ => CreateDelegationTokenResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::CreateDelegationToken
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&CreateDelegationTokenRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&CreateDelegationTokenRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> CreateDelegationTokenResponse {
+        match version {
+            0 => CreateDelegationTokenResponse0::deserialize(buf).into(),
+            1 => CreateDelegationTokenResponse1::deserialize(buf).into(),
+            2 => CreateDelegationTokenResponse::deserialize(buf),
+            _ => CreateDelegationTokenResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct CreateDelegationTokenRequest0 {
     pub renewers: Vec<CreateDelegationTokenRequestRenewers0>,

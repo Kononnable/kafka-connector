@@ -2,32 +2,39 @@ use super::prelude::*;
 
 pub type LeaderAndIsrRequest = LeaderAndIsrRequest4;
 pub type LeaderAndIsrResponse = LeaderAndIsrResponse4;
-pub fn serialize_leader_and_isr_request(
-    data: LeaderAndIsrRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&LeaderAndIsrRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&LeaderAndIsrRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&LeaderAndIsrRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&LeaderAndIsrRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for LeaderAndIsrRequest {
+    type Response = LeaderAndIsrResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_leader_and_isr_response(version: i32, buf: &mut Bytes) -> LeaderAndIsrResponse {
-    match version {
-        0 => LeaderAndIsrResponse0::deserialize(buf).into(),
-        1 => LeaderAndIsrResponse1::deserialize(buf).into(),
-        2 => LeaderAndIsrResponse2::deserialize(buf).into(),
-        3 => LeaderAndIsrResponse3::deserialize(buf).into(),
-        4 => LeaderAndIsrResponse::deserialize(buf),
-        _ => LeaderAndIsrResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        4
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::LeaderAndIsr
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&LeaderAndIsrRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&LeaderAndIsrRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&LeaderAndIsrRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&LeaderAndIsrRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> LeaderAndIsrResponse {
+        match version {
+            0 => LeaderAndIsrResponse0::deserialize(buf).into(),
+            1 => LeaderAndIsrResponse1::deserialize(buf).into(),
+            2 => LeaderAndIsrResponse2::deserialize(buf).into(),
+            3 => LeaderAndIsrResponse3::deserialize(buf).into(),
+            4 => LeaderAndIsrResponse::deserialize(buf),
+            _ => LeaderAndIsrResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct LeaderAndIsrRequest0 {
     pub controller_id: Int32,

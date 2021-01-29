@@ -55,6 +55,7 @@ pub mod update_features;
 pub mod update_metadata;
 pub mod write_txn_markers;
 
+#[derive(Debug, Clone, Copy)]
 pub enum ApiNumbers {
     Produce = 0,
     Fetch = 1,
@@ -121,6 +122,8 @@ mod prelude {
     pub use super::super::from_bytes::FromBytes;
     pub use super::super::optional::Optional;
     pub use super::super::to_bytes::ToBytes;
+    pub use super::super::ApiCall;
+    pub use super::ApiNumbers;
     pub use bytes::{Bytes, BytesMut};
     pub use kafka_connector_derive::FromBytes;
     pub use kafka_connector_derive::ToBytes;

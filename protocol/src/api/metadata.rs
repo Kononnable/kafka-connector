@@ -2,42 +2,49 @@ use super::prelude::*;
 
 pub type MetadataRequest = MetadataRequest9;
 pub type MetadataResponse = MetadataResponse9;
-pub fn serialize_metadata_request(
-    data: MetadataRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&MetadataRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&MetadataRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&MetadataRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&MetadataRequest3::try_from(data)?, buf),
-        4 => ToBytes::serialize(&MetadataRequest4::try_from(data)?, buf),
-        5 => ToBytes::serialize(&MetadataRequest5::try_from(data)?, buf),
-        6 => ToBytes::serialize(&MetadataRequest6::try_from(data)?, buf),
-        7 => ToBytes::serialize(&MetadataRequest7::try_from(data)?, buf),
-        8 => ToBytes::serialize(&MetadataRequest8::try_from(data)?, buf),
-        9 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for MetadataRequest {
+    type Response = MetadataResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_metadata_response(version: i32, buf: &mut Bytes) -> MetadataResponse {
-    match version {
-        0 => MetadataResponse0::deserialize(buf).into(),
-        1 => MetadataResponse1::deserialize(buf).into(),
-        2 => MetadataResponse2::deserialize(buf).into(),
-        3 => MetadataResponse3::deserialize(buf).into(),
-        4 => MetadataResponse4::deserialize(buf).into(),
-        5 => MetadataResponse5::deserialize(buf).into(),
-        6 => MetadataResponse6::deserialize(buf).into(),
-        7 => MetadataResponse7::deserialize(buf).into(),
-        8 => MetadataResponse8::deserialize(buf).into(),
-        9 => MetadataResponse::deserialize(buf),
-        _ => MetadataResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        9
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::Metadata
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&MetadataRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&MetadataRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&MetadataRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&MetadataRequest3::try_from(self)?, buf),
+            4 => ToBytes::serialize(&MetadataRequest4::try_from(self)?, buf),
+            5 => ToBytes::serialize(&MetadataRequest5::try_from(self)?, buf),
+            6 => ToBytes::serialize(&MetadataRequest6::try_from(self)?, buf),
+            7 => ToBytes::serialize(&MetadataRequest7::try_from(self)?, buf),
+            8 => ToBytes::serialize(&MetadataRequest8::try_from(self)?, buf),
+            9 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> MetadataResponse {
+        match version {
+            0 => MetadataResponse0::deserialize(buf).into(),
+            1 => MetadataResponse1::deserialize(buf).into(),
+            2 => MetadataResponse2::deserialize(buf).into(),
+            3 => MetadataResponse3::deserialize(buf).into(),
+            4 => MetadataResponse4::deserialize(buf).into(),
+            5 => MetadataResponse5::deserialize(buf).into(),
+            6 => MetadataResponse6::deserialize(buf).into(),
+            7 => MetadataResponse7::deserialize(buf).into(),
+            8 => MetadataResponse8::deserialize(buf).into(),
+            9 => MetadataResponse::deserialize(buf),
+            _ => MetadataResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct MetadataRequest0 {
     pub topics: Vec<MetadataRequestTopics0>,

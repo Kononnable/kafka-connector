@@ -2,7 +2,7 @@ use bytes::{Bytes, BytesMut};
 
 use crate::{from_bytes::FromBytes, to_bytes::ToBytes};
 
-use super::unsigned_varint32::{UnsignedVarInt32};
+use super::unsigned_varint32::UnsignedVarInt32;
 
 pub fn decode_zig_zag_32(n: u32) -> i32 {
     ((n >> 1) as i32) ^ (-((n & 1) as i32))

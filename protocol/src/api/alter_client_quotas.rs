@@ -2,27 +2,31 @@ use super::prelude::*;
 
 pub type AlterClientQuotasRequest = AlterClientQuotasRequest0;
 pub type AlterClientQuotasResponse = AlterClientQuotasResponse0;
-pub fn serialize_alter_client_quotas_request(
-    data: AlterClientQuotasRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for AlterClientQuotasRequest {
+    type Response = AlterClientQuotasResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_alter_client_quotas_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> AlterClientQuotasResponse {
-    match version {
-        0 => AlterClientQuotasResponse::deserialize(buf),
-        _ => AlterClientQuotasResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        0
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::AlterClientQuotas
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> AlterClientQuotasResponse {
+        match version {
+            0 => AlterClientQuotasResponse::deserialize(buf),
+            _ => AlterClientQuotasResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct AlterClientQuotasRequest0 {
     pub entries: Vec<AlterClientQuotasRequestEntries0>,

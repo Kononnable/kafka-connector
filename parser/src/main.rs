@@ -43,7 +43,7 @@ async fn main() -> anyhow::Result<()> {
         let path = Path::new(&file_name);
         println!("{}", path.display());
 
-        let content = generate_content(grouped_call);
+        let content = generate_content(grouped_call, key);
 
         let mut file = File::create(&path)?;
         file.write_all(content.as_bytes())?;

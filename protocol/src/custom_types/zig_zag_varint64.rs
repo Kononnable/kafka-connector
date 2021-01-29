@@ -1,8 +1,8 @@
-use bytes::{ Bytes, BytesMut};
+use bytes::{Bytes, BytesMut};
 
 use crate::{from_bytes::FromBytes, to_bytes::ToBytes};
 
-use super::unsigned_varint64::{ UnsignedVarInt64};
+use super::unsigned_varint64::UnsignedVarInt64;
 
 pub fn decode_zig_zag_64(n: u64) -> i64 {
     ((n >> 1) as i64) ^ (-((n & 1) as i64))

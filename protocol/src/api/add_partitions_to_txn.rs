@@ -2,31 +2,35 @@ use super::prelude::*;
 
 pub type AddPartitionsToTxnRequest = AddPartitionsToTxnRequest2;
 pub type AddPartitionsToTxnResponse = AddPartitionsToTxnResponse2;
-pub fn serialize_add_partitions_to_txn_request(
-    data: AddPartitionsToTxnRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&AddPartitionsToTxnRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&AddPartitionsToTxnRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for AddPartitionsToTxnRequest {
+    type Response = AddPartitionsToTxnResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_add_partitions_to_txn_response(
-    version: i32,
-    buf: &mut Bytes,
-) -> AddPartitionsToTxnResponse {
-    match version {
-        0 => AddPartitionsToTxnResponse0::deserialize(buf).into(),
-        1 => AddPartitionsToTxnResponse1::deserialize(buf).into(),
-        2 => AddPartitionsToTxnResponse::deserialize(buf),
-        _ => AddPartitionsToTxnResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::AddPartitionsToTxn
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&AddPartitionsToTxnRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&AddPartitionsToTxnRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> AddPartitionsToTxnResponse {
+        match version {
+            0 => AddPartitionsToTxnResponse0::deserialize(buf).into(),
+            1 => AddPartitionsToTxnResponse1::deserialize(buf).into(),
+            2 => AddPartitionsToTxnResponse::deserialize(buf),
+            _ => AddPartitionsToTxnResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct AddPartitionsToTxnRequest0 {
     pub transactional_id: String,

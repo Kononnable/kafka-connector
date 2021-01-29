@@ -2,30 +2,37 @@ use super::prelude::*;
 
 pub type ApiVersionsRequest = ApiVersionsRequest3;
 pub type ApiVersionsResponse = ApiVersionsResponse3;
-pub fn serialize_api_versions_request(
-    data: ApiVersionsRequest,
-    version: i32,
-    buf: &mut BytesMut,
-) -> Result<(), Error> {
-    match version {
-        0 => ToBytes::serialize(&ApiVersionsRequest0::try_from(data)?, buf),
-        1 => ToBytes::serialize(&ApiVersionsRequest1::try_from(data)?, buf),
-        2 => ToBytes::serialize(&ApiVersionsRequest2::try_from(data)?, buf),
-        3 => ToBytes::serialize(&data, buf),
-        _ => ToBytes::serialize(&data, buf),
+impl ApiCall for ApiVersionsRequest {
+    type Response = ApiVersionsResponse;
+    fn get_min_supported_version() -> i16 {
+        0
     }
-    Ok(())
-}
-pub fn deserialize_api_versions_response(version: i32, buf: &mut Bytes) -> ApiVersionsResponse {
-    match version {
-        0 => ApiVersionsResponse0::deserialize(buf).into(),
-        1 => ApiVersionsResponse1::deserialize(buf).into(),
-        2 => ApiVersionsResponse2::deserialize(buf).into(),
-        3 => ApiVersionsResponse::deserialize(buf),
-        _ => ApiVersionsResponse::deserialize(buf),
+    fn get_max_supported_version() -> i16 {
+        3
+    }
+    fn get_api_key() -> ApiNumbers {
+        ApiNumbers::ApiVersions
+    }
+    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+        match version {
+            0 => ToBytes::serialize(&ApiVersionsRequest0::try_from(self)?, buf),
+            1 => ToBytes::serialize(&ApiVersionsRequest1::try_from(self)?, buf),
+            2 => ToBytes::serialize(&ApiVersionsRequest2::try_from(self)?, buf),
+            3 => ToBytes::serialize(&self, buf),
+            _ => ToBytes::serialize(&self, buf),
+        }
+        Ok(())
+    }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> ApiVersionsResponse {
+        match version {
+            0 => ApiVersionsResponse0::deserialize(buf).into(),
+            1 => ApiVersionsResponse1::deserialize(buf).into(),
+            2 => ApiVersionsResponse2::deserialize(buf).into(),
+            3 => ApiVersionsResponse::deserialize(buf),
+            _ => ApiVersionsResponse::deserialize(buf),
+        }
     }
 }
-
 #[derive(Default, Debug, ToBytes)]
 pub struct ApiVersionsRequest0 {}
 
