@@ -26,6 +26,7 @@ pub struct HeaderRequest {
     pub api_version: Int16,
     pub correlation_id: Int32,
     pub client_id: Option<String>,
+    pub tag_buffer: TagBuffer,
 }
 
 impl HeaderRequest {
@@ -40,6 +41,7 @@ impl HeaderRequest {
             api_version,
             correlation_id,
             client_id: Some(client_id),
+            tag_buffer: TagBuffer {},
         }
     }
 }
@@ -47,4 +49,5 @@ impl HeaderRequest {
 #[derive(Debug, FromBytes)]
 pub struct HeaderResponse {
     pub correlation: Int32,
+    pub tag_buffer: TagBuffer,
 }

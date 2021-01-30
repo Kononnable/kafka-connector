@@ -53,6 +53,7 @@ pub struct ControlledShutdownRequest2 {
 pub struct ControlledShutdownRequest3 {
     pub broker_id: Int32,
     pub broker_epoch: Optional<Int64>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -95,12 +96,14 @@ pub struct ControlledShutdownResponseRemainingPartitions2 {
 pub struct ControlledShutdownResponse3 {
     pub error_code: Int16,
     pub remaining_partitions: Vec<ControlledShutdownResponseRemainingPartitions3>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ControlledShutdownResponseRemainingPartitions3 {
     pub topic_name: CompactString,
     pub partition_index: Int32,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest0 {
@@ -111,6 +114,13 @@ impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest0 {
                 "ControlledShutdownRequest",
                 0,
                 "broker_epoch",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "ControlledShutdownRequest",
+                0,
+                "tag_buffer",
             ));
         }
         Ok(ControlledShutdownRequest0 {
@@ -129,6 +139,13 @@ impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest1 {
                 "broker_epoch",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "ControlledShutdownRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(ControlledShutdownRequest1 {
             broker_id: latest.broker_id,
         })
@@ -138,6 +155,13 @@ impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest1 {
 impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest2 {
     type Error = Error;
     fn try_from(latest: ControlledShutdownRequest3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "ControlledShutdownRequest",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(ControlledShutdownRequest2 {
             broker_id: latest.broker_id,
             broker_epoch: latest.broker_epoch,
@@ -154,6 +178,7 @@ impl From<ControlledShutdownResponse0> for ControlledShutdownResponse3 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..ControlledShutdownResponse3::default()
         }
     }
 }
@@ -165,6 +190,7 @@ impl From<ControlledShutdownResponseRemainingPartitions0>
         ControlledShutdownResponseRemainingPartitions3 {
             topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
+            ..ControlledShutdownResponseRemainingPartitions3::default()
         }
     }
 }
@@ -178,6 +204,7 @@ impl From<ControlledShutdownResponse1> for ControlledShutdownResponse3 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..ControlledShutdownResponse3::default()
         }
     }
 }
@@ -189,6 +216,7 @@ impl From<ControlledShutdownResponseRemainingPartitions1>
         ControlledShutdownResponseRemainingPartitions3 {
             topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
+            ..ControlledShutdownResponseRemainingPartitions3::default()
         }
     }
 }
@@ -202,6 +230,7 @@ impl From<ControlledShutdownResponse2> for ControlledShutdownResponse3 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..ControlledShutdownResponse3::default()
         }
     }
 }
@@ -213,6 +242,7 @@ impl From<ControlledShutdownResponseRemainingPartitions2>
         ControlledShutdownResponseRemainingPartitions3 {
             topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
+            ..ControlledShutdownResponseRemainingPartitions3::default()
         }
     }
 }

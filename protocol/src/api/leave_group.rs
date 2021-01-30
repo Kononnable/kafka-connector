@@ -69,12 +69,14 @@ pub struct LeaveGroupRequestMembers3 {
 pub struct LeaveGroupRequest4 {
     pub group_id: CompactString,
     pub members: Optional<Vec<LeaveGroupRequestMembers4>>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequestMembers4 {
     pub member_id: CompactString,
     pub group_instance_id: CompactNullableString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -113,6 +115,7 @@ pub struct LeaveGroupResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub members: Optional<Vec<LeaveGroupResponseMembers4>>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -120,6 +123,7 @@ pub struct LeaveGroupResponseMembers4 {
     pub member_id: CompactString,
     pub group_instance_id: CompactNullableString,
     pub error_code: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest0 {
@@ -127,6 +131,9 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest0 {
     fn try_from(latest: LeaveGroupRequest4) -> Result<Self, Self::Error> {
         if latest.members.is_some() {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 0, "members"));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("LeaveGroupRequest", 0, "tag_buffer"));
         }
         Ok(LeaveGroupRequest0 {
             group_id: latest.group_id.into(),
@@ -141,6 +148,9 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest1 {
         if latest.members.is_some() {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 1, "members"));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("LeaveGroupRequest", 1, "tag_buffer"));
+        }
         Ok(LeaveGroupRequest1 {
             group_id: latest.group_id.into(),
             ..LeaveGroupRequest1::default()
@@ -154,6 +164,9 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest2 {
         if latest.members.is_some() {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 2, "members"));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("LeaveGroupRequest", 2, "tag_buffer"));
+        }
         Ok(LeaveGroupRequest2 {
             group_id: latest.group_id.into(),
             ..LeaveGroupRequest2::default()
@@ -164,6 +177,9 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest2 {
 impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest3 {
     type Error = Error;
     fn try_from(latest: LeaveGroupRequest4) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("LeaveGroupRequest", 3, "tag_buffer"));
+        }
         Ok(LeaveGroupRequest3 {
             group_id: latest.group_id.into(),
             members: latest
@@ -181,6 +197,13 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest3 {
 impl TryFrom<LeaveGroupRequestMembers4> for LeaveGroupRequestMembers3 {
     type Error = Error;
     fn try_from(latest: LeaveGroupRequestMembers4) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaveGroupRequestMembers",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaveGroupRequestMembers3 {
             member_id: latest.member_id.into(),
             group_instance_id: latest.group_instance_id.into(),
@@ -225,6 +248,7 @@ impl From<LeaveGroupResponse3> for LeaveGroupResponse4 {
             members: older
                 .members
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
+            ..LeaveGroupResponse4::default()
         }
     }
 }
@@ -235,6 +259,7 @@ impl From<LeaveGroupResponseMembers3> for LeaveGroupResponseMembers4 {
             member_id: older.member_id.into(),
             group_instance_id: older.group_instance_id.into(),
             error_code: older.error_code,
+            ..LeaveGroupResponseMembers4::default()
         }
     }
 }

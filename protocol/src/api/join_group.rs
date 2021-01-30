@@ -146,12 +146,14 @@ pub struct JoinGroupRequest6 {
     pub group_instance_id: Optional<CompactNullableString>,
     pub protocol_type: CompactString,
     pub protocols: Vec<JoinGroupRequestProtocols6>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequestProtocols6 {
     pub name: CompactString,
     pub metadata: CompactBytes,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -163,12 +165,14 @@ pub struct JoinGroupRequest7 {
     pub group_instance_id: Optional<CompactNullableString>,
     pub protocol_type: CompactString,
     pub protocols: Vec<JoinGroupRequestProtocols7>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequestProtocols7 {
     pub name: CompactString,
     pub metadata: CompactBytes,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -281,6 +285,7 @@ pub struct JoinGroupResponse6 {
     pub leader: CompactString,
     pub member_id: CompactString,
     pub members: Vec<JoinGroupResponseMembers6>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -288,6 +293,7 @@ pub struct JoinGroupResponseMembers6 {
     pub member_id: CompactString,
     pub group_instance_id: Optional<CompactNullableString>,
     pub metadata: CompactBytes,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -300,6 +306,7 @@ pub struct JoinGroupResponse7 {
     pub leader: CompactString,
     pub member_id: CompactString,
     pub members: Vec<JoinGroupResponseMembers7>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -307,6 +314,7 @@ pub struct JoinGroupResponseMembers7 {
     pub member_id: CompactString,
     pub group_instance_id: Optional<CompactNullableString>,
     pub metadata: CompactBytes,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<JoinGroupRequest7> for JoinGroupRequest0 {
@@ -326,6 +334,9 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest0 {
                 "group_instance_id",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("JoinGroupRequest", 0, "tag_buffer"));
+        }
         Ok(JoinGroupRequest0 {
             group_id: latest.group_id.into(),
             session_timeout_ms: latest.session_timeout_ms,
@@ -343,6 +354,13 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest0 {
 impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols0 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "JoinGroupRequestProtocols",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(JoinGroupRequestProtocols0 {
             name: latest.name.into(),
             metadata: latest.metadata.into(),
@@ -359,6 +377,9 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest1 {
                 1,
                 "group_instance_id",
             ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("JoinGroupRequest", 1, "tag_buffer"));
         }
         Ok(JoinGroupRequest1 {
             group_id: latest.group_id.into(),
@@ -378,6 +399,13 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest1 {
 impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols1 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "JoinGroupRequestProtocols",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(JoinGroupRequestProtocols1 {
             name: latest.name.into(),
             metadata: latest.metadata.into(),
@@ -394,6 +422,9 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest2 {
                 2,
                 "group_instance_id",
             ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("JoinGroupRequest", 2, "tag_buffer"));
         }
         Ok(JoinGroupRequest2 {
             group_id: latest.group_id.into(),
@@ -413,6 +444,13 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest2 {
 impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols2 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "JoinGroupRequestProtocols",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(JoinGroupRequestProtocols2 {
             name: latest.name.into(),
             metadata: latest.metadata.into(),
@@ -429,6 +467,9 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest3 {
                 3,
                 "group_instance_id",
             ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("JoinGroupRequest", 3, "tag_buffer"));
         }
         Ok(JoinGroupRequest3 {
             group_id: latest.group_id.into(),
@@ -448,6 +489,13 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest3 {
 impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols3 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "JoinGroupRequestProtocols",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(JoinGroupRequestProtocols3 {
             name: latest.name.into(),
             metadata: latest.metadata.into(),
@@ -464,6 +512,9 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest4 {
                 4,
                 "group_instance_id",
             ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("JoinGroupRequest", 4, "tag_buffer"));
         }
         Ok(JoinGroupRequest4 {
             group_id: latest.group_id.into(),
@@ -483,6 +534,13 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest4 {
 impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols4 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "JoinGroupRequestProtocols",
+                4,
+                "tag_buffer",
+            ));
+        }
         Ok(JoinGroupRequestProtocols4 {
             name: latest.name.into(),
             metadata: latest.metadata.into(),
@@ -493,6 +551,9 @@ impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols4 {
 impl TryFrom<JoinGroupRequest7> for JoinGroupRequest5 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("JoinGroupRequest", 5, "tag_buffer"));
+        }
         Ok(JoinGroupRequest5 {
             group_id: latest.group_id.into(),
             session_timeout_ms: latest.session_timeout_ms,
@@ -512,6 +573,13 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest5 {
 impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols5 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "JoinGroupRequestProtocols",
+                5,
+                "tag_buffer",
+            ));
+        }
         Ok(JoinGroupRequestProtocols5 {
             name: latest.name.into(),
             metadata: latest.metadata.into(),
@@ -534,6 +602,7 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest6 {
                 .into_iter()
                 .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -544,6 +613,7 @@ impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols6 {
         Ok(JoinGroupRequestProtocols6 {
             name: latest.name,
             metadata: latest.metadata,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -692,6 +762,7 @@ impl From<JoinGroupResponseMembers5> for JoinGroupResponseMembers7 {
             member_id: older.member_id.into(),
             group_instance_id: older.group_instance_id.map(|val| val.into()),
             metadata: older.metadata.into(),
+            ..JoinGroupResponseMembers7::default()
         }
     }
 }
@@ -706,6 +777,7 @@ impl From<JoinGroupResponse6> for JoinGroupResponse7 {
             leader: older.leader,
             member_id: older.member_id,
             members: older.members.into_iter().map(|el| el.into()).collect(),
+            tag_buffer: older.tag_buffer,
             ..JoinGroupResponse7::default()
         }
     }
@@ -717,6 +789,7 @@ impl From<JoinGroupResponseMembers6> for JoinGroupResponseMembers7 {
             member_id: older.member_id,
             group_instance_id: older.group_instance_id,
             metadata: older.metadata,
+            tag_buffer: older.tag_buffer,
         }
     }
 }

@@ -69,12 +69,14 @@ pub struct StopReplicaRequest2 {
     pub broker_epoch: Optional<Int64>,
     pub delete_partitions: Boolean,
     pub topics: Optional<Vec<StopReplicaRequestTopics2>>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequestTopics2 {
     pub name: CompactString,
     pub partition_indexes: Vec<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -83,12 +85,14 @@ pub struct StopReplicaRequest3 {
     pub controller_epoch: Int32,
     pub broker_epoch: Optional<Int64>,
     pub topic_states: Optional<Vec<StopReplicaRequestTopicStates3>>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequestTopicStates3 {
     pub topic_name: CompactString,
     pub partition_states: Vec<StopReplicaRequestTopicStatesPartitionStates3>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -96,6 +100,7 @@ pub struct StopReplicaRequestTopicStatesPartitionStates3 {
     pub partition_index: Int32,
     pub leader_epoch: Int32,
     pub delete_partition: Boolean,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -128,6 +133,7 @@ pub struct StopReplicaResponsePartitionErrors1 {
 pub struct StopReplicaResponse2 {
     pub error_code: Int16,
     pub partition_errors: Vec<StopReplicaResponsePartitionErrors2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -135,12 +141,14 @@ pub struct StopReplicaResponsePartitionErrors2 {
     pub topic_name: CompactString,
     pub partition_index: Int32,
     pub error_code: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct StopReplicaResponse3 {
     pub error_code: Int16,
     pub partition_errors: Vec<StopReplicaResponsePartitionErrors3>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -148,6 +156,7 @@ pub struct StopReplicaResponsePartitionErrors3 {
     pub topic_name: CompactString,
     pub partition_index: Int32,
     pub error_code: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<StopReplicaRequest3> for StopReplicaRequest0 {
@@ -167,6 +176,13 @@ impl TryFrom<StopReplicaRequest3> for StopReplicaRequest0 {
                 "topic_states",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "StopReplicaRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(StopReplicaRequest0 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -183,6 +199,13 @@ impl TryFrom<StopReplicaRequest3> for StopReplicaRequest1 {
                 "StopReplicaRequest",
                 1,
                 "topic_states",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "StopReplicaRequest",
+                1,
+                "tag_buffer",
             ));
         }
         Ok(StopReplicaRequest1 {
@@ -208,6 +231,7 @@ impl TryFrom<StopReplicaRequest3> for StopReplicaRequest2 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             broker_epoch: latest.broker_epoch,
+            tag_buffer: latest.tag_buffer,
             ..StopReplicaRequest2::default()
         })
     }
@@ -222,6 +246,7 @@ impl From<StopReplicaResponse0> for StopReplicaResponse3 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..StopReplicaResponse3::default()
         }
     }
 }
@@ -232,6 +257,7 @@ impl From<StopReplicaResponsePartitionErrors0> for StopReplicaResponsePartitionE
             topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..StopReplicaResponsePartitionErrors3::default()
         }
     }
 }
@@ -245,6 +271,7 @@ impl From<StopReplicaResponse1> for StopReplicaResponse3 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..StopReplicaResponse3::default()
         }
     }
 }
@@ -255,6 +282,7 @@ impl From<StopReplicaResponsePartitionErrors1> for StopReplicaResponsePartitionE
             topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..StopReplicaResponsePartitionErrors3::default()
         }
     }
 }
@@ -268,6 +296,7 @@ impl From<StopReplicaResponse2> for StopReplicaResponse3 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            tag_buffer: older.tag_buffer,
         }
     }
 }
@@ -278,6 +307,7 @@ impl From<StopReplicaResponsePartitionErrors2> for StopReplicaResponsePartitionE
             topic_name: older.topic_name,
             partition_index: older.partition_index,
             error_code: older.error_code,
+            tag_buffer: older.tag_buffer,
         }
     }
 }

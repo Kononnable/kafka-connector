@@ -118,6 +118,7 @@ mod prelude {
     pub use super::super::custom_types::compact_nullable_string::CompactNullableString;
     pub use super::super::custom_types::compact_string::CompactString;
     pub use super::super::custom_types::optional::Optional;
+    pub use super::super::custom_types::tag_buffer::TagBuffer;
     pub use super::super::custom_types::*;
     pub use super::super::error::Error;
     pub use super::super::from_bytes::FromBytes;

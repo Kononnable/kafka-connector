@@ -167,12 +167,14 @@ pub struct LeaderAndIsrRequest4 {
     pub broker_epoch: Optional<Int64>,
     pub topic_states: Optional<Vec<LeaderAndIsrRequestTopicStates4>>,
     pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders4>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestTopicStates4 {
     pub topic_name: CompactString,
     pub partition_states: Vec<LeaderAndIsrRequestTopicStatesPartitionStates4>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -187,6 +189,7 @@ pub struct LeaderAndIsrRequestTopicStatesPartitionStates4 {
     pub adding_replicas: Optional<Vec<Int32>>,
     pub removing_replicas: Optional<Vec<Int32>>,
     pub is_new: Boolean,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -194,6 +197,7 @@ pub struct LeaderAndIsrRequestLiveLeaders4 {
     pub broker_id: Int32,
     pub host_name: CompactString,
     pub port: Int32,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -252,6 +256,7 @@ pub struct LeaderAndIsrResponsePartitionErrors3 {
 pub struct LeaderAndIsrResponse4 {
     pub error_code: Int16,
     pub partition_errors: Vec<LeaderAndIsrResponsePartitionErrors4>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -259,6 +264,7 @@ pub struct LeaderAndIsrResponsePartitionErrors4 {
     pub topic_name: CompactString,
     pub partition_index: Int32,
     pub error_code: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest0 {
@@ -278,6 +284,13 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest0 {
                 "topic_states",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaderAndIsrRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaderAndIsrRequest0 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -294,6 +307,13 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest0 {
 impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders0 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaderAndIsrRequestLiveLeaders",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaderAndIsrRequestLiveLeaders0 {
             broker_id: latest.broker_id,
             host_name: latest.host_name.into(),
@@ -319,6 +339,13 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest1 {
                 "topic_states",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaderAndIsrRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaderAndIsrRequest1 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -335,6 +362,13 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest1 {
 impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders1 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaderAndIsrRequestLiveLeaders",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaderAndIsrRequestLiveLeaders1 {
             broker_id: latest.broker_id,
             host_name: latest.host_name.into(),
@@ -346,6 +380,13 @@ impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders
 impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest2 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequest4) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaderAndIsrRequest",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaderAndIsrRequest2 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -370,6 +411,13 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest2 {
 impl TryFrom<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates2 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestTopicStates4) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaderAndIsrRequestTopicStates",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaderAndIsrRequestTopicStates2 {
             topic_name: latest.topic_name.into(),
             partition_states: latest
@@ -402,6 +450,13 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
                 "removing_replicas",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaderAndIsrRequestTopicStatesPartitionStates",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaderAndIsrRequestTopicStatesPartitionStates2 {
             partition_index: latest.partition_index,
             controller_epoch: latest.controller_epoch,
@@ -418,6 +473,13 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
 impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders2 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaderAndIsrRequestLiveLeaders",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaderAndIsrRequestLiveLeaders2 {
             broker_id: latest.broker_id,
             host_name: latest.host_name.into(),
@@ -429,6 +491,13 @@ impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders
 impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest3 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequest4) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaderAndIsrRequest",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaderAndIsrRequest3 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -453,6 +522,13 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest3 {
 impl TryFrom<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates3 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestTopicStates4) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaderAndIsrRequestTopicStates",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaderAndIsrRequestTopicStates3 {
             topic_name: latest.topic_name.into(),
             partition_states: latest
@@ -471,6 +547,13 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
     fn try_from(
         latest: LeaderAndIsrRequestTopicStatesPartitionStates4,
     ) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaderAndIsrRequestTopicStatesPartitionStates",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaderAndIsrRequestTopicStatesPartitionStates3 {
             partition_index: latest.partition_index,
             controller_epoch: latest.controller_epoch,
@@ -489,6 +572,13 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
 impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders3 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "LeaderAndIsrRequestLiveLeaders",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(LeaderAndIsrRequestLiveLeaders3 {
             broker_id: latest.broker_id,
             host_name: latest.host_name.into(),
@@ -506,6 +596,7 @@ impl From<LeaderAndIsrResponse0> for LeaderAndIsrResponse4 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..LeaderAndIsrResponse4::default()
         }
     }
 }
@@ -516,6 +607,7 @@ impl From<LeaderAndIsrResponsePartitionErrors0> for LeaderAndIsrResponsePartitio
             topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..LeaderAndIsrResponsePartitionErrors4::default()
         }
     }
 }
@@ -529,6 +621,7 @@ impl From<LeaderAndIsrResponse1> for LeaderAndIsrResponse4 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..LeaderAndIsrResponse4::default()
         }
     }
 }
@@ -539,6 +632,7 @@ impl From<LeaderAndIsrResponsePartitionErrors1> for LeaderAndIsrResponsePartitio
             topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..LeaderAndIsrResponsePartitionErrors4::default()
         }
     }
 }
@@ -552,6 +646,7 @@ impl From<LeaderAndIsrResponse2> for LeaderAndIsrResponse4 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..LeaderAndIsrResponse4::default()
         }
     }
 }
@@ -562,6 +657,7 @@ impl From<LeaderAndIsrResponsePartitionErrors2> for LeaderAndIsrResponsePartitio
             topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..LeaderAndIsrResponsePartitionErrors4::default()
         }
     }
 }
@@ -575,6 +671,7 @@ impl From<LeaderAndIsrResponse3> for LeaderAndIsrResponse4 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..LeaderAndIsrResponse4::default()
         }
     }
 }
@@ -585,6 +682,7 @@ impl From<LeaderAndIsrResponsePartitionErrors3> for LeaderAndIsrResponsePartitio
             topic_name: older.topic_name.into(),
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..LeaderAndIsrResponsePartitionErrors4::default()
         }
     }
 }

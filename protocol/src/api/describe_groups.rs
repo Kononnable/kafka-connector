@@ -68,6 +68,7 @@ pub struct DescribeGroupsRequest4 {
 pub struct DescribeGroupsRequest5 {
     pub groups: Vec<CompactString>,
     pub include_authorized_operations: Optional<Boolean>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -201,6 +202,7 @@ pub struct DescribeGroupsResponseGroupsMembers4 {
 pub struct DescribeGroupsResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub groups: Vec<DescribeGroupsResponseGroups5>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -212,6 +214,7 @@ pub struct DescribeGroupsResponseGroups5 {
     pub protocol_data: CompactString,
     pub members: Vec<DescribeGroupsResponseGroupsMembers5>,
     pub authorized_operations: Optional<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -222,6 +225,7 @@ pub struct DescribeGroupsResponseGroupsMembers5 {
     pub client_host: CompactString,
     pub member_metadata: CompactBytes,
     pub member_assignment: CompactBytes,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest0 {
@@ -232,6 +236,13 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest0 {
                 "DescribeGroupsRequest",
                 0,
                 "include_authorized_operations",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeGroupsRequest",
+                0,
+                "tag_buffer",
             ));
         }
         Ok(DescribeGroupsRequest0 {
@@ -250,6 +261,13 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest1 {
                 "include_authorized_operations",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeGroupsRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeGroupsRequest1 {
             groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
         })
@@ -266,6 +284,13 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest2 {
                 "include_authorized_operations",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeGroupsRequest",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeGroupsRequest2 {
             groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
         })
@@ -275,6 +300,13 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest2 {
 impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest3 {
     type Error = Error;
     fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeGroupsRequest",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeGroupsRequest3 {
             groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
             include_authorized_operations: latest.include_authorized_operations,
@@ -285,6 +317,13 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest3 {
 impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest4 {
     type Error = Error;
     fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeGroupsRequest",
+                4,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeGroupsRequest4 {
             groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
             include_authorized_operations: latest.include_authorized_operations,
@@ -333,6 +372,7 @@ impl From<DescribeGroupsResponse1> for DescribeGroupsResponse5 {
         DescribeGroupsResponse5 {
             throttle_time_ms: older.throttle_time_ms,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
+            ..DescribeGroupsResponse5::default()
         }
     }
 }
@@ -369,6 +409,7 @@ impl From<DescribeGroupsResponse2> for DescribeGroupsResponse5 {
         DescribeGroupsResponse5 {
             throttle_time_ms: older.throttle_time_ms,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
+            ..DescribeGroupsResponse5::default()
         }
     }
 }
@@ -405,6 +446,7 @@ impl From<DescribeGroupsResponse3> for DescribeGroupsResponse5 {
         DescribeGroupsResponse5 {
             throttle_time_ms: older.throttle_time_ms,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
+            ..DescribeGroupsResponse5::default()
         }
     }
 }
@@ -419,6 +461,7 @@ impl From<DescribeGroupsResponseGroups3> for DescribeGroupsResponseGroups5 {
             protocol_data: older.protocol_data.into(),
             members: older.members.into_iter().map(|el| el.into()).collect(),
             authorized_operations: older.authorized_operations,
+            ..DescribeGroupsResponseGroups5::default()
         }
     }
 }
@@ -441,6 +484,7 @@ impl From<DescribeGroupsResponse4> for DescribeGroupsResponse5 {
         DescribeGroupsResponse5 {
             throttle_time_ms: older.throttle_time_ms,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
+            ..DescribeGroupsResponse5::default()
         }
     }
 }
@@ -455,6 +499,7 @@ impl From<DescribeGroupsResponseGroups4> for DescribeGroupsResponseGroups5 {
             protocol_data: older.protocol_data.into(),
             members: older.members.into_iter().map(|el| el.into()).collect(),
             authorized_operations: older.authorized_operations,
+            ..DescribeGroupsResponseGroups5::default()
         }
     }
 }
@@ -468,6 +513,7 @@ impl From<DescribeGroupsResponseGroupsMembers4> for DescribeGroupsResponseGroups
             client_host: older.client_host.into(),
             member_metadata: older.member_metadata.into(),
             member_assignment: older.member_assignment.into(),
+            ..DescribeGroupsResponseGroupsMembers5::default()
         }
     }
 }

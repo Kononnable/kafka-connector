@@ -45,11 +45,14 @@ pub struct ListGroupsRequest1 {}
 pub struct ListGroupsRequest2 {}
 
 #[derive(Default, Debug, Clone, ToBytes)]
-pub struct ListGroupsRequest3 {}
+pub struct ListGroupsRequest3 {
+    pub tag_buffer: Optional<TagBuffer>,
+}
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListGroupsRequest4 {
     pub states_filter: Optional<Vec<CompactString>>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -95,12 +98,14 @@ pub struct ListGroupsResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub groups: Vec<ListGroupsResponseGroups3>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListGroupsResponseGroups3 {
     pub group_id: CompactString,
     pub protocol_type: CompactString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -108,6 +113,7 @@ pub struct ListGroupsResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub groups: Vec<ListGroupsResponseGroups4>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -115,6 +121,7 @@ pub struct ListGroupsResponseGroups4 {
     pub group_id: CompactString,
     pub protocol_type: CompactString,
     pub group_state: Optional<CompactString>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<ListGroupsRequest4> for ListGroupsRequest0 {
@@ -126,6 +133,9 @@ impl TryFrom<ListGroupsRequest4> for ListGroupsRequest0 {
                 0,
                 "states_filter",
             ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("ListGroupsRequest", 0, "tag_buffer"));
         }
         Ok(ListGroupsRequest0 {})
     }
@@ -141,6 +151,9 @@ impl TryFrom<ListGroupsRequest4> for ListGroupsRequest1 {
                 "states_filter",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("ListGroupsRequest", 1, "tag_buffer"));
+        }
         Ok(ListGroupsRequest1 {})
     }
 }
@@ -154,6 +167,9 @@ impl TryFrom<ListGroupsRequest4> for ListGroupsRequest2 {
                 2,
                 "states_filter",
             ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("ListGroupsRequest", 2, "tag_buffer"));
         }
         Ok(ListGroupsRequest2 {})
     }
@@ -169,7 +185,9 @@ impl TryFrom<ListGroupsRequest4> for ListGroupsRequest3 {
                 "states_filter",
             ));
         }
-        Ok(ListGroupsRequest3 {})
+        Ok(ListGroupsRequest3 {
+            tag_buffer: latest.tag_buffer,
+        })
     }
 }
 
@@ -199,6 +217,7 @@ impl From<ListGroupsResponse1> for ListGroupsResponse4 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
+            ..ListGroupsResponse4::default()
         }
     }
 }
@@ -219,6 +238,7 @@ impl From<ListGroupsResponse2> for ListGroupsResponse4 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
+            ..ListGroupsResponse4::default()
         }
     }
 }
@@ -239,6 +259,7 @@ impl From<ListGroupsResponse3> for ListGroupsResponse4 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             groups: older.groups.into_iter().map(|el| el.into()).collect(),
+            tag_buffer: older.tag_buffer,
         }
     }
 }
@@ -248,6 +269,7 @@ impl From<ListGroupsResponseGroups3> for ListGroupsResponseGroups4 {
         ListGroupsResponseGroups4 {
             group_id: older.group_id,
             protocol_type: older.protocol_type,
+            tag_buffer: older.tag_buffer,
             ..ListGroupsResponseGroups4::default()
         }
     }

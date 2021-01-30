@@ -44,6 +44,7 @@ pub struct DeleteGroupsRequest1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteGroupsRequest2 {
     pub groups_names: Vec<CompactString>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -74,17 +75,26 @@ pub struct DeleteGroupsResponseResults1 {
 pub struct DeleteGroupsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DeleteGroupsResponseResults2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteGroupsResponseResults2 {
     pub group_id: CompactString,
     pub error_code: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<DeleteGroupsRequest2> for DeleteGroupsRequest0 {
     type Error = Error;
     fn try_from(latest: DeleteGroupsRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteGroupsRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteGroupsRequest0 {
             groups_names: latest
                 .groups_names
@@ -98,6 +108,13 @@ impl TryFrom<DeleteGroupsRequest2> for DeleteGroupsRequest0 {
 impl TryFrom<DeleteGroupsRequest2> for DeleteGroupsRequest1 {
     type Error = Error;
     fn try_from(latest: DeleteGroupsRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteGroupsRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteGroupsRequest1 {
             groups_names: latest
                 .groups_names
@@ -113,6 +130,7 @@ impl From<DeleteGroupsResponse0> for DeleteGroupsResponse2 {
         DeleteGroupsResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             results: older.results.into_iter().map(|el| el.into()).collect(),
+            ..DeleteGroupsResponse2::default()
         }
     }
 }
@@ -122,6 +140,7 @@ impl From<DeleteGroupsResponseResults0> for DeleteGroupsResponseResults2 {
         DeleteGroupsResponseResults2 {
             group_id: older.group_id.into(),
             error_code: older.error_code,
+            ..DeleteGroupsResponseResults2::default()
         }
     }
 }
@@ -131,6 +150,7 @@ impl From<DeleteGroupsResponse1> for DeleteGroupsResponse2 {
         DeleteGroupsResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             results: older.results.into_iter().map(|el| el.into()).collect(),
+            ..DeleteGroupsResponse2::default()
         }
     }
 }
@@ -140,6 +160,7 @@ impl From<DeleteGroupsResponseResults1> for DeleteGroupsResponseResults2 {
         DeleteGroupsResponseResults2 {
             group_id: older.group_id.into(),
             error_code: older.error_code,
+            ..DeleteGroupsResponseResults2::default()
         }
     }
 }

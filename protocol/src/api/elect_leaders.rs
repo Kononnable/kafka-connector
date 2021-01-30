@@ -61,12 +61,14 @@ pub struct ElectLeadersRequest2 {
     pub election_type: Optional<Int8>,
     pub topic_partitions: Vec<ElectLeadersRequestTopicPartitions2>,
     pub timeout_ms: Int32,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ElectLeadersRequestTopicPartitions2 {
     pub topic: CompactString,
     pub partition_id: Vec<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -113,12 +115,14 @@ pub struct ElectLeadersResponse2 {
     pub throttle_time_ms: Int32,
     pub error_code: Optional<Int16>,
     pub replica_election_results: Vec<ElectLeadersResponseReplicaElectionResults2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponseReplicaElectionResults2 {
     pub topic: CompactString,
     pub partition_result: Vec<ElectLeadersResponseReplicaElectionResultsPartitionResult2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -126,6 +130,7 @@ pub struct ElectLeadersResponseReplicaElectionResultsPartitionResult2 {
     pub partition_id: Int32,
     pub error_code: Int16,
     pub error_message: CompactNullableString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest0 {
@@ -136,6 +141,13 @@ impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest0 {
                 "ElectLeadersRequest",
                 0,
                 "election_type",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "ElectLeadersRequest",
+                0,
+                "tag_buffer",
             ));
         }
         Ok(ElectLeadersRequest0 {
@@ -152,6 +164,13 @@ impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest0 {
 impl TryFrom<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPartitions0 {
     type Error = Error;
     fn try_from(latest: ElectLeadersRequestTopicPartitions2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "ElectLeadersRequestTopicPartitions",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(ElectLeadersRequestTopicPartitions0 {
             topic: latest.topic.into(),
             partition_id: latest.partition_id,
@@ -162,6 +181,13 @@ impl TryFrom<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPa
 impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest1 {
     type Error = Error;
     fn try_from(latest: ElectLeadersRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "ElectLeadersRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(ElectLeadersRequest1 {
             election_type: latest.election_type,
             topic_partitions: latest
@@ -177,6 +203,13 @@ impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest1 {
 impl TryFrom<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPartitions1 {
     type Error = Error;
     fn try_from(latest: ElectLeadersRequestTopicPartitions2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "ElectLeadersRequestTopicPartitions",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(ElectLeadersRequestTopicPartitions1 {
             topic: latest.topic.into(),
             partition_id: latest.partition_id,
@@ -209,6 +242,7 @@ impl From<ElectLeadersResponseReplicaElectionResults0>
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..ElectLeadersResponseReplicaElectionResults2::default()
         }
     }
 }
@@ -221,6 +255,7 @@ impl From<ElectLeadersResponseReplicaElectionResultsPartitionResult0>
             partition_id: older.partition_id,
             error_code: older.error_code,
             error_message: older.error_message.into(),
+            ..ElectLeadersResponseReplicaElectionResultsPartitionResult2::default()
         }
     }
 }
@@ -235,6 +270,7 @@ impl From<ElectLeadersResponse1> for ElectLeadersResponse2 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..ElectLeadersResponse2::default()
         }
     }
 }
@@ -250,6 +286,7 @@ impl From<ElectLeadersResponseReplicaElectionResults1>
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..ElectLeadersResponseReplicaElectionResults2::default()
         }
     }
 }
@@ -262,6 +299,7 @@ impl From<ElectLeadersResponseReplicaElectionResultsPartitionResult1>
             partition_id: older.partition_id,
             error_code: older.error_code,
             error_message: older.error_message.into(),
+            ..ElectLeadersResponseReplicaElectionResultsPartitionResult2::default()
         }
     }
 }

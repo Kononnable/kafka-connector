@@ -61,6 +61,7 @@ pub struct DescribeAclsRequest2 {
     pub host_filter: CompactNullableString,
     pub operation: Int8,
     pub permission_type: Int8,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -116,6 +117,7 @@ pub struct DescribeAclsResponse2 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,
     pub resources: Vec<DescribeAclsResponseResources2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -124,6 +126,7 @@ pub struct DescribeAclsResponseResources2 {
     pub resource_name: CompactString,
     pub pattern_type: Optional<Int8>,
     pub acls: Vec<DescribeAclsResponseResourcesAcls2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -132,6 +135,7 @@ pub struct DescribeAclsResponseResourcesAcls2 {
     pub host: CompactString,
     pub operation: Int8,
     pub permission_type: Int8,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest0 {
@@ -142,6 +146,13 @@ impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest0 {
                 "DescribeAclsRequest",
                 0,
                 "pattern_type_filter",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeAclsRequest",
+                0,
+                "tag_buffer",
             ));
         }
         Ok(DescribeAclsRequest0 {
@@ -158,6 +169,13 @@ impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest0 {
 impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest1 {
     type Error = Error;
     fn try_from(latest: DescribeAclsRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeAclsRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeAclsRequest1 {
             resource_type_filter: latest.resource_type_filter,
             resource_name_filter: latest.resource_name_filter.into(),
@@ -177,6 +195,7 @@ impl From<DescribeAclsResponse0> for DescribeAclsResponse2 {
             error_code: older.error_code,
             error_message: older.error_message.into(),
             resources: older.resources.into_iter().map(|el| el.into()).collect(),
+            ..DescribeAclsResponse2::default()
         }
     }
 }
@@ -199,6 +218,7 @@ impl From<DescribeAclsResponseResourcesAcls0> for DescribeAclsResponseResourcesA
             host: older.host.into(),
             operation: older.operation,
             permission_type: older.permission_type,
+            ..DescribeAclsResponseResourcesAcls2::default()
         }
     }
 }
@@ -210,6 +230,7 @@ impl From<DescribeAclsResponse1> for DescribeAclsResponse2 {
             error_code: older.error_code,
             error_message: older.error_message.into(),
             resources: older.resources.into_iter().map(|el| el.into()).collect(),
+            ..DescribeAclsResponse2::default()
         }
     }
 }
@@ -221,6 +242,7 @@ impl From<DescribeAclsResponseResources1> for DescribeAclsResponseResources2 {
             resource_name: older.resource_name.into(),
             pattern_type: older.pattern_type,
             acls: older.acls.into_iter().map(|el| el.into()).collect(),
+            ..DescribeAclsResponseResources2::default()
         }
     }
 }
@@ -232,6 +254,7 @@ impl From<DescribeAclsResponseResourcesAcls1> for DescribeAclsResponseResourcesA
             host: older.host.into(),
             operation: older.operation,
             permission_type: older.permission_type,
+            ..DescribeAclsResponseResourcesAcls2::default()
         }
     }
 }

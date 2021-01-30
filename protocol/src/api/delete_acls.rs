@@ -65,6 +65,7 @@ pub struct DeleteAclsRequestFilters1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteAclsRequest2 {
     pub filters: Vec<DeleteAclsRequestFilters2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -76,6 +77,7 @@ pub struct DeleteAclsRequestFilters2 {
     pub host_filter: CompactNullableString,
     pub operation: Int8,
     pub permission_type: Int8,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -133,6 +135,7 @@ pub struct DeleteAclsResponseFilterResultsMatchingAcls1 {
 pub struct DeleteAclsResponse2 {
     pub throttle_time_ms: Int32,
     pub filter_results: Vec<DeleteAclsResponseFilterResults2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -140,6 +143,7 @@ pub struct DeleteAclsResponseFilterResults2 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,
     pub matching_acls: Vec<DeleteAclsResponseFilterResultsMatchingAcls2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -153,11 +157,15 @@ pub struct DeleteAclsResponseFilterResultsMatchingAcls2 {
     pub host: CompactString,
     pub operation: Int8,
     pub permission_type: Int8,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<DeleteAclsRequest2> for DeleteAclsRequest0 {
     type Error = Error;
     fn try_from(latest: DeleteAclsRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("DeleteAclsRequest", 0, "tag_buffer"));
+        }
         Ok(DeleteAclsRequest0 {
             filters: latest
                 .filters
@@ -178,6 +186,13 @@ impl TryFrom<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters0 {
                 "pattern_type_filter",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteAclsRequestFilters",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteAclsRequestFilters0 {
             resource_type_filter: latest.resource_type_filter,
             resource_name_filter: latest.resource_name_filter.into(),
@@ -192,6 +207,9 @@ impl TryFrom<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters0 {
 impl TryFrom<DeleteAclsRequest2> for DeleteAclsRequest1 {
     type Error = Error;
     fn try_from(latest: DeleteAclsRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("DeleteAclsRequest", 1, "tag_buffer"));
+        }
         Ok(DeleteAclsRequest1 {
             filters: latest
                 .filters
@@ -205,6 +223,13 @@ impl TryFrom<DeleteAclsRequest2> for DeleteAclsRequest1 {
 impl TryFrom<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters1 {
     type Error = Error;
     fn try_from(latest: DeleteAclsRequestFilters2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteAclsRequestFilters",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteAclsRequestFilters1 {
             resource_type_filter: latest.resource_type_filter,
             resource_name_filter: latest.resource_name_filter.into(),
@@ -226,6 +251,7 @@ impl From<DeleteAclsResponse0> for DeleteAclsResponse2 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..DeleteAclsResponse2::default()
         }
     }
 }
@@ -240,6 +266,7 @@ impl From<DeleteAclsResponseFilterResults0> for DeleteAclsResponseFilterResults2
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..DeleteAclsResponseFilterResults2::default()
         }
     }
 }
@@ -271,6 +298,7 @@ impl From<DeleteAclsResponse1> for DeleteAclsResponse2 {
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..DeleteAclsResponse2::default()
         }
     }
 }
@@ -285,6 +313,7 @@ impl From<DeleteAclsResponseFilterResults1> for DeleteAclsResponseFilterResults2
                 .into_iter()
                 .map(|el| el.into())
                 .collect(),
+            ..DeleteAclsResponseFilterResults2::default()
         }
     }
 }
@@ -303,6 +332,7 @@ impl From<DeleteAclsResponseFilterResultsMatchingAcls1>
             host: older.host.into(),
             operation: older.operation,
             permission_type: older.permission_type,
+            ..DeleteAclsResponseFilterResultsMatchingAcls2::default()
         }
     }
 }

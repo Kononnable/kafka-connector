@@ -10,6 +10,7 @@ pub struct ApiCall<'a> {
 
 #[derive(Debug)]
 pub enum FieldTypeWithPayload<'a> {
+    TagBuffer,
     Field(FieldType),
     VecSimple(FieldType),
     VecStruct(Vec<FieldData<'a>>),
@@ -55,6 +56,7 @@ pub enum FieldType {
     CompactRecords,
     CompactNullableString,
     CompactBytes,
+    TagBuffer,
 }
 
 impl FieldType {
@@ -92,7 +94,10 @@ impl FieldType {
             | FieldType::String
             | FieldType::Boolean => true,
             // TODO:
-            FieldType::Records | FieldType::NullableString | FieldType::CompactRecords => true,
+            FieldType::Records
+            | FieldType::NullableString
+            | FieldType::CompactRecords
+            | FieldType::TagBuffer => true,
 
             FieldType::KafkaBytes
             | FieldType::CompactBytes
@@ -100,6 +105,7 @@ impl FieldType {
             | FieldType::CompactNullableString => false,
         }
     }
+    // TODO: unused(?)
     pub fn is_easily_convertable(&self) -> bool {
         match self {
             FieldType::Int8
@@ -117,6 +123,7 @@ impl FieldType {
             | FieldType::CompactNullableString
             | FieldType::CompactRecords => true,
             FieldType::CompactString => true,
+            FieldType::TagBuffer => true,
         }
     }
 }

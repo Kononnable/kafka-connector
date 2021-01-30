@@ -5,6 +5,7 @@ pub mod compact_nullable_string;
 pub mod compact_string;
 pub mod optional;
 pub mod record_batch;
+pub mod tag_buffer;
 pub mod unsigned_varint32;
 pub mod unsigned_varint64;
 pub mod zig_zag_string;

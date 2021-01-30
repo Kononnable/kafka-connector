@@ -76,6 +76,7 @@ pub struct CreatePartitionsRequest2 {
     pub topics: Vec<CreatePartitionsRequestTopics2>,
     pub timeout_ms: Int32,
     pub validate_only: Boolean,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -83,11 +84,13 @@ pub struct CreatePartitionsRequestTopics2 {
     pub name: CompactString,
     pub count: Int32,
     pub assignments: Vec<CreatePartitionsRequestTopicsAssignments2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreatePartitionsRequestTopicsAssignments2 {
     pub broker_ids: Vec<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -95,6 +98,7 @@ pub struct CreatePartitionsRequest3 {
     pub topics: Vec<CreatePartitionsRequestTopics3>,
     pub timeout_ms: Int32,
     pub validate_only: Boolean,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -102,11 +106,13 @@ pub struct CreatePartitionsRequestTopics3 {
     pub name: CompactString,
     pub count: Int32,
     pub assignments: Vec<CreatePartitionsRequestTopicsAssignments3>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreatePartitionsRequestTopicsAssignments3 {
     pub broker_ids: Vec<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -139,6 +145,7 @@ pub struct CreatePartitionsResponseResults1 {
 pub struct CreatePartitionsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreatePartitionsResponseResults2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -146,12 +153,14 @@ pub struct CreatePartitionsResponseResults2 {
     pub name: CompactString,
     pub error_code: Int16,
     pub error_message: CompactNullableString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreatePartitionsResponse3 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreatePartitionsResponseResults3>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -159,11 +168,19 @@ pub struct CreatePartitionsResponseResults3 {
     pub name: CompactString,
     pub error_code: Int16,
     pub error_message: CompactNullableString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest0 {
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequest3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreatePartitionsRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(CreatePartitionsRequest0 {
             topics: latest
                 .topics
@@ -179,6 +196,13 @@ impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest0 {
 impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics0 {
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopics3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreatePartitionsRequestTopics",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(CreatePartitionsRequestTopics0 {
             name: latest.name.into(),
             count: latest.count,
@@ -196,6 +220,13 @@ impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
 {
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopicsAssignments3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreatePartitionsRequestTopicsAssignments",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(CreatePartitionsRequestTopicsAssignments0 {
             broker_ids: latest.broker_ids,
         })
@@ -205,6 +236,13 @@ impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
 impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest1 {
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequest3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreatePartitionsRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(CreatePartitionsRequest1 {
             topics: latest
                 .topics
@@ -220,6 +258,13 @@ impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest1 {
 impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics1 {
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopics3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreatePartitionsRequestTopics",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(CreatePartitionsRequestTopics1 {
             name: latest.name.into(),
             count: latest.count,
@@ -237,6 +282,13 @@ impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
 {
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopicsAssignments3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreatePartitionsRequestTopicsAssignments",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(CreatePartitionsRequestTopicsAssignments1 {
             broker_ids: latest.broker_ids,
         })
@@ -254,6 +306,7 @@ impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest2 {
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -269,6 +322,7 @@ impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics2 
                 .into_iter()
                 .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -280,6 +334,7 @@ impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
     fn try_from(latest: CreatePartitionsRequestTopicsAssignments3) -> Result<Self, Self::Error> {
         Ok(CreatePartitionsRequestTopicsAssignments2 {
             broker_ids: latest.broker_ids,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -289,6 +344,7 @@ impl From<CreatePartitionsResponse0> for CreatePartitionsResponse3 {
         CreatePartitionsResponse3 {
             throttle_time_ms: older.throttle_time_ms,
             results: older.results.into_iter().map(|el| el.into()).collect(),
+            ..CreatePartitionsResponse3::default()
         }
     }
 }
@@ -299,6 +355,7 @@ impl From<CreatePartitionsResponseResults0> for CreatePartitionsResponseResults3
             name: older.name.into(),
             error_code: older.error_code,
             error_message: older.error_message.into(),
+            ..CreatePartitionsResponseResults3::default()
         }
     }
 }
@@ -308,6 +365,7 @@ impl From<CreatePartitionsResponse1> for CreatePartitionsResponse3 {
         CreatePartitionsResponse3 {
             throttle_time_ms: older.throttle_time_ms,
             results: older.results.into_iter().map(|el| el.into()).collect(),
+            ..CreatePartitionsResponse3::default()
         }
     }
 }
@@ -318,6 +376,7 @@ impl From<CreatePartitionsResponseResults1> for CreatePartitionsResponseResults3
             name: older.name.into(),
             error_code: older.error_code,
             error_message: older.error_message.into(),
+            ..CreatePartitionsResponseResults3::default()
         }
     }
 }
@@ -327,6 +386,7 @@ impl From<CreatePartitionsResponse2> for CreatePartitionsResponse3 {
         CreatePartitionsResponse3 {
             throttle_time_ms: older.throttle_time_ms,
             results: older.results.into_iter().map(|el| el.into()).collect(),
+            tag_buffer: older.tag_buffer,
         }
     }
 }
@@ -337,6 +397,7 @@ impl From<CreatePartitionsResponseResults2> for CreatePartitionsResponseResults3
             name: older.name,
             error_code: older.error_code,
             error_message: older.error_message,
+            tag_buffer: older.tag_buffer,
         }
     }
 }

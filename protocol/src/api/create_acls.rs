@@ -65,6 +65,7 @@ pub struct CreateAclsRequestCreations1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateAclsRequest2 {
     pub creations: Vec<CreateAclsRequestCreations2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -76,6 +77,7 @@ pub struct CreateAclsRequestCreations2 {
     pub host: CompactString,
     pub operation: Int8,
     pub permission_type: Int8,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -106,17 +108,22 @@ pub struct CreateAclsResponseResults1 {
 pub struct CreateAclsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreateAclsResponseResults2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateAclsResponseResults2 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<CreateAclsRequest2> for CreateAclsRequest0 {
     type Error = Error;
     fn try_from(latest: CreateAclsRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("CreateAclsRequest", 0, "tag_buffer"));
+        }
         Ok(CreateAclsRequest0 {
             creations: latest
                 .creations
@@ -137,6 +144,13 @@ impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations0 {
                 "resource_pattern_type",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateAclsRequestCreations",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateAclsRequestCreations0 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name.into(),
@@ -151,6 +165,9 @@ impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations0 {
 impl TryFrom<CreateAclsRequest2> for CreateAclsRequest1 {
     type Error = Error;
     fn try_from(latest: CreateAclsRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("CreateAclsRequest", 1, "tag_buffer"));
+        }
         Ok(CreateAclsRequest1 {
             creations: latest
                 .creations
@@ -164,6 +181,13 @@ impl TryFrom<CreateAclsRequest2> for CreateAclsRequest1 {
 impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations1 {
     type Error = Error;
     fn try_from(latest: CreateAclsRequestCreations2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateAclsRequestCreations",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateAclsRequestCreations1 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name.into(),
@@ -181,6 +205,7 @@ impl From<CreateAclsResponse0> for CreateAclsResponse2 {
         CreateAclsResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             results: older.results.into_iter().map(|el| el.into()).collect(),
+            ..CreateAclsResponse2::default()
         }
     }
 }
@@ -190,6 +215,7 @@ impl From<CreateAclsResponseResults0> for CreateAclsResponseResults2 {
         CreateAclsResponseResults2 {
             error_code: older.error_code,
             error_message: older.error_message.into(),
+            ..CreateAclsResponseResults2::default()
         }
     }
 }
@@ -199,6 +225,7 @@ impl From<CreateAclsResponse1> for CreateAclsResponse2 {
         CreateAclsResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             results: older.results.into_iter().map(|el| el.into()).collect(),
+            ..CreateAclsResponse2::default()
         }
     }
 }
@@ -208,6 +235,7 @@ impl From<CreateAclsResponseResults1> for CreateAclsResponseResults2 {
         CreateAclsResponseResults2 {
             error_code: older.error_code,
             error_message: older.error_message.into(),
+            ..CreateAclsResponseResults2::default()
         }
     }
 }

@@ -70,6 +70,7 @@ pub struct HeartbeatRequest4 {
     pub generation_id: Int32,
     pub member_id: CompactString,
     pub group_instance_id: Optional<CompactNullableString>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -99,6 +100,7 @@ pub struct HeartbeatResponse3 {
 pub struct HeartbeatResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<HeartbeatRequest4> for HeartbeatRequest0 {
@@ -110,6 +112,9 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest0 {
                 0,
                 "group_instance_id",
             ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("HeartbeatRequest", 0, "tag_buffer"));
         }
         Ok(HeartbeatRequest0 {
             group_id: latest.group_id.into(),
@@ -129,6 +134,9 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest1 {
                 "group_instance_id",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("HeartbeatRequest", 1, "tag_buffer"));
+        }
         Ok(HeartbeatRequest1 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
@@ -147,6 +155,9 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest2 {
                 "group_instance_id",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("HeartbeatRequest", 2, "tag_buffer"));
+        }
         Ok(HeartbeatRequest2 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
@@ -158,6 +169,9 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest2 {
 impl TryFrom<HeartbeatRequest4> for HeartbeatRequest3 {
     type Error = Error;
     fn try_from(latest: HeartbeatRequest4) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("HeartbeatRequest", 3, "tag_buffer"));
+        }
         Ok(HeartbeatRequest3 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
@@ -181,6 +195,7 @@ impl From<HeartbeatResponse1> for HeartbeatResponse4 {
         HeartbeatResponse4 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
+            ..HeartbeatResponse4::default()
         }
     }
 }
@@ -190,6 +205,7 @@ impl From<HeartbeatResponse2> for HeartbeatResponse4 {
         HeartbeatResponse4 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
+            ..HeartbeatResponse4::default()
         }
     }
 }
@@ -199,6 +215,7 @@ impl From<HeartbeatResponse3> for HeartbeatResponse4 {
         HeartbeatResponse4 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
+            ..HeartbeatResponse4::default()
         }
     }
 }

@@ -223,12 +223,14 @@ pub struct OffsetCommitRequest8 {
     pub member_id: Optional<CompactString>,
     pub group_instance_id: Optional<CompactNullableString>,
     pub topics: Vec<OffsetCommitRequestTopics8>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetCommitRequestTopics8 {
     pub name: CompactString,
     pub partitions: Vec<OffsetCommitRequestTopicsPartitions8>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -237,6 +239,7 @@ pub struct OffsetCommitRequestTopicsPartitions8 {
     pub committed_offset: Int64,
     pub committed_leader_epoch: Optional<Int32>,
     pub committed_metadata: CompactNullableString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -384,18 +387,21 @@ pub struct OffsetCommitResponseTopicsPartitions7 {
 pub struct OffsetCommitResponse8 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<OffsetCommitResponseTopics8>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetCommitResponseTopics8 {
     pub name: CompactString,
     pub partitions: Vec<OffsetCommitResponseTopicsPartitions8>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetCommitResponseTopicsPartitions8 {
     pub partition_index: Int32,
     pub error_code: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest0 {
@@ -422,6 +428,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest0 {
                 "group_instance_id",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequest0 {
             group_id: latest.group_id.into(),
             topics: latest
@@ -436,6 +449,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest0 {
 impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics0 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopics",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopics0 {
             name: latest.name.into(),
             partitions: latest
@@ -457,6 +477,13 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
                 "committed_leader_epoch",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopicsPartitions",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopicsPartitions0 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
@@ -475,6 +502,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest1 {
                 "group_instance_id",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequest1 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
@@ -491,6 +525,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest1 {
 impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics1 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopics",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopics1 {
             name: latest.name.into(),
             partitions: latest
@@ -512,6 +553,13 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
                 "committed_leader_epoch",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopicsPartitions",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopicsPartitions1 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
@@ -531,6 +579,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest2 {
                 "group_instance_id",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequest",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequest2 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
@@ -548,6 +603,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest2 {
 impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics2 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopics",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopics2 {
             name: latest.name.into(),
             partitions: latest
@@ -569,6 +631,13 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
                 "committed_leader_epoch",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopicsPartitions",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopicsPartitions2 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
@@ -585,6 +654,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest3 {
                 "OffsetCommitRequest",
                 3,
                 "group_instance_id",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequest",
+                3,
+                "tag_buffer",
             ));
         }
         Ok(OffsetCommitRequest3 {
@@ -604,6 +680,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest3 {
 impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics3 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopics",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopics3 {
             name: latest.name.into(),
             partitions: latest
@@ -625,6 +708,13 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
                 "committed_leader_epoch",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopicsPartitions",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopicsPartitions3 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
@@ -641,6 +731,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest4 {
                 "OffsetCommitRequest",
                 4,
                 "group_instance_id",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequest",
+                4,
+                "tag_buffer",
             ));
         }
         Ok(OffsetCommitRequest4 {
@@ -660,6 +757,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest4 {
 impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics4 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopics",
+                4,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopics4 {
             name: latest.name.into(),
             partitions: latest
@@ -681,6 +785,13 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
                 "committed_leader_epoch",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopicsPartitions",
+                4,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopicsPartitions4 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
@@ -699,6 +810,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest5 {
                 "group_instance_id",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequest",
+                5,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequest5 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
@@ -715,6 +833,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest5 {
 impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics5 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopics",
+                5,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopics5 {
             name: latest.name.into(),
             partitions: latest
@@ -736,6 +861,13 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
                 "committed_leader_epoch",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopicsPartitions",
+                5,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopicsPartitions5 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
@@ -754,6 +886,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest6 {
                 "group_instance_id",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequest",
+                6,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequest6 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
@@ -770,6 +909,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest6 {
 impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics6 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopics",
+                6,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopics6 {
             name: latest.name.into(),
             partitions: latest
@@ -784,6 +930,13 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics6 {
 impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopicsPartitions6 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopicsPartitions8) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopicsPartitions",
+                6,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopicsPartitions6 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
@@ -796,6 +949,13 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
 impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest7 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequest8) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequest",
+                7,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequest7 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
@@ -813,6 +973,13 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest7 {
 impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics7 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopics8) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopics",
+                7,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopics7 {
             name: latest.name.into(),
             partitions: latest
@@ -827,6 +994,13 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics7 {
 impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopicsPartitions7 {
     type Error = Error;
     fn try_from(latest: OffsetCommitRequestTopicsPartitions8) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetCommitRequestTopicsPartitions",
+                7,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetCommitRequestTopicsPartitions7 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
@@ -850,6 +1024,7 @@ impl From<OffsetCommitResponseTopics0> for OffsetCommitResponseTopics8 {
         OffsetCommitResponseTopics8 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponseTopics8::default()
         }
     }
 }
@@ -859,6 +1034,7 @@ impl From<OffsetCommitResponseTopicsPartitions0> for OffsetCommitResponseTopicsP
         OffsetCommitResponseTopicsPartitions8 {
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..OffsetCommitResponseTopicsPartitions8::default()
         }
     }
 }
@@ -877,6 +1053,7 @@ impl From<OffsetCommitResponseTopics1> for OffsetCommitResponseTopics8 {
         OffsetCommitResponseTopics8 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponseTopics8::default()
         }
     }
 }
@@ -886,6 +1063,7 @@ impl From<OffsetCommitResponseTopicsPartitions1> for OffsetCommitResponseTopicsP
         OffsetCommitResponseTopicsPartitions8 {
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..OffsetCommitResponseTopicsPartitions8::default()
         }
     }
 }
@@ -904,6 +1082,7 @@ impl From<OffsetCommitResponseTopics2> for OffsetCommitResponseTopics8 {
         OffsetCommitResponseTopics8 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponseTopics8::default()
         }
     }
 }
@@ -913,6 +1092,7 @@ impl From<OffsetCommitResponseTopicsPartitions2> for OffsetCommitResponseTopicsP
         OffsetCommitResponseTopicsPartitions8 {
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..OffsetCommitResponseTopicsPartitions8::default()
         }
     }
 }
@@ -922,6 +1102,7 @@ impl From<OffsetCommitResponse3> for OffsetCommitResponse8 {
         OffsetCommitResponse8 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponse8::default()
         }
     }
 }
@@ -931,6 +1112,7 @@ impl From<OffsetCommitResponseTopics3> for OffsetCommitResponseTopics8 {
         OffsetCommitResponseTopics8 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponseTopics8::default()
         }
     }
 }
@@ -940,6 +1122,7 @@ impl From<OffsetCommitResponseTopicsPartitions3> for OffsetCommitResponseTopicsP
         OffsetCommitResponseTopicsPartitions8 {
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..OffsetCommitResponseTopicsPartitions8::default()
         }
     }
 }
@@ -949,6 +1132,7 @@ impl From<OffsetCommitResponse4> for OffsetCommitResponse8 {
         OffsetCommitResponse8 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponse8::default()
         }
     }
 }
@@ -958,6 +1142,7 @@ impl From<OffsetCommitResponseTopics4> for OffsetCommitResponseTopics8 {
         OffsetCommitResponseTopics8 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponseTopics8::default()
         }
     }
 }
@@ -967,6 +1152,7 @@ impl From<OffsetCommitResponseTopicsPartitions4> for OffsetCommitResponseTopicsP
         OffsetCommitResponseTopicsPartitions8 {
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..OffsetCommitResponseTopicsPartitions8::default()
         }
     }
 }
@@ -976,6 +1162,7 @@ impl From<OffsetCommitResponse5> for OffsetCommitResponse8 {
         OffsetCommitResponse8 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponse8::default()
         }
     }
 }
@@ -985,6 +1172,7 @@ impl From<OffsetCommitResponseTopics5> for OffsetCommitResponseTopics8 {
         OffsetCommitResponseTopics8 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponseTopics8::default()
         }
     }
 }
@@ -994,6 +1182,7 @@ impl From<OffsetCommitResponseTopicsPartitions5> for OffsetCommitResponseTopicsP
         OffsetCommitResponseTopicsPartitions8 {
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..OffsetCommitResponseTopicsPartitions8::default()
         }
     }
 }
@@ -1003,6 +1192,7 @@ impl From<OffsetCommitResponse6> for OffsetCommitResponse8 {
         OffsetCommitResponse8 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponse8::default()
         }
     }
 }
@@ -1012,6 +1202,7 @@ impl From<OffsetCommitResponseTopics6> for OffsetCommitResponseTopics8 {
         OffsetCommitResponseTopics8 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponseTopics8::default()
         }
     }
 }
@@ -1021,6 +1212,7 @@ impl From<OffsetCommitResponseTopicsPartitions6> for OffsetCommitResponseTopicsP
         OffsetCommitResponseTopicsPartitions8 {
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..OffsetCommitResponseTopicsPartitions8::default()
         }
     }
 }
@@ -1030,6 +1222,7 @@ impl From<OffsetCommitResponse7> for OffsetCommitResponse8 {
         OffsetCommitResponse8 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponse8::default()
         }
     }
 }
@@ -1039,6 +1232,7 @@ impl From<OffsetCommitResponseTopics7> for OffsetCommitResponseTopics8 {
         OffsetCommitResponseTopics8 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetCommitResponseTopics8::default()
         }
     }
 }
@@ -1048,6 +1242,7 @@ impl From<OffsetCommitResponseTopicsPartitions7> for OffsetCommitResponseTopicsP
         OffsetCommitResponseTopicsPartitions8 {
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..OffsetCommitResponseTopicsPartitions8::default()
         }
     }
 }

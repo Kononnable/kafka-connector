@@ -47,6 +47,7 @@ pub struct ExpireDelegationTokenRequest1 {
 pub struct ExpireDelegationTokenRequest2 {
     pub hmac: CompactBytes,
     pub expiry_time_period_ms: Int64,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -68,11 +69,19 @@ pub struct ExpireDelegationTokenResponse2 {
     pub error_code: Int16,
     pub expiry_timestamp_ms: Int64,
     pub throttle_time_ms: Int32,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<ExpireDelegationTokenRequest2> for ExpireDelegationTokenRequest0 {
     type Error = Error;
     fn try_from(latest: ExpireDelegationTokenRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "ExpireDelegationTokenRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(ExpireDelegationTokenRequest0 {
             hmac: latest.hmac.into(),
             expiry_time_period_ms: latest.expiry_time_period_ms,
@@ -83,6 +92,13 @@ impl TryFrom<ExpireDelegationTokenRequest2> for ExpireDelegationTokenRequest0 {
 impl TryFrom<ExpireDelegationTokenRequest2> for ExpireDelegationTokenRequest1 {
     type Error = Error;
     fn try_from(latest: ExpireDelegationTokenRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "ExpireDelegationTokenRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(ExpireDelegationTokenRequest1 {
             hmac: latest.hmac.into(),
             expiry_time_period_ms: latest.expiry_time_period_ms,
@@ -96,6 +112,7 @@ impl From<ExpireDelegationTokenResponse0> for ExpireDelegationTokenResponse2 {
             error_code: older.error_code,
             expiry_timestamp_ms: older.expiry_timestamp_ms,
             throttle_time_ms: older.throttle_time_ms,
+            ..ExpireDelegationTokenResponse2::default()
         }
     }
 }
@@ -106,6 +123,7 @@ impl From<ExpireDelegationTokenResponse1> for ExpireDelegationTokenResponse2 {
             error_code: older.error_code,
             expiry_timestamp_ms: older.expiry_timestamp_ms,
             throttle_time_ms: older.throttle_time_ms,
+            ..ExpireDelegationTokenResponse2::default()
         }
     }
 }

@@ -71,18 +71,21 @@ pub struct DeleteRecordsRequestTopicsPartitions1 {
 pub struct DeleteRecordsRequest2 {
     pub topics: Vec<DeleteRecordsRequestTopics2>,
     pub timeout_ms: Int32,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequestTopics2 {
     pub name: CompactString,
     pub partitions: Vec<DeleteRecordsRequestTopicsPartitions2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequestTopicsPartitions2 {
     pub partition_index: Int32,
     pub offset: Int64,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -127,12 +130,14 @@ pub struct DeleteRecordsResponseTopicsPartitions1 {
 pub struct DeleteRecordsResponse2 {
     pub throttle_time_ms: Int32,
     pub topics: Vec<DeleteRecordsResponseTopics2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteRecordsResponseTopics2 {
     pub name: CompactString,
     pub partitions: Vec<DeleteRecordsResponseTopicsPartitions2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -140,11 +145,19 @@ pub struct DeleteRecordsResponseTopicsPartitions2 {
     pub partition_index: Int32,
     pub low_watermark: Int64,
     pub error_code: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<DeleteRecordsRequest2> for DeleteRecordsRequest0 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteRecordsRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteRecordsRequest0 {
             topics: latest
                 .topics
@@ -159,6 +172,13 @@ impl TryFrom<DeleteRecordsRequest2> for DeleteRecordsRequest0 {
 impl TryFrom<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics0 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequestTopics2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteRecordsRequestTopics",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteRecordsRequestTopics0 {
             name: latest.name.into(),
             partitions: latest
@@ -173,6 +193,13 @@ impl TryFrom<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics0 {
 impl TryFrom<DeleteRecordsRequestTopicsPartitions2> for DeleteRecordsRequestTopicsPartitions0 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequestTopicsPartitions2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteRecordsRequestTopicsPartitions",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteRecordsRequestTopicsPartitions0 {
             partition_index: latest.partition_index,
             offset: latest.offset,
@@ -183,6 +210,13 @@ impl TryFrom<DeleteRecordsRequestTopicsPartitions2> for DeleteRecordsRequestTopi
 impl TryFrom<DeleteRecordsRequest2> for DeleteRecordsRequest1 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteRecordsRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteRecordsRequest1 {
             topics: latest
                 .topics
@@ -197,6 +231,13 @@ impl TryFrom<DeleteRecordsRequest2> for DeleteRecordsRequest1 {
 impl TryFrom<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics1 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequestTopics2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteRecordsRequestTopics",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteRecordsRequestTopics1 {
             name: latest.name.into(),
             partitions: latest
@@ -211,6 +252,13 @@ impl TryFrom<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics1 {
 impl TryFrom<DeleteRecordsRequestTopicsPartitions2> for DeleteRecordsRequestTopicsPartitions1 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequestTopicsPartitions2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteRecordsRequestTopicsPartitions",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteRecordsRequestTopicsPartitions1 {
             partition_index: latest.partition_index,
             offset: latest.offset,
@@ -223,6 +271,7 @@ impl From<DeleteRecordsResponse0> for DeleteRecordsResponse2 {
         DeleteRecordsResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..DeleteRecordsResponse2::default()
         }
     }
 }
@@ -232,6 +281,7 @@ impl From<DeleteRecordsResponseTopics0> for DeleteRecordsResponseTopics2 {
         DeleteRecordsResponseTopics2 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..DeleteRecordsResponseTopics2::default()
         }
     }
 }
@@ -242,6 +292,7 @@ impl From<DeleteRecordsResponseTopicsPartitions0> for DeleteRecordsResponseTopic
             partition_index: older.partition_index,
             low_watermark: older.low_watermark,
             error_code: older.error_code,
+            ..DeleteRecordsResponseTopicsPartitions2::default()
         }
     }
 }
@@ -251,6 +302,7 @@ impl From<DeleteRecordsResponse1> for DeleteRecordsResponse2 {
         DeleteRecordsResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..DeleteRecordsResponse2::default()
         }
     }
 }
@@ -260,6 +312,7 @@ impl From<DeleteRecordsResponseTopics1> for DeleteRecordsResponseTopics2 {
         DeleteRecordsResponseTopics2 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..DeleteRecordsResponseTopics2::default()
         }
     }
 }
@@ -270,6 +323,7 @@ impl From<DeleteRecordsResponseTopicsPartitions1> for DeleteRecordsResponseTopic
             partition_index: older.partition_index,
             low_watermark: older.low_watermark,
             error_code: older.error_code,
+            ..DeleteRecordsResponseTopicsPartitions2::default()
         }
     }
 }

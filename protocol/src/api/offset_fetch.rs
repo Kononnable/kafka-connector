@@ -117,12 +117,14 @@ pub struct OffsetFetchRequestTopics5 {
 pub struct OffsetFetchRequest6 {
     pub group_id: CompactString,
     pub topics: Vec<OffsetFetchRequestTopics6>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics6 {
     pub name: CompactString,
     pub partition_indexes: Vec<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -130,12 +132,14 @@ pub struct OffsetFetchRequest7 {
     pub group_id: CompactString,
     pub topics: Vec<OffsetFetchRequestTopics7>,
     pub require_stable: Optional<Boolean>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics7 {
     pub name: CompactString,
     pub partition_indexes: Vec<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -265,12 +269,14 @@ pub struct OffsetFetchResponse6 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<OffsetFetchResponseTopics6>,
     pub error_code: Optional<Int16>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics6 {
     pub name: CompactString,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions6>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -280,6 +286,7 @@ pub struct OffsetFetchResponseTopicsPartitions6 {
     pub committed_leader_epoch: Optional<Int32>,
     pub metadata: CompactNullableString,
     pub error_code: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -287,12 +294,14 @@ pub struct OffsetFetchResponse7 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<OffsetFetchResponseTopics7>,
     pub error_code: Optional<Int16>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics7 {
     pub name: CompactString,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions7>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -302,6 +311,7 @@ pub struct OffsetFetchResponseTopicsPartitions7 {
     pub committed_leader_epoch: Optional<Int32>,
     pub metadata: CompactNullableString,
     pub error_code: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest0 {
@@ -312,6 +322,13 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest0 {
                 "OffsetFetchRequest",
                 0,
                 "require_stable",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetFetchRequest",
+                0,
+                "tag_buffer",
             ));
         }
         Ok(OffsetFetchRequest0 {
@@ -328,6 +345,13 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest0 {
 impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics0 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetFetchRequestTopics",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetFetchRequestTopics0 {
             name: latest.name.into(),
             partition_indexes: latest.partition_indexes,
@@ -345,6 +369,13 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest1 {
                 "require_stable",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetFetchRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetFetchRequest1 {
             group_id: latest.group_id.into(),
             topics: latest
@@ -359,6 +390,13 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest1 {
 impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics1 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetFetchRequestTopics",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetFetchRequestTopics1 {
             name: latest.name.into(),
             partition_indexes: latest.partition_indexes,
@@ -376,6 +414,13 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest2 {
                 "require_stable",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetFetchRequest",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetFetchRequest2 {
             group_id: latest.group_id.into(),
             topics: latest
@@ -390,6 +435,13 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest2 {
 impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics2 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetFetchRequestTopics",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetFetchRequestTopics2 {
             name: latest.name.into(),
             partition_indexes: latest.partition_indexes,
@@ -407,6 +459,13 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest3 {
                 "require_stable",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetFetchRequest",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetFetchRequest3 {
             group_id: latest.group_id.into(),
             topics: latest
@@ -421,6 +480,13 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest3 {
 impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics3 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetFetchRequestTopics",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetFetchRequestTopics3 {
             name: latest.name.into(),
             partition_indexes: latest.partition_indexes,
@@ -438,6 +504,13 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest4 {
                 "require_stable",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetFetchRequest",
+                4,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetFetchRequest4 {
             group_id: latest.group_id.into(),
             topics: latest
@@ -452,6 +525,13 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest4 {
 impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics4 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetFetchRequestTopics",
+                4,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetFetchRequestTopics4 {
             name: latest.name.into(),
             partition_indexes: latest.partition_indexes,
@@ -469,6 +549,13 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest5 {
                 "require_stable",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetFetchRequest",
+                5,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetFetchRequest5 {
             group_id: latest.group_id.into(),
             topics: latest
@@ -483,6 +570,13 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest5 {
 impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics5 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "OffsetFetchRequestTopics",
+                5,
+                "tag_buffer",
+            ));
+        }
         Ok(OffsetFetchRequestTopics5 {
             name: latest.name.into(),
             partition_indexes: latest.partition_indexes,
@@ -507,6 +601,7 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest6 {
                 .into_iter()
                 .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -517,6 +612,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics6 {
         Ok(OffsetFetchRequestTopics6 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -535,6 +631,7 @@ impl From<OffsetFetchResponseTopics0> for OffsetFetchResponseTopics7 {
         OffsetFetchResponseTopics7 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetFetchResponseTopics7::default()
         }
     }
 }
@@ -565,6 +662,7 @@ impl From<OffsetFetchResponseTopics1> for OffsetFetchResponseTopics7 {
         OffsetFetchResponseTopics7 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetFetchResponseTopics7::default()
         }
     }
 }
@@ -596,6 +694,7 @@ impl From<OffsetFetchResponseTopics2> for OffsetFetchResponseTopics7 {
         OffsetFetchResponseTopics7 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetFetchResponseTopics7::default()
         }
     }
 }
@@ -618,6 +717,7 @@ impl From<OffsetFetchResponse3> for OffsetFetchResponse7 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             error_code: older.error_code,
+            ..OffsetFetchResponse7::default()
         }
     }
 }
@@ -627,6 +727,7 @@ impl From<OffsetFetchResponseTopics3> for OffsetFetchResponseTopics7 {
         OffsetFetchResponseTopics7 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetFetchResponseTopics7::default()
         }
     }
 }
@@ -649,6 +750,7 @@ impl From<OffsetFetchResponse4> for OffsetFetchResponse7 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             error_code: older.error_code,
+            ..OffsetFetchResponse7::default()
         }
     }
 }
@@ -658,6 +760,7 @@ impl From<OffsetFetchResponseTopics4> for OffsetFetchResponseTopics7 {
         OffsetFetchResponseTopics7 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetFetchResponseTopics7::default()
         }
     }
 }
@@ -680,6 +783,7 @@ impl From<OffsetFetchResponse5> for OffsetFetchResponse7 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             error_code: older.error_code,
+            ..OffsetFetchResponse7::default()
         }
     }
 }
@@ -689,6 +793,7 @@ impl From<OffsetFetchResponseTopics5> for OffsetFetchResponseTopics7 {
         OffsetFetchResponseTopics7 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..OffsetFetchResponseTopics7::default()
         }
     }
 }
@@ -701,6 +806,7 @@ impl From<OffsetFetchResponseTopicsPartitions5> for OffsetFetchResponseTopicsPar
             committed_leader_epoch: older.committed_leader_epoch,
             metadata: older.metadata.into(),
             error_code: older.error_code,
+            ..OffsetFetchResponseTopicsPartitions7::default()
         }
     }
 }
@@ -711,6 +817,7 @@ impl From<OffsetFetchResponse6> for OffsetFetchResponse7 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             error_code: older.error_code,
+            tag_buffer: older.tag_buffer,
         }
     }
 }
@@ -720,6 +827,7 @@ impl From<OffsetFetchResponseTopics6> for OffsetFetchResponseTopics7 {
         OffsetFetchResponseTopics7 {
             name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            tag_buffer: older.tag_buffer,
         }
     }
 }
@@ -732,6 +840,7 @@ impl From<OffsetFetchResponseTopicsPartitions6> for OffsetFetchResponseTopicsPar
             committed_leader_epoch: older.committed_leader_epoch,
             metadata: older.metadata,
             error_code: older.error_code,
+            tag_buffer: older.tag_buffer,
         }
     }
 }

@@ -56,12 +56,14 @@ pub struct DescribeDelegationTokenRequestOwners1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeDelegationTokenRequest2 {
     pub owners: Vec<DescribeDelegationTokenRequestOwners2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeDelegationTokenRequestOwners2 {
     pub principal_type: CompactString,
     pub principal_name: CompactString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -119,6 +121,7 @@ pub struct DescribeDelegationTokenResponse2 {
     pub error_code: Int16,
     pub tokens: Vec<DescribeDelegationTokenResponseTokens2>,
     pub throttle_time_ms: Int32,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -131,17 +134,26 @@ pub struct DescribeDelegationTokenResponseTokens2 {
     pub token_id: CompactString,
     pub hmac: CompactBytes,
     pub renewers: Vec<DescribeDelegationTokenResponseTokensRenewers2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeDelegationTokenResponseTokensRenewers2 {
     pub principal_type: CompactString,
     pub principal_name: CompactString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<DescribeDelegationTokenRequest2> for DescribeDelegationTokenRequest0 {
     type Error = Error;
     fn try_from(latest: DescribeDelegationTokenRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeDelegationTokenRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeDelegationTokenRequest0 {
             owners: latest
                 .owners
@@ -155,6 +167,13 @@ impl TryFrom<DescribeDelegationTokenRequest2> for DescribeDelegationTokenRequest
 impl TryFrom<DescribeDelegationTokenRequestOwners2> for DescribeDelegationTokenRequestOwners0 {
     type Error = Error;
     fn try_from(latest: DescribeDelegationTokenRequestOwners2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeDelegationTokenRequestOwners",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeDelegationTokenRequestOwners0 {
             principal_type: latest.principal_type.into(),
             principal_name: latest.principal_name.into(),
@@ -165,6 +184,13 @@ impl TryFrom<DescribeDelegationTokenRequestOwners2> for DescribeDelegationTokenR
 impl TryFrom<DescribeDelegationTokenRequest2> for DescribeDelegationTokenRequest1 {
     type Error = Error;
     fn try_from(latest: DescribeDelegationTokenRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeDelegationTokenRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeDelegationTokenRequest1 {
             owners: latest
                 .owners
@@ -178,6 +204,13 @@ impl TryFrom<DescribeDelegationTokenRequest2> for DescribeDelegationTokenRequest
 impl TryFrom<DescribeDelegationTokenRequestOwners2> for DescribeDelegationTokenRequestOwners1 {
     type Error = Error;
     fn try_from(latest: DescribeDelegationTokenRequestOwners2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeDelegationTokenRequestOwners",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeDelegationTokenRequestOwners1 {
             principal_type: latest.principal_type.into(),
             principal_name: latest.principal_name.into(),
@@ -191,6 +224,7 @@ impl From<DescribeDelegationTokenResponse0> for DescribeDelegationTokenResponse2
             error_code: older.error_code,
             tokens: older.tokens.into_iter().map(|el| el.into()).collect(),
             throttle_time_ms: older.throttle_time_ms,
+            ..DescribeDelegationTokenResponse2::default()
         }
     }
 }
@@ -206,6 +240,7 @@ impl From<DescribeDelegationTokenResponseTokens0> for DescribeDelegationTokenRes
             token_id: older.token_id.into(),
             hmac: older.hmac.into(),
             renewers: older.renewers.into_iter().map(|el| el.into()).collect(),
+            ..DescribeDelegationTokenResponseTokens2::default()
         }
     }
 }
@@ -217,6 +252,7 @@ impl From<DescribeDelegationTokenResponseTokensRenewers0>
         DescribeDelegationTokenResponseTokensRenewers2 {
             principal_type: older.principal_type.into(),
             principal_name: older.principal_name.into(),
+            ..DescribeDelegationTokenResponseTokensRenewers2::default()
         }
     }
 }
@@ -227,6 +263,7 @@ impl From<DescribeDelegationTokenResponse1> for DescribeDelegationTokenResponse2
             error_code: older.error_code,
             tokens: older.tokens.into_iter().map(|el| el.into()).collect(),
             throttle_time_ms: older.throttle_time_ms,
+            ..DescribeDelegationTokenResponse2::default()
         }
     }
 }
@@ -242,6 +279,7 @@ impl From<DescribeDelegationTokenResponseTokens1> for DescribeDelegationTokenRes
             token_id: older.token_id.into(),
             hmac: older.hmac.into(),
             renewers: older.renewers.into_iter().map(|el| el.into()).collect(),
+            ..DescribeDelegationTokenResponseTokens2::default()
         }
     }
 }
@@ -253,6 +291,7 @@ impl From<DescribeDelegationTokenResponseTokensRenewers1>
         DescribeDelegationTokenResponseTokensRenewers2 {
             principal_type: older.principal_type.into(),
             principal_name: older.principal_name.into(),
+            ..DescribeDelegationTokenResponseTokensRenewers2::default()
         }
     }
 }

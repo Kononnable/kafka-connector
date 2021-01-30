@@ -148,11 +148,13 @@ pub struct MetadataRequest9 {
     pub allow_auto_topic_creation: Optional<Boolean>,
     pub include_cluster_authorized_operations: Optional<Boolean>,
     pub include_topic_authorized_operations: Optional<Boolean>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct MetadataRequestTopics9 {
     pub name: CompactString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -469,6 +471,7 @@ pub struct MetadataResponse9 {
     pub controller_id: Optional<Int32>,
     pub topics: Vec<MetadataResponseTopics9>,
     pub cluster_authorized_operations: Optional<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -477,6 +480,7 @@ pub struct MetadataResponseBrokers9 {
     pub host: CompactString,
     pub port: Int32,
     pub rack: Optional<CompactNullableString>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -486,6 +490,7 @@ pub struct MetadataResponseTopics9 {
     pub is_internal: Optional<Boolean>,
     pub partitions: Vec<MetadataResponseTopicsPartitions9>,
     pub topic_authorized_operations: Optional<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -497,6 +502,7 @@ pub struct MetadataResponseTopicsPartitions9 {
     pub replica_nodes: Vec<Int32>,
     pub isr_nodes: Vec<Int32>,
     pub offline_replicas: Optional<Vec<Int32>>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<MetadataRequest9> for MetadataRequest0 {
@@ -523,6 +529,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest0 {
                 "include_topic_authorized_operations",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("MetadataRequest", 0, "tag_buffer"));
+        }
         Ok(MetadataRequest0 {
             topics: latest
                 .topics
@@ -536,6 +545,13 @@ impl TryFrom<MetadataRequest9> for MetadataRequest0 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics0 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "MetadataRequestTopics",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(MetadataRequestTopics0 {
             name: latest.name.into(),
         })
@@ -566,6 +582,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest1 {
                 "include_topic_authorized_operations",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("MetadataRequest", 1, "tag_buffer"));
+        }
         Ok(MetadataRequest1 {
             topics: latest
                 .topics
@@ -579,6 +598,13 @@ impl TryFrom<MetadataRequest9> for MetadataRequest1 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics1 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "MetadataRequestTopics",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(MetadataRequestTopics1 {
             name: latest.name.into(),
         })
@@ -609,6 +635,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest2 {
                 "include_topic_authorized_operations",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("MetadataRequest", 2, "tag_buffer"));
+        }
         Ok(MetadataRequest2 {
             topics: latest
                 .topics
@@ -622,6 +651,13 @@ impl TryFrom<MetadataRequest9> for MetadataRequest2 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics2 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "MetadataRequestTopics",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(MetadataRequestTopics2 {
             name: latest.name.into(),
         })
@@ -652,6 +688,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest3 {
                 "include_topic_authorized_operations",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("MetadataRequest", 3, "tag_buffer"));
+        }
         Ok(MetadataRequest3 {
             topics: latest
                 .topics
@@ -665,6 +704,13 @@ impl TryFrom<MetadataRequest9> for MetadataRequest3 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics3 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "MetadataRequestTopics",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(MetadataRequestTopics3 {
             name: latest.name.into(),
         })
@@ -688,6 +734,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest4 {
                 "include_topic_authorized_operations",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("MetadataRequest", 4, "tag_buffer"));
+        }
         Ok(MetadataRequest4 {
             topics: latest
                 .topics
@@ -702,6 +751,13 @@ impl TryFrom<MetadataRequest9> for MetadataRequest4 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics4 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "MetadataRequestTopics",
+                4,
+                "tag_buffer",
+            ));
+        }
         Ok(MetadataRequestTopics4 {
             name: latest.name.into(),
         })
@@ -725,6 +781,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest5 {
                 "include_topic_authorized_operations",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("MetadataRequest", 5, "tag_buffer"));
+        }
         Ok(MetadataRequest5 {
             topics: latest
                 .topics
@@ -739,6 +798,13 @@ impl TryFrom<MetadataRequest9> for MetadataRequest5 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics5 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "MetadataRequestTopics",
+                5,
+                "tag_buffer",
+            ));
+        }
         Ok(MetadataRequestTopics5 {
             name: latest.name.into(),
         })
@@ -762,6 +828,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest6 {
                 "include_topic_authorized_operations",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("MetadataRequest", 6, "tag_buffer"));
+        }
         Ok(MetadataRequest6 {
             topics: latest
                 .topics
@@ -776,6 +845,13 @@ impl TryFrom<MetadataRequest9> for MetadataRequest6 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics6 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "MetadataRequestTopics",
+                6,
+                "tag_buffer",
+            ));
+        }
         Ok(MetadataRequestTopics6 {
             name: latest.name.into(),
         })
@@ -799,6 +875,9 @@ impl TryFrom<MetadataRequest9> for MetadataRequest7 {
                 "include_topic_authorized_operations",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("MetadataRequest", 7, "tag_buffer"));
+        }
         Ok(MetadataRequest7 {
             topics: latest
                 .topics
@@ -813,6 +892,13 @@ impl TryFrom<MetadataRequest9> for MetadataRequest7 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics7 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "MetadataRequestTopics",
+                7,
+                "tag_buffer",
+            ));
+        }
         Ok(MetadataRequestTopics7 {
             name: latest.name.into(),
         })
@@ -822,6 +908,9 @@ impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics7 {
 impl TryFrom<MetadataRequest9> for MetadataRequest8 {
     type Error = Error;
     fn try_from(latest: MetadataRequest9) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("MetadataRequest", 8, "tag_buffer"));
+        }
         Ok(MetadataRequest8 {
             topics: latest
                 .topics
@@ -838,6 +927,13 @@ impl TryFrom<MetadataRequest9> for MetadataRequest8 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics8 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "MetadataRequestTopics",
+                8,
+                "tag_buffer",
+            ));
+        }
         Ok(MetadataRequestTopics8 {
             name: latest.name.into(),
         })
@@ -907,6 +1003,7 @@ impl From<MetadataResponseBrokers1> for MetadataResponseBrokers9 {
             host: older.host.into(),
             port: older.port,
             rack: older.rack.map(|val| val.into()),
+            ..MetadataResponseBrokers9::default()
         }
     }
 }
@@ -955,6 +1052,7 @@ impl From<MetadataResponseBrokers2> for MetadataResponseBrokers9 {
             host: older.host.into(),
             port: older.port,
             rack: older.rack.map(|val| val.into()),
+            ..MetadataResponseBrokers9::default()
         }
     }
 }
@@ -1004,6 +1102,7 @@ impl From<MetadataResponseBrokers3> for MetadataResponseBrokers9 {
             host: older.host.into(),
             port: older.port,
             rack: older.rack.map(|val| val.into()),
+            ..MetadataResponseBrokers9::default()
         }
     }
 }
@@ -1053,6 +1152,7 @@ impl From<MetadataResponseBrokers4> for MetadataResponseBrokers9 {
             host: older.host.into(),
             port: older.port,
             rack: older.rack.map(|val| val.into()),
+            ..MetadataResponseBrokers9::default()
         }
     }
 }
@@ -1102,6 +1202,7 @@ impl From<MetadataResponseBrokers5> for MetadataResponseBrokers9 {
             host: older.host.into(),
             port: older.port,
             rack: older.rack.map(|val| val.into()),
+            ..MetadataResponseBrokers9::default()
         }
     }
 }
@@ -1152,6 +1253,7 @@ impl From<MetadataResponseBrokers6> for MetadataResponseBrokers9 {
             host: older.host.into(),
             port: older.port,
             rack: older.rack.map(|val| val.into()),
+            ..MetadataResponseBrokers9::default()
         }
     }
 }
@@ -1202,6 +1304,7 @@ impl From<MetadataResponseBrokers7> for MetadataResponseBrokers9 {
             host: older.host.into(),
             port: older.port,
             rack: older.rack.map(|val| val.into()),
+            ..MetadataResponseBrokers9::default()
         }
     }
 }
@@ -1228,6 +1331,7 @@ impl From<MetadataResponseTopicsPartitions7> for MetadataResponseTopicsPartition
             replica_nodes: older.replica_nodes,
             isr_nodes: older.isr_nodes,
             offline_replicas: older.offline_replicas,
+            ..MetadataResponseTopicsPartitions9::default()
         }
     }
 }
@@ -1241,6 +1345,7 @@ impl From<MetadataResponse8> for MetadataResponse9 {
             controller_id: older.controller_id,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             cluster_authorized_operations: older.cluster_authorized_operations,
+            ..MetadataResponse9::default()
         }
     }
 }
@@ -1252,6 +1357,7 @@ impl From<MetadataResponseBrokers8> for MetadataResponseBrokers9 {
             host: older.host.into(),
             port: older.port,
             rack: older.rack.map(|val| val.into()),
+            ..MetadataResponseBrokers9::default()
         }
     }
 }
@@ -1264,6 +1370,7 @@ impl From<MetadataResponseTopics8> for MetadataResponseTopics9 {
             is_internal: older.is_internal,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             topic_authorized_operations: older.topic_authorized_operations,
+            ..MetadataResponseTopics9::default()
         }
     }
 }
@@ -1278,6 +1385,7 @@ impl From<MetadataResponseTopicsPartitions8> for MetadataResponseTopicsPartition
             replica_nodes: older.replica_nodes,
             isr_nodes: older.isr_nodes,
             offline_replicas: older.offline_replicas,
+            ..MetadataResponseTopicsPartitions9::default()
         }
     }
 }

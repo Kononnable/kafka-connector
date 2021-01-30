@@ -32,12 +32,14 @@ pub struct AlterIsrRequest0 {
     pub broker_id: Int32,
     pub broker_epoch: Int64,
     pub topics: Vec<AlterIsrRequestTopics0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterIsrRequestTopics0 {
     pub name: CompactString,
     pub partitions: Vec<AlterIsrRequestTopicsPartitions0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -46,6 +48,7 @@ pub struct AlterIsrRequestTopicsPartitions0 {
     pub leader_epoch: Int32,
     pub new_isr: Vec<Int32>,
     pub current_isr_version: Int32,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -53,12 +56,14 @@ pub struct AlterIsrResponse0 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
     pub topics: Vec<AlterIsrResponseTopics0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterIsrResponseTopics0 {
     pub name: CompactString,
     pub partitions: Vec<AlterIsrResponseTopicsPartitions0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -69,4 +74,5 @@ pub struct AlterIsrResponseTopicsPartitions0 {
     pub leader_epoch: Int32,
     pub isr: Vec<Int32>,
     pub current_isr_version: Int32,
+    pub tag_buffer: TagBuffer,
 }

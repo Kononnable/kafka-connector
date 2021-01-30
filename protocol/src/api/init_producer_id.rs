@@ -51,6 +51,7 @@ pub struct InitProducerIdRequest1 {
 pub struct InitProducerIdRequest2 {
     pub transactional_id: CompactNullableString,
     pub transaction_timeout_ms: Int32,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -59,6 +60,7 @@ pub struct InitProducerIdRequest3 {
     pub transaction_timeout_ms: Int32,
     pub producer_id: Optional<Int64>,
     pub producer_epoch: Optional<Int16>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -67,6 +69,7 @@ pub struct InitProducerIdRequest4 {
     pub transaction_timeout_ms: Int32,
     pub producer_id: Optional<Int64>,
     pub producer_epoch: Optional<Int16>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -91,6 +94,7 @@ pub struct InitProducerIdResponse2 {
     pub error_code: Int16,
     pub producer_id: Int64,
     pub producer_epoch: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -99,6 +103,7 @@ pub struct InitProducerIdResponse3 {
     pub error_code: Int16,
     pub producer_id: Int64,
     pub producer_epoch: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -107,6 +112,7 @@ pub struct InitProducerIdResponse4 {
     pub error_code: Int16,
     pub producer_id: Int64,
     pub producer_epoch: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest0 {
@@ -124,6 +130,13 @@ impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest0 {
                 "InitProducerIdRequest",
                 0,
                 "producer_epoch",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "InitProducerIdRequest",
+                0,
+                "tag_buffer",
             ));
         }
         Ok(InitProducerIdRequest0 {
@@ -148,6 +161,13 @@ impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest1 {
                 "InitProducerIdRequest",
                 1,
                 "producer_epoch",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "InitProducerIdRequest",
+                1,
+                "tag_buffer",
             ));
         }
         Ok(InitProducerIdRequest1 {
@@ -177,6 +197,7 @@ impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest2 {
         Ok(InitProducerIdRequest2 {
             transactional_id: latest.transactional_id,
             transaction_timeout_ms: latest.transaction_timeout_ms,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -189,6 +210,7 @@ impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest3 {
             transaction_timeout_ms: latest.transaction_timeout_ms,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -200,6 +222,7 @@ impl From<InitProducerIdResponse0> for InitProducerIdResponse4 {
             error_code: older.error_code,
             producer_id: older.producer_id,
             producer_epoch: older.producer_epoch,
+            ..InitProducerIdResponse4::default()
         }
     }
 }
@@ -211,6 +234,7 @@ impl From<InitProducerIdResponse1> for InitProducerIdResponse4 {
             error_code: older.error_code,
             producer_id: older.producer_id,
             producer_epoch: older.producer_epoch,
+            ..InitProducerIdResponse4::default()
         }
     }
 }
@@ -222,6 +246,7 @@ impl From<InitProducerIdResponse2> for InitProducerIdResponse4 {
             error_code: older.error_code,
             producer_id: older.producer_id,
             producer_epoch: older.producer_epoch,
+            tag_buffer: older.tag_buffer,
         }
     }
 }
@@ -233,6 +258,7 @@ impl From<InitProducerIdResponse3> for InitProducerIdResponse4 {
             error_code: older.error_code,
             producer_id: older.producer_id,
             producer_epoch: older.producer_epoch,
+            tag_buffer: older.tag_buffer,
         }
     }
 }

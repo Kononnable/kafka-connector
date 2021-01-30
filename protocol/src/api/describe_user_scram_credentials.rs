@@ -30,11 +30,13 @@ impl ApiCall for DescribeUserScramCredentialsRequest {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeUserScramCredentialsRequest0 {
     pub users: Vec<DescribeUserScramCredentialsRequestUsers0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeUserScramCredentialsRequestUsers0 {
     pub name: CompactString,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -43,6 +45,7 @@ pub struct DescribeUserScramCredentialsResponse0 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,
     pub results: Vec<DescribeUserScramCredentialsResponseResults0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -51,10 +54,12 @@ pub struct DescribeUserScramCredentialsResponseResults0 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,
     pub credential_infos: Vec<DescribeUserScramCredentialsResponseResultsCredentialInfos0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeUserScramCredentialsResponseResultsCredentialInfos0 {
     pub mechanism: Int8,
     pub iterations: Int32,
+    pub tag_buffer: TagBuffer,
 }

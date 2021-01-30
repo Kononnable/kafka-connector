@@ -56,12 +56,14 @@ pub struct DescribeLogDirsRequestTopics1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequest2 {
     pub topics: Vec<DescribeLogDirsRequestTopics2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequestTopics2 {
     pub topic: CompactString,
     pub partition_index: Vec<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -122,6 +124,7 @@ pub struct DescribeLogDirsResponseResultsTopicsPartitions1 {
 pub struct DescribeLogDirsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DescribeLogDirsResponseResults2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -129,12 +132,14 @@ pub struct DescribeLogDirsResponseResults2 {
     pub error_code: Int16,
     pub log_dir: CompactString,
     pub topics: Vec<DescribeLogDirsResponseResultsTopics2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResultsTopics2 {
     pub name: CompactString,
     pub partitions: Vec<DescribeLogDirsResponseResultsTopicsPartitions2>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -143,11 +148,19 @@ pub struct DescribeLogDirsResponseResultsTopicsPartitions2 {
     pub partition_size: Int64,
     pub offset_lag: Int64,
     pub is_future_key: Boolean,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<DescribeLogDirsRequest2> for DescribeLogDirsRequest0 {
     type Error = Error;
     fn try_from(latest: DescribeLogDirsRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeLogDirsRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeLogDirsRequest0 {
             topics: latest
                 .topics
@@ -161,6 +174,13 @@ impl TryFrom<DescribeLogDirsRequest2> for DescribeLogDirsRequest0 {
 impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics0 {
     type Error = Error;
     fn try_from(latest: DescribeLogDirsRequestTopics2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeLogDirsRequestTopics",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeLogDirsRequestTopics0 {
             topic: latest.topic.into(),
             partition_index: latest.partition_index,
@@ -171,6 +191,13 @@ impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics0 {
 impl TryFrom<DescribeLogDirsRequest2> for DescribeLogDirsRequest1 {
     type Error = Error;
     fn try_from(latest: DescribeLogDirsRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeLogDirsRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeLogDirsRequest1 {
             topics: latest
                 .topics
@@ -184,6 +211,13 @@ impl TryFrom<DescribeLogDirsRequest2> for DescribeLogDirsRequest1 {
 impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics1 {
     type Error = Error;
     fn try_from(latest: DescribeLogDirsRequestTopics2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DescribeLogDirsRequestTopics",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(DescribeLogDirsRequestTopics1 {
             topic: latest.topic.into(),
             partition_index: latest.partition_index,
@@ -196,6 +230,7 @@ impl From<DescribeLogDirsResponse0> for DescribeLogDirsResponse2 {
         DescribeLogDirsResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             results: older.results.into_iter().map(|el| el.into()).collect(),
+            ..DescribeLogDirsResponse2::default()
         }
     }
 }
@@ -206,6 +241,7 @@ impl From<DescribeLogDirsResponseResults0> for DescribeLogDirsResponseResults2 {
             error_code: older.error_code,
             log_dir: older.log_dir.into(),
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..DescribeLogDirsResponseResults2::default()
         }
     }
 }
@@ -215,6 +251,7 @@ impl From<DescribeLogDirsResponseResultsTopics0> for DescribeLogDirsResponseResu
         DescribeLogDirsResponseResultsTopics2 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..DescribeLogDirsResponseResultsTopics2::default()
         }
     }
 }
@@ -228,6 +265,7 @@ impl From<DescribeLogDirsResponseResultsTopicsPartitions0>
             partition_size: older.partition_size,
             offset_lag: older.offset_lag,
             is_future_key: older.is_future_key,
+            ..DescribeLogDirsResponseResultsTopicsPartitions2::default()
         }
     }
 }
@@ -237,6 +275,7 @@ impl From<DescribeLogDirsResponse1> for DescribeLogDirsResponse2 {
         DescribeLogDirsResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             results: older.results.into_iter().map(|el| el.into()).collect(),
+            ..DescribeLogDirsResponse2::default()
         }
     }
 }
@@ -247,6 +286,7 @@ impl From<DescribeLogDirsResponseResults1> for DescribeLogDirsResponseResults2 {
             error_code: older.error_code,
             log_dir: older.log_dir.into(),
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..DescribeLogDirsResponseResults2::default()
         }
     }
 }
@@ -256,6 +296,7 @@ impl From<DescribeLogDirsResponseResultsTopics1> for DescribeLogDirsResponseResu
         DescribeLogDirsResponseResultsTopics2 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..DescribeLogDirsResponseResultsTopics2::default()
         }
     }
 }
@@ -269,6 +310,7 @@ impl From<DescribeLogDirsResponseResultsTopicsPartitions1>
             partition_size: older.partition_size,
             offset_lag: older.offset_lag,
             is_future_key: older.is_future_key,
+            ..DescribeLogDirsResponseResultsTopicsPartitions2::default()
         }
     }
 }

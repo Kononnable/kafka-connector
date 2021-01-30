@@ -53,6 +53,7 @@ pub struct IncrementalAlterConfigsRequestResourcesConfigs0 {
 pub struct IncrementalAlterConfigsRequest1 {
     pub resources: Vec<IncrementalAlterConfigsRequestResources1>,
     pub validate_only: Boolean,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -60,6 +61,7 @@ pub struct IncrementalAlterConfigsRequestResources1 {
     pub resource_type: Int8,
     pub resource_name: CompactString,
     pub configs: Vec<IncrementalAlterConfigsRequestResourcesConfigs1>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -67,6 +69,7 @@ pub struct IncrementalAlterConfigsRequestResourcesConfigs1 {
     pub name: CompactString,
     pub config_operation: Int8,
     pub value: CompactNullableString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -87,6 +90,7 @@ pub struct IncrementalAlterConfigsResponseResponses0 {
 pub struct IncrementalAlterConfigsResponse1 {
     pub throttle_time_ms: Int32,
     pub responses: Vec<IncrementalAlterConfigsResponseResponses1>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -95,11 +99,19 @@ pub struct IncrementalAlterConfigsResponseResponses1 {
     pub error_message: CompactNullableString,
     pub resource_type: Int8,
     pub resource_name: CompactString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<IncrementalAlterConfigsRequest1> for IncrementalAlterConfigsRequest0 {
     type Error = Error;
     fn try_from(latest: IncrementalAlterConfigsRequest1) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "IncrementalAlterConfigsRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(IncrementalAlterConfigsRequest0 {
             resources: latest
                 .resources
@@ -116,6 +128,13 @@ impl TryFrom<IncrementalAlterConfigsRequestResources1>
 {
     type Error = Error;
     fn try_from(latest: IncrementalAlterConfigsRequestResources1) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "IncrementalAlterConfigsRequestResources",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(IncrementalAlterConfigsRequestResources0 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name.into(),
@@ -135,6 +154,13 @@ impl TryFrom<IncrementalAlterConfigsRequestResourcesConfigs1>
     fn try_from(
         latest: IncrementalAlterConfigsRequestResourcesConfigs1,
     ) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "IncrementalAlterConfigsRequestResourcesConfigs",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(IncrementalAlterConfigsRequestResourcesConfigs0 {
             name: latest.name.into(),
             config_operation: latest.config_operation,
@@ -148,6 +174,7 @@ impl From<IncrementalAlterConfigsResponse0> for IncrementalAlterConfigsResponse1
         IncrementalAlterConfigsResponse1 {
             throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
+            ..IncrementalAlterConfigsResponse1::default()
         }
     }
 }
@@ -159,6 +186,7 @@ impl From<IncrementalAlterConfigsResponseResponses0> for IncrementalAlterConfigs
             error_message: older.error_message.into(),
             resource_type: older.resource_type,
             resource_name: older.resource_name.into(),
+            ..IncrementalAlterConfigsResponseResponses1::default()
         }
     }
 }

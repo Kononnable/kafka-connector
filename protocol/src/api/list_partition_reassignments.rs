@@ -31,12 +31,14 @@ impl ApiCall for ListPartitionReassignmentsRequest {
 pub struct ListPartitionReassignmentsRequest0 {
     pub timeout_ms: Int32,
     pub topics: Vec<ListPartitionReassignmentsRequestTopics0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListPartitionReassignmentsRequestTopics0 {
     pub name: CompactString,
     pub partition_indexes: Vec<Int32>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -45,12 +47,14 @@ pub struct ListPartitionReassignmentsResponse0 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,
     pub topics: Vec<ListPartitionReassignmentsResponseTopics0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListPartitionReassignmentsResponseTopics0 {
     pub name: CompactString,
     pub partitions: Vec<ListPartitionReassignmentsResponseTopicsPartitions0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -59,4 +63,5 @@ pub struct ListPartitionReassignmentsResponseTopicsPartitions0 {
     pub replicas: Vec<Int32>,
     pub adding_replicas: Vec<Int32>,
     pub removing_replicas: Vec<Int32>,
+    pub tag_buffer: TagBuffer,
 }

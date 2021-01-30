@@ -31,12 +31,14 @@ impl ApiCall for AlterUserScramCredentialsRequest {
 pub struct AlterUserScramCredentialsRequest0 {
     pub deletions: Vec<AlterUserScramCredentialsRequestDeletions0>,
     pub upsertions: Vec<AlterUserScramCredentialsRequestUpsertions0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterUserScramCredentialsRequestDeletions0 {
     pub name: CompactString,
     pub mechanism: Int8,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -46,12 +48,14 @@ pub struct AlterUserScramCredentialsRequestUpsertions0 {
     pub iterations: Int32,
     pub salt: CompactBytes,
     pub salted_password: CompactBytes,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterUserScramCredentialsResponse0 {
     pub throttle_time_ms: Int32,
     pub results: Vec<AlterUserScramCredentialsResponseResults0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -59,4 +63,5 @@ pub struct AlterUserScramCredentialsResponseResults0 {
     pub user: CompactString,
     pub error_code: Int16,
     pub error_message: CompactNullableString,
+    pub tag_buffer: TagBuffer,
 }

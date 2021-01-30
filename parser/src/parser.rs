@@ -26,6 +26,14 @@ pub struct FieldDef<'a> {
 pub fn parse_api_call(input: &str) -> IResult<&str, ApiCall> {
     let (mut input, (mut api_call, fields)) = parse_first_row(input)?;
     for field in fields {
+        if field.name == "TAG_BUFFER" {
+            api_call.fields.push(FieldData {
+                name: "tag_buffer",
+                type_with_payload: FieldTypeWithPayload::TagBuffer,
+            });
+            continue;
+        }
+
         let field_name = field.name;
         let is_vec = field.ty == FieldTy::Vec;
         let (input2, parsed_child) = parse_field(input, is_vec, field_name)?;
@@ -105,7 +113,6 @@ fn parse_field_list(input: &str) -> IResult<&str, Vec<FieldDef>> {
                 }
             }
         })
-        .filter(|field| field.name != "TAG_BUFFER")
         .collect();
 
     Ok((input, fields))
@@ -133,6 +140,12 @@ fn parse_field<'a>(
                         let field_name = child.name;
                         let is_vec = child.ty == FieldTy::Vec;
 
+                        if field_name == "TAG_BUFFER" {
+                            return Ok(FieldData {
+                                name: "tag_buffer",
+                                type_with_payload: FieldTypeWithPayload::TagBuffer,
+                            });
+                        }
                         let (input2, parsed_child) = parse_field(input, is_vec, field_name)?;
                         input = input2;
 

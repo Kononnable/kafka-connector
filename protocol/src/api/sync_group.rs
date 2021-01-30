@@ -101,12 +101,14 @@ pub struct SyncGroupRequest4 {
     pub member_id: CompactString,
     pub group_instance_id: Optional<CompactNullableString>,
     pub assignments: Vec<SyncGroupRequestAssignments4>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequestAssignments4 {
     pub member_id: CompactString,
     pub assignment: CompactBytes,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -118,12 +120,14 @@ pub struct SyncGroupRequest5 {
     pub protocol_type: Optional<CompactNullableString>,
     pub protocol_name: Optional<CompactNullableString>,
     pub assignments: Vec<SyncGroupRequestAssignments5>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequestAssignments5 {
     pub member_id: CompactString,
     pub assignment: CompactBytes,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -158,6 +162,7 @@ pub struct SyncGroupResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
     pub assignment: CompactBytes,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -167,6 +172,7 @@ pub struct SyncGroupResponse5 {
     pub protocol_type: Optional<CompactNullableString>,
     pub protocol_name: Optional<CompactNullableString>,
     pub assignment: CompactBytes,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<SyncGroupRequest5> for SyncGroupRequest0 {
@@ -193,6 +199,9 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest0 {
                 "protocol_name",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("SyncGroupRequest", 0, "tag_buffer"));
+        }
         Ok(SyncGroupRequest0 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
@@ -209,6 +218,13 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest0 {
 impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments0 {
     type Error = Error;
     fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "SyncGroupRequestAssignments",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(SyncGroupRequestAssignments0 {
             member_id: latest.member_id.into(),
             assignment: latest.assignment.into(),
@@ -240,6 +256,9 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest1 {
                 "protocol_name",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("SyncGroupRequest", 1, "tag_buffer"));
+        }
         Ok(SyncGroupRequest1 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
@@ -256,6 +275,13 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest1 {
 impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments1 {
     type Error = Error;
     fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "SyncGroupRequestAssignments",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(SyncGroupRequestAssignments1 {
             member_id: latest.member_id.into(),
             assignment: latest.assignment.into(),
@@ -287,6 +313,9 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest2 {
                 "protocol_name",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("SyncGroupRequest", 2, "tag_buffer"));
+        }
         Ok(SyncGroupRequest2 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
@@ -303,6 +332,13 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest2 {
 impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments2 {
     type Error = Error;
     fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "SyncGroupRequestAssignments",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(SyncGroupRequestAssignments2 {
             member_id: latest.member_id.into(),
             assignment: latest.assignment.into(),
@@ -327,6 +363,9 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest3 {
                 "protocol_name",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion("SyncGroupRequest", 3, "tag_buffer"));
+        }
         Ok(SyncGroupRequest3 {
             group_id: latest.group_id.into(),
             generation_id: latest.generation_id,
@@ -344,6 +383,13 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest3 {
 impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments3 {
     type Error = Error;
     fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "SyncGroupRequestAssignments",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(SyncGroupRequestAssignments3 {
             member_id: latest.member_id.into(),
             assignment: latest.assignment.into(),
@@ -378,6 +424,7 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest4 {
                 .into_iter()
                 .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -388,6 +435,7 @@ impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments4 {
         Ok(SyncGroupRequestAssignments4 {
             member_id: latest.member_id,
             assignment: latest.assignment,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -441,6 +489,7 @@ impl From<SyncGroupResponse4> for SyncGroupResponse5 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
             assignment: older.assignment,
+            tag_buffer: older.tag_buffer,
             ..SyncGroupResponse5::default()
         }
     }

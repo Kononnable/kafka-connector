@@ -110,12 +110,14 @@ pub struct TxnOffsetCommitRequest3 {
     pub member_id: Optional<CompactString>,
     pub group_instance_id: Optional<CompactNullableString>,
     pub topics: Vec<TxnOffsetCommitRequestTopics3>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct TxnOffsetCommitRequestTopics3 {
     pub name: CompactString,
     pub partitions: Vec<TxnOffsetCommitRequestTopicsPartitions3>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -124,6 +126,7 @@ pub struct TxnOffsetCommitRequestTopicsPartitions3 {
     pub committed_offset: Int64,
     pub committed_leader_epoch: Optional<Int32>,
     pub committed_metadata: CompactNullableString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -184,18 +187,21 @@ pub struct TxnOffsetCommitResponseTopicsPartitions2 {
 pub struct TxnOffsetCommitResponse3 {
     pub throttle_time_ms: Int32,
     pub topics: Vec<TxnOffsetCommitResponseTopics3>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct TxnOffsetCommitResponseTopics3 {
     pub name: CompactString,
     pub partitions: Vec<TxnOffsetCommitResponseTopicsPartitions3>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct TxnOffsetCommitResponseTopicsPartitions3 {
     pub partition_index: Int32,
     pub error_code: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest0 {
@@ -222,6 +228,13 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest0 {
                 "group_instance_id",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "TxnOffsetCommitRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(TxnOffsetCommitRequest0 {
             transactional_id: latest.transactional_id.into(),
             group_id: latest.group_id.into(),
@@ -239,6 +252,13 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest0 {
 impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics0 {
     type Error = Error;
     fn try_from(latest: TxnOffsetCommitRequestTopics3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "TxnOffsetCommitRequestTopics",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(TxnOffsetCommitRequestTopics0 {
             name: latest.name.into(),
             partitions: latest
@@ -258,6 +278,13 @@ impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequest
                 "TxnOffsetCommitRequestTopicsPartitions",
                 0,
                 "committed_leader_epoch",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "TxnOffsetCommitRequestTopicsPartitions",
+                0,
+                "tag_buffer",
             ));
         }
         Ok(TxnOffsetCommitRequestTopicsPartitions0 {
@@ -292,6 +319,13 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest1 {
                 "group_instance_id",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "TxnOffsetCommitRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(TxnOffsetCommitRequest1 {
             transactional_id: latest.transactional_id.into(),
             group_id: latest.group_id.into(),
@@ -309,6 +343,13 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest1 {
 impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics1 {
     type Error = Error;
     fn try_from(latest: TxnOffsetCommitRequestTopics3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "TxnOffsetCommitRequestTopics",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(TxnOffsetCommitRequestTopics1 {
             name: latest.name.into(),
             partitions: latest
@@ -328,6 +369,13 @@ impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequest
                 "TxnOffsetCommitRequestTopicsPartitions",
                 1,
                 "committed_leader_epoch",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "TxnOffsetCommitRequestTopicsPartitions",
+                1,
+                "tag_buffer",
             ));
         }
         Ok(TxnOffsetCommitRequestTopicsPartitions1 {
@@ -362,6 +410,13 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest2 {
                 "group_instance_id",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "TxnOffsetCommitRequest",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(TxnOffsetCommitRequest2 {
             transactional_id: latest.transactional_id.into(),
             group_id: latest.group_id.into(),
@@ -379,6 +434,13 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest2 {
 impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics2 {
     type Error = Error;
     fn try_from(latest: TxnOffsetCommitRequestTopics3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "TxnOffsetCommitRequestTopics",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(TxnOffsetCommitRequestTopics2 {
             name: latest.name.into(),
             partitions: latest
@@ -393,6 +455,13 @@ impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics2 {
 impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequestTopicsPartitions2 {
     type Error = Error;
     fn try_from(latest: TxnOffsetCommitRequestTopicsPartitions3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "TxnOffsetCommitRequestTopicsPartitions",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(TxnOffsetCommitRequestTopicsPartitions2 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
@@ -407,6 +476,7 @@ impl From<TxnOffsetCommitResponse0> for TxnOffsetCommitResponse3 {
         TxnOffsetCommitResponse3 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..TxnOffsetCommitResponse3::default()
         }
     }
 }
@@ -416,6 +486,7 @@ impl From<TxnOffsetCommitResponseTopics0> for TxnOffsetCommitResponseTopics3 {
         TxnOffsetCommitResponseTopics3 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..TxnOffsetCommitResponseTopics3::default()
         }
     }
 }
@@ -425,6 +496,7 @@ impl From<TxnOffsetCommitResponseTopicsPartitions0> for TxnOffsetCommitResponseT
         TxnOffsetCommitResponseTopicsPartitions3 {
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..TxnOffsetCommitResponseTopicsPartitions3::default()
         }
     }
 }
@@ -434,6 +506,7 @@ impl From<TxnOffsetCommitResponse1> for TxnOffsetCommitResponse3 {
         TxnOffsetCommitResponse3 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..TxnOffsetCommitResponse3::default()
         }
     }
 }
@@ -443,6 +516,7 @@ impl From<TxnOffsetCommitResponseTopics1> for TxnOffsetCommitResponseTopics3 {
         TxnOffsetCommitResponseTopics3 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..TxnOffsetCommitResponseTopics3::default()
         }
     }
 }
@@ -452,6 +526,7 @@ impl From<TxnOffsetCommitResponseTopicsPartitions1> for TxnOffsetCommitResponseT
         TxnOffsetCommitResponseTopicsPartitions3 {
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..TxnOffsetCommitResponseTopicsPartitions3::default()
         }
     }
 }
@@ -461,6 +536,7 @@ impl From<TxnOffsetCommitResponse2> for TxnOffsetCommitResponse3 {
         TxnOffsetCommitResponse3 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..TxnOffsetCommitResponse3::default()
         }
     }
 }
@@ -470,6 +546,7 @@ impl From<TxnOffsetCommitResponseTopics2> for TxnOffsetCommitResponseTopics3 {
         TxnOffsetCommitResponseTopics3 {
             name: older.name.into(),
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
+            ..TxnOffsetCommitResponseTopics3::default()
         }
     }
 }
@@ -479,6 +556,7 @@ impl From<TxnOffsetCommitResponseTopicsPartitions2> for TxnOffsetCommitResponseT
         TxnOffsetCommitResponseTopicsPartitions3 {
             partition_index: older.partition_index,
             error_code: older.error_code,
+            ..TxnOffsetCommitResponseTopicsPartitions3::default()
         }
     }
 }

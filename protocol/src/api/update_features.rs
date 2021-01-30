@@ -31,6 +31,7 @@ impl ApiCall for UpdateFeaturesRequest {
 pub struct UpdateFeaturesRequest0 {
     pub timeout_ms: Int32,
     pub feature_updates: Vec<UpdateFeaturesRequestFeatureUpdates0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -38,6 +39,7 @@ pub struct UpdateFeaturesRequestFeatureUpdates0 {
     pub feature: CompactString,
     pub max_version_level: Int16,
     pub allow_downgrade: Boolean,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -46,6 +48,7 @@ pub struct UpdateFeaturesResponse0 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,
     pub results: Vec<UpdateFeaturesResponseResults0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -53,4 +56,5 @@ pub struct UpdateFeaturesResponseResults0 {
     pub feature: CompactString,
     pub error_code: Int16,
     pub error_message: CompactNullableString,
+    pub tag_buffer: TagBuffer,
 }

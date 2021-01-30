@@ -65,12 +65,14 @@ pub struct DeleteTopicsRequest3 {
 pub struct DeleteTopicsRequest4 {
     pub topic_names: Vec<CompactString>,
     pub timeout_ms: Int32,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteTopicsRequest5 {
     pub topic_names: Vec<CompactString>,
     pub timeout_ms: Int32,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -124,18 +126,21 @@ pub struct DeleteTopicsResponseResponses3 {
 pub struct DeleteTopicsResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<DeleteTopicsResponseResponses4>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponseResponses4 {
     pub name: CompactString,
     pub error_code: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub responses: Vec<DeleteTopicsResponseResponses5>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -143,11 +148,19 @@ pub struct DeleteTopicsResponseResponses5 {
     pub name: CompactString,
     pub error_code: Int16,
     pub error_message: Optional<CompactNullableString>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest0 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteTopicsRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteTopicsRequest0 {
             topic_names: latest
                 .topic_names
@@ -162,6 +175,13 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest0 {
 impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest1 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteTopicsRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteTopicsRequest1 {
             topic_names: latest
                 .topic_names
@@ -176,6 +196,13 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest1 {
 impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest2 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteTopicsRequest",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteTopicsRequest2 {
             topic_names: latest
                 .topic_names
@@ -190,6 +217,13 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest2 {
 impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest3 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "DeleteTopicsRequest",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(DeleteTopicsRequest3 {
             topic_names: latest
                 .topic_names
@@ -207,6 +241,7 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest4 {
         Ok(DeleteTopicsRequest4 {
             topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -235,6 +270,7 @@ impl From<DeleteTopicsResponse1> for DeleteTopicsResponse5 {
         DeleteTopicsResponse5 {
             throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
+            ..DeleteTopicsResponse5::default()
         }
     }
 }
@@ -254,6 +290,7 @@ impl From<DeleteTopicsResponse2> for DeleteTopicsResponse5 {
         DeleteTopicsResponse5 {
             throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
+            ..DeleteTopicsResponse5::default()
         }
     }
 }
@@ -273,6 +310,7 @@ impl From<DeleteTopicsResponse3> for DeleteTopicsResponse5 {
         DeleteTopicsResponse5 {
             throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
+            ..DeleteTopicsResponse5::default()
         }
     }
 }
@@ -292,6 +330,7 @@ impl From<DeleteTopicsResponse4> for DeleteTopicsResponse5 {
         DeleteTopicsResponse5 {
             throttle_time_ms: older.throttle_time_ms,
             responses: older.responses.into_iter().map(|el| el.into()).collect(),
+            tag_buffer: older.tag_buffer,
         }
     }
 }
@@ -301,6 +340,7 @@ impl From<DeleteTopicsResponseResponses4> for DeleteTopicsResponseResponses5 {
         DeleteTopicsResponseResponses5 {
             name: older.name,
             error_code: older.error_code,
+            tag_buffer: older.tag_buffer,
             ..DeleteTopicsResponseResponses5::default()
         }
     }

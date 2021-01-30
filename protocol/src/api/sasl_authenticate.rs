@@ -44,6 +44,7 @@ pub struct SaslAuthenticateRequest1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct SaslAuthenticateRequest2 {
     pub auth_bytes: CompactBytes,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -67,11 +68,19 @@ pub struct SaslAuthenticateResponse2 {
     pub error_message: CompactNullableString,
     pub auth_bytes: CompactBytes,
     pub session_lifetime_ms: Optional<Int64>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<SaslAuthenticateRequest2> for SaslAuthenticateRequest0 {
     type Error = Error;
     fn try_from(latest: SaslAuthenticateRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "SaslAuthenticateRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(SaslAuthenticateRequest0 {
             auth_bytes: latest.auth_bytes.into(),
         })
@@ -81,6 +90,13 @@ impl TryFrom<SaslAuthenticateRequest2> for SaslAuthenticateRequest0 {
 impl TryFrom<SaslAuthenticateRequest2> for SaslAuthenticateRequest1 {
     type Error = Error;
     fn try_from(latest: SaslAuthenticateRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "SaslAuthenticateRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(SaslAuthenticateRequest1 {
             auth_bytes: latest.auth_bytes.into(),
         })
@@ -105,6 +121,7 @@ impl From<SaslAuthenticateResponse1> for SaslAuthenticateResponse2 {
             error_message: older.error_message.into(),
             auth_bytes: older.auth_bytes.into(),
             session_lifetime_ms: older.session_lifetime_ms,
+            ..SaslAuthenticateResponse2::default()
         }
     }
 }

@@ -47,6 +47,7 @@ pub struct RenewDelegationTokenRequest1 {
 pub struct RenewDelegationTokenRequest2 {
     pub hmac: CompactBytes,
     pub renew_period_ms: Int64,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -68,11 +69,19 @@ pub struct RenewDelegationTokenResponse2 {
     pub error_code: Int16,
     pub expiry_timestamp_ms: Int64,
     pub throttle_time_ms: Int32,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<RenewDelegationTokenRequest2> for RenewDelegationTokenRequest0 {
     type Error = Error;
     fn try_from(latest: RenewDelegationTokenRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "RenewDelegationTokenRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(RenewDelegationTokenRequest0 {
             hmac: latest.hmac.into(),
             renew_period_ms: latest.renew_period_ms,
@@ -83,6 +92,13 @@ impl TryFrom<RenewDelegationTokenRequest2> for RenewDelegationTokenRequest0 {
 impl TryFrom<RenewDelegationTokenRequest2> for RenewDelegationTokenRequest1 {
     type Error = Error;
     fn try_from(latest: RenewDelegationTokenRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "RenewDelegationTokenRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(RenewDelegationTokenRequest1 {
             hmac: latest.hmac.into(),
             renew_period_ms: latest.renew_period_ms,
@@ -96,6 +112,7 @@ impl From<RenewDelegationTokenResponse0> for RenewDelegationTokenResponse2 {
             error_code: older.error_code,
             expiry_timestamp_ms: older.expiry_timestamp_ms,
             throttle_time_ms: older.throttle_time_ms,
+            ..RenewDelegationTokenResponse2::default()
         }
     }
 }
@@ -106,6 +123,7 @@ impl From<RenewDelegationTokenResponse1> for RenewDelegationTokenResponse2 {
             error_code: older.error_code,
             expiry_timestamp_ms: older.expiry_timestamp_ms,
             throttle_time_ms: older.throttle_time_ms,
+            ..RenewDelegationTokenResponse2::default()
         }
     }
 }

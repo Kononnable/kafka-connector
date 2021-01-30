@@ -46,6 +46,7 @@ pub struct ApiVersionsRequest2 {}
 pub struct ApiVersionsRequest3 {
     pub client_software_name: Optional<CompactString>,
     pub client_software_version: Optional<CompactString>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -94,6 +95,7 @@ pub struct ApiVersionsResponse3 {
     pub error_code: Int16,
     pub api_keys: Vec<ApiVersionsResponseApiKeys3>,
     pub throttle_time_ms: Optional<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -101,6 +103,7 @@ pub struct ApiVersionsResponseApiKeys3 {
     pub api_key: Int16,
     pub min_version: Int16,
     pub max_version: Int16,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest0 {
@@ -118,6 +121,13 @@ impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest0 {
                 "ApiVersionsRequest",
                 0,
                 "client_software_version",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "ApiVersionsRequest",
+                0,
+                "tag_buffer",
             ));
         }
         Ok(ApiVersionsRequest0 {})
@@ -141,6 +151,13 @@ impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest1 {
                 "client_software_version",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "ApiVersionsRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(ApiVersionsRequest1 {})
     }
 }
@@ -160,6 +177,13 @@ impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest2 {
                 "ApiVersionsRequest",
                 2,
                 "client_software_version",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "ApiVersionsRequest",
+                2,
+                "tag_buffer",
             ));
         }
         Ok(ApiVersionsRequest2 {})
@@ -182,6 +206,7 @@ impl From<ApiVersionsResponseApiKeys0> for ApiVersionsResponseApiKeys3 {
             api_key: older.api_key,
             min_version: older.min_version,
             max_version: older.max_version,
+            ..ApiVersionsResponseApiKeys3::default()
         }
     }
 }
@@ -192,6 +217,7 @@ impl From<ApiVersionsResponse1> for ApiVersionsResponse3 {
             error_code: older.error_code,
             api_keys: older.api_keys.into_iter().map(|el| el.into()).collect(),
             throttle_time_ms: older.throttle_time_ms,
+            ..ApiVersionsResponse3::default()
         }
     }
 }
@@ -202,6 +228,7 @@ impl From<ApiVersionsResponseApiKeys1> for ApiVersionsResponseApiKeys3 {
             api_key: older.api_key,
             min_version: older.min_version,
             max_version: older.max_version,
+            ..ApiVersionsResponseApiKeys3::default()
         }
     }
 }
@@ -212,6 +239,7 @@ impl From<ApiVersionsResponse2> for ApiVersionsResponse3 {
             error_code: older.error_code,
             api_keys: older.api_keys.into_iter().map(|el| el.into()).collect(),
             throttle_time_ms: older.throttle_time_ms,
+            ..ApiVersionsResponse3::default()
         }
     }
 }
@@ -222,6 +250,7 @@ impl From<ApiVersionsResponseApiKeys2> for ApiVersionsResponseApiKeys3 {
             api_key: older.api_key,
             min_version: older.min_version,
             max_version: older.max_version,
+            ..ApiVersionsResponseApiKeys3::default()
         }
     }
 }

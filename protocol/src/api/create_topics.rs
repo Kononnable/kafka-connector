@@ -183,6 +183,7 @@ pub struct CreateTopicsRequest5 {
     pub topics: Vec<CreateTopicsRequestTopics5>,
     pub timeout_ms: Int32,
     pub validate_only: Optional<Boolean>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -192,18 +193,21 @@ pub struct CreateTopicsRequestTopics5 {
     pub replication_factor: Int16,
     pub assignments: Vec<CreateTopicsRequestTopicsAssignments5>,
     pub configs: Vec<CreateTopicsRequestTopicsConfigs5>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsAssignments5 {
     pub partition_index: Int32,
     pub broker_ids: Vec<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsConfigs5 {
     pub name: CompactString,
     pub value: CompactNullableString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -211,6 +215,7 @@ pub struct CreateTopicsRequest6 {
     pub topics: Vec<CreateTopicsRequestTopics6>,
     pub timeout_ms: Int32,
     pub validate_only: Optional<Boolean>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -220,18 +225,21 @@ pub struct CreateTopicsRequestTopics6 {
     pub replication_factor: Int16,
     pub assignments: Vec<CreateTopicsRequestTopicsAssignments6>,
     pub configs: Vec<CreateTopicsRequestTopicsConfigs6>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsAssignments6 {
     pub partition_index: Int32,
     pub broker_ids: Vec<Int32>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsConfigs6 {
     pub name: CompactString,
     pub value: CompactNullableString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -300,6 +308,7 @@ pub struct CreateTopicsResponseTopics4 {
 pub struct CreateTopicsResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<CreateTopicsResponseTopics5>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -310,6 +319,7 @@ pub struct CreateTopicsResponseTopics5 {
     pub num_partitions: Optional<Int32>,
     pub replication_factor: Optional<Int16>,
     pub configs: Optional<Vec<CreateTopicsResponseTopicsConfigs5>>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -319,12 +329,14 @@ pub struct CreateTopicsResponseTopicsConfigs5 {
     pub read_only: Boolean,
     pub config_source: Int8,
     pub is_sensitive: Boolean,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponse6 {
     pub throttle_time_ms: Optional<Int32>,
     pub topics: Vec<CreateTopicsResponseTopics6>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -335,6 +347,7 @@ pub struct CreateTopicsResponseTopics6 {
     pub num_partitions: Optional<Int32>,
     pub replication_factor: Optional<Int16>,
     pub configs: Optional<Vec<CreateTopicsResponseTopicsConfigs6>>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -344,6 +357,7 @@ pub struct CreateTopicsResponseTopicsConfigs6 {
     pub read_only: Boolean,
     pub config_source: Int8,
     pub is_sensitive: Boolean,
+    pub tag_buffer: TagBuffer,
 }
 
 impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest0 {
@@ -354,6 +368,13 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest0 {
                 "CreateTopicsRequest",
                 0,
                 "validate_only",
+            ));
+        }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequest",
+                0,
+                "tag_buffer",
             ));
         }
         Ok(CreateTopicsRequest0 {
@@ -370,6 +391,13 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest0 {
 impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics0 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopics",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopics0 {
             name: latest.name.into(),
             num_partitions: latest.num_partitions,
@@ -391,6 +419,13 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics0 {
 impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopicsAssignments0 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopicsAssignments",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopicsAssignments0 {
             partition_index: latest.partition_index,
             broker_ids: latest.broker_ids,
@@ -401,6 +436,13 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
 impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsConfigs0 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopicsConfigs",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopicsConfigs0 {
             name: latest.name.into(),
             value: latest.value.into(),
@@ -411,6 +453,13 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
 impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest1 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequest6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequest1 {
             topics: latest
                 .topics
@@ -426,6 +475,13 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest1 {
 impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics1 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopics",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopics1 {
             name: latest.name.into(),
             num_partitions: latest.num_partitions,
@@ -447,6 +503,13 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics1 {
 impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopicsAssignments1 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopicsAssignments",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopicsAssignments1 {
             partition_index: latest.partition_index,
             broker_ids: latest.broker_ids,
@@ -457,6 +520,13 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
 impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsConfigs1 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopicsConfigs",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopicsConfigs1 {
             name: latest.name.into(),
             value: latest.value.into(),
@@ -467,6 +537,13 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
 impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest2 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequest6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequest",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequest2 {
             topics: latest
                 .topics
@@ -482,6 +559,13 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest2 {
 impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics2 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopics",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopics2 {
             name: latest.name.into(),
             num_partitions: latest.num_partitions,
@@ -503,6 +587,13 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics2 {
 impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopicsAssignments2 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopicsAssignments",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopicsAssignments2 {
             partition_index: latest.partition_index,
             broker_ids: latest.broker_ids,
@@ -513,6 +604,13 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
 impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsConfigs2 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopicsConfigs",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopicsConfigs2 {
             name: latest.name.into(),
             value: latest.value.into(),
@@ -523,6 +621,13 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
 impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest3 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequest6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequest",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequest3 {
             topics: latest
                 .topics
@@ -538,6 +643,13 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest3 {
 impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics3 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopics",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopics3 {
             name: latest.name.into(),
             num_partitions: latest.num_partitions,
@@ -559,6 +671,13 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics3 {
 impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopicsAssignments3 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopicsAssignments",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopicsAssignments3 {
             partition_index: latest.partition_index,
             broker_ids: latest.broker_ids,
@@ -569,6 +688,13 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
 impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsConfigs3 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopicsConfigs",
+                3,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopicsConfigs3 {
             name: latest.name.into(),
             value: latest.value.into(),
@@ -579,6 +705,13 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
 impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest4 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequest6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequest",
+                4,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequest4 {
             topics: latest
                 .topics
@@ -594,6 +727,13 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest4 {
 impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics4 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopics",
+                4,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopics4 {
             name: latest.name.into(),
             num_partitions: latest.num_partitions,
@@ -615,6 +755,13 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics4 {
 impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopicsAssignments4 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopicsAssignments",
+                4,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopicsAssignments4 {
             partition_index: latest.partition_index,
             broker_ids: latest.broker_ids,
@@ -625,6 +772,13 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
 impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsConfigs4 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateTopicsRequestTopicsConfigs",
+                4,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateTopicsRequestTopicsConfigs4 {
             name: latest.name.into(),
             value: latest.value.into(),
@@ -643,6 +797,7 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest5 {
                 .collect::<Result<_, Error>>()?,
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -664,6 +819,7 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics5 {
                 .into_iter()
                 .map(|ele| ele.try_into())
                 .collect::<Result<_, Error>>()?,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -674,6 +830,7 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
         Ok(CreateTopicsRequestTopicsAssignments5 {
             partition_index: latest.partition_index,
             broker_ids: latest.broker_ids,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -684,6 +841,7 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
         Ok(CreateTopicsRequestTopicsConfigs5 {
             name: latest.name,
             value: latest.value,
+            tag_buffer: latest.tag_buffer,
         })
     }
 }
@@ -732,6 +890,7 @@ impl From<CreateTopicsResponse2> for CreateTopicsResponse6 {
         CreateTopicsResponse6 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..CreateTopicsResponse6::default()
         }
     }
 }
@@ -752,6 +911,7 @@ impl From<CreateTopicsResponse3> for CreateTopicsResponse6 {
         CreateTopicsResponse6 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..CreateTopicsResponse6::default()
         }
     }
 }
@@ -772,6 +932,7 @@ impl From<CreateTopicsResponse4> for CreateTopicsResponse6 {
         CreateTopicsResponse6 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            ..CreateTopicsResponse6::default()
         }
     }
 }
@@ -792,6 +953,7 @@ impl From<CreateTopicsResponse5> for CreateTopicsResponse6 {
         CreateTopicsResponse6 {
             throttle_time_ms: older.throttle_time_ms,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
+            tag_buffer: older.tag_buffer,
         }
     }
 }
@@ -807,6 +969,7 @@ impl From<CreateTopicsResponseTopics5> for CreateTopicsResponseTopics6 {
             configs: older
                 .configs
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
+            tag_buffer: older.tag_buffer,
         }
     }
 }
@@ -819,6 +982,7 @@ impl From<CreateTopicsResponseTopicsConfigs5> for CreateTopicsResponseTopicsConf
             read_only: older.read_only,
             config_source: older.config_source,
             is_sensitive: older.is_sensitive,
+            tag_buffer: older.tag_buffer,
         }
     }
 }

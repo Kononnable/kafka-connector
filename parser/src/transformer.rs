@@ -133,6 +133,16 @@ fn parse_vec(
                     is_optional: false,
                 });
             }
+            FieldTypeWithPayload::TagBuffer => {
+                returned_fields.push(StructField {
+                    name: field.name,
+                    ty: "TagBuffer".to_owned(),
+                    is_vec: false,
+                    is_simple_type: FieldType::is_simple_type(&FieldType::TagBuffer),
+                    is_easily_convertable: FieldType::is_easily_convertable(&FieldType::TagBuffer),
+                    is_optional: false,
+                });
+            }
         };
     }
     (returned_fields, children)

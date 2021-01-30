@@ -59,12 +59,14 @@ pub struct CreateDelegationTokenRequestRenewers1 {
 pub struct CreateDelegationTokenRequest2 {
     pub renewers: Vec<CreateDelegationTokenRequestRenewers2>,
     pub max_lifetime_ms: Int64,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateDelegationTokenRequestRenewers2 {
     pub principal_type: CompactString,
     pub principal_name: CompactString,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -104,11 +106,19 @@ pub struct CreateDelegationTokenResponse2 {
     pub token_id: CompactString,
     pub hmac: CompactBytes,
     pub throttle_time_ms: Int32,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest0 {
     type Error = Error;
     fn try_from(latest: CreateDelegationTokenRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateDelegationTokenRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateDelegationTokenRequest0 {
             renewers: latest
                 .renewers
@@ -123,6 +133,13 @@ impl TryFrom<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest0 {
 impl TryFrom<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenRequestRenewers0 {
     type Error = Error;
     fn try_from(latest: CreateDelegationTokenRequestRenewers2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateDelegationTokenRequestRenewers",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateDelegationTokenRequestRenewers0 {
             principal_type: latest.principal_type.into(),
             principal_name: latest.principal_name.into(),
@@ -133,6 +150,13 @@ impl TryFrom<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenReq
 impl TryFrom<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest1 {
     type Error = Error;
     fn try_from(latest: CreateDelegationTokenRequest2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateDelegationTokenRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateDelegationTokenRequest1 {
             renewers: latest
                 .renewers
@@ -147,6 +171,13 @@ impl TryFrom<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest1 {
 impl TryFrom<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenRequestRenewers1 {
     type Error = Error;
     fn try_from(latest: CreateDelegationTokenRequestRenewers2) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "CreateDelegationTokenRequestRenewers",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(CreateDelegationTokenRequestRenewers1 {
             principal_type: latest.principal_type.into(),
             principal_name: latest.principal_name.into(),
@@ -166,6 +197,7 @@ impl From<CreateDelegationTokenResponse0> for CreateDelegationTokenResponse2 {
             token_id: older.token_id.into(),
             hmac: older.hmac.into(),
             throttle_time_ms: older.throttle_time_ms,
+            ..CreateDelegationTokenResponse2::default()
         }
     }
 }
@@ -182,6 +214,7 @@ impl From<CreateDelegationTokenResponse1> for CreateDelegationTokenResponse2 {
             token_id: older.token_id.into(),
             hmac: older.hmac.into(),
             throttle_time_ms: older.throttle_time_ms,
+            ..CreateDelegationTokenResponse2::default()
         }
     }
 }

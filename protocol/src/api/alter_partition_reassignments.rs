@@ -31,18 +31,21 @@ impl ApiCall for AlterPartitionReassignmentsRequest {
 pub struct AlterPartitionReassignmentsRequest0 {
     pub timeout_ms: Int32,
     pub topics: Vec<AlterPartitionReassignmentsRequestTopics0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterPartitionReassignmentsRequestTopics0 {
     pub name: CompactString,
     pub partitions: Vec<AlterPartitionReassignmentsRequestTopicsPartitions0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct AlterPartitionReassignmentsRequestTopicsPartitions0 {
     pub partition_index: Int32,
     pub replicas: Vec<Int32>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -51,12 +54,14 @@ pub struct AlterPartitionReassignmentsResponse0 {
     pub error_code: Int16,
     pub error_message: CompactNullableString,
     pub responses: Vec<AlterPartitionReassignmentsResponseResponses0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct AlterPartitionReassignmentsResponseResponses0 {
     pub name: CompactString,
     pub partitions: Vec<AlterPartitionReassignmentsResponseResponsesPartitions0>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -64,4 +69,5 @@ pub struct AlterPartitionReassignmentsResponseResponsesPartitions0 {
     pub partition_index: Int32,
     pub error_code: Int16,
     pub error_message: CompactNullableString,
+    pub tag_buffer: TagBuffer,
 }

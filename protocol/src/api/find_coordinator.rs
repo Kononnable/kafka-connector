@@ -54,6 +54,7 @@ pub struct FindCoordinatorRequest2 {
 pub struct FindCoordinatorRequest3 {
     pub key: CompactString,
     pub key_type: Optional<Int8>,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -92,6 +93,7 @@ pub struct FindCoordinatorResponse3 {
     pub node_id: Int32,
     pub host: CompactString,
     pub port: Int32,
+    pub tag_buffer: Optional<TagBuffer>,
 }
 
 impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest0 {
@@ -104,6 +106,13 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest0 {
                 "key_type",
             ));
         }
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "FindCoordinatorRequest",
+                0,
+                "tag_buffer",
+            ));
+        }
         Ok(FindCoordinatorRequest0 {
             key: latest.key.into(),
         })
@@ -113,6 +122,13 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest0 {
 impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest1 {
     type Error = Error;
     fn try_from(latest: FindCoordinatorRequest3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "FindCoordinatorRequest",
+                1,
+                "tag_buffer",
+            ));
+        }
         Ok(FindCoordinatorRequest1 {
             key: latest.key.into(),
             key_type: latest.key_type,
@@ -123,6 +139,13 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest1 {
 impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest2 {
     type Error = Error;
     fn try_from(latest: FindCoordinatorRequest3) -> Result<Self, Self::Error> {
+        if latest.tag_buffer.is_some() {
+            return Err(Error::OldKafkaVersion(
+                "FindCoordinatorRequest",
+                2,
+                "tag_buffer",
+            ));
+        }
         Ok(FindCoordinatorRequest2 {
             key: latest.key.into(),
             key_type: latest.key_type,
@@ -151,6 +174,7 @@ impl From<FindCoordinatorResponse1> for FindCoordinatorResponse3 {
             node_id: older.node_id,
             host: older.host.into(),
             port: older.port,
+            ..FindCoordinatorResponse3::default()
         }
     }
 }
@@ -164,6 +188,7 @@ impl From<FindCoordinatorResponse2> for FindCoordinatorResponse3 {
             node_id: older.node_id,
             host: older.host.into(),
             port: older.port,
+            ..FindCoordinatorResponse3::default()
         }
     }
 }
