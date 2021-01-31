@@ -156,21 +156,21 @@ pub struct ApiVersionsResponseApiKeys3 {
 
 impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest0 {
     type Error = Error;
-    fn try_from(latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
+    fn try_from(_latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
         Ok(ApiVersionsRequest0 {})
     }
 }
 
 impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest1 {
     type Error = Error;
-    fn try_from(latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
+    fn try_from(_latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
         Ok(ApiVersionsRequest1 {})
     }
 }
 
 impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest2 {
     type Error = Error;
-    fn try_from(latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
+    fn try_from(_latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
         Ok(ApiVersionsRequest2 {})
     }
 }

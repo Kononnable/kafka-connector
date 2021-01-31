@@ -179,21 +179,21 @@ pub struct ListGroupsResponseGroups4 {
 
 impl TryFrom<ListGroupsRequest4> for ListGroupsRequest0 {
     type Error = Error;
-    fn try_from(latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
+    fn try_from(_latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
         Ok(ListGroupsRequest0 {})
     }
 }
 
 impl TryFrom<ListGroupsRequest4> for ListGroupsRequest1 {
     type Error = Error;
-    fn try_from(latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
+    fn try_from(_latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
         Ok(ListGroupsRequest1 {})
     }
 }
 
 impl TryFrom<ListGroupsRequest4> for ListGroupsRequest2 {
     type Error = Error;
-    fn try_from(latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
+    fn try_from(_latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
         Ok(ListGroupsRequest2 {})
     }
 }

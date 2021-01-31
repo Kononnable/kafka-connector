@@ -189,10 +189,15 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
                     "impl TryFrom<{}{}> for {}{}{{\n",
                     latest.name, latest.version, call.name, call.version
                 ));
+                let latest_str = if call.fields.is_empty() {
+                    "_latest"
+                } else {
+                    "latest"
+                };
                 impl_def.push_str("    type Error = Error;\n");
                 impl_def.push_str(&format!(
-                    "    fn try_from(latest:{}{}) -> Result<Self, Self::Error> {{\n",
-                    latest.name, latest.version
+                    "    fn try_from({}:{}{}) -> Result<Self, Self::Error> {{\n",
+                    latest_str, latest.name, latest.version
                 ));
                 for field in &latest.fields {
                     if call.fields.iter().find(|x| x.name == field.name).is_none()

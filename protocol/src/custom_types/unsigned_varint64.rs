@@ -27,14 +27,14 @@ impl UnsignedVarInt64 {
     }
 }
 impl FromBytes for UnsignedVarInt64 {
-    fn deserialize(buf: &mut Bytes, is_flexible_version: bool) -> Self {
+    fn deserialize(buf: &mut Bytes, _is_flexible_version: bool) -> Self {
         let value = deserialize_unsigned_varint_64(buf);
         UnsignedVarInt64 { value }
     }
 }
 
 impl ToBytes for UnsignedVarInt64 {
-    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
+    fn serialize(&self, buf: &mut BytesMut, _is_flexible_version: bool) {
         serialize_unsigned_varint_64(self.value, buf);
     }
 }
