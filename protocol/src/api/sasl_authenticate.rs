@@ -61,7 +61,10 @@ impl ApiCall for SaslAuthenticateRequest {
         Ok(())
     }
     fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, SaslAuthenticateResponse) {
-        let header = HeaderResponse::deserialize(buf, false);
+        let correlation = match Self::is_flexible_version(version) {
+            true => HeaderResponse2::deserialize(buf, false).correlation,
+            false => HeaderResponse::deserialize(buf, false).correlation,
+        };
         let response = match version {
             0 => SaslAuthenticateResponse0::deserialize(buf, Self::is_flexible_version(version))
                 .into(),
@@ -70,7 +73,7 @@ impl ApiCall for SaslAuthenticateRequest {
             2 => SaslAuthenticateResponse::deserialize(buf, Self::is_flexible_version(version)),
             _ => SaslAuthenticateResponse::deserialize(buf, Self::is_flexible_version(version)),
         };
-        (header.correlation, response)
+        (correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]

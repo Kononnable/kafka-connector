@@ -121,7 +121,7 @@ mod prelude {
     pub use super::super::from_bytes::FromBytes;
     pub use super::super::to_bytes::ToBytes;
     pub use super::super::ApiCall;
-    pub use super::header::{HeaderRequest1, HeaderRequest2, HeaderResponse};
+    pub use super::header::{HeaderRequest1, HeaderRequest2, HeaderResponse, HeaderResponse2};
     pub use super::ApiNumbers;
     pub use bytes::{Bytes, BytesMut};
     pub use kafka_connector_derive::FromBytes;

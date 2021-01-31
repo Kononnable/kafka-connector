@@ -91,7 +91,10 @@ impl ApiCall for JoinGroupRequest {
         Ok(())
     }
     fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, JoinGroupResponse) {
-        let header = HeaderResponse::deserialize(buf, false);
+        let correlation = match Self::is_flexible_version(version) {
+            true => HeaderResponse2::deserialize(buf, false).correlation,
+            false => HeaderResponse::deserialize(buf, false).correlation,
+        };
         let response = match version {
             0 => JoinGroupResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
             1 => JoinGroupResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
@@ -103,7 +106,7 @@ impl ApiCall for JoinGroupRequest {
             7 => JoinGroupResponse::deserialize(buf, Self::is_flexible_version(version)),
             _ => JoinGroupResponse::deserialize(buf, Self::is_flexible_version(version)),
         };
-        (header.correlation, response)
+        (correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]

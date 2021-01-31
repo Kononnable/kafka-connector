@@ -56,3 +56,9 @@ impl<'a> HeaderRequest2<'a> {
 pub struct HeaderResponse {
     pub correlation: Int32,
 }
+
+#[derive(Debug, FromBytes)]
+pub struct HeaderResponse2 {
+    pub correlation: Int32,
+    pub tag_buffer: TagBuffer,
+}

@@ -4,7 +4,7 @@ use crate::{from_bytes::FromBytes, to_bytes::ToBytes};
 
 pub fn deserialize_unsigned_varint_32(buf: &mut Bytes) -> u32 {
     let mut no_of_bytes = 0;
-    while unsigned_varint::decode::is_last(buf.get(no_of_bytes).copied().unwrap()) {
+    while !unsigned_varint::decode::is_last(buf.get(no_of_bytes).copied().unwrap()) {
         no_of_bytes += 1;
     }
     assert!(no_of_bytes < 6);

@@ -1,4 +1,4 @@
-use kafka_connector::kafka_client::{BrokerClient, KafkaClient};
+use kafka_connector::kafka_client::BrokerClient;
 use kafka_connector::protocol;
 use protocol::{
     api::{metadata::MetadataRequestTopics9, ApiNumbers},
@@ -15,7 +15,7 @@ pub async fn main() -> anyhow::Result<()> {
 
     let metadata_request = protocol::api::metadata::MetadataRequest {
         topics: vec![MetadataRequestTopics9 {
-            name: "test".to_owned().into(),
+            name: "test".to_owned(),
             tag_buffer: Optional::Some(TagBuffer {}),
         }],
         allow_auto_topic_creation: Optional::None,
@@ -23,10 +23,10 @@ pub async fn main() -> anyhow::Result<()> {
         include_topic_authorized_operations: Optional::None,
         tag_buffer: Optional::Some(TagBuffer {}),
     };
-    // let supported_version = broker
-    //     .supported_versions
-    //     .get(&(ApiNumbers::Metadata as i16));
-    // println!("supported_versions {:?}", supported_version);
+    let supported_version = broker
+        .supported_versions
+        .get(&(ApiNumbers::Metadata as i16));
+    println!("supported_versions {:?}", supported_version);
     broker
         .run_api_call(metadata_request.clone(), Some(0))
         .await?;

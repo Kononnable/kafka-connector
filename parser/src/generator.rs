@@ -124,7 +124,11 @@ fn deserialize_api_response(responses: &[Vec<ApiStructDefinition>]) -> String {
         struct_name
     );
 
-    fn_def.push_str("let header = HeaderResponse::deserialize(buf, false);\n");
+    fn_def.push_str("let correlation = match Self::is_flexible_version(version) {\n");
+    fn_def.push_str("true => HeaderResponse2::deserialize(buf, false).correlation,\n");
+    fn_def.push_str("false => HeaderResponse::deserialize(buf, false).correlation,\n");
+    fn_def.push_str("};\n");
+
     fn_def.push_str("let response = match version {\n");
     for version in 0..responses.len() - 1 {
         fn_def.push_str(&format!(
@@ -142,7 +146,7 @@ fn deserialize_api_response(responses: &[Vec<ApiStructDefinition>]) -> String {
         struct_name
     ));
     fn_def.push_str("    };\n");
-    fn_def.push_str("(header.correlation, response)\n");
+    fn_def.push_str("(correlation, response)\n");
     fn_def.push_str("}\n");
     fn_def
 }

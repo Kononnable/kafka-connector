@@ -49,12 +49,15 @@ impl ApiCall for AlterClientQuotasRequest {
         Ok(())
     }
     fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, AlterClientQuotasResponse) {
-        let header = HeaderResponse::deserialize(buf, false);
+        let correlation = match Self::is_flexible_version(version) {
+            true => HeaderResponse2::deserialize(buf, false).correlation,
+            false => HeaderResponse::deserialize(buf, false).correlation,
+        };
         let response = match version {
             0 => AlterClientQuotasResponse::deserialize(buf, Self::is_flexible_version(version)),
             _ => AlterClientQuotasResponse::deserialize(buf, Self::is_flexible_version(version)),
         };
-        (header.correlation, response)
+        (correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]

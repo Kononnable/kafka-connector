@@ -52,7 +52,10 @@ impl ApiCall for AlterUserScramCredentialsRequest {
         version: i16,
         buf: &mut Bytes,
     ) -> (i32, AlterUserScramCredentialsResponse) {
-        let header = HeaderResponse::deserialize(buf, false);
+        let correlation = match Self::is_flexible_version(version) {
+            true => HeaderResponse2::deserialize(buf, false).correlation,
+            false => HeaderResponse::deserialize(buf, false).correlation,
+        };
         let response = match version {
             0 => AlterUserScramCredentialsResponse::deserialize(
                 buf,
@@ -63,7 +66,7 @@ impl ApiCall for AlterUserScramCredentialsRequest {
                 Self::is_flexible_version(version),
             ),
         };
-        (header.correlation, response)
+        (correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
