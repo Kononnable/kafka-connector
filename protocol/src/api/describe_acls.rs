@@ -13,22 +13,62 @@ impl ApiCall for DescribeAclsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeAcls
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&DescribeAclsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&DescribeAclsRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                DescribeAclsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                DescribeAclsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &DescribeAclsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &DescribeAclsRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> DescribeAclsResponse {
-        match version {
-            0 => DescribeAclsResponse0::deserialize(buf).into(),
-            1 => DescribeAclsResponse1::deserialize(buf).into(),
-            2 => DescribeAclsResponse::deserialize(buf),
-            _ => DescribeAclsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, DescribeAclsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => DescribeAclsResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => DescribeAclsResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => DescribeAclsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => DescribeAclsResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -55,10 +95,10 @@ pub struct DescribeAclsRequest1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeAclsRequest2 {
     pub resource_type_filter: Int8,
-    pub resource_name_filter: CompactNullableString,
+    pub resource_name_filter: NullableString,
     pub pattern_type_filter: Optional<Int8>,
-    pub principal_filter: CompactNullableString,
-    pub host_filter: CompactNullableString,
+    pub principal_filter: NullableString,
+    pub host_filter: NullableString,
     pub operation: Int8,
     pub permission_type: Int8,
     pub tag_buffer: Optional<TagBuffer>,
@@ -115,7 +155,7 @@ pub struct DescribeAclsResponseResourcesAcls1 {
 pub struct DescribeAclsResponse2 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
-    pub error_message: CompactNullableString,
+    pub error_message: NullableString,
     pub resources: Vec<DescribeAclsResponseResources2>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -123,7 +163,7 @@ pub struct DescribeAclsResponse2 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeAclsResponseResources2 {
     pub resource_type: Int8,
-    pub resource_name: CompactString,
+    pub resource_name: String,
     pub pattern_type: Optional<Int8>,
     pub acls: Vec<DescribeAclsResponseResourcesAcls2>,
     pub tag_buffer: Optional<TagBuffer>,
@@ -131,8 +171,8 @@ pub struct DescribeAclsResponseResources2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeAclsResponseResourcesAcls2 {
-    pub principal: CompactString,
-    pub host: CompactString,
+    pub principal: String,
+    pub host: String,
     pub operation: Int8,
     pub permission_type: Int8,
     pub tag_buffer: Optional<TagBuffer>,
@@ -157,9 +197,9 @@ impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest0 {
         }
         Ok(DescribeAclsRequest0 {
             resource_type_filter: latest.resource_type_filter,
-            resource_name_filter: latest.resource_name_filter.into(),
-            principal_filter: latest.principal_filter.into(),
-            host_filter: latest.host_filter.into(),
+            resource_name_filter: latest.resource_name_filter,
+            principal_filter: latest.principal_filter,
+            host_filter: latest.host_filter,
             operation: latest.operation,
             permission_type: latest.permission_type,
         })
@@ -178,10 +218,10 @@ impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest1 {
         }
         Ok(DescribeAclsRequest1 {
             resource_type_filter: latest.resource_type_filter,
-            resource_name_filter: latest.resource_name_filter.into(),
+            resource_name_filter: latest.resource_name_filter,
             pattern_type_filter: latest.pattern_type_filter,
-            principal_filter: latest.principal_filter.into(),
-            host_filter: latest.host_filter.into(),
+            principal_filter: latest.principal_filter,
+            host_filter: latest.host_filter,
             operation: latest.operation,
             permission_type: latest.permission_type,
         })
@@ -193,7 +233,7 @@ impl From<DescribeAclsResponse0> for DescribeAclsResponse2 {
         DescribeAclsResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
-            error_message: older.error_message.into(),
+            error_message: older.error_message,
             resources: older.resources.into_iter().map(|el| el.into()).collect(),
             ..DescribeAclsResponse2::default()
         }
@@ -204,7 +244,7 @@ impl From<DescribeAclsResponseResources0> for DescribeAclsResponseResources2 {
     fn from(older: DescribeAclsResponseResources0) -> Self {
         DescribeAclsResponseResources2 {
             resource_type: older.resource_type,
-            resource_name: older.resource_name.into(),
+            resource_name: older.resource_name,
             acls: older.acls.into_iter().map(|el| el.into()).collect(),
             ..DescribeAclsResponseResources2::default()
         }
@@ -214,8 +254,8 @@ impl From<DescribeAclsResponseResources0> for DescribeAclsResponseResources2 {
 impl From<DescribeAclsResponseResourcesAcls0> for DescribeAclsResponseResourcesAcls2 {
     fn from(older: DescribeAclsResponseResourcesAcls0) -> Self {
         DescribeAclsResponseResourcesAcls2 {
-            principal: older.principal.into(),
-            host: older.host.into(),
+            principal: older.principal,
+            host: older.host,
             operation: older.operation,
             permission_type: older.permission_type,
             ..DescribeAclsResponseResourcesAcls2::default()
@@ -228,7 +268,7 @@ impl From<DescribeAclsResponse1> for DescribeAclsResponse2 {
         DescribeAclsResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
-            error_message: older.error_message.into(),
+            error_message: older.error_message,
             resources: older.resources.into_iter().map(|el| el.into()).collect(),
             ..DescribeAclsResponse2::default()
         }
@@ -239,7 +279,7 @@ impl From<DescribeAclsResponseResources1> for DescribeAclsResponseResources2 {
     fn from(older: DescribeAclsResponseResources1) -> Self {
         DescribeAclsResponseResources2 {
             resource_type: older.resource_type,
-            resource_name: older.resource_name.into(),
+            resource_name: older.resource_name,
             pattern_type: older.pattern_type,
             acls: older.acls.into_iter().map(|el| el.into()).collect(),
             ..DescribeAclsResponseResources2::default()
@@ -250,8 +290,8 @@ impl From<DescribeAclsResponseResources1> for DescribeAclsResponseResources2 {
 impl From<DescribeAclsResponseResourcesAcls1> for DescribeAclsResponseResourcesAcls2 {
     fn from(older: DescribeAclsResponseResourcesAcls1) -> Self {
         DescribeAclsResponseResourcesAcls2 {
-            principal: older.principal.into(),
-            host: older.host.into(),
+            principal: older.principal,
+            host: older.host,
             operation: older.operation,
             permission_type: older.permission_type,
             ..DescribeAclsResponseResourcesAcls2::default()

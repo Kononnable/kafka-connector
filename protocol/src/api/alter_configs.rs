@@ -13,20 +13,55 @@ impl ApiCall for AlterConfigsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::AlterConfigs
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&AlterConfigsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            _ => false,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                AlterConfigsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                AlterConfigsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &AlterConfigsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> AlterConfigsResponse {
-        match version {
-            0 => AlterConfigsResponse0::deserialize(buf).into(),
-            1 => AlterConfigsResponse::deserialize(buf),
-            _ => AlterConfigsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, AlterConfigsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => AlterConfigsResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => AlterConfigsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => AlterConfigsResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]

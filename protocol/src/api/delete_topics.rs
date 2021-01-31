@@ -13,28 +13,83 @@ impl ApiCall for DeleteTopicsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DeleteTopics
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&DeleteTopicsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&DeleteTopicsRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&DeleteTopicsRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&DeleteTopicsRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&DeleteTopicsRequest4::try_from(self)?, buf),
-            5 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => true,
+            5 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                DeleteTopicsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                DeleteTopicsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &DeleteTopicsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &DeleteTopicsRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &DeleteTopicsRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &DeleteTopicsRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(
+                &DeleteTopicsRequest4::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            5 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> DeleteTopicsResponse {
-        match version {
-            0 => DeleteTopicsResponse0::deserialize(buf).into(),
-            1 => DeleteTopicsResponse1::deserialize(buf).into(),
-            2 => DeleteTopicsResponse2::deserialize(buf).into(),
-            3 => DeleteTopicsResponse3::deserialize(buf).into(),
-            4 => DeleteTopicsResponse4::deserialize(buf).into(),
-            5 => DeleteTopicsResponse::deserialize(buf),
-            _ => DeleteTopicsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, DeleteTopicsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => DeleteTopicsResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => DeleteTopicsResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => DeleteTopicsResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => DeleteTopicsResponse3::deserialize(buf, Self::is_flexible_version(version)).into(),
+            4 => DeleteTopicsResponse4::deserialize(buf, Self::is_flexible_version(version)).into(),
+            5 => DeleteTopicsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => DeleteTopicsResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -63,14 +118,14 @@ pub struct DeleteTopicsRequest3 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteTopicsRequest4 {
-    pub topic_names: Vec<CompactString>,
+    pub topic_names: Vec<String>,
     pub timeout_ms: Int32,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteTopicsRequest5 {
-    pub topic_names: Vec<CompactString>,
+    pub topic_names: Vec<String>,
     pub timeout_ms: Int32,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -131,7 +186,7 @@ pub struct DeleteTopicsResponse4 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponseResponses4 {
-    pub name: CompactString,
+    pub name: String,
     pub error_code: Int16,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -145,9 +200,9 @@ pub struct DeleteTopicsResponse5 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponseResponses5 {
-    pub name: CompactString,
+    pub name: String,
     pub error_code: Int16,
-    pub error_message: Optional<CompactNullableString>,
+    pub error_message: Optional<NullableString>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -162,11 +217,7 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest0 {
             ));
         }
         Ok(DeleteTopicsRequest0 {
-            topic_names: latest
-                .topic_names
-                .into_iter()
-                .map(|ele| ele.into())
-                .collect(),
+            topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
         })
     }
@@ -183,11 +234,7 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest1 {
             ));
         }
         Ok(DeleteTopicsRequest1 {
-            topic_names: latest
-                .topic_names
-                .into_iter()
-                .map(|ele| ele.into())
-                .collect(),
+            topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
         })
     }
@@ -204,11 +251,7 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest2 {
             ));
         }
         Ok(DeleteTopicsRequest2 {
-            topic_names: latest
-                .topic_names
-                .into_iter()
-                .map(|ele| ele.into())
-                .collect(),
+            topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
         })
     }
@@ -225,11 +268,7 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest3 {
             ));
         }
         Ok(DeleteTopicsRequest3 {
-            topic_names: latest
-                .topic_names
-                .into_iter()
-                .map(|ele| ele.into())
-                .collect(),
+            topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
         })
     }
@@ -258,7 +297,7 @@ impl From<DeleteTopicsResponse0> for DeleteTopicsResponse5 {
 impl From<DeleteTopicsResponseResponses0> for DeleteTopicsResponseResponses5 {
     fn from(older: DeleteTopicsResponseResponses0) -> Self {
         DeleteTopicsResponseResponses5 {
-            name: older.name.into(),
+            name: older.name,
             error_code: older.error_code,
             ..DeleteTopicsResponseResponses5::default()
         }
@@ -278,7 +317,7 @@ impl From<DeleteTopicsResponse1> for DeleteTopicsResponse5 {
 impl From<DeleteTopicsResponseResponses1> for DeleteTopicsResponseResponses5 {
     fn from(older: DeleteTopicsResponseResponses1) -> Self {
         DeleteTopicsResponseResponses5 {
-            name: older.name.into(),
+            name: older.name,
             error_code: older.error_code,
             ..DeleteTopicsResponseResponses5::default()
         }
@@ -298,7 +337,7 @@ impl From<DeleteTopicsResponse2> for DeleteTopicsResponse5 {
 impl From<DeleteTopicsResponseResponses2> for DeleteTopicsResponseResponses5 {
     fn from(older: DeleteTopicsResponseResponses2) -> Self {
         DeleteTopicsResponseResponses5 {
-            name: older.name.into(),
+            name: older.name,
             error_code: older.error_code,
             ..DeleteTopicsResponseResponses5::default()
         }
@@ -318,7 +357,7 @@ impl From<DeleteTopicsResponse3> for DeleteTopicsResponse5 {
 impl From<DeleteTopicsResponseResponses3> for DeleteTopicsResponseResponses5 {
     fn from(older: DeleteTopicsResponseResponses3) -> Self {
         DeleteTopicsResponseResponses5 {
-            name: older.name.into(),
+            name: older.name,
             error_code: older.error_code,
             ..DeleteTopicsResponseResponses5::default()
         }

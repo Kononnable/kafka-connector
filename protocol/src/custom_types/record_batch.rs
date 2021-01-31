@@ -43,38 +43,39 @@ pub struct Header {
 }
 
 impl ToBytes for RecordBatch {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
         // MessageSet v2 header(?)
         let message_set_v2_header_size: i32 = 8 + 4 + 4 + 1 + 4 + 2 + 4 + 8 + 8 + 8 + 2 + 4 + 4;
-        message_set_v2_header_size.serialize(buf);
+        message_set_v2_header_size.serialize(buf, is_flexible_version);
 
-        self.base_offset.serialize(buf);
-        self.batch_length.serialize(buf); // set later(?)
-        self.partition_leader_epoch.serialize(buf);
-        self.magic.serialize(buf);
-        self.crc.serialize(buf); // set later(?)
-        self.attributes.serialize(buf); // set later(?)
-        self.last_offset_delta.serialize(buf); // set later(?)
-        self.first_timestamp.serialize(buf); // set later(?)
-        self.max_timestamp.serialize(buf); // set later
-        self.producer_id.serialize(buf);
-        self.producer_epoch.serialize(buf);
-        self.base_sequence.serialize(buf); // set later
-        self.records.serialize(buf); // set later
+        self.base_offset.serialize(buf, is_flexible_version);
+        self.batch_length.serialize(buf, is_flexible_version); // set later(?)
+        self.partition_leader_epoch
+            .serialize(buf, is_flexible_version);
+        self.magic.serialize(buf, is_flexible_version);
+        self.crc.serialize(buf, is_flexible_version); // set later(?)
+        self.attributes.serialize(buf, is_flexible_version); // set later(?)
+        self.last_offset_delta.serialize(buf, is_flexible_version); // set later(?)
+        self.first_timestamp.serialize(buf, is_flexible_version); // set later(?)
+        self.max_timestamp.serialize(buf, is_flexible_version); // set later
+        self.producer_id.serialize(buf, is_flexible_version);
+        self.producer_epoch.serialize(buf, is_flexible_version);
+        self.base_sequence.serialize(buf, is_flexible_version); // set later
+        self.records.serialize(buf, is_flexible_version); // set later
 
         todo!()
     }
 }
 
 impl ToBytes for Record {
-    fn serialize(&self, buf: &mut BytesMut) {
-        self.length.serialize(buf); // set later(?)
-        self.attributes.serialize(buf); // set later(?)
-        self.timestamp_delta.serialize(buf); // set later(?)
-        self.offset_delta.serialize(buf); // set later(?)
-        self.key.serialize(buf);
-        self.value.serialize(buf);
-        self.headers.serialize(buf); // TODO: set later(?) - no len, len as zigzag i32
+    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
+        self.length.serialize(buf, is_flexible_version); // set later(?)
+        self.attributes.serialize(buf, is_flexible_version); // set later(?)
+        self.timestamp_delta.serialize(buf, is_flexible_version); // set later(?)
+        self.offset_delta.serialize(buf, is_flexible_version); // set later(?)
+        self.key.serialize(buf, is_flexible_version);
+        self.value.serialize(buf, is_flexible_version);
+        self.headers.serialize(buf, is_flexible_version); // TODO: set later(?) - no len, len as zigzag i32
         todo!()
     }
 }

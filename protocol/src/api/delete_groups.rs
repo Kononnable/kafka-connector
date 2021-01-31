@@ -13,22 +13,62 @@ impl ApiCall for DeleteGroupsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DeleteGroups
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&DeleteGroupsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&DeleteGroupsRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                DeleteGroupsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                DeleteGroupsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &DeleteGroupsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &DeleteGroupsRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> DeleteGroupsResponse {
-        match version {
-            0 => DeleteGroupsResponse0::deserialize(buf).into(),
-            1 => DeleteGroupsResponse1::deserialize(buf).into(),
-            2 => DeleteGroupsResponse::deserialize(buf),
-            _ => DeleteGroupsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, DeleteGroupsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => DeleteGroupsResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => DeleteGroupsResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => DeleteGroupsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => DeleteGroupsResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -43,7 +83,7 @@ pub struct DeleteGroupsRequest1 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteGroupsRequest2 {
-    pub groups_names: Vec<CompactString>,
+    pub groups_names: Vec<String>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -80,7 +120,7 @@ pub struct DeleteGroupsResponse2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteGroupsResponseResults2 {
-    pub group_id: CompactString,
+    pub group_id: String,
     pub error_code: Int16,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -96,11 +136,7 @@ impl TryFrom<DeleteGroupsRequest2> for DeleteGroupsRequest0 {
             ));
         }
         Ok(DeleteGroupsRequest0 {
-            groups_names: latest
-                .groups_names
-                .into_iter()
-                .map(|ele| ele.into())
-                .collect(),
+            groups_names: latest.groups_names,
         })
     }
 }
@@ -116,11 +152,7 @@ impl TryFrom<DeleteGroupsRequest2> for DeleteGroupsRequest1 {
             ));
         }
         Ok(DeleteGroupsRequest1 {
-            groups_names: latest
-                .groups_names
-                .into_iter()
-                .map(|ele| ele.into())
-                .collect(),
+            groups_names: latest.groups_names,
         })
     }
 }
@@ -138,7 +170,7 @@ impl From<DeleteGroupsResponse0> for DeleteGroupsResponse2 {
 impl From<DeleteGroupsResponseResults0> for DeleteGroupsResponseResults2 {
     fn from(older: DeleteGroupsResponseResults0) -> Self {
         DeleteGroupsResponseResults2 {
-            group_id: older.group_id.into(),
+            group_id: older.group_id,
             error_code: older.error_code,
             ..DeleteGroupsResponseResults2::default()
         }
@@ -158,7 +190,7 @@ impl From<DeleteGroupsResponse1> for DeleteGroupsResponse2 {
 impl From<DeleteGroupsResponseResults1> for DeleteGroupsResponseResults2 {
     fn from(older: DeleteGroupsResponseResults1) -> Self {
         DeleteGroupsResponseResults2 {
-            group_id: older.group_id.into(),
+            group_id: older.group_id,
             error_code: older.error_code,
             ..DeleteGroupsResponseResults2::default()
         }

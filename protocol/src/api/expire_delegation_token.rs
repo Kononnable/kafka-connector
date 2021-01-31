@@ -13,22 +13,72 @@ impl ApiCall for ExpireDelegationTokenRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ExpireDelegationToken
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&ExpireDelegationTokenRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&ExpireDelegationTokenRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                ExpireDelegationTokenRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                ExpireDelegationTokenRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &ExpireDelegationTokenRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &ExpireDelegationTokenRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> ExpireDelegationTokenResponse {
-        match version {
-            0 => ExpireDelegationTokenResponse0::deserialize(buf).into(),
-            1 => ExpireDelegationTokenResponse1::deserialize(buf).into(),
-            2 => ExpireDelegationTokenResponse::deserialize(buf),
-            _ => ExpireDelegationTokenResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, ExpireDelegationTokenResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => {
+                ExpireDelegationTokenResponse0::deserialize(buf, Self::is_flexible_version(version))
+                    .into()
+            }
+            1 => {
+                ExpireDelegationTokenResponse1::deserialize(buf, Self::is_flexible_version(version))
+                    .into()
+            }
+            2 => {
+                ExpireDelegationTokenResponse::deserialize(buf, Self::is_flexible_version(version))
+            }
+            _ => {
+                ExpireDelegationTokenResponse::deserialize(buf, Self::is_flexible_version(version))
+            }
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -45,7 +95,7 @@ pub struct ExpireDelegationTokenRequest1 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ExpireDelegationTokenRequest2 {
-    pub hmac: CompactBytes,
+    pub hmac: KafkaBytes,
     pub expiry_time_period_ms: Int64,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -83,7 +133,7 @@ impl TryFrom<ExpireDelegationTokenRequest2> for ExpireDelegationTokenRequest0 {
             ));
         }
         Ok(ExpireDelegationTokenRequest0 {
-            hmac: latest.hmac.into(),
+            hmac: latest.hmac,
             expiry_time_period_ms: latest.expiry_time_period_ms,
         })
     }
@@ -100,7 +150,7 @@ impl TryFrom<ExpireDelegationTokenRequest2> for ExpireDelegationTokenRequest1 {
             ));
         }
         Ok(ExpireDelegationTokenRequest1 {
-            hmac: latest.hmac.into(),
+            hmac: latest.hmac,
             expiry_time_period_ms: latest.expiry_time_period_ms,
         })
     }

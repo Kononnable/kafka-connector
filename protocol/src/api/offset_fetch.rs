@@ -13,32 +13,97 @@ impl ApiCall for OffsetFetchRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::OffsetFetch
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&OffsetFetchRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&OffsetFetchRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&OffsetFetchRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&OffsetFetchRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&OffsetFetchRequest4::try_from(self)?, buf),
-            5 => ToBytes::serialize(&OffsetFetchRequest5::try_from(self)?, buf),
-            6 => ToBytes::serialize(&OffsetFetchRequest6::try_from(self)?, buf),
-            7 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => false,
+            5 => false,
+            6 => true,
+            7 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                OffsetFetchRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                OffsetFetchRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &OffsetFetchRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &OffsetFetchRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &OffsetFetchRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &OffsetFetchRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(
+                &OffsetFetchRequest4::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            5 => ToBytes::serialize(
+                &OffsetFetchRequest5::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            6 => ToBytes::serialize(
+                &OffsetFetchRequest6::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            7 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> OffsetFetchResponse {
-        match version {
-            0 => OffsetFetchResponse0::deserialize(buf).into(),
-            1 => OffsetFetchResponse1::deserialize(buf).into(),
-            2 => OffsetFetchResponse2::deserialize(buf).into(),
-            3 => OffsetFetchResponse3::deserialize(buf).into(),
-            4 => OffsetFetchResponse4::deserialize(buf).into(),
-            5 => OffsetFetchResponse5::deserialize(buf).into(),
-            6 => OffsetFetchResponse6::deserialize(buf).into(),
-            7 => OffsetFetchResponse::deserialize(buf),
-            _ => OffsetFetchResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, OffsetFetchResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => OffsetFetchResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => OffsetFetchResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => OffsetFetchResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => OffsetFetchResponse3::deserialize(buf, Self::is_flexible_version(version)).into(),
+            4 => OffsetFetchResponse4::deserialize(buf, Self::is_flexible_version(version)).into(),
+            5 => OffsetFetchResponse5::deserialize(buf, Self::is_flexible_version(version)).into(),
+            6 => OffsetFetchResponse6::deserialize(buf, Self::is_flexible_version(version)).into(),
+            7 => OffsetFetchResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => OffsetFetchResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -115,21 +180,21 @@ pub struct OffsetFetchRequestTopics5 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequest6 {
-    pub group_id: CompactString,
+    pub group_id: String,
     pub topics: Vec<OffsetFetchRequestTopics6>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics6 {
-    pub name: CompactString,
+    pub name: String,
     pub partition_indexes: Vec<Int32>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequest7 {
-    pub group_id: CompactString,
+    pub group_id: String,
     pub topics: Vec<OffsetFetchRequestTopics7>,
     pub require_stable: Optional<Boolean>,
     pub tag_buffer: Optional<TagBuffer>,
@@ -137,7 +202,7 @@ pub struct OffsetFetchRequest7 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics7 {
-    pub name: CompactString,
+    pub name: String,
     pub partition_indexes: Vec<Int32>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -274,7 +339,7 @@ pub struct OffsetFetchResponse6 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics6 {
-    pub name: CompactString,
+    pub name: String,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions6>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -284,7 +349,7 @@ pub struct OffsetFetchResponseTopicsPartitions6 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
     pub committed_leader_epoch: Optional<Int32>,
-    pub metadata: CompactNullableString,
+    pub metadata: NullableString,
     pub error_code: Int16,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -299,7 +364,7 @@ pub struct OffsetFetchResponse7 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics7 {
-    pub name: CompactString,
+    pub name: String,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions7>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -309,7 +374,7 @@ pub struct OffsetFetchResponseTopicsPartitions7 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
     pub committed_leader_epoch: Optional<Int32>,
-    pub metadata: CompactNullableString,
+    pub metadata: NullableString,
     pub error_code: Int16,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -332,7 +397,7 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest0 {
             ));
         }
         Ok(OffsetFetchRequest0 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -353,7 +418,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics0 {
             ));
         }
         Ok(OffsetFetchRequestTopics0 {
-            name: latest.name.into(),
+            name: latest.name,
             partition_indexes: latest.partition_indexes,
         })
     }
@@ -377,7 +442,7 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest1 {
             ));
         }
         Ok(OffsetFetchRequest1 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -398,7 +463,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics1 {
             ));
         }
         Ok(OffsetFetchRequestTopics1 {
-            name: latest.name.into(),
+            name: latest.name,
             partition_indexes: latest.partition_indexes,
         })
     }
@@ -422,7 +487,7 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest2 {
             ));
         }
         Ok(OffsetFetchRequest2 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -443,7 +508,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics2 {
             ));
         }
         Ok(OffsetFetchRequestTopics2 {
-            name: latest.name.into(),
+            name: latest.name,
             partition_indexes: latest.partition_indexes,
         })
     }
@@ -467,7 +532,7 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest3 {
             ));
         }
         Ok(OffsetFetchRequest3 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -488,7 +553,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics3 {
             ));
         }
         Ok(OffsetFetchRequestTopics3 {
-            name: latest.name.into(),
+            name: latest.name,
             partition_indexes: latest.partition_indexes,
         })
     }
@@ -512,7 +577,7 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest4 {
             ));
         }
         Ok(OffsetFetchRequest4 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -533,7 +598,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics4 {
             ));
         }
         Ok(OffsetFetchRequestTopics4 {
-            name: latest.name.into(),
+            name: latest.name,
             partition_indexes: latest.partition_indexes,
         })
     }
@@ -557,7 +622,7 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest5 {
             ));
         }
         Ok(OffsetFetchRequest5 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -578,7 +643,7 @@ impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics5 {
             ));
         }
         Ok(OffsetFetchRequestTopics5 {
-            name: latest.name.into(),
+            name: latest.name,
             partition_indexes: latest.partition_indexes,
         })
     }
@@ -629,7 +694,7 @@ impl From<OffsetFetchResponse0> for OffsetFetchResponse7 {
 impl From<OffsetFetchResponseTopics0> for OffsetFetchResponseTopics7 {
     fn from(older: OffsetFetchResponseTopics0) -> Self {
         OffsetFetchResponseTopics7 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetFetchResponseTopics7::default()
         }
@@ -641,7 +706,7 @@ impl From<OffsetFetchResponseTopicsPartitions0> for OffsetFetchResponseTopicsPar
         OffsetFetchResponseTopicsPartitions7 {
             partition_index: older.partition_index,
             committed_offset: older.committed_offset,
-            metadata: older.metadata.into(),
+            metadata: older.metadata,
             error_code: older.error_code,
             ..OffsetFetchResponseTopicsPartitions7::default()
         }
@@ -660,7 +725,7 @@ impl From<OffsetFetchResponse1> for OffsetFetchResponse7 {
 impl From<OffsetFetchResponseTopics1> for OffsetFetchResponseTopics7 {
     fn from(older: OffsetFetchResponseTopics1) -> Self {
         OffsetFetchResponseTopics7 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetFetchResponseTopics7::default()
         }
@@ -672,7 +737,7 @@ impl From<OffsetFetchResponseTopicsPartitions1> for OffsetFetchResponseTopicsPar
         OffsetFetchResponseTopicsPartitions7 {
             partition_index: older.partition_index,
             committed_offset: older.committed_offset,
-            metadata: older.metadata.into(),
+            metadata: older.metadata,
             error_code: older.error_code,
             ..OffsetFetchResponseTopicsPartitions7::default()
         }
@@ -692,7 +757,7 @@ impl From<OffsetFetchResponse2> for OffsetFetchResponse7 {
 impl From<OffsetFetchResponseTopics2> for OffsetFetchResponseTopics7 {
     fn from(older: OffsetFetchResponseTopics2) -> Self {
         OffsetFetchResponseTopics7 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetFetchResponseTopics7::default()
         }
@@ -704,7 +769,7 @@ impl From<OffsetFetchResponseTopicsPartitions2> for OffsetFetchResponseTopicsPar
         OffsetFetchResponseTopicsPartitions7 {
             partition_index: older.partition_index,
             committed_offset: older.committed_offset,
-            metadata: older.metadata.into(),
+            metadata: older.metadata,
             error_code: older.error_code,
             ..OffsetFetchResponseTopicsPartitions7::default()
         }
@@ -725,7 +790,7 @@ impl From<OffsetFetchResponse3> for OffsetFetchResponse7 {
 impl From<OffsetFetchResponseTopics3> for OffsetFetchResponseTopics7 {
     fn from(older: OffsetFetchResponseTopics3) -> Self {
         OffsetFetchResponseTopics7 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetFetchResponseTopics7::default()
         }
@@ -737,7 +802,7 @@ impl From<OffsetFetchResponseTopicsPartitions3> for OffsetFetchResponseTopicsPar
         OffsetFetchResponseTopicsPartitions7 {
             partition_index: older.partition_index,
             committed_offset: older.committed_offset,
-            metadata: older.metadata.into(),
+            metadata: older.metadata,
             error_code: older.error_code,
             ..OffsetFetchResponseTopicsPartitions7::default()
         }
@@ -758,7 +823,7 @@ impl From<OffsetFetchResponse4> for OffsetFetchResponse7 {
 impl From<OffsetFetchResponseTopics4> for OffsetFetchResponseTopics7 {
     fn from(older: OffsetFetchResponseTopics4) -> Self {
         OffsetFetchResponseTopics7 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetFetchResponseTopics7::default()
         }
@@ -770,7 +835,7 @@ impl From<OffsetFetchResponseTopicsPartitions4> for OffsetFetchResponseTopicsPar
         OffsetFetchResponseTopicsPartitions7 {
             partition_index: older.partition_index,
             committed_offset: older.committed_offset,
-            metadata: older.metadata.into(),
+            metadata: older.metadata,
             error_code: older.error_code,
             ..OffsetFetchResponseTopicsPartitions7::default()
         }
@@ -791,7 +856,7 @@ impl From<OffsetFetchResponse5> for OffsetFetchResponse7 {
 impl From<OffsetFetchResponseTopics5> for OffsetFetchResponseTopics7 {
     fn from(older: OffsetFetchResponseTopics5) -> Self {
         OffsetFetchResponseTopics7 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetFetchResponseTopics7::default()
         }
@@ -804,7 +869,7 @@ impl From<OffsetFetchResponseTopicsPartitions5> for OffsetFetchResponseTopicsPar
             partition_index: older.partition_index,
             committed_offset: older.committed_offset,
             committed_leader_epoch: older.committed_leader_epoch,
-            metadata: older.metadata.into(),
+            metadata: older.metadata,
             error_code: older.error_code,
             ..OffsetFetchResponseTopicsPartitions7::default()
         }

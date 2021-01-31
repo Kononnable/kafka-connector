@@ -13,22 +13,62 @@ impl ApiCall for DeleteAclsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DeleteAcls
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&DeleteAclsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&DeleteAclsRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                DeleteAclsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                DeleteAclsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &DeleteAclsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &DeleteAclsRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> DeleteAclsResponse {
-        match version {
-            0 => DeleteAclsResponse0::deserialize(buf).into(),
-            1 => DeleteAclsResponse1::deserialize(buf).into(),
-            2 => DeleteAclsResponse::deserialize(buf),
-            _ => DeleteAclsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, DeleteAclsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => DeleteAclsResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => DeleteAclsResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => DeleteAclsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => DeleteAclsResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -71,10 +111,10 @@ pub struct DeleteAclsRequest2 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteAclsRequestFilters2 {
     pub resource_type_filter: Int8,
-    pub resource_name_filter: CompactNullableString,
+    pub resource_name_filter: NullableString,
     pub pattern_type_filter: Optional<Int8>,
-    pub principal_filter: CompactNullableString,
-    pub host_filter: CompactNullableString,
+    pub principal_filter: NullableString,
+    pub host_filter: NullableString,
     pub operation: Int8,
     pub permission_type: Int8,
     pub tag_buffer: Optional<TagBuffer>,
@@ -141,7 +181,7 @@ pub struct DeleteAclsResponse2 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteAclsResponseFilterResults2 {
     pub error_code: Int16,
-    pub error_message: CompactNullableString,
+    pub error_message: NullableString,
     pub matching_acls: Vec<DeleteAclsResponseFilterResultsMatchingAcls2>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -149,12 +189,12 @@ pub struct DeleteAclsResponseFilterResults2 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteAclsResponseFilterResultsMatchingAcls2 {
     pub error_code: Int16,
-    pub error_message: CompactNullableString,
+    pub error_message: NullableString,
     pub resource_type: Int8,
-    pub resource_name: CompactString,
+    pub resource_name: String,
     pub pattern_type: Optional<Int8>,
-    pub principal: CompactString,
-    pub host: CompactString,
+    pub principal: String,
+    pub host: String,
     pub operation: Int8,
     pub permission_type: Int8,
     pub tag_buffer: Optional<TagBuffer>,
@@ -195,9 +235,9 @@ impl TryFrom<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters0 {
         }
         Ok(DeleteAclsRequestFilters0 {
             resource_type_filter: latest.resource_type_filter,
-            resource_name_filter: latest.resource_name_filter.into(),
-            principal_filter: latest.principal_filter.into(),
-            host_filter: latest.host_filter.into(),
+            resource_name_filter: latest.resource_name_filter,
+            principal_filter: latest.principal_filter,
+            host_filter: latest.host_filter,
             operation: latest.operation,
             permission_type: latest.permission_type,
         })
@@ -232,10 +272,10 @@ impl TryFrom<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters1 {
         }
         Ok(DeleteAclsRequestFilters1 {
             resource_type_filter: latest.resource_type_filter,
-            resource_name_filter: latest.resource_name_filter.into(),
+            resource_name_filter: latest.resource_name_filter,
             pattern_type_filter: latest.pattern_type_filter,
-            principal_filter: latest.principal_filter.into(),
-            host_filter: latest.host_filter.into(),
+            principal_filter: latest.principal_filter,
+            host_filter: latest.host_filter,
             operation: latest.operation,
             permission_type: latest.permission_type,
         })
@@ -260,7 +300,7 @@ impl From<DeleteAclsResponseFilterResults0> for DeleteAclsResponseFilterResults2
     fn from(older: DeleteAclsResponseFilterResults0) -> Self {
         DeleteAclsResponseFilterResults2 {
             error_code: older.error_code,
-            error_message: older.error_message.into(),
+            error_message: older.error_message,
             matching_acls: older
                 .matching_acls
                 .into_iter()
@@ -277,11 +317,11 @@ impl From<DeleteAclsResponseFilterResultsMatchingAcls0>
     fn from(older: DeleteAclsResponseFilterResultsMatchingAcls0) -> Self {
         DeleteAclsResponseFilterResultsMatchingAcls2 {
             error_code: older.error_code,
-            error_message: older.error_message.into(),
+            error_message: older.error_message,
             resource_type: older.resource_type,
-            resource_name: older.resource_name.into(),
-            principal: older.principal.into(),
-            host: older.host.into(),
+            resource_name: older.resource_name,
+            principal: older.principal,
+            host: older.host,
             operation: older.operation,
             permission_type: older.permission_type,
             ..DeleteAclsResponseFilterResultsMatchingAcls2::default()
@@ -307,7 +347,7 @@ impl From<DeleteAclsResponseFilterResults1> for DeleteAclsResponseFilterResults2
     fn from(older: DeleteAclsResponseFilterResults1) -> Self {
         DeleteAclsResponseFilterResults2 {
             error_code: older.error_code,
-            error_message: older.error_message.into(),
+            error_message: older.error_message,
             matching_acls: older
                 .matching_acls
                 .into_iter()
@@ -324,12 +364,12 @@ impl From<DeleteAclsResponseFilterResultsMatchingAcls1>
     fn from(older: DeleteAclsResponseFilterResultsMatchingAcls1) -> Self {
         DeleteAclsResponseFilterResultsMatchingAcls2 {
             error_code: older.error_code,
-            error_message: older.error_message.into(),
+            error_message: older.error_message,
             resource_type: older.resource_type,
-            resource_name: older.resource_name.into(),
+            resource_name: older.resource_name,
             pattern_type: older.pattern_type,
-            principal: older.principal.into(),
-            host: older.host.into(),
+            principal: older.principal,
+            host: older.host,
             operation: older.operation,
             permission_type: older.permission_type,
             ..DeleteAclsResponseFilterResultsMatchingAcls2::default()

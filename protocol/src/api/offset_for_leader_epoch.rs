@@ -13,24 +13,78 @@ impl ApiCall for OffsetForLeaderEpochRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::OffsetForLeaderEpoch
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&OffsetForLeaderEpochRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&OffsetForLeaderEpochRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&OffsetForLeaderEpochRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            _ => false,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                OffsetForLeaderEpochRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                OffsetForLeaderEpochRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &OffsetForLeaderEpochRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &OffsetForLeaderEpochRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &OffsetForLeaderEpochRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> OffsetForLeaderEpochResponse {
-        match version {
-            0 => OffsetForLeaderEpochResponse0::deserialize(buf).into(),
-            1 => OffsetForLeaderEpochResponse1::deserialize(buf).into(),
-            2 => OffsetForLeaderEpochResponse2::deserialize(buf).into(),
-            3 => OffsetForLeaderEpochResponse::deserialize(buf),
-            _ => OffsetForLeaderEpochResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, OffsetForLeaderEpochResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => {
+                OffsetForLeaderEpochResponse0::deserialize(buf, Self::is_flexible_version(version))
+                    .into()
+            }
+            1 => {
+                OffsetForLeaderEpochResponse1::deserialize(buf, Self::is_flexible_version(version))
+                    .into()
+            }
+            2 => {
+                OffsetForLeaderEpochResponse2::deserialize(buf, Self::is_flexible_version(version))
+                    .into()
+            }
+            3 => OffsetForLeaderEpochResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => OffsetForLeaderEpochResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]

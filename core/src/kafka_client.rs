@@ -8,15 +8,7 @@ use tokio::{
 
 use thiserror::Error as DeriveError;
 
-use kafka_connector_protocol::{
-    api::{
-        api_versions::ApiVersionsRequest,
-        header::{HeaderRequest, HeaderResponse},
-    },
-    from_bytes::FromBytes,
-    to_bytes::ToBytes,
-    ApiCall,
-};
+use kafka_connector_protocol::{api::api_versions::ApiVersionsRequest, ApiCall};
 
 #[derive(Debug)]
 pub struct KafkaClient {
@@ -97,15 +89,22 @@ impl BrokerClient {
             }
         };
 
-        let header = HeaderRequest::new(
-            T::get_api_key() as i16,
-            api_version,
-            self.last_correlation + 1,
-            self.client_id.to_owned(),
-        );
+        // let header = HeaderRequest1::new(
+        //     T::get_api_key() as i16,
+        //     api_version,
+        //     self.last_correlation + 1,
+        //     self.client_id.to_owned(),
+        // );
         let mut buffer = BytesMut::with_capacity(4096);
-        header.serialize(&mut buffer);
-        request.serialize(api_version, &mut buffer).unwrap();
+        // header.serialize(&mut buffer);
+        request
+            .serialize(
+                api_version,
+                &mut buffer,
+                self.last_correlation + 1,
+                &self.client_id,
+            )
+            .unwrap();
         let len = buffer.len() as i32;
         self.connection.write_all(&len.to_be_bytes()).await.unwrap();
         self.connection.write_all(&buffer).await.unwrap();
@@ -115,9 +114,9 @@ impl BrokerClient {
         let mut buf2 = vec![0; cap as usize];
         self.connection.read_exact(&mut buf2).await.unwrap();
         let mut buf2 = Bytes::from(buf2);
-        let response_header = HeaderResponse::deserialize(&mut buf2);
-        self.last_correlation = response_header.correlation;
-        let response = T::deserialize_response(api_version, &mut buf2);
+        // let response_header = HeaderResponse::deserialize(&mut buf2);
+        let (correlation, response) = T::deserialize_response(api_version, &mut buf2);
+        self.last_correlation = correlation;
         Ok(response)
     }
 

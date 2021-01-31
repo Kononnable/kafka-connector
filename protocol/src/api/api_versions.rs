@@ -13,24 +13,69 @@ impl ApiCall for ApiVersionsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ApiVersions
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&ApiVersionsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&ApiVersionsRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&ApiVersionsRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                ApiVersionsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                ApiVersionsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &ApiVersionsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &ApiVersionsRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &ApiVersionsRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> ApiVersionsResponse {
-        match version {
-            0 => ApiVersionsResponse0::deserialize(buf).into(),
-            1 => ApiVersionsResponse1::deserialize(buf).into(),
-            2 => ApiVersionsResponse2::deserialize(buf).into(),
-            3 => ApiVersionsResponse::deserialize(buf),
-            _ => ApiVersionsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, ApiVersionsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => ApiVersionsResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => ApiVersionsResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => ApiVersionsResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => ApiVersionsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => ApiVersionsResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -44,8 +89,8 @@ pub struct ApiVersionsRequest2 {}
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ApiVersionsRequest3 {
-    pub client_software_name: Optional<CompactString>,
-    pub client_software_version: Optional<CompactString>,
+    pub client_software_name: Optional<String>,
+    pub client_software_version: Optional<String>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 

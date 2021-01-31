@@ -13,22 +13,64 @@ impl ApiCall for DescribeLogDirsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeLogDirs
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&DescribeLogDirsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&DescribeLogDirsRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                DescribeLogDirsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                DescribeLogDirsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &DescribeLogDirsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &DescribeLogDirsRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> DescribeLogDirsResponse {
-        match version {
-            0 => DescribeLogDirsResponse0::deserialize(buf).into(),
-            1 => DescribeLogDirsResponse1::deserialize(buf).into(),
-            2 => DescribeLogDirsResponse::deserialize(buf),
-            _ => DescribeLogDirsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, DescribeLogDirsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => DescribeLogDirsResponse0::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            1 => DescribeLogDirsResponse1::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            2 => DescribeLogDirsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => DescribeLogDirsResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -61,7 +103,7 @@ pub struct DescribeLogDirsRequest2 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequestTopics2 {
-    pub topic: CompactString,
+    pub topic: String,
     pub partition_index: Vec<Int32>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -130,14 +172,14 @@ pub struct DescribeLogDirsResponse2 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResults2 {
     pub error_code: Int16,
-    pub log_dir: CompactString,
+    pub log_dir: String,
     pub topics: Vec<DescribeLogDirsResponseResultsTopics2>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResultsTopics2 {
-    pub name: CompactString,
+    pub name: String,
     pub partitions: Vec<DescribeLogDirsResponseResultsTopicsPartitions2>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -182,7 +224,7 @@ impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics0 {
             ));
         }
         Ok(DescribeLogDirsRequestTopics0 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partition_index: latest.partition_index,
         })
     }
@@ -219,7 +261,7 @@ impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics1 {
             ));
         }
         Ok(DescribeLogDirsRequestTopics1 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partition_index: latest.partition_index,
         })
     }
@@ -239,7 +281,7 @@ impl From<DescribeLogDirsResponseResults0> for DescribeLogDirsResponseResults2 {
     fn from(older: DescribeLogDirsResponseResults0) -> Self {
         DescribeLogDirsResponseResults2 {
             error_code: older.error_code,
-            log_dir: older.log_dir.into(),
+            log_dir: older.log_dir,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..DescribeLogDirsResponseResults2::default()
         }
@@ -249,7 +291,7 @@ impl From<DescribeLogDirsResponseResults0> for DescribeLogDirsResponseResults2 {
 impl From<DescribeLogDirsResponseResultsTopics0> for DescribeLogDirsResponseResultsTopics2 {
     fn from(older: DescribeLogDirsResponseResultsTopics0) -> Self {
         DescribeLogDirsResponseResultsTopics2 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..DescribeLogDirsResponseResultsTopics2::default()
         }
@@ -284,7 +326,7 @@ impl From<DescribeLogDirsResponseResults1> for DescribeLogDirsResponseResults2 {
     fn from(older: DescribeLogDirsResponseResults1) -> Self {
         DescribeLogDirsResponseResults2 {
             error_code: older.error_code,
-            log_dir: older.log_dir.into(),
+            log_dir: older.log_dir,
             topics: older.topics.into_iter().map(|el| el.into()).collect(),
             ..DescribeLogDirsResponseResults2::default()
         }
@@ -294,7 +336,7 @@ impl From<DescribeLogDirsResponseResults1> for DescribeLogDirsResponseResults2 {
 impl From<DescribeLogDirsResponseResultsTopics1> for DescribeLogDirsResponseResultsTopics2 {
     fn from(older: DescribeLogDirsResponseResultsTopics1) -> Self {
         DescribeLogDirsResponseResultsTopics2 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..DescribeLogDirsResponseResultsTopics2::default()
         }

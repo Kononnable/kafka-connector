@@ -13,28 +13,83 @@ impl ApiCall for SyncGroupRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::SyncGroup
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&SyncGroupRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&SyncGroupRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&SyncGroupRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&SyncGroupRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&SyncGroupRequest4::try_from(self)?, buf),
-            5 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => true,
+            5 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                SyncGroupRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                SyncGroupRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &SyncGroupRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &SyncGroupRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &SyncGroupRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &SyncGroupRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(
+                &SyncGroupRequest4::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            5 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> SyncGroupResponse {
-        match version {
-            0 => SyncGroupResponse0::deserialize(buf).into(),
-            1 => SyncGroupResponse1::deserialize(buf).into(),
-            2 => SyncGroupResponse2::deserialize(buf).into(),
-            3 => SyncGroupResponse3::deserialize(buf).into(),
-            4 => SyncGroupResponse4::deserialize(buf).into(),
-            5 => SyncGroupResponse::deserialize(buf),
-            _ => SyncGroupResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, SyncGroupResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => SyncGroupResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => SyncGroupResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => SyncGroupResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => SyncGroupResponse3::deserialize(buf, Self::is_flexible_version(version)).into(),
+            4 => SyncGroupResponse4::deserialize(buf, Self::is_flexible_version(version)).into(),
+            5 => SyncGroupResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => SyncGroupResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -96,37 +151,37 @@ pub struct SyncGroupRequestAssignments3 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequest4 {
-    pub group_id: CompactString,
+    pub group_id: String,
     pub generation_id: Int32,
-    pub member_id: CompactString,
-    pub group_instance_id: Optional<CompactNullableString>,
+    pub member_id: String,
+    pub group_instance_id: Optional<NullableString>,
     pub assignments: Vec<SyncGroupRequestAssignments4>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequestAssignments4 {
-    pub member_id: CompactString,
-    pub assignment: CompactBytes,
+    pub member_id: String,
+    pub assignment: KafkaBytes,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequest5 {
-    pub group_id: CompactString,
+    pub group_id: String,
     pub generation_id: Int32,
-    pub member_id: CompactString,
-    pub group_instance_id: Optional<CompactNullableString>,
-    pub protocol_type: Optional<CompactNullableString>,
-    pub protocol_name: Optional<CompactNullableString>,
+    pub member_id: String,
+    pub group_instance_id: Optional<NullableString>,
+    pub protocol_type: Optional<NullableString>,
+    pub protocol_name: Optional<NullableString>,
     pub assignments: Vec<SyncGroupRequestAssignments5>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequestAssignments5 {
-    pub member_id: CompactString,
-    pub assignment: CompactBytes,
+    pub member_id: String,
+    pub assignment: KafkaBytes,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -161,7 +216,7 @@ pub struct SyncGroupResponse3 {
 pub struct SyncGroupResponse4 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
-    pub assignment: CompactBytes,
+    pub assignment: KafkaBytes,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -169,9 +224,9 @@ pub struct SyncGroupResponse4 {
 pub struct SyncGroupResponse5 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
-    pub protocol_type: Optional<CompactNullableString>,
-    pub protocol_name: Optional<CompactNullableString>,
-    pub assignment: CompactBytes,
+    pub protocol_type: Optional<NullableString>,
+    pub protocol_name: Optional<NullableString>,
+    pub assignment: KafkaBytes,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -203,9 +258,9 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest0 {
             return Err(Error::OldKafkaVersion("SyncGroupRequest", 0, "tag_buffer"));
         }
         Ok(SyncGroupRequest0 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.into(),
+            member_id: latest.member_id,
             assignments: latest
                 .assignments
                 .into_iter()
@@ -226,8 +281,8 @@ impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments0 {
             ));
         }
         Ok(SyncGroupRequestAssignments0 {
-            member_id: latest.member_id.into(),
-            assignment: latest.assignment.into(),
+            member_id: latest.member_id,
+            assignment: latest.assignment,
         })
     }
 }
@@ -260,9 +315,9 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest1 {
             return Err(Error::OldKafkaVersion("SyncGroupRequest", 1, "tag_buffer"));
         }
         Ok(SyncGroupRequest1 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.into(),
+            member_id: latest.member_id,
             assignments: latest
                 .assignments
                 .into_iter()
@@ -283,8 +338,8 @@ impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments1 {
             ));
         }
         Ok(SyncGroupRequestAssignments1 {
-            member_id: latest.member_id.into(),
-            assignment: latest.assignment.into(),
+            member_id: latest.member_id,
+            assignment: latest.assignment,
         })
     }
 }
@@ -317,9 +372,9 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest2 {
             return Err(Error::OldKafkaVersion("SyncGroupRequest", 2, "tag_buffer"));
         }
         Ok(SyncGroupRequest2 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.into(),
+            member_id: latest.member_id,
             assignments: latest
                 .assignments
                 .into_iter()
@@ -340,8 +395,8 @@ impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments2 {
             ));
         }
         Ok(SyncGroupRequestAssignments2 {
-            member_id: latest.member_id.into(),
-            assignment: latest.assignment.into(),
+            member_id: latest.member_id,
+            assignment: latest.assignment,
         })
     }
 }
@@ -367,10 +422,10 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest3 {
             return Err(Error::OldKafkaVersion("SyncGroupRequest", 3, "tag_buffer"));
         }
         Ok(SyncGroupRequest3 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.into(),
-            group_instance_id: latest.group_instance_id.map(|val| val.into()),
+            member_id: latest.member_id,
+            group_instance_id: latest.group_instance_id,
             assignments: latest
                 .assignments
                 .into_iter()
@@ -391,8 +446,8 @@ impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments3 {
             ));
         }
         Ok(SyncGroupRequestAssignments3 {
-            member_id: latest.member_id.into(),
-            assignment: latest.assignment.into(),
+            member_id: latest.member_id,
+            assignment: latest.assignment,
         })
     }
 }
@@ -444,7 +499,7 @@ impl From<SyncGroupResponse0> for SyncGroupResponse5 {
     fn from(older: SyncGroupResponse0) -> Self {
         SyncGroupResponse5 {
             error_code: older.error_code,
-            assignment: older.assignment.into(),
+            assignment: older.assignment,
             ..SyncGroupResponse5::default()
         }
     }
@@ -455,7 +510,7 @@ impl From<SyncGroupResponse1> for SyncGroupResponse5 {
         SyncGroupResponse5 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
-            assignment: older.assignment.into(),
+            assignment: older.assignment,
             ..SyncGroupResponse5::default()
         }
     }
@@ -466,7 +521,7 @@ impl From<SyncGroupResponse2> for SyncGroupResponse5 {
         SyncGroupResponse5 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
-            assignment: older.assignment.into(),
+            assignment: older.assignment,
             ..SyncGroupResponse5::default()
         }
     }
@@ -477,7 +532,7 @@ impl From<SyncGroupResponse3> for SyncGroupResponse5 {
         SyncGroupResponse5 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
-            assignment: older.assignment.into(),
+            assignment: older.assignment,
             ..SyncGroupResponse5::default()
         }
     }

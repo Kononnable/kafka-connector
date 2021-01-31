@@ -13,26 +13,76 @@ impl ApiCall for LeaveGroupRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::LeaveGroup
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&LeaveGroupRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&LeaveGroupRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&LeaveGroupRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&LeaveGroupRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                LeaveGroupRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                LeaveGroupRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &LeaveGroupRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &LeaveGroupRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &LeaveGroupRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &LeaveGroupRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> LeaveGroupResponse {
-        match version {
-            0 => LeaveGroupResponse0::deserialize(buf).into(),
-            1 => LeaveGroupResponse1::deserialize(buf).into(),
-            2 => LeaveGroupResponse2::deserialize(buf).into(),
-            3 => LeaveGroupResponse3::deserialize(buf).into(),
-            4 => LeaveGroupResponse::deserialize(buf),
-            _ => LeaveGroupResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, LeaveGroupResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => LeaveGroupResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => LeaveGroupResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => LeaveGroupResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => LeaveGroupResponse3::deserialize(buf, Self::is_flexible_version(version)).into(),
+            4 => LeaveGroupResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => LeaveGroupResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -67,15 +117,15 @@ pub struct LeaveGroupRequestMembers3 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequest4 {
-    pub group_id: CompactString,
+    pub group_id: String,
     pub members: Optional<Vec<LeaveGroupRequestMembers4>>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequestMembers4 {
-    pub member_id: CompactString,
-    pub group_instance_id: CompactNullableString,
+    pub member_id: String,
+    pub group_instance_id: NullableString,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -120,8 +170,8 @@ pub struct LeaveGroupResponse4 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaveGroupResponseMembers4 {
-    pub member_id: CompactString,
-    pub group_instance_id: CompactNullableString,
+    pub member_id: String,
+    pub group_instance_id: NullableString,
     pub error_code: Int16,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -136,7 +186,7 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest0 {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 0, "tag_buffer"));
         }
         Ok(LeaveGroupRequest0 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             ..LeaveGroupRequest0::default()
         })
     }
@@ -152,7 +202,7 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest1 {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 1, "tag_buffer"));
         }
         Ok(LeaveGroupRequest1 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             ..LeaveGroupRequest1::default()
         })
     }
@@ -168,7 +218,7 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest2 {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 2, "tag_buffer"));
         }
         Ok(LeaveGroupRequest2 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             ..LeaveGroupRequest2::default()
         })
     }
@@ -181,7 +231,7 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest3 {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 3, "tag_buffer"));
         }
         Ok(LeaveGroupRequest3 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             members: latest
                 .members
                 .map(|val| {
@@ -205,8 +255,8 @@ impl TryFrom<LeaveGroupRequestMembers4> for LeaveGroupRequestMembers3 {
             ));
         }
         Ok(LeaveGroupRequestMembers3 {
-            member_id: latest.member_id.into(),
-            group_instance_id: latest.group_instance_id.into(),
+            member_id: latest.member_id,
+            group_instance_id: latest.group_instance_id,
         })
     }
 }
@@ -256,8 +306,8 @@ impl From<LeaveGroupResponse3> for LeaveGroupResponse4 {
 impl From<LeaveGroupResponseMembers3> for LeaveGroupResponseMembers4 {
     fn from(older: LeaveGroupResponseMembers3) -> Self {
         LeaveGroupResponseMembers4 {
-            member_id: older.member_id.into(),
-            group_instance_id: older.group_instance_id.into(),
+            member_id: older.member_id,
+            group_instance_id: older.group_instance_id,
             error_code: older.error_code,
             ..LeaveGroupResponseMembers4::default()
         }

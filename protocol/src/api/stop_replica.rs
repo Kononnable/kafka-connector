@@ -13,24 +13,69 @@ impl ApiCall for StopReplicaRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::StopReplica
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&StopReplicaRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&StopReplicaRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&StopReplicaRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => true,
+            3 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                StopReplicaRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                StopReplicaRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &StopReplicaRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &StopReplicaRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &StopReplicaRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> StopReplicaResponse {
-        match version {
-            0 => StopReplicaResponse0::deserialize(buf).into(),
-            1 => StopReplicaResponse1::deserialize(buf).into(),
-            2 => StopReplicaResponse2::deserialize(buf).into(),
-            3 => StopReplicaResponse::deserialize(buf),
-            _ => StopReplicaResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, StopReplicaResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => StopReplicaResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => StopReplicaResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => StopReplicaResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => StopReplicaResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => StopReplicaResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -74,7 +119,7 @@ pub struct StopReplicaRequest2 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequestTopics2 {
-    pub name: CompactString,
+    pub name: String,
     pub partition_indexes: Vec<Int32>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -90,7 +135,7 @@ pub struct StopReplicaRequest3 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequestTopicStates3 {
-    pub topic_name: CompactString,
+    pub topic_name: String,
     pub partition_states: Vec<StopReplicaRequestTopicStatesPartitionStates3>,
     pub tag_buffer: TagBuffer,
 }
@@ -138,7 +183,7 @@ pub struct StopReplicaResponse2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct StopReplicaResponsePartitionErrors2 {
-    pub topic_name: CompactString,
+    pub topic_name: String,
     pub partition_index: Int32,
     pub error_code: Int16,
     pub tag_buffer: Optional<TagBuffer>,
@@ -153,7 +198,7 @@ pub struct StopReplicaResponse3 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct StopReplicaResponsePartitionErrors3 {
-    pub topic_name: CompactString,
+    pub topic_name: String,
     pub partition_index: Int32,
     pub error_code: Int16,
     pub tag_buffer: Optional<TagBuffer>,
@@ -254,7 +299,7 @@ impl From<StopReplicaResponse0> for StopReplicaResponse3 {
 impl From<StopReplicaResponsePartitionErrors0> for StopReplicaResponsePartitionErrors3 {
     fn from(older: StopReplicaResponsePartitionErrors0) -> Self {
         StopReplicaResponsePartitionErrors3 {
-            topic_name: older.topic_name.into(),
+            topic_name: older.topic_name,
             partition_index: older.partition_index,
             error_code: older.error_code,
             ..StopReplicaResponsePartitionErrors3::default()
@@ -279,7 +324,7 @@ impl From<StopReplicaResponse1> for StopReplicaResponse3 {
 impl From<StopReplicaResponsePartitionErrors1> for StopReplicaResponsePartitionErrors3 {
     fn from(older: StopReplicaResponsePartitionErrors1) -> Self {
         StopReplicaResponsePartitionErrors3 {
-            topic_name: older.topic_name.into(),
+            topic_name: older.topic_name,
             partition_index: older.partition_index,
             error_code: older.error_code,
             ..StopReplicaResponsePartitionErrors3::default()

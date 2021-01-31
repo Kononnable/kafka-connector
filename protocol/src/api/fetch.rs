@@ -13,42 +13,132 @@ impl ApiCall for FetchRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::Fetch
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&FetchRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&FetchRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&FetchRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&FetchRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&FetchRequest4::try_from(self)?, buf),
-            5 => ToBytes::serialize(&FetchRequest5::try_from(self)?, buf),
-            6 => ToBytes::serialize(&FetchRequest6::try_from(self)?, buf),
-            7 => ToBytes::serialize(&FetchRequest7::try_from(self)?, buf),
-            8 => ToBytes::serialize(&FetchRequest8::try_from(self)?, buf),
-            9 => ToBytes::serialize(&FetchRequest9::try_from(self)?, buf),
-            10 => ToBytes::serialize(&FetchRequest10::try_from(self)?, buf),
-            11 => ToBytes::serialize(&FetchRequest11::try_from(self)?, buf),
-            12 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => false,
+            5 => false,
+            6 => false,
+            7 => false,
+            8 => false,
+            9 => false,
+            10 => false,
+            11 => false,
+            12 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                FetchRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                FetchRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &FetchRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &FetchRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &FetchRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &FetchRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(
+                &FetchRequest4::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            5 => ToBytes::serialize(
+                &FetchRequest5::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            6 => ToBytes::serialize(
+                &FetchRequest6::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            7 => ToBytes::serialize(
+                &FetchRequest7::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            8 => ToBytes::serialize(
+                &FetchRequest8::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            9 => ToBytes::serialize(
+                &FetchRequest9::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            10 => ToBytes::serialize(
+                &FetchRequest10::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            11 => ToBytes::serialize(
+                &FetchRequest11::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            12 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> FetchResponse {
-        match version {
-            0 => FetchResponse0::deserialize(buf).into(),
-            1 => FetchResponse1::deserialize(buf).into(),
-            2 => FetchResponse2::deserialize(buf).into(),
-            3 => FetchResponse3::deserialize(buf).into(),
-            4 => FetchResponse4::deserialize(buf).into(),
-            5 => FetchResponse5::deserialize(buf).into(),
-            6 => FetchResponse6::deserialize(buf).into(),
-            7 => FetchResponse7::deserialize(buf).into(),
-            8 => FetchResponse8::deserialize(buf).into(),
-            9 => FetchResponse9::deserialize(buf).into(),
-            10 => FetchResponse10::deserialize(buf).into(),
-            11 => FetchResponse11::deserialize(buf).into(),
-            12 => FetchResponse::deserialize(buf),
-            _ => FetchResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, FetchResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => FetchResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => FetchResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => FetchResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => FetchResponse3::deserialize(buf, Self::is_flexible_version(version)).into(),
+            4 => FetchResponse4::deserialize(buf, Self::is_flexible_version(version)).into(),
+            5 => FetchResponse5::deserialize(buf, Self::is_flexible_version(version)).into(),
+            6 => FetchResponse6::deserialize(buf, Self::is_flexible_version(version)).into(),
+            7 => FetchResponse7::deserialize(buf, Self::is_flexible_version(version)).into(),
+            8 => FetchResponse8::deserialize(buf, Self::is_flexible_version(version)).into(),
+            9 => FetchResponse9::deserialize(buf, Self::is_flexible_version(version)).into(),
+            10 => FetchResponse10::deserialize(buf, Self::is_flexible_version(version)).into(),
+            11 => FetchResponse11::deserialize(buf, Self::is_flexible_version(version)).into(),
+            12 => FetchResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => FetchResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -387,13 +477,13 @@ pub struct FetchRequest12 {
     pub session_epoch: Optional<Int32>,
     pub topics: Vec<FetchRequestTopics12>,
     pub forgotten_topics_data: Optional<Vec<FetchRequestForgottenTopicsData12>>,
-    pub rack_id: Optional<CompactString>,
+    pub rack_id: Optional<String>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics12 {
-    pub topic: CompactString,
+    pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions12>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -411,7 +501,7 @@ pub struct FetchRequestTopicsPartitions12 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestForgottenTopicsData12 {
-    pub topic: CompactString,
+    pub topic: String,
     pub partitions: Vec<Int32>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -756,7 +846,7 @@ pub struct FetchResponse12 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses12 {
-    pub topic: CompactString,
+    pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses12>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -771,7 +861,7 @@ pub struct FetchResponseResponsesPartitionResponses12 {
     pub aborted_transactions:
         Optional<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions12>>,
     pub preferred_read_replica: Optional<Int32>,
-    pub record_set: CompactRecords,
+    pub record_set: Records,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -834,7 +924,7 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics0 {
             ));
         }
         Ok(FetchRequestTopics0 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -935,7 +1025,7 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics1 {
             ));
         }
         Ok(FetchRequestTopics1 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -1036,7 +1126,7 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics2 {
             ));
         }
         Ok(FetchRequestTopics2 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -1135,7 +1225,7 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics3 {
             ));
         }
         Ok(FetchRequestTopics3 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -1232,7 +1322,7 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics4 {
             ));
         }
         Ok(FetchRequestTopics4 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -1329,7 +1419,7 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics5 {
             ));
         }
         Ok(FetchRequestTopics5 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -1420,7 +1510,7 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics6 {
             ));
         }
         Ok(FetchRequestTopics6 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -1508,7 +1598,7 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics7 {
             ));
         }
         Ok(FetchRequestTopics7 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -1562,7 +1652,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
             ));
         }
         Ok(FetchRequestForgottenTopicsData7 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest.partitions,
         })
     }
@@ -1613,7 +1703,7 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics8 {
             ));
         }
         Ok(FetchRequestTopics8 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -1667,7 +1757,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
             ));
         }
         Ok(FetchRequestForgottenTopicsData8 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest.partitions,
         })
     }
@@ -1718,7 +1808,7 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics9 {
             ));
         }
         Ok(FetchRequestTopics9 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -1766,7 +1856,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
             ));
         }
         Ok(FetchRequestForgottenTopicsData9 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest.partitions,
         })
     }
@@ -1817,7 +1907,7 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics10 {
             ));
         }
         Ok(FetchRequestTopics10 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -1865,7 +1955,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
             ));
         }
         Ok(FetchRequestForgottenTopicsData10 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest.partitions,
         })
     }
@@ -1898,7 +1988,7 @@ impl TryFrom<FetchRequest12> for FetchRequest11 {
                         .collect::<Result<_, Error>>()
                 })
                 .wrap_result()?,
-            rack_id: latest.rack_id.map(|val| val.into()),
+            rack_id: latest.rack_id,
         })
     }
 }
@@ -1914,7 +2004,7 @@ impl TryFrom<FetchRequestTopics12> for FetchRequestTopics11 {
             ));
         }
         Ok(FetchRequestTopics11 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -1962,7 +2052,7 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
             ));
         }
         Ok(FetchRequestForgottenTopicsData11 {
-            topic: latest.topic.into(),
+            topic: latest.topic,
             partitions: latest.partitions,
         })
     }
@@ -1980,7 +2070,7 @@ impl From<FetchResponse0> for FetchResponse12 {
 impl From<FetchResponseResponses0> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses0) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic.into(),
+            topic: older.topic,
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -1999,7 +2089,7 @@ impl From<FetchResponseResponsesPartitionResponses0>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            record_set: older.record_set.into(),
+            record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2018,7 +2108,7 @@ impl From<FetchResponse1> for FetchResponse12 {
 impl From<FetchResponseResponses1> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses1) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic.into(),
+            topic: older.topic,
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2037,7 +2127,7 @@ impl From<FetchResponseResponsesPartitionResponses1>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            record_set: older.record_set.into(),
+            record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2056,7 +2146,7 @@ impl From<FetchResponse2> for FetchResponse12 {
 impl From<FetchResponseResponses2> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses2) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic.into(),
+            topic: older.topic,
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2075,7 +2165,7 @@ impl From<FetchResponseResponsesPartitionResponses2>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            record_set: older.record_set.into(),
+            record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2094,7 +2184,7 @@ impl From<FetchResponse3> for FetchResponse12 {
 impl From<FetchResponseResponses3> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses3) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic.into(),
+            topic: older.topic,
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2113,7 +2203,7 @@ impl From<FetchResponseResponsesPartitionResponses3>
             partition: older.partition,
             error_code: older.error_code,
             high_watermark: older.high_watermark,
-            record_set: older.record_set.into(),
+            record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2132,7 +2222,7 @@ impl From<FetchResponse4> for FetchResponse12 {
 impl From<FetchResponseResponses4> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses4) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic.into(),
+            topic: older.topic,
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2155,7 +2245,7 @@ impl From<FetchResponseResponsesPartitionResponses4>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set.into(),
+            record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2186,7 +2276,7 @@ impl From<FetchResponse5> for FetchResponse12 {
 impl From<FetchResponseResponses5> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses5) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic.into(),
+            topic: older.topic,
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2210,7 +2300,7 @@ impl From<FetchResponseResponsesPartitionResponses5>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set.into(),
+            record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2241,7 +2331,7 @@ impl From<FetchResponse6> for FetchResponse12 {
 impl From<FetchResponseResponses6> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses6) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic.into(),
+            topic: older.topic,
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2265,7 +2355,7 @@ impl From<FetchResponseResponsesPartitionResponses6>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set.into(),
+            record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2298,7 +2388,7 @@ impl From<FetchResponse7> for FetchResponse12 {
 impl From<FetchResponseResponses7> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses7) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic.into(),
+            topic: older.topic,
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2322,7 +2412,7 @@ impl From<FetchResponseResponsesPartitionResponses7>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set.into(),
+            record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2355,7 +2445,7 @@ impl From<FetchResponse8> for FetchResponse12 {
 impl From<FetchResponseResponses8> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses8) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic.into(),
+            topic: older.topic,
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2379,7 +2469,7 @@ impl From<FetchResponseResponsesPartitionResponses8>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set.into(),
+            record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2412,7 +2502,7 @@ impl From<FetchResponse9> for FetchResponse12 {
 impl From<FetchResponseResponses9> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses9) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic.into(),
+            topic: older.topic,
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2436,7 +2526,7 @@ impl From<FetchResponseResponsesPartitionResponses9>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set.into(),
+            record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2469,7 +2559,7 @@ impl From<FetchResponse10> for FetchResponse12 {
 impl From<FetchResponseResponses10> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses10) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic.into(),
+            topic: older.topic,
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2493,7 +2583,7 @@ impl From<FetchResponseResponsesPartitionResponses10>
             aborted_transactions: older
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
-            record_set: older.record_set.into(),
+            record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }
@@ -2526,7 +2616,7 @@ impl From<FetchResponse11> for FetchResponse12 {
 impl From<FetchResponseResponses11> for FetchResponseResponses12 {
     fn from(older: FetchResponseResponses11) -> Self {
         FetchResponseResponses12 {
-            topic: older.topic.into(),
+            topic: older.topic,
             partition_responses: older
                 .partition_responses
                 .into_iter()
@@ -2551,7 +2641,7 @@ impl From<FetchResponseResponsesPartitionResponses11>
                 .aborted_transactions
                 .map(|val| val.into_iter().map(|el| el.into()).collect()),
             preferred_read_replica: older.preferred_read_replica,
-            record_set: older.record_set.into(),
+            record_set: older.record_set,
             ..FetchResponseResponsesPartitionResponses12::default()
         }
     }

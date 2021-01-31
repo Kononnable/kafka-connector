@@ -13,34 +13,104 @@ impl ApiCall for OffsetCommitRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::OffsetCommit
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&OffsetCommitRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&OffsetCommitRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&OffsetCommitRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&OffsetCommitRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&OffsetCommitRequest4::try_from(self)?, buf),
-            5 => ToBytes::serialize(&OffsetCommitRequest5::try_from(self)?, buf),
-            6 => ToBytes::serialize(&OffsetCommitRequest6::try_from(self)?, buf),
-            7 => ToBytes::serialize(&OffsetCommitRequest7::try_from(self)?, buf),
-            8 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => false,
+            5 => false,
+            6 => false,
+            7 => false,
+            8 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                OffsetCommitRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                OffsetCommitRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &OffsetCommitRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &OffsetCommitRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &OffsetCommitRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &OffsetCommitRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(
+                &OffsetCommitRequest4::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            5 => ToBytes::serialize(
+                &OffsetCommitRequest5::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            6 => ToBytes::serialize(
+                &OffsetCommitRequest6::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            7 => ToBytes::serialize(
+                &OffsetCommitRequest7::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            8 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> OffsetCommitResponse {
-        match version {
-            0 => OffsetCommitResponse0::deserialize(buf).into(),
-            1 => OffsetCommitResponse1::deserialize(buf).into(),
-            2 => OffsetCommitResponse2::deserialize(buf).into(),
-            3 => OffsetCommitResponse3::deserialize(buf).into(),
-            4 => OffsetCommitResponse4::deserialize(buf).into(),
-            5 => OffsetCommitResponse5::deserialize(buf).into(),
-            6 => OffsetCommitResponse6::deserialize(buf).into(),
-            7 => OffsetCommitResponse7::deserialize(buf).into(),
-            8 => OffsetCommitResponse::deserialize(buf),
-            _ => OffsetCommitResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, OffsetCommitResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => OffsetCommitResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => OffsetCommitResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => OffsetCommitResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => OffsetCommitResponse3::deserialize(buf, Self::is_flexible_version(version)).into(),
+            4 => OffsetCommitResponse4::deserialize(buf, Self::is_flexible_version(version)).into(),
+            5 => OffsetCommitResponse5::deserialize(buf, Self::is_flexible_version(version)).into(),
+            6 => OffsetCommitResponse6::deserialize(buf, Self::is_flexible_version(version)).into(),
+            7 => OffsetCommitResponse7::deserialize(buf, Self::is_flexible_version(version)).into(),
+            8 => OffsetCommitResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => OffsetCommitResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -218,17 +288,17 @@ pub struct OffsetCommitRequestTopicsPartitions7 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetCommitRequest8 {
-    pub group_id: CompactString,
+    pub group_id: String,
     pub generation_id: Optional<Int32>,
-    pub member_id: Optional<CompactString>,
-    pub group_instance_id: Optional<CompactNullableString>,
+    pub member_id: Optional<String>,
+    pub group_instance_id: Optional<NullableString>,
     pub topics: Vec<OffsetCommitRequestTopics8>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetCommitRequestTopics8 {
-    pub name: CompactString,
+    pub name: String,
     pub partitions: Vec<OffsetCommitRequestTopicsPartitions8>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -238,7 +308,7 @@ pub struct OffsetCommitRequestTopicsPartitions8 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
     pub committed_leader_epoch: Optional<Int32>,
-    pub committed_metadata: CompactNullableString,
+    pub committed_metadata: NullableString,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -392,7 +462,7 @@ pub struct OffsetCommitResponse8 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetCommitResponseTopics8 {
-    pub name: CompactString,
+    pub name: String,
     pub partitions: Vec<OffsetCommitResponseTopicsPartitions8>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -436,7 +506,7 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest0 {
             ));
         }
         Ok(OffsetCommitRequest0 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -457,7 +527,7 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics0 {
             ));
         }
         Ok(OffsetCommitRequestTopics0 {
-            name: latest.name.into(),
+            name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -487,7 +557,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions0 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata.into(),
+            committed_metadata: latest.committed_metadata,
         })
     }
 }
@@ -510,9 +580,9 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest1 {
             ));
         }
         Ok(OffsetCommitRequest1 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val.into()),
+            member_id: latest.member_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -533,7 +603,7 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics1 {
             ));
         }
         Ok(OffsetCommitRequestTopics1 {
-            name: latest.name.into(),
+            name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -563,7 +633,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions1 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata.into(),
+            committed_metadata: latest.committed_metadata,
             ..OffsetCommitRequestTopicsPartitions1::default()
         })
     }
@@ -587,9 +657,9 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest2 {
             ));
         }
         Ok(OffsetCommitRequest2 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val.into()),
+            member_id: latest.member_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -611,7 +681,7 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics2 {
             ));
         }
         Ok(OffsetCommitRequestTopics2 {
-            name: latest.name.into(),
+            name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -641,7 +711,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions2 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata.into(),
+            committed_metadata: latest.committed_metadata,
         })
     }
 }
@@ -664,9 +734,9 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest3 {
             ));
         }
         Ok(OffsetCommitRequest3 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val.into()),
+            member_id: latest.member_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -688,7 +758,7 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics3 {
             ));
         }
         Ok(OffsetCommitRequestTopics3 {
-            name: latest.name.into(),
+            name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -718,7 +788,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions3 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata.into(),
+            committed_metadata: latest.committed_metadata,
         })
     }
 }
@@ -741,9 +811,9 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest4 {
             ));
         }
         Ok(OffsetCommitRequest4 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val.into()),
+            member_id: latest.member_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -765,7 +835,7 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics4 {
             ));
         }
         Ok(OffsetCommitRequestTopics4 {
-            name: latest.name.into(),
+            name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -795,7 +865,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions4 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata.into(),
+            committed_metadata: latest.committed_metadata,
         })
     }
 }
@@ -818,9 +888,9 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest5 {
             ));
         }
         Ok(OffsetCommitRequest5 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val.into()),
+            member_id: latest.member_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -841,7 +911,7 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics5 {
             ));
         }
         Ok(OffsetCommitRequestTopics5 {
-            name: latest.name.into(),
+            name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -871,7 +941,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
         Ok(OffsetCommitRequestTopicsPartitions5 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata.into(),
+            committed_metadata: latest.committed_metadata,
         })
     }
 }
@@ -894,9 +964,9 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest6 {
             ));
         }
         Ok(OffsetCommitRequest6 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val.into()),
+            member_id: latest.member_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -917,7 +987,7 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics6 {
             ));
         }
         Ok(OffsetCommitRequestTopics6 {
-            name: latest.name.into(),
+            name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -941,7 +1011,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
             committed_leader_epoch: latest.committed_leader_epoch,
-            committed_metadata: latest.committed_metadata.into(),
+            committed_metadata: latest.committed_metadata,
         })
     }
 }
@@ -957,10 +1027,10 @@ impl TryFrom<OffsetCommitRequest8> for OffsetCommitRequest7 {
             ));
         }
         Ok(OffsetCommitRequest7 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.map(|val| val.into()),
-            group_instance_id: latest.group_instance_id.map(|val| val.into()),
+            member_id: latest.member_id,
+            group_instance_id: latest.group_instance_id,
             topics: latest
                 .topics
                 .into_iter()
@@ -981,7 +1051,7 @@ impl TryFrom<OffsetCommitRequestTopics8> for OffsetCommitRequestTopics7 {
             ));
         }
         Ok(OffsetCommitRequestTopics7 {
-            name: latest.name.into(),
+            name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -1005,7 +1075,7 @@ impl TryFrom<OffsetCommitRequestTopicsPartitions8> for OffsetCommitRequestTopics
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
             committed_leader_epoch: latest.committed_leader_epoch,
-            committed_metadata: latest.committed_metadata.into(),
+            committed_metadata: latest.committed_metadata,
         })
     }
 }
@@ -1022,7 +1092,7 @@ impl From<OffsetCommitResponse0> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics0> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics0) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetCommitResponseTopics8::default()
         }
@@ -1051,7 +1121,7 @@ impl From<OffsetCommitResponse1> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics1> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics1) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetCommitResponseTopics8::default()
         }
@@ -1080,7 +1150,7 @@ impl From<OffsetCommitResponse2> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics2> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics2) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetCommitResponseTopics8::default()
         }
@@ -1110,7 +1180,7 @@ impl From<OffsetCommitResponse3> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics3> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics3) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetCommitResponseTopics8::default()
         }
@@ -1140,7 +1210,7 @@ impl From<OffsetCommitResponse4> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics4> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics4) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetCommitResponseTopics8::default()
         }
@@ -1170,7 +1240,7 @@ impl From<OffsetCommitResponse5> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics5> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics5) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetCommitResponseTopics8::default()
         }
@@ -1200,7 +1270,7 @@ impl From<OffsetCommitResponse6> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics6> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics6) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetCommitResponseTopics8::default()
         }
@@ -1230,7 +1300,7 @@ impl From<OffsetCommitResponse7> for OffsetCommitResponse8 {
 impl From<OffsetCommitResponseTopics7> for OffsetCommitResponseTopics8 {
     fn from(older: OffsetCommitResponseTopics7) -> Self {
         OffsetCommitResponseTopics8 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..OffsetCommitResponseTopics8::default()
         }

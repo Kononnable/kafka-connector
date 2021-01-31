@@ -78,18 +78,18 @@ impl<T> FromBytes for Optional<T>
 where
     T: FromBytes,
 {
-    fn deserialize(buf: &mut Bytes) -> Self {
-        Optional::Some(T::deserialize(buf))
+    fn deserialize(buf: &mut Bytes, is_flexible_version: bool) -> Self {
+        Optional::Some(T::deserialize(buf, is_flexible_version))
     }
 }
 impl<T> ToBytes for Optional<T>
 where
     T: ToBytes + Default,
 {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
         match self {
-            Self::Some(value) => T::serialize(value, buf),
-            Self::None => T::serialize(&T::default(), buf),
+            Self::Some(value) => T::serialize(value, buf, is_flexible_version),
+            Self::None => T::serialize(&T::default(), buf, is_flexible_version),
         }
     }
 }

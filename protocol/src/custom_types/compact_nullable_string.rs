@@ -9,8 +9,8 @@ pub struct CompactNullableString {
     pub value: Option<String>,
 }
 impl FromBytes for CompactNullableString {
-    fn deserialize(buf: &mut Bytes) -> Self {
-        let len = UnsignedVarInt32::deserialize(buf);
+    fn deserialize(buf: &mut Bytes, is_flexible_version: bool) -> Self {
+        let len = UnsignedVarInt32::deserialize(buf, is_flexible_version);
         if len.value == 0 {
             return CompactNullableString { value: None };
         }
@@ -22,11 +22,11 @@ impl FromBytes for CompactNullableString {
 }
 
 impl ToBytes for CompactNullableString {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
         match &self.value {
             Some(str) => {
                 let len = UnsignedVarInt32::new(str.len() as u32 + 1);
-                len.serialize(buf);
+                len.serialize(buf, is_flexible_version);
                 buf.put_slice(&str.as_bytes());
             }
             None => {}

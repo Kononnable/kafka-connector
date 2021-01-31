@@ -13,18 +13,48 @@ impl ApiCall for WriteTxnMarkersRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::WriteTxnMarkers
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            _ => false,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                WriteTxnMarkersRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                WriteTxnMarkersRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> WriteTxnMarkersResponse {
-        match version {
-            0 => WriteTxnMarkersResponse::deserialize(buf),
-            _ => WriteTxnMarkersResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, WriteTxnMarkersResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => WriteTxnMarkersResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => WriteTxnMarkersResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]

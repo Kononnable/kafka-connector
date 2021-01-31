@@ -13,20 +13,68 @@ impl ApiCall for IncrementalAlterConfigsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::IncrementalAlterConfigs
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&IncrementalAlterConfigsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                IncrementalAlterConfigsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                IncrementalAlterConfigsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &IncrementalAlterConfigsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> IncrementalAlterConfigsResponse {
-        match version {
-            0 => IncrementalAlterConfigsResponse0::deserialize(buf).into(),
-            1 => IncrementalAlterConfigsResponse::deserialize(buf),
-            _ => IncrementalAlterConfigsResponse::deserialize(buf),
-        }
+    fn deserialize_response(
+        version: i16,
+        buf: &mut Bytes,
+    ) -> (i32, IncrementalAlterConfigsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => IncrementalAlterConfigsResponse0::deserialize(
+                buf,
+                Self::is_flexible_version(version),
+            )
+            .into(),
+            1 => IncrementalAlterConfigsResponse::deserialize(
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            _ => IncrementalAlterConfigsResponse::deserialize(
+                buf,
+                Self::is_flexible_version(version),
+            ),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -59,16 +107,16 @@ pub struct IncrementalAlterConfigsRequest1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct IncrementalAlterConfigsRequestResources1 {
     pub resource_type: Int8,
-    pub resource_name: CompactString,
+    pub resource_name: String,
     pub configs: Vec<IncrementalAlterConfigsRequestResourcesConfigs1>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct IncrementalAlterConfigsRequestResourcesConfigs1 {
-    pub name: CompactString,
+    pub name: String,
     pub config_operation: Int8,
-    pub value: CompactNullableString,
+    pub value: NullableString,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -96,9 +144,9 @@ pub struct IncrementalAlterConfigsResponse1 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct IncrementalAlterConfigsResponseResponses1 {
     pub error_code: Int16,
-    pub error_message: CompactNullableString,
+    pub error_message: NullableString,
     pub resource_type: Int8,
-    pub resource_name: CompactString,
+    pub resource_name: String,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -137,7 +185,7 @@ impl TryFrom<IncrementalAlterConfigsRequestResources1>
         }
         Ok(IncrementalAlterConfigsRequestResources0 {
             resource_type: latest.resource_type,
-            resource_name: latest.resource_name.into(),
+            resource_name: latest.resource_name,
             configs: latest
                 .configs
                 .into_iter()
@@ -162,9 +210,9 @@ impl TryFrom<IncrementalAlterConfigsRequestResourcesConfigs1>
             ));
         }
         Ok(IncrementalAlterConfigsRequestResourcesConfigs0 {
-            name: latest.name.into(),
+            name: latest.name,
             config_operation: latest.config_operation,
-            value: latest.value.into(),
+            value: latest.value,
         })
     }
 }
@@ -183,9 +231,9 @@ impl From<IncrementalAlterConfigsResponseResponses0> for IncrementalAlterConfigs
     fn from(older: IncrementalAlterConfigsResponseResponses0) -> Self {
         IncrementalAlterConfigsResponseResponses1 {
             error_code: older.error_code,
-            error_message: older.error_message.into(),
+            error_message: older.error_message,
             resource_type: older.resource_type,
-            resource_name: older.resource_name.into(),
+            resource_name: older.resource_name,
             ..IncrementalAlterConfigsResponseResponses1::default()
         }
     }

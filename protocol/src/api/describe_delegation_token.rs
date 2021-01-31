@@ -13,22 +13,79 @@ impl ApiCall for DescribeDelegationTokenRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeDelegationToken
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&DescribeDelegationTokenRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&DescribeDelegationTokenRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                DescribeDelegationTokenRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                DescribeDelegationTokenRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &DescribeDelegationTokenRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &DescribeDelegationTokenRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> DescribeDelegationTokenResponse {
-        match version {
-            0 => DescribeDelegationTokenResponse0::deserialize(buf).into(),
-            1 => DescribeDelegationTokenResponse1::deserialize(buf).into(),
-            2 => DescribeDelegationTokenResponse::deserialize(buf),
-            _ => DescribeDelegationTokenResponse::deserialize(buf),
-        }
+    fn deserialize_response(
+        version: i16,
+        buf: &mut Bytes,
+    ) -> (i32, DescribeDelegationTokenResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => DescribeDelegationTokenResponse0::deserialize(
+                buf,
+                Self::is_flexible_version(version),
+            )
+            .into(),
+            1 => DescribeDelegationTokenResponse1::deserialize(
+                buf,
+                Self::is_flexible_version(version),
+            )
+            .into(),
+            2 => DescribeDelegationTokenResponse::deserialize(
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            _ => DescribeDelegationTokenResponse::deserialize(
+                buf,
+                Self::is_flexible_version(version),
+            ),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -61,8 +118,8 @@ pub struct DescribeDelegationTokenRequest2 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeDelegationTokenRequestOwners2 {
-    pub principal_type: CompactString,
-    pub principal_name: CompactString,
+    pub principal_type: String,
+    pub principal_name: String,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -126,21 +183,21 @@ pub struct DescribeDelegationTokenResponse2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeDelegationTokenResponseTokens2 {
-    pub principal_type: CompactString,
-    pub principal_name: CompactString,
+    pub principal_type: String,
+    pub principal_name: String,
     pub issue_timestamp: Int64,
     pub expiry_timestamp: Int64,
     pub max_timestamp: Int64,
-    pub token_id: CompactString,
-    pub hmac: CompactBytes,
+    pub token_id: String,
+    pub hmac: KafkaBytes,
     pub renewers: Vec<DescribeDelegationTokenResponseTokensRenewers2>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeDelegationTokenResponseTokensRenewers2 {
-    pub principal_type: CompactString,
-    pub principal_name: CompactString,
+    pub principal_type: String,
+    pub principal_name: String,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -175,8 +232,8 @@ impl TryFrom<DescribeDelegationTokenRequestOwners2> for DescribeDelegationTokenR
             ));
         }
         Ok(DescribeDelegationTokenRequestOwners0 {
-            principal_type: latest.principal_type.into(),
-            principal_name: latest.principal_name.into(),
+            principal_type: latest.principal_type,
+            principal_name: latest.principal_name,
         })
     }
 }
@@ -212,8 +269,8 @@ impl TryFrom<DescribeDelegationTokenRequestOwners2> for DescribeDelegationTokenR
             ));
         }
         Ok(DescribeDelegationTokenRequestOwners1 {
-            principal_type: latest.principal_type.into(),
-            principal_name: latest.principal_name.into(),
+            principal_type: latest.principal_type,
+            principal_name: latest.principal_name,
         })
     }
 }
@@ -232,13 +289,13 @@ impl From<DescribeDelegationTokenResponse0> for DescribeDelegationTokenResponse2
 impl From<DescribeDelegationTokenResponseTokens0> for DescribeDelegationTokenResponseTokens2 {
     fn from(older: DescribeDelegationTokenResponseTokens0) -> Self {
         DescribeDelegationTokenResponseTokens2 {
-            principal_type: older.principal_type.into(),
-            principal_name: older.principal_name.into(),
+            principal_type: older.principal_type,
+            principal_name: older.principal_name,
             issue_timestamp: older.issue_timestamp,
             expiry_timestamp: older.expiry_timestamp,
             max_timestamp: older.max_timestamp,
-            token_id: older.token_id.into(),
-            hmac: older.hmac.into(),
+            token_id: older.token_id,
+            hmac: older.hmac,
             renewers: older.renewers.into_iter().map(|el| el.into()).collect(),
             ..DescribeDelegationTokenResponseTokens2::default()
         }
@@ -250,8 +307,8 @@ impl From<DescribeDelegationTokenResponseTokensRenewers0>
 {
     fn from(older: DescribeDelegationTokenResponseTokensRenewers0) -> Self {
         DescribeDelegationTokenResponseTokensRenewers2 {
-            principal_type: older.principal_type.into(),
-            principal_name: older.principal_name.into(),
+            principal_type: older.principal_type,
+            principal_name: older.principal_name,
             ..DescribeDelegationTokenResponseTokensRenewers2::default()
         }
     }
@@ -271,13 +328,13 @@ impl From<DescribeDelegationTokenResponse1> for DescribeDelegationTokenResponse2
 impl From<DescribeDelegationTokenResponseTokens1> for DescribeDelegationTokenResponseTokens2 {
     fn from(older: DescribeDelegationTokenResponseTokens1) -> Self {
         DescribeDelegationTokenResponseTokens2 {
-            principal_type: older.principal_type.into(),
-            principal_name: older.principal_name.into(),
+            principal_type: older.principal_type,
+            principal_name: older.principal_name,
             issue_timestamp: older.issue_timestamp,
             expiry_timestamp: older.expiry_timestamp,
             max_timestamp: older.max_timestamp,
-            token_id: older.token_id.into(),
-            hmac: older.hmac.into(),
+            token_id: older.token_id,
+            hmac: older.hmac,
             renewers: older.renewers.into_iter().map(|el| el.into()).collect(),
             ..DescribeDelegationTokenResponseTokens2::default()
         }
@@ -289,8 +346,8 @@ impl From<DescribeDelegationTokenResponseTokensRenewers1>
 {
     fn from(older: DescribeDelegationTokenResponseTokensRenewers1) -> Self {
         DescribeDelegationTokenResponseTokensRenewers2 {
-            principal_type: older.principal_type.into(),
-            principal_name: older.principal_name.into(),
+            principal_type: older.principal_type,
+            principal_name: older.principal_name,
             ..DescribeDelegationTokenResponseTokensRenewers2::default()
         }
     }

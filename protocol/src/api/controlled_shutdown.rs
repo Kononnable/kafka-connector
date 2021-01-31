@@ -13,24 +13,72 @@ impl ApiCall for ControlledShutdownRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ControlledShutdown
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&ControlledShutdownRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&ControlledShutdownRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&ControlledShutdownRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                ControlledShutdownRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                ControlledShutdownRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &ControlledShutdownRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &ControlledShutdownRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &ControlledShutdownRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> ControlledShutdownResponse {
-        match version {
-            0 => ControlledShutdownResponse0::deserialize(buf).into(),
-            1 => ControlledShutdownResponse1::deserialize(buf).into(),
-            2 => ControlledShutdownResponse2::deserialize(buf).into(),
-            3 => ControlledShutdownResponse::deserialize(buf),
-            _ => ControlledShutdownResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, ControlledShutdownResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => ControlledShutdownResponse0::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            1 => ControlledShutdownResponse1::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            2 => ControlledShutdownResponse2::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            3 => ControlledShutdownResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => ControlledShutdownResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -101,7 +149,7 @@ pub struct ControlledShutdownResponse3 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ControlledShutdownResponseRemainingPartitions3 {
-    pub topic_name: CompactString,
+    pub topic_name: String,
     pub partition_index: Int32,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -188,7 +236,7 @@ impl From<ControlledShutdownResponseRemainingPartitions0>
 {
     fn from(older: ControlledShutdownResponseRemainingPartitions0) -> Self {
         ControlledShutdownResponseRemainingPartitions3 {
-            topic_name: older.topic_name.into(),
+            topic_name: older.topic_name,
             partition_index: older.partition_index,
             ..ControlledShutdownResponseRemainingPartitions3::default()
         }
@@ -214,7 +262,7 @@ impl From<ControlledShutdownResponseRemainingPartitions1>
 {
     fn from(older: ControlledShutdownResponseRemainingPartitions1) -> Self {
         ControlledShutdownResponseRemainingPartitions3 {
-            topic_name: older.topic_name.into(),
+            topic_name: older.topic_name,
             partition_index: older.partition_index,
             ..ControlledShutdownResponseRemainingPartitions3::default()
         }
@@ -240,7 +288,7 @@ impl From<ControlledShutdownResponseRemainingPartitions2>
 {
     fn from(older: ControlledShutdownResponseRemainingPartitions2) -> Self {
         ControlledShutdownResponseRemainingPartitions3 {
-            topic_name: older.topic_name.into(),
+            topic_name: older.topic_name,
             partition_index: older.partition_index,
             ..ControlledShutdownResponseRemainingPartitions3::default()
         }

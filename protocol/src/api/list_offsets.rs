@@ -13,28 +13,83 @@ impl ApiCall for ListOffsetsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ListOffsets
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&ListOffsetsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&ListOffsetsRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&ListOffsetsRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&ListOffsetsRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&ListOffsetsRequest4::try_from(self)?, buf),
-            5 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => false,
+            5 => false,
+            _ => false,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                ListOffsetsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                ListOffsetsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &ListOffsetsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &ListOffsetsRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &ListOffsetsRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &ListOffsetsRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(
+                &ListOffsetsRequest4::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            5 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> ListOffsetsResponse {
-        match version {
-            0 => ListOffsetsResponse0::deserialize(buf).into(),
-            1 => ListOffsetsResponse1::deserialize(buf).into(),
-            2 => ListOffsetsResponse2::deserialize(buf).into(),
-            3 => ListOffsetsResponse3::deserialize(buf).into(),
-            4 => ListOffsetsResponse4::deserialize(buf).into(),
-            5 => ListOffsetsResponse::deserialize(buf),
-            _ => ListOffsetsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, ListOffsetsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => ListOffsetsResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => ListOffsetsResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => ListOffsetsResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => ListOffsetsResponse3::deserialize(buf, Self::is_flexible_version(version)).into(),
+            4 => ListOffsetsResponse4::deserialize(buf, Self::is_flexible_version(version)).into(),
+            5 => ListOffsetsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => ListOffsetsResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]

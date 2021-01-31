@@ -40,7 +40,7 @@ impl FromStr for CallType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum FieldType {
     Boolean,
     KafkaBytes,
@@ -103,27 +103,6 @@ impl FieldType {
             | FieldType::CompactBytes
             | FieldType::CompactString
             | FieldType::CompactNullableString => false,
-        }
-    }
-    // TODO: unused(?)
-    pub fn is_easily_convertable(&self) -> bool {
-        match self {
-            FieldType::Int8
-            | FieldType::Int16
-            | FieldType::Int32
-            | FieldType::Int64
-            | FieldType::Float64
-            | FieldType::String
-            | FieldType::KafkaBytes
-            | FieldType::CompactBytes
-            | FieldType::Boolean => true,
-            // TODO:
-            FieldType::Records
-            | FieldType::NullableString
-            | FieldType::CompactNullableString
-            | FieldType::CompactRecords => true,
-            FieldType::CompactString => true,
-            FieldType::TagBuffer => true,
         }
     }
 }

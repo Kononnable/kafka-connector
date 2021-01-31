@@ -13,26 +13,76 @@ impl ApiCall for LeaderAndIsrRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::LeaderAndIsr
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&LeaderAndIsrRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&LeaderAndIsrRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&LeaderAndIsrRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&LeaderAndIsrRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                LeaderAndIsrRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                LeaderAndIsrRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &LeaderAndIsrRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &LeaderAndIsrRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &LeaderAndIsrRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &LeaderAndIsrRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> LeaderAndIsrResponse {
-        match version {
-            0 => LeaderAndIsrResponse0::deserialize(buf).into(),
-            1 => LeaderAndIsrResponse1::deserialize(buf).into(),
-            2 => LeaderAndIsrResponse2::deserialize(buf).into(),
-            3 => LeaderAndIsrResponse3::deserialize(buf).into(),
-            4 => LeaderAndIsrResponse::deserialize(buf),
-            _ => LeaderAndIsrResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, LeaderAndIsrResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => LeaderAndIsrResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => LeaderAndIsrResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => LeaderAndIsrResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => LeaderAndIsrResponse3::deserialize(buf, Self::is_flexible_version(version)).into(),
+            4 => LeaderAndIsrResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => LeaderAndIsrResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -172,7 +222,7 @@ pub struct LeaderAndIsrRequest4 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestTopicStates4 {
-    pub topic_name: CompactString,
+    pub topic_name: String,
     pub partition_states: Vec<LeaderAndIsrRequestTopicStatesPartitionStates4>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -195,7 +245,7 @@ pub struct LeaderAndIsrRequestTopicStatesPartitionStates4 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestLiveLeaders4 {
     pub broker_id: Int32,
-    pub host_name: CompactString,
+    pub host_name: String,
     pub port: Int32,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -261,7 +311,7 @@ pub struct LeaderAndIsrResponse4 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaderAndIsrResponsePartitionErrors4 {
-    pub topic_name: CompactString,
+    pub topic_name: String,
     pub partition_index: Int32,
     pub error_code: Int16,
     pub tag_buffer: Optional<TagBuffer>,
@@ -316,7 +366,7 @@ impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders
         }
         Ok(LeaderAndIsrRequestLiveLeaders0 {
             broker_id: latest.broker_id,
-            host_name: latest.host_name.into(),
+            host_name: latest.host_name,
             port: latest.port,
         })
     }
@@ -371,7 +421,7 @@ impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders
         }
         Ok(LeaderAndIsrRequestLiveLeaders1 {
             broker_id: latest.broker_id,
-            host_name: latest.host_name.into(),
+            host_name: latest.host_name,
             port: latest.port,
         })
     }
@@ -419,7 +469,7 @@ impl TryFrom<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates
             ));
         }
         Ok(LeaderAndIsrRequestTopicStates2 {
-            topic_name: latest.topic_name.into(),
+            topic_name: latest.topic_name,
             partition_states: latest
                 .partition_states
                 .into_iter()
@@ -482,7 +532,7 @@ impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders
         }
         Ok(LeaderAndIsrRequestLiveLeaders2 {
             broker_id: latest.broker_id,
-            host_name: latest.host_name.into(),
+            host_name: latest.host_name,
             port: latest.port,
         })
     }
@@ -530,7 +580,7 @@ impl TryFrom<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates
             ));
         }
         Ok(LeaderAndIsrRequestTopicStates3 {
-            topic_name: latest.topic_name.into(),
+            topic_name: latest.topic_name,
             partition_states: latest
                 .partition_states
                 .into_iter()
@@ -581,7 +631,7 @@ impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders
         }
         Ok(LeaderAndIsrRequestLiveLeaders3 {
             broker_id: latest.broker_id,
-            host_name: latest.host_name.into(),
+            host_name: latest.host_name,
             port: latest.port,
         })
     }
@@ -604,7 +654,7 @@ impl From<LeaderAndIsrResponse0> for LeaderAndIsrResponse4 {
 impl From<LeaderAndIsrResponsePartitionErrors0> for LeaderAndIsrResponsePartitionErrors4 {
     fn from(older: LeaderAndIsrResponsePartitionErrors0) -> Self {
         LeaderAndIsrResponsePartitionErrors4 {
-            topic_name: older.topic_name.into(),
+            topic_name: older.topic_name,
             partition_index: older.partition_index,
             error_code: older.error_code,
             ..LeaderAndIsrResponsePartitionErrors4::default()
@@ -629,7 +679,7 @@ impl From<LeaderAndIsrResponse1> for LeaderAndIsrResponse4 {
 impl From<LeaderAndIsrResponsePartitionErrors1> for LeaderAndIsrResponsePartitionErrors4 {
     fn from(older: LeaderAndIsrResponsePartitionErrors1) -> Self {
         LeaderAndIsrResponsePartitionErrors4 {
-            topic_name: older.topic_name.into(),
+            topic_name: older.topic_name,
             partition_index: older.partition_index,
             error_code: older.error_code,
             ..LeaderAndIsrResponsePartitionErrors4::default()
@@ -654,7 +704,7 @@ impl From<LeaderAndIsrResponse2> for LeaderAndIsrResponse4 {
 impl From<LeaderAndIsrResponsePartitionErrors2> for LeaderAndIsrResponsePartitionErrors4 {
     fn from(older: LeaderAndIsrResponsePartitionErrors2) -> Self {
         LeaderAndIsrResponsePartitionErrors4 {
-            topic_name: older.topic_name.into(),
+            topic_name: older.topic_name,
             partition_index: older.partition_index,
             error_code: older.error_code,
             ..LeaderAndIsrResponsePartitionErrors4::default()
@@ -679,7 +729,7 @@ impl From<LeaderAndIsrResponse3> for LeaderAndIsrResponse4 {
 impl From<LeaderAndIsrResponsePartitionErrors3> for LeaderAndIsrResponsePartitionErrors4 {
     fn from(older: LeaderAndIsrResponsePartitionErrors3) -> Self {
         LeaderAndIsrResponsePartitionErrors4 {
-            topic_name: older.topic_name.into(),
+            topic_name: older.topic_name,
             partition_index: older.partition_index,
             error_code: older.error_code,
             ..LeaderAndIsrResponsePartitionErrors4::default()

@@ -9,8 +9,8 @@ pub struct CompactBytes {
     pub value: Vec<u8>,
 }
 impl FromBytes for CompactBytes {
-    fn deserialize(buf: &mut Bytes) -> Self {
-        let len = UnsignedVarInt32::deserialize(buf);
+    fn deserialize(buf: &mut Bytes, is_flexible_version: bool) -> Self {
+        let len = UnsignedVarInt32::deserialize(buf, is_flexible_version);
         CompactBytes {
             value: buf.split_to(len.value as usize).into_iter().collect(),
         }
@@ -18,9 +18,9 @@ impl FromBytes for CompactBytes {
 }
 
 impl ToBytes for CompactBytes {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
         let len = UnsignedVarInt32::new(self.value.len() as u32 + 1);
-        len.serialize(buf);
+        len.serialize(buf, is_flexible_version);
         buf.put_slice(self.value.as_slice());
     }
 }

@@ -13,30 +13,97 @@ impl ApiCall for UpdateMetadataRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::UpdateMetadata
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&UpdateMetadataRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&UpdateMetadataRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&UpdateMetadataRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&UpdateMetadataRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&UpdateMetadataRequest4::try_from(self)?, buf),
-            5 => ToBytes::serialize(&UpdateMetadataRequest5::try_from(self)?, buf),
-            6 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => false,
+            5 => false,
+            6 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                UpdateMetadataRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                UpdateMetadataRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &UpdateMetadataRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &UpdateMetadataRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &UpdateMetadataRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &UpdateMetadataRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(
+                &UpdateMetadataRequest4::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            5 => ToBytes::serialize(
+                &UpdateMetadataRequest5::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            6 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> UpdateMetadataResponse {
-        match version {
-            0 => UpdateMetadataResponse0::deserialize(buf).into(),
-            1 => UpdateMetadataResponse1::deserialize(buf).into(),
-            2 => UpdateMetadataResponse2::deserialize(buf).into(),
-            3 => UpdateMetadataResponse3::deserialize(buf).into(),
-            4 => UpdateMetadataResponse4::deserialize(buf).into(),
-            5 => UpdateMetadataResponse5::deserialize(buf).into(),
-            6 => UpdateMetadataResponse::deserialize(buf),
-            _ => UpdateMetadataResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, UpdateMetadataResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response =
+            match version {
+                0 => UpdateMetadataResponse0::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                1 => UpdateMetadataResponse1::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                2 => UpdateMetadataResponse2::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                3 => UpdateMetadataResponse3::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                4 => UpdateMetadataResponse4::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                5 => UpdateMetadataResponse5::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                6 => UpdateMetadataResponse::deserialize(buf, Self::is_flexible_version(version)),
+                _ => UpdateMetadataResponse::deserialize(buf, Self::is_flexible_version(version)),
+            };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -258,7 +325,7 @@ pub struct UpdateMetadataRequest6 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestTopicStates6 {
-    pub topic_name: CompactString,
+    pub topic_name: String,
     pub partition_states: Vec<UpdateMetadataRequestTopicStatesPartitionStates6>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -280,15 +347,15 @@ pub struct UpdateMetadataRequestTopicStatesPartitionStates6 {
 pub struct UpdateMetadataRequestLiveBrokers6 {
     pub id: Int32,
     pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints6>>,
-    pub rack: Optional<CompactNullableString>,
+    pub rack: Optional<NullableString>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints6 {
     pub port: Int32,
-    pub host: CompactString,
-    pub listener: Optional<CompactString>,
+    pub host: String,
+    pub listener: Optional<String>,
     pub security_protocol: Int16,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -486,7 +553,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
         }
         Ok(UpdateMetadataRequestLiveBrokersEndpoints1 {
             port: latest.port,
-            host: latest.host.into(),
+            host: latest.host,
             security_protocol: latest.security_protocol,
         })
     }
@@ -549,7 +616,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
                         .collect::<Result<_, Error>>()
                 })
                 .wrap_result()?,
-            rack: latest.rack.map(|val| val.into()),
+            rack: latest.rack,
         })
     }
 }
@@ -575,7 +642,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
         }
         Ok(UpdateMetadataRequestLiveBrokersEndpoints2 {
             port: latest.port,
-            host: latest.host.into(),
+            host: latest.host,
             security_protocol: latest.security_protocol,
         })
     }
@@ -638,7 +705,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
                         .collect::<Result<_, Error>>()
                 })
                 .wrap_result()?,
-            rack: latest.rack.map(|val| val.into()),
+            rack: latest.rack,
         })
     }
 }
@@ -657,8 +724,8 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
         }
         Ok(UpdateMetadataRequestLiveBrokersEndpoints3 {
             port: latest.port,
-            host: latest.host.into(),
-            listener: latest.listener.map(|val| val.into()),
+            host: latest.host,
+            listener: latest.listener,
             security_protocol: latest.security_protocol,
         })
     }
@@ -721,7 +788,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
                         .collect::<Result<_, Error>>()
                 })
                 .wrap_result()?,
-            rack: latest.rack.map(|val| val.into()),
+            rack: latest.rack,
         })
     }
 }
@@ -740,8 +807,8 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
         }
         Ok(UpdateMetadataRequestLiveBrokersEndpoints4 {
             port: latest.port,
-            host: latest.host.into(),
-            listener: latest.listener.map(|val| val.into()),
+            host: latest.host,
+            listener: latest.listener,
             security_protocol: latest.security_protocol,
         })
     }
@@ -789,7 +856,7 @@ impl TryFrom<UpdateMetadataRequestTopicStates6> for UpdateMetadataRequestTopicSt
             ));
         }
         Ok(UpdateMetadataRequestTopicStates5 {
-            topic_name: latest.topic_name.into(),
+            topic_name: latest.topic_name,
             partition_states: latest
                 .partition_states
                 .into_iter()
@@ -846,7 +913,7 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
                         .collect::<Result<_, Error>>()
                 })
                 .wrap_result()?,
-            rack: latest.rack.map(|val| val.into()),
+            rack: latest.rack,
         })
     }
 }
@@ -865,8 +932,8 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
         }
         Ok(UpdateMetadataRequestLiveBrokersEndpoints5 {
             port: latest.port,
-            host: latest.host.into(),
-            listener: latest.listener.map(|val| val.into()),
+            host: latest.host,
+            listener: latest.listener,
             security_protocol: latest.security_protocol,
         })
     }

@@ -13,28 +13,89 @@ impl ApiCall for DescribeGroupsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeGroups
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&DescribeGroupsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&DescribeGroupsRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&DescribeGroupsRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&DescribeGroupsRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&DescribeGroupsRequest4::try_from(self)?, buf),
-            5 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => false,
+            5 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                DescribeGroupsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                DescribeGroupsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &DescribeGroupsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &DescribeGroupsRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &DescribeGroupsRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &DescribeGroupsRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(
+                &DescribeGroupsRequest4::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            5 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> DescribeGroupsResponse {
-        match version {
-            0 => DescribeGroupsResponse0::deserialize(buf).into(),
-            1 => DescribeGroupsResponse1::deserialize(buf).into(),
-            2 => DescribeGroupsResponse2::deserialize(buf).into(),
-            3 => DescribeGroupsResponse3::deserialize(buf).into(),
-            4 => DescribeGroupsResponse4::deserialize(buf).into(),
-            5 => DescribeGroupsResponse::deserialize(buf),
-            _ => DescribeGroupsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, DescribeGroupsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response =
+            match version {
+                0 => DescribeGroupsResponse0::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                1 => DescribeGroupsResponse1::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                2 => DescribeGroupsResponse2::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                3 => DescribeGroupsResponse3::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                4 => DescribeGroupsResponse4::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                5 => DescribeGroupsResponse::deserialize(buf, Self::is_flexible_version(version)),
+                _ => DescribeGroupsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -66,7 +127,7 @@ pub struct DescribeGroupsRequest4 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeGroupsRequest5 {
-    pub groups: Vec<CompactString>,
+    pub groups: Vec<String>,
     pub include_authorized_operations: Optional<Boolean>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -208,10 +269,10 @@ pub struct DescribeGroupsResponse5 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeGroupsResponseGroups5 {
     pub error_code: Int16,
-    pub group_id: CompactString,
-    pub group_state: CompactString,
-    pub protocol_type: CompactString,
-    pub protocol_data: CompactString,
+    pub group_id: String,
+    pub group_state: String,
+    pub protocol_type: String,
+    pub protocol_data: String,
     pub members: Vec<DescribeGroupsResponseGroupsMembers5>,
     pub authorized_operations: Optional<Int32>,
     pub tag_buffer: Optional<TagBuffer>,
@@ -219,12 +280,12 @@ pub struct DescribeGroupsResponseGroups5 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeGroupsResponseGroupsMembers5 {
-    pub member_id: CompactString,
-    pub group_instance_id: Optional<CompactNullableString>,
-    pub client_id: CompactString,
-    pub client_host: CompactString,
-    pub member_metadata: CompactBytes,
-    pub member_assignment: CompactBytes,
+    pub member_id: String,
+    pub group_instance_id: Optional<NullableString>,
+    pub client_id: String,
+    pub client_host: String,
+    pub member_metadata: KafkaBytes,
+    pub member_assignment: KafkaBytes,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -246,7 +307,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest0 {
             ));
         }
         Ok(DescribeGroupsRequest0 {
-            groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
+            groups: latest.groups,
         })
     }
 }
@@ -269,7 +330,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest1 {
             ));
         }
         Ok(DescribeGroupsRequest1 {
-            groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
+            groups: latest.groups,
         })
     }
 }
@@ -292,7 +353,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest2 {
             ));
         }
         Ok(DescribeGroupsRequest2 {
-            groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
+            groups: latest.groups,
         })
     }
 }
@@ -308,7 +369,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest3 {
             ));
         }
         Ok(DescribeGroupsRequest3 {
-            groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
+            groups: latest.groups,
             include_authorized_operations: latest.include_authorized_operations,
         })
     }
@@ -325,7 +386,7 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest4 {
             ));
         }
         Ok(DescribeGroupsRequest4 {
-            groups: latest.groups.into_iter().map(|ele| ele.into()).collect(),
+            groups: latest.groups,
             include_authorized_operations: latest.include_authorized_operations,
         })
     }
@@ -344,10 +405,10 @@ impl From<DescribeGroupsResponseGroups0> for DescribeGroupsResponseGroups5 {
     fn from(older: DescribeGroupsResponseGroups0) -> Self {
         DescribeGroupsResponseGroups5 {
             error_code: older.error_code,
-            group_id: older.group_id.into(),
-            group_state: older.group_state.into(),
-            protocol_type: older.protocol_type.into(),
-            protocol_data: older.protocol_data.into(),
+            group_id: older.group_id,
+            group_state: older.group_state,
+            protocol_type: older.protocol_type,
+            protocol_data: older.protocol_data,
             members: older.members.into_iter().map(|el| el.into()).collect(),
             ..DescribeGroupsResponseGroups5::default()
         }
@@ -357,11 +418,11 @@ impl From<DescribeGroupsResponseGroups0> for DescribeGroupsResponseGroups5 {
 impl From<DescribeGroupsResponseGroupsMembers0> for DescribeGroupsResponseGroupsMembers5 {
     fn from(older: DescribeGroupsResponseGroupsMembers0) -> Self {
         DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id.into(),
-            client_id: older.client_id.into(),
-            client_host: older.client_host.into(),
-            member_metadata: older.member_metadata.into(),
-            member_assignment: older.member_assignment.into(),
+            member_id: older.member_id,
+            client_id: older.client_id,
+            client_host: older.client_host,
+            member_metadata: older.member_metadata,
+            member_assignment: older.member_assignment,
             ..DescribeGroupsResponseGroupsMembers5::default()
         }
     }
@@ -381,10 +442,10 @@ impl From<DescribeGroupsResponseGroups1> for DescribeGroupsResponseGroups5 {
     fn from(older: DescribeGroupsResponseGroups1) -> Self {
         DescribeGroupsResponseGroups5 {
             error_code: older.error_code,
-            group_id: older.group_id.into(),
-            group_state: older.group_state.into(),
-            protocol_type: older.protocol_type.into(),
-            protocol_data: older.protocol_data.into(),
+            group_id: older.group_id,
+            group_state: older.group_state,
+            protocol_type: older.protocol_type,
+            protocol_data: older.protocol_data,
             members: older.members.into_iter().map(|el| el.into()).collect(),
             ..DescribeGroupsResponseGroups5::default()
         }
@@ -394,11 +455,11 @@ impl From<DescribeGroupsResponseGroups1> for DescribeGroupsResponseGroups5 {
 impl From<DescribeGroupsResponseGroupsMembers1> for DescribeGroupsResponseGroupsMembers5 {
     fn from(older: DescribeGroupsResponseGroupsMembers1) -> Self {
         DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id.into(),
-            client_id: older.client_id.into(),
-            client_host: older.client_host.into(),
-            member_metadata: older.member_metadata.into(),
-            member_assignment: older.member_assignment.into(),
+            member_id: older.member_id,
+            client_id: older.client_id,
+            client_host: older.client_host,
+            member_metadata: older.member_metadata,
+            member_assignment: older.member_assignment,
             ..DescribeGroupsResponseGroupsMembers5::default()
         }
     }
@@ -418,10 +479,10 @@ impl From<DescribeGroupsResponseGroups2> for DescribeGroupsResponseGroups5 {
     fn from(older: DescribeGroupsResponseGroups2) -> Self {
         DescribeGroupsResponseGroups5 {
             error_code: older.error_code,
-            group_id: older.group_id.into(),
-            group_state: older.group_state.into(),
-            protocol_type: older.protocol_type.into(),
-            protocol_data: older.protocol_data.into(),
+            group_id: older.group_id,
+            group_state: older.group_state,
+            protocol_type: older.protocol_type,
+            protocol_data: older.protocol_data,
             members: older.members.into_iter().map(|el| el.into()).collect(),
             ..DescribeGroupsResponseGroups5::default()
         }
@@ -431,11 +492,11 @@ impl From<DescribeGroupsResponseGroups2> for DescribeGroupsResponseGroups5 {
 impl From<DescribeGroupsResponseGroupsMembers2> for DescribeGroupsResponseGroupsMembers5 {
     fn from(older: DescribeGroupsResponseGroupsMembers2) -> Self {
         DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id.into(),
-            client_id: older.client_id.into(),
-            client_host: older.client_host.into(),
-            member_metadata: older.member_metadata.into(),
-            member_assignment: older.member_assignment.into(),
+            member_id: older.member_id,
+            client_id: older.client_id,
+            client_host: older.client_host,
+            member_metadata: older.member_metadata,
+            member_assignment: older.member_assignment,
             ..DescribeGroupsResponseGroupsMembers5::default()
         }
     }
@@ -455,10 +516,10 @@ impl From<DescribeGroupsResponseGroups3> for DescribeGroupsResponseGroups5 {
     fn from(older: DescribeGroupsResponseGroups3) -> Self {
         DescribeGroupsResponseGroups5 {
             error_code: older.error_code,
-            group_id: older.group_id.into(),
-            group_state: older.group_state.into(),
-            protocol_type: older.protocol_type.into(),
-            protocol_data: older.protocol_data.into(),
+            group_id: older.group_id,
+            group_state: older.group_state,
+            protocol_type: older.protocol_type,
+            protocol_data: older.protocol_data,
             members: older.members.into_iter().map(|el| el.into()).collect(),
             authorized_operations: older.authorized_operations,
             ..DescribeGroupsResponseGroups5::default()
@@ -469,11 +530,11 @@ impl From<DescribeGroupsResponseGroups3> for DescribeGroupsResponseGroups5 {
 impl From<DescribeGroupsResponseGroupsMembers3> for DescribeGroupsResponseGroupsMembers5 {
     fn from(older: DescribeGroupsResponseGroupsMembers3) -> Self {
         DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id.into(),
-            client_id: older.client_id.into(),
-            client_host: older.client_host.into(),
-            member_metadata: older.member_metadata.into(),
-            member_assignment: older.member_assignment.into(),
+            member_id: older.member_id,
+            client_id: older.client_id,
+            client_host: older.client_host,
+            member_metadata: older.member_metadata,
+            member_assignment: older.member_assignment,
             ..DescribeGroupsResponseGroupsMembers5::default()
         }
     }
@@ -493,10 +554,10 @@ impl From<DescribeGroupsResponseGroups4> for DescribeGroupsResponseGroups5 {
     fn from(older: DescribeGroupsResponseGroups4) -> Self {
         DescribeGroupsResponseGroups5 {
             error_code: older.error_code,
-            group_id: older.group_id.into(),
-            group_state: older.group_state.into(),
-            protocol_type: older.protocol_type.into(),
-            protocol_data: older.protocol_data.into(),
+            group_id: older.group_id,
+            group_state: older.group_state,
+            protocol_type: older.protocol_type,
+            protocol_data: older.protocol_data,
             members: older.members.into_iter().map(|el| el.into()).collect(),
             authorized_operations: older.authorized_operations,
             ..DescribeGroupsResponseGroups5::default()
@@ -507,12 +568,12 @@ impl From<DescribeGroupsResponseGroups4> for DescribeGroupsResponseGroups5 {
 impl From<DescribeGroupsResponseGroupsMembers4> for DescribeGroupsResponseGroupsMembers5 {
     fn from(older: DescribeGroupsResponseGroupsMembers4) -> Self {
         DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id.into(),
-            group_instance_id: older.group_instance_id.map(|val| val.into()),
-            client_id: older.client_id.into(),
-            client_host: older.client_host.into(),
-            member_metadata: older.member_metadata.into(),
-            member_assignment: older.member_assignment.into(),
+            member_id: older.member_id,
+            group_instance_id: older.group_instance_id,
+            client_id: older.client_id,
+            client_host: older.client_host,
+            member_metadata: older.member_metadata,
+            member_assignment: older.member_assignment,
             ..DescribeGroupsResponseGroupsMembers5::default()
         }
     }

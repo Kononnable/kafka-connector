@@ -75,10 +75,12 @@ fn parse_call(api_call: ApiCall) -> Vec<ApiStructDefinition> {
     let name = format!("{}{:?}", api_call.name, api_call.ty);
     let (fields, mut children_definitions) =
         parse_vec(api_call.fields, name.clone(), api_call.version);
+    let is_flexible_version = fields.iter().any(|x| x.is_compact_field);
     let definition = ApiStructDefinition {
         name,
         version: api_call.version,
         fields,
+        is_flexible_version,
     };
     definitions.push(definition);
     definitions.append(&mut children_definitions);
@@ -96,32 +98,38 @@ fn parse_vec(
     for field in fields {
         match field.type_with_payload {
             FieldTypeWithPayload::Field(ty) => {
+                let (is_compact_field, typ) = process_flexible_version_fields(ty);
                 returned_fields.push(StructField {
                     name: field.name,
-                    ty: format!("{:?}", ty),
+                    ty: typ,
                     is_vec: false,
                     is_simple_type: FieldType::is_simple_type(&ty),
-                    is_easily_convertable: FieldType::is_easily_convertable(&ty),
+                    is_easily_convertable: true,
                     is_optional: false,
+                    is_compact_field,
                 });
             }
             FieldTypeWithPayload::VecSimple(ty) => {
+                let (is_compact_field, typ) = process_flexible_version_fields(ty);
                 returned_fields.push(StructField {
                     name: field.name,
-                    ty: format!("Vec<{:?}>", ty),
+                    ty: format!("Vec<{}>", typ),
                     is_vec: true,
                     is_simple_type: FieldType::is_simple_type(&ty),
-                    is_easily_convertable: FieldType::is_easily_convertable(&ty),
+                    is_easily_convertable: true,
                     is_optional: false,
+                    is_compact_field,
                 });
             }
             FieldTypeWithPayload::VecStruct(ty) => {
                 let struct_name = format!("{}{}", prefix, to_upper_case(field.name));
                 let (fields, mut grandchildren) = parse_vec(ty, struct_name.clone(), api_version);
+                let is_flexible_version = fields.iter().any(|x| x.is_compact_field);
                 children.push(ApiStructDefinition {
                     name: struct_name.clone(),
                     version: api_version,
                     fields,
+                    is_flexible_version,
                 });
                 children.append(&mut grandchildren);
                 returned_fields.push(StructField {
@@ -131,6 +139,7 @@ fn parse_vec(
                     is_simple_type: false,
                     is_easily_convertable: false,
                     is_optional: false,
+                    is_compact_field: false,
                 });
             }
             FieldTypeWithPayload::TagBuffer => {
@@ -139,13 +148,23 @@ fn parse_vec(
                     ty: "TagBuffer".to_owned(),
                     is_vec: false,
                     is_simple_type: FieldType::is_simple_type(&FieldType::TagBuffer),
-                    is_easily_convertable: FieldType::is_easily_convertable(&FieldType::TagBuffer),
+                    is_easily_convertable: true,
                     is_optional: false,
+                    is_compact_field: true,
                 });
             }
         };
     }
     (returned_fields, children)
+}
+
+fn process_flexible_version_fields(field_type: FieldType) -> (bool, String) {
+    let field_type = format!("{:?}", field_type).replace("CompactBytes", "CompactKafkaBytes");
+    if field_type.contains("Compact") {
+        (true, field_type.replacen("Compact", "", 1))
+    } else {
+        (false, field_type)
+    }
 }
 
 #[derive(Default, Debug)]
@@ -159,6 +178,7 @@ pub struct ApiStructDefinition<'a> {
     pub name: String,
     pub version: i32,
     pub fields: Vec<StructField<'a>>,
+    pub is_flexible_version: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -169,4 +189,5 @@ pub struct StructField<'a> {
     pub is_simple_type: bool,
     pub is_easily_convertable: bool,
     pub is_optional: bool,
+    pub is_compact_field: bool,
 }

@@ -22,18 +22,18 @@ impl ZigZagVarInt32 {
     }
 }
 impl FromBytes for ZigZagVarInt32 {
-    fn deserialize(buf: &mut Bytes) -> Self {
-        let varint = UnsignedVarInt32::deserialize(buf);
+    fn deserialize(buf: &mut Bytes, is_flexible_version: bool) -> Self {
+        let varint = UnsignedVarInt32::deserialize(buf, is_flexible_version);
         let value = decode_zig_zag_32(varint.value);
         ZigZagVarInt32 { value }
     }
 }
 
 impl ToBytes for ZigZagVarInt32 {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
         let zigzag = encode_zig_zag_32(self.value);
         let varint = UnsignedVarInt32::new(zigzag);
-        varint.serialize(buf);
+        varint.serialize(buf, is_flexible_version);
     }
 }
 impl Default for ZigZagVarInt32 {

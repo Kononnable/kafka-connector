@@ -13,34 +13,104 @@ impl ApiCall for ProduceRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::Produce
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&ProduceRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&ProduceRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&ProduceRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&ProduceRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&ProduceRequest4::try_from(self)?, buf),
-            5 => ToBytes::serialize(&ProduceRequest5::try_from(self)?, buf),
-            6 => ToBytes::serialize(&ProduceRequest6::try_from(self)?, buf),
-            7 => ToBytes::serialize(&ProduceRequest7::try_from(self)?, buf),
-            8 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => false,
+            5 => false,
+            6 => false,
+            7 => false,
+            8 => false,
+            _ => false,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                ProduceRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                ProduceRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &ProduceRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &ProduceRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &ProduceRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &ProduceRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(
+                &ProduceRequest4::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            5 => ToBytes::serialize(
+                &ProduceRequest5::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            6 => ToBytes::serialize(
+                &ProduceRequest6::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            7 => ToBytes::serialize(
+                &ProduceRequest7::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            8 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> ProduceResponse {
-        match version {
-            0 => ProduceResponse0::deserialize(buf).into(),
-            1 => ProduceResponse1::deserialize(buf).into(),
-            2 => ProduceResponse2::deserialize(buf).into(),
-            3 => ProduceResponse3::deserialize(buf).into(),
-            4 => ProduceResponse4::deserialize(buf).into(),
-            5 => ProduceResponse5::deserialize(buf).into(),
-            6 => ProduceResponse6::deserialize(buf).into(),
-            7 => ProduceResponse7::deserialize(buf).into(),
-            8 => ProduceResponse::deserialize(buf),
-            _ => ProduceResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, ProduceResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => ProduceResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => ProduceResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => ProduceResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => ProduceResponse3::deserialize(buf, Self::is_flexible_version(version)).into(),
+            4 => ProduceResponse4::deserialize(buf, Self::is_flexible_version(version)).into(),
+            5 => ProduceResponse5::deserialize(buf, Self::is_flexible_version(version)).into(),
+            6 => ProduceResponse6::deserialize(buf, Self::is_flexible_version(version)).into(),
+            7 => ProduceResponse7::deserialize(buf, Self::is_flexible_version(version)).into(),
+            8 => ProduceResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => ProduceResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]

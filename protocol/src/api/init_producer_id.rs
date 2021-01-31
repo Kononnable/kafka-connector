@@ -13,26 +13,81 @@ impl ApiCall for InitProducerIdRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::InitProducerId
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&InitProducerIdRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&InitProducerIdRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&InitProducerIdRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&InitProducerIdRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => true,
+            3 => true,
+            4 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                InitProducerIdRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                InitProducerIdRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &InitProducerIdRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &InitProducerIdRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &InitProducerIdRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &InitProducerIdRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> InitProducerIdResponse {
-        match version {
-            0 => InitProducerIdResponse0::deserialize(buf).into(),
-            1 => InitProducerIdResponse1::deserialize(buf).into(),
-            2 => InitProducerIdResponse2::deserialize(buf).into(),
-            3 => InitProducerIdResponse3::deserialize(buf).into(),
-            4 => InitProducerIdResponse::deserialize(buf),
-            _ => InitProducerIdResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, InitProducerIdResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response =
+            match version {
+                0 => InitProducerIdResponse0::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                1 => InitProducerIdResponse1::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                2 => InitProducerIdResponse2::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                3 => InitProducerIdResponse3::deserialize(buf, Self::is_flexible_version(version))
+                    .into(),
+                4 => InitProducerIdResponse::deserialize(buf, Self::is_flexible_version(version)),
+                _ => InitProducerIdResponse::deserialize(buf, Self::is_flexible_version(version)),
+            };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -49,14 +104,14 @@ pub struct InitProducerIdRequest1 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct InitProducerIdRequest2 {
-    pub transactional_id: CompactNullableString,
+    pub transactional_id: NullableString,
     pub transaction_timeout_ms: Int32,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct InitProducerIdRequest3 {
-    pub transactional_id: CompactNullableString,
+    pub transactional_id: NullableString,
     pub transaction_timeout_ms: Int32,
     pub producer_id: Optional<Int64>,
     pub producer_epoch: Optional<Int16>,
@@ -65,7 +120,7 @@ pub struct InitProducerIdRequest3 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct InitProducerIdRequest4 {
-    pub transactional_id: CompactNullableString,
+    pub transactional_id: NullableString,
     pub transaction_timeout_ms: Int32,
     pub producer_id: Optional<Int64>,
     pub producer_epoch: Optional<Int16>,
@@ -140,7 +195,7 @@ impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest0 {
             ));
         }
         Ok(InitProducerIdRequest0 {
-            transactional_id: latest.transactional_id.into(),
+            transactional_id: latest.transactional_id,
             transaction_timeout_ms: latest.transaction_timeout_ms,
         })
     }
@@ -171,7 +226,7 @@ impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest1 {
             ));
         }
         Ok(InitProducerIdRequest1 {
-            transactional_id: latest.transactional_id.into(),
+            transactional_id: latest.transactional_id,
             transaction_timeout_ms: latest.transaction_timeout_ms,
         })
     }

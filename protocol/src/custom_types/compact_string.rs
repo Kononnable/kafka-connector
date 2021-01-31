@@ -9,8 +9,8 @@ pub struct CompactString {
     pub value: String,
 }
 impl FromBytes for CompactString {
-    fn deserialize(buf: &mut Bytes) -> Self {
-        let len = UnsignedVarInt32::deserialize(buf);
+    fn deserialize(buf: &mut Bytes, is_flexible_version: bool) -> Self {
+        let len = UnsignedVarInt32::deserialize(buf, is_flexible_version);
         let len = len.value - 1;
         let slice = buf.split_to(len as usize).into_iter();
         let data: Vec<u8> = slice.take(len as usize).collect();
@@ -20,13 +20,13 @@ impl FromBytes for CompactString {
 }
 
 impl ToBytes for CompactString {
-    fn serialize(&self, buf: &mut BytesMut) {
+    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
         println!("Before write {:?}", buf);
         println!("{:?}", self);
         let len = UnsignedVarInt32::new(self.value.as_bytes().len() as u32 + 1);
         println!("{:?}", len);
 
-        len.serialize(buf);
+        len.serialize(buf, is_flexible_version);
         buf.put_slice(&self.value.as_bytes());
         println!("After write {:?}", buf);
     }

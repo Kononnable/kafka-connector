@@ -13,30 +13,90 @@ impl ApiCall for CreateTopicsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::CreateTopics
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&CreateTopicsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&CreateTopicsRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&CreateTopicsRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&CreateTopicsRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&CreateTopicsRequest4::try_from(self)?, buf),
-            5 => ToBytes::serialize(&CreateTopicsRequest5::try_from(self)?, buf),
-            6 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => false,
+            5 => true,
+            6 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                CreateTopicsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                CreateTopicsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &CreateTopicsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &CreateTopicsRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &CreateTopicsRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &CreateTopicsRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(
+                &CreateTopicsRequest4::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            5 => ToBytes::serialize(
+                &CreateTopicsRequest5::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            6 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> CreateTopicsResponse {
-        match version {
-            0 => CreateTopicsResponse0::deserialize(buf).into(),
-            1 => CreateTopicsResponse1::deserialize(buf).into(),
-            2 => CreateTopicsResponse2::deserialize(buf).into(),
-            3 => CreateTopicsResponse3::deserialize(buf).into(),
-            4 => CreateTopicsResponse4::deserialize(buf).into(),
-            5 => CreateTopicsResponse5::deserialize(buf).into(),
-            6 => CreateTopicsResponse::deserialize(buf),
-            _ => CreateTopicsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, CreateTopicsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => CreateTopicsResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => CreateTopicsResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => CreateTopicsResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => CreateTopicsResponse3::deserialize(buf, Self::is_flexible_version(version)).into(),
+            4 => CreateTopicsResponse4::deserialize(buf, Self::is_flexible_version(version)).into(),
+            5 => CreateTopicsResponse5::deserialize(buf, Self::is_flexible_version(version)).into(),
+            6 => CreateTopicsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => CreateTopicsResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -188,7 +248,7 @@ pub struct CreateTopicsRequest5 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopics5 {
-    pub name: CompactString,
+    pub name: String,
     pub num_partitions: Int32,
     pub replication_factor: Int16,
     pub assignments: Vec<CreateTopicsRequestTopicsAssignments5>,
@@ -205,8 +265,8 @@ pub struct CreateTopicsRequestTopicsAssignments5 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsConfigs5 {
-    pub name: CompactString,
-    pub value: CompactNullableString,
+    pub name: String,
+    pub value: NullableString,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -220,7 +280,7 @@ pub struct CreateTopicsRequest6 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopics6 {
-    pub name: CompactString,
+    pub name: String,
     pub num_partitions: Int32,
     pub replication_factor: Int16,
     pub assignments: Vec<CreateTopicsRequestTopicsAssignments6>,
@@ -237,8 +297,8 @@ pub struct CreateTopicsRequestTopicsAssignments6 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateTopicsRequestTopicsConfigs6 {
-    pub name: CompactString,
-    pub value: CompactNullableString,
+    pub name: String,
+    pub value: NullableString,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -313,9 +373,9 @@ pub struct CreateTopicsResponse5 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopics5 {
-    pub name: CompactString,
+    pub name: String,
     pub error_code: Int16,
-    pub error_message: Optional<CompactNullableString>,
+    pub error_message: Optional<NullableString>,
     pub num_partitions: Optional<Int32>,
     pub replication_factor: Optional<Int16>,
     pub configs: Optional<Vec<CreateTopicsResponseTopicsConfigs5>>,
@@ -324,8 +384,8 @@ pub struct CreateTopicsResponseTopics5 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopicsConfigs5 {
-    pub name: CompactString,
-    pub value: CompactNullableString,
+    pub name: String,
+    pub value: NullableString,
     pub read_only: Boolean,
     pub config_source: Int8,
     pub is_sensitive: Boolean,
@@ -341,9 +401,9 @@ pub struct CreateTopicsResponse6 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopics6 {
-    pub name: CompactString,
+    pub name: String,
     pub error_code: Int16,
-    pub error_message: Optional<CompactNullableString>,
+    pub error_message: Optional<NullableString>,
     pub num_partitions: Optional<Int32>,
     pub replication_factor: Optional<Int16>,
     pub configs: Optional<Vec<CreateTopicsResponseTopicsConfigs6>>,
@@ -352,8 +412,8 @@ pub struct CreateTopicsResponseTopics6 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateTopicsResponseTopicsConfigs6 {
-    pub name: CompactString,
-    pub value: CompactNullableString,
+    pub name: String,
+    pub value: NullableString,
     pub read_only: Boolean,
     pub config_source: Int8,
     pub is_sensitive: Boolean,
@@ -399,7 +459,7 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics0 {
             ));
         }
         Ok(CreateTopicsRequestTopics0 {
-            name: latest.name.into(),
+            name: latest.name,
             num_partitions: latest.num_partitions,
             replication_factor: latest.replication_factor,
             assignments: latest
@@ -444,8 +504,8 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
             ));
         }
         Ok(CreateTopicsRequestTopicsConfigs0 {
-            name: latest.name.into(),
-            value: latest.value.into(),
+            name: latest.name,
+            value: latest.value,
         })
     }
 }
@@ -483,7 +543,7 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics1 {
             ));
         }
         Ok(CreateTopicsRequestTopics1 {
-            name: latest.name.into(),
+            name: latest.name,
             num_partitions: latest.num_partitions,
             replication_factor: latest.replication_factor,
             assignments: latest
@@ -528,8 +588,8 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
             ));
         }
         Ok(CreateTopicsRequestTopicsConfigs1 {
-            name: latest.name.into(),
-            value: latest.value.into(),
+            name: latest.name,
+            value: latest.value,
         })
     }
 }
@@ -567,7 +627,7 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics2 {
             ));
         }
         Ok(CreateTopicsRequestTopics2 {
-            name: latest.name.into(),
+            name: latest.name,
             num_partitions: latest.num_partitions,
             replication_factor: latest.replication_factor,
             assignments: latest
@@ -612,8 +672,8 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
             ));
         }
         Ok(CreateTopicsRequestTopicsConfigs2 {
-            name: latest.name.into(),
-            value: latest.value.into(),
+            name: latest.name,
+            value: latest.value,
         })
     }
 }
@@ -651,7 +711,7 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics3 {
             ));
         }
         Ok(CreateTopicsRequestTopics3 {
-            name: latest.name.into(),
+            name: latest.name,
             num_partitions: latest.num_partitions,
             replication_factor: latest.replication_factor,
             assignments: latest
@@ -696,8 +756,8 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
             ));
         }
         Ok(CreateTopicsRequestTopicsConfigs3 {
-            name: latest.name.into(),
-            value: latest.value.into(),
+            name: latest.name,
+            value: latest.value,
         })
     }
 }
@@ -735,7 +795,7 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics4 {
             ));
         }
         Ok(CreateTopicsRequestTopics4 {
-            name: latest.name.into(),
+            name: latest.name,
             num_partitions: latest.num_partitions,
             replication_factor: latest.replication_factor,
             assignments: latest
@@ -780,8 +840,8 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
             ));
         }
         Ok(CreateTopicsRequestTopicsConfigs4 {
-            name: latest.name.into(),
-            value: latest.value.into(),
+            name: latest.name,
+            value: latest.value,
         })
     }
 }
@@ -858,7 +918,7 @@ impl From<CreateTopicsResponse0> for CreateTopicsResponse6 {
 impl From<CreateTopicsResponseTopics0> for CreateTopicsResponseTopics6 {
     fn from(older: CreateTopicsResponseTopics0) -> Self {
         CreateTopicsResponseTopics6 {
-            name: older.name.into(),
+            name: older.name,
             error_code: older.error_code,
             ..CreateTopicsResponseTopics6::default()
         }
@@ -877,9 +937,9 @@ impl From<CreateTopicsResponse1> for CreateTopicsResponse6 {
 impl From<CreateTopicsResponseTopics1> for CreateTopicsResponseTopics6 {
     fn from(older: CreateTopicsResponseTopics1) -> Self {
         CreateTopicsResponseTopics6 {
-            name: older.name.into(),
+            name: older.name,
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val.into()),
+            error_message: older.error_message,
             ..CreateTopicsResponseTopics6::default()
         }
     }
@@ -898,9 +958,9 @@ impl From<CreateTopicsResponse2> for CreateTopicsResponse6 {
 impl From<CreateTopicsResponseTopics2> for CreateTopicsResponseTopics6 {
     fn from(older: CreateTopicsResponseTopics2) -> Self {
         CreateTopicsResponseTopics6 {
-            name: older.name.into(),
+            name: older.name,
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val.into()),
+            error_message: older.error_message,
             ..CreateTopicsResponseTopics6::default()
         }
     }
@@ -919,9 +979,9 @@ impl From<CreateTopicsResponse3> for CreateTopicsResponse6 {
 impl From<CreateTopicsResponseTopics3> for CreateTopicsResponseTopics6 {
     fn from(older: CreateTopicsResponseTopics3) -> Self {
         CreateTopicsResponseTopics6 {
-            name: older.name.into(),
+            name: older.name,
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val.into()),
+            error_message: older.error_message,
             ..CreateTopicsResponseTopics6::default()
         }
     }
@@ -940,9 +1000,9 @@ impl From<CreateTopicsResponse4> for CreateTopicsResponse6 {
 impl From<CreateTopicsResponseTopics4> for CreateTopicsResponseTopics6 {
     fn from(older: CreateTopicsResponseTopics4) -> Self {
         CreateTopicsResponseTopics6 {
-            name: older.name.into(),
+            name: older.name,
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val.into()),
+            error_message: older.error_message,
             ..CreateTopicsResponseTopics6::default()
         }
     }

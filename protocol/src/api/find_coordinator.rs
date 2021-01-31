@@ -13,24 +13,72 @@ impl ApiCall for FindCoordinatorRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::FindCoordinator
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&FindCoordinatorRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&FindCoordinatorRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&FindCoordinatorRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                FindCoordinatorRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                FindCoordinatorRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &FindCoordinatorRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &FindCoordinatorRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &FindCoordinatorRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> FindCoordinatorResponse {
-        match version {
-            0 => FindCoordinatorResponse0::deserialize(buf).into(),
-            1 => FindCoordinatorResponse1::deserialize(buf).into(),
-            2 => FindCoordinatorResponse2::deserialize(buf).into(),
-            3 => FindCoordinatorResponse::deserialize(buf),
-            _ => FindCoordinatorResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, FindCoordinatorResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => FindCoordinatorResponse0::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            1 => FindCoordinatorResponse1::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            2 => FindCoordinatorResponse2::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            3 => FindCoordinatorResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => FindCoordinatorResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -52,7 +100,7 @@ pub struct FindCoordinatorRequest2 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct FindCoordinatorRequest3 {
-    pub key: CompactString,
+    pub key: String,
     pub key_type: Optional<Int8>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -89,9 +137,9 @@ pub struct FindCoordinatorResponse2 {
 pub struct FindCoordinatorResponse3 {
     pub throttle_time_ms: Optional<Int32>,
     pub error_code: Int16,
-    pub error_message: Optional<CompactNullableString>,
+    pub error_message: Optional<NullableString>,
     pub node_id: Int32,
-    pub host: CompactString,
+    pub host: String,
     pub port: Int32,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -113,9 +161,7 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest0 {
                 "tag_buffer",
             ));
         }
-        Ok(FindCoordinatorRequest0 {
-            key: latest.key.into(),
-        })
+        Ok(FindCoordinatorRequest0 { key: latest.key })
     }
 }
 
@@ -130,7 +176,7 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest1 {
             ));
         }
         Ok(FindCoordinatorRequest1 {
-            key: latest.key.into(),
+            key: latest.key,
             key_type: latest.key_type,
         })
     }
@@ -147,7 +193,7 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest2 {
             ));
         }
         Ok(FindCoordinatorRequest2 {
-            key: latest.key.into(),
+            key: latest.key,
             key_type: latest.key_type,
         })
     }
@@ -158,7 +204,7 @@ impl From<FindCoordinatorResponse0> for FindCoordinatorResponse3 {
         FindCoordinatorResponse3 {
             error_code: older.error_code,
             node_id: older.node_id,
-            host: older.host.into(),
+            host: older.host,
             port: older.port,
             ..FindCoordinatorResponse3::default()
         }
@@ -170,9 +216,9 @@ impl From<FindCoordinatorResponse1> for FindCoordinatorResponse3 {
         FindCoordinatorResponse3 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val.into()),
+            error_message: older.error_message,
             node_id: older.node_id,
-            host: older.host.into(),
+            host: older.host,
             port: older.port,
             ..FindCoordinatorResponse3::default()
         }
@@ -184,9 +230,9 @@ impl From<FindCoordinatorResponse2> for FindCoordinatorResponse3 {
         FindCoordinatorResponse3 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
-            error_message: older.error_message.map(|val| val.into()),
+            error_message: older.error_message,
             node_id: older.node_id,
-            host: older.host.into(),
+            host: older.host,
             port: older.port,
             ..FindCoordinatorResponse3::default()
         }

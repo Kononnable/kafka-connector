@@ -13,24 +13,72 @@ impl ApiCall for TxnOffsetCommitRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::TxnOffsetCommit
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&TxnOffsetCommitRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&TxnOffsetCommitRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&TxnOffsetCommitRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                TxnOffsetCommitRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                TxnOffsetCommitRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &TxnOffsetCommitRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &TxnOffsetCommitRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &TxnOffsetCommitRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> TxnOffsetCommitResponse {
-        match version {
-            0 => TxnOffsetCommitResponse0::deserialize(buf).into(),
-            1 => TxnOffsetCommitResponse1::deserialize(buf).into(),
-            2 => TxnOffsetCommitResponse2::deserialize(buf).into(),
-            3 => TxnOffsetCommitResponse::deserialize(buf),
-            _ => TxnOffsetCommitResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, TxnOffsetCommitResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => TxnOffsetCommitResponse0::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            1 => TxnOffsetCommitResponse1::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            2 => TxnOffsetCommitResponse2::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            3 => TxnOffsetCommitResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => TxnOffsetCommitResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -102,20 +150,20 @@ pub struct TxnOffsetCommitRequestTopicsPartitions2 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct TxnOffsetCommitRequest3 {
-    pub transactional_id: CompactString,
-    pub group_id: CompactString,
+    pub transactional_id: String,
+    pub group_id: String,
     pub producer_id: Int64,
     pub producer_epoch: Int16,
     pub generation_id: Optional<Int32>,
-    pub member_id: Optional<CompactString>,
-    pub group_instance_id: Optional<CompactNullableString>,
+    pub member_id: Optional<String>,
+    pub group_instance_id: Optional<NullableString>,
     pub topics: Vec<TxnOffsetCommitRequestTopics3>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct TxnOffsetCommitRequestTopics3 {
-    pub name: CompactString,
+    pub name: String,
     pub partitions: Vec<TxnOffsetCommitRequestTopicsPartitions3>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -125,7 +173,7 @@ pub struct TxnOffsetCommitRequestTopicsPartitions3 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
     pub committed_leader_epoch: Optional<Int32>,
-    pub committed_metadata: CompactNullableString,
+    pub committed_metadata: NullableString,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -192,7 +240,7 @@ pub struct TxnOffsetCommitResponse3 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct TxnOffsetCommitResponseTopics3 {
-    pub name: CompactString,
+    pub name: String,
     pub partitions: Vec<TxnOffsetCommitResponseTopicsPartitions3>,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -236,8 +284,8 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest0 {
             ));
         }
         Ok(TxnOffsetCommitRequest0 {
-            transactional_id: latest.transactional_id.into(),
-            group_id: latest.group_id.into(),
+            transactional_id: latest.transactional_id,
+            group_id: latest.group_id,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
             topics: latest
@@ -260,7 +308,7 @@ impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics0 {
             ));
         }
         Ok(TxnOffsetCommitRequestTopics0 {
-            name: latest.name.into(),
+            name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -290,7 +338,7 @@ impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequest
         Ok(TxnOffsetCommitRequestTopicsPartitions0 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata.into(),
+            committed_metadata: latest.committed_metadata,
         })
     }
 }
@@ -327,8 +375,8 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest1 {
             ));
         }
         Ok(TxnOffsetCommitRequest1 {
-            transactional_id: latest.transactional_id.into(),
-            group_id: latest.group_id.into(),
+            transactional_id: latest.transactional_id,
+            group_id: latest.group_id,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
             topics: latest
@@ -351,7 +399,7 @@ impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics1 {
             ));
         }
         Ok(TxnOffsetCommitRequestTopics1 {
-            name: latest.name.into(),
+            name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -381,7 +429,7 @@ impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequest
         Ok(TxnOffsetCommitRequestTopicsPartitions1 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
-            committed_metadata: latest.committed_metadata.into(),
+            committed_metadata: latest.committed_metadata,
         })
     }
 }
@@ -418,8 +466,8 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest2 {
             ));
         }
         Ok(TxnOffsetCommitRequest2 {
-            transactional_id: latest.transactional_id.into(),
-            group_id: latest.group_id.into(),
+            transactional_id: latest.transactional_id,
+            group_id: latest.group_id,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
             topics: latest
@@ -442,7 +490,7 @@ impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics2 {
             ));
         }
         Ok(TxnOffsetCommitRequestTopics2 {
-            name: latest.name.into(),
+            name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
@@ -466,7 +514,7 @@ impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequest
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
             committed_leader_epoch: latest.committed_leader_epoch,
-            committed_metadata: latest.committed_metadata.into(),
+            committed_metadata: latest.committed_metadata,
         })
     }
 }
@@ -484,7 +532,7 @@ impl From<TxnOffsetCommitResponse0> for TxnOffsetCommitResponse3 {
 impl From<TxnOffsetCommitResponseTopics0> for TxnOffsetCommitResponseTopics3 {
     fn from(older: TxnOffsetCommitResponseTopics0) -> Self {
         TxnOffsetCommitResponseTopics3 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..TxnOffsetCommitResponseTopics3::default()
         }
@@ -514,7 +562,7 @@ impl From<TxnOffsetCommitResponse1> for TxnOffsetCommitResponse3 {
 impl From<TxnOffsetCommitResponseTopics1> for TxnOffsetCommitResponseTopics3 {
     fn from(older: TxnOffsetCommitResponseTopics1) -> Self {
         TxnOffsetCommitResponseTopics3 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..TxnOffsetCommitResponseTopics3::default()
         }
@@ -544,7 +592,7 @@ impl From<TxnOffsetCommitResponse2> for TxnOffsetCommitResponse3 {
 impl From<TxnOffsetCommitResponseTopics2> for TxnOffsetCommitResponseTopics3 {
     fn from(older: TxnOffsetCommitResponseTopics2) -> Self {
         TxnOffsetCommitResponseTopics3 {
-            name: older.name.into(),
+            name: older.name,
             partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
             ..TxnOffsetCommitResponseTopics3::default()
         }

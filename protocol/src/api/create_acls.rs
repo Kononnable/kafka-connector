@@ -13,22 +13,62 @@ impl ApiCall for CreateAclsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::CreateAcls
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&CreateAclsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&CreateAclsRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                CreateAclsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                CreateAclsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &CreateAclsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &CreateAclsRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> CreateAclsResponse {
-        match version {
-            0 => CreateAclsResponse0::deserialize(buf).into(),
-            1 => CreateAclsResponse1::deserialize(buf).into(),
-            2 => CreateAclsResponse::deserialize(buf),
-            _ => CreateAclsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, CreateAclsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => CreateAclsResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => CreateAclsResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => CreateAclsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => CreateAclsResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -71,10 +111,10 @@ pub struct CreateAclsRequest2 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateAclsRequestCreations2 {
     pub resource_type: Int8,
-    pub resource_name: CompactString,
+    pub resource_name: String,
     pub resource_pattern_type: Optional<Int8>,
-    pub principal: CompactString,
-    pub host: CompactString,
+    pub principal: String,
+    pub host: String,
     pub operation: Int8,
     pub permission_type: Int8,
     pub tag_buffer: Optional<TagBuffer>,
@@ -114,7 +154,7 @@ pub struct CreateAclsResponse2 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateAclsResponseResults2 {
     pub error_code: Int16,
-    pub error_message: CompactNullableString,
+    pub error_message: NullableString,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -153,9 +193,9 @@ impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations0 {
         }
         Ok(CreateAclsRequestCreations0 {
             resource_type: latest.resource_type,
-            resource_name: latest.resource_name.into(),
-            principal: latest.principal.into(),
-            host: latest.host.into(),
+            resource_name: latest.resource_name,
+            principal: latest.principal,
+            host: latest.host,
             operation: latest.operation,
             permission_type: latest.permission_type,
         })
@@ -190,10 +230,10 @@ impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations1 {
         }
         Ok(CreateAclsRequestCreations1 {
             resource_type: latest.resource_type,
-            resource_name: latest.resource_name.into(),
+            resource_name: latest.resource_name,
             resource_pattern_type: latest.resource_pattern_type,
-            principal: latest.principal.into(),
-            host: latest.host.into(),
+            principal: latest.principal,
+            host: latest.host,
             operation: latest.operation,
             permission_type: latest.permission_type,
         })
@@ -214,7 +254,7 @@ impl From<CreateAclsResponseResults0> for CreateAclsResponseResults2 {
     fn from(older: CreateAclsResponseResults0) -> Self {
         CreateAclsResponseResults2 {
             error_code: older.error_code,
-            error_message: older.error_message.into(),
+            error_message: older.error_message,
             ..CreateAclsResponseResults2::default()
         }
     }
@@ -234,7 +274,7 @@ impl From<CreateAclsResponseResults1> for CreateAclsResponseResults2 {
     fn from(older: CreateAclsResponseResults1) -> Self {
         CreateAclsResponseResults2 {
             error_code: older.error_code,
-            error_message: older.error_message.into(),
+            error_message: older.error_message,
             ..CreateAclsResponseResults2::default()
         }
     }

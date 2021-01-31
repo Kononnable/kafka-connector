@@ -13,22 +13,72 @@ impl ApiCall for CreateDelegationTokenRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::CreateDelegationToken
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&CreateDelegationTokenRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&CreateDelegationTokenRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                CreateDelegationTokenRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                CreateDelegationTokenRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &CreateDelegationTokenRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &CreateDelegationTokenRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> CreateDelegationTokenResponse {
-        match version {
-            0 => CreateDelegationTokenResponse0::deserialize(buf).into(),
-            1 => CreateDelegationTokenResponse1::deserialize(buf).into(),
-            2 => CreateDelegationTokenResponse::deserialize(buf),
-            _ => CreateDelegationTokenResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, CreateDelegationTokenResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => {
+                CreateDelegationTokenResponse0::deserialize(buf, Self::is_flexible_version(version))
+                    .into()
+            }
+            1 => {
+                CreateDelegationTokenResponse1::deserialize(buf, Self::is_flexible_version(version))
+                    .into()
+            }
+            2 => {
+                CreateDelegationTokenResponse::deserialize(buf, Self::is_flexible_version(version))
+            }
+            _ => {
+                CreateDelegationTokenResponse::deserialize(buf, Self::is_flexible_version(version))
+            }
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -64,8 +114,8 @@ pub struct CreateDelegationTokenRequest2 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateDelegationTokenRequestRenewers2 {
-    pub principal_type: CompactString,
-    pub principal_name: CompactString,
+    pub principal_type: String,
+    pub principal_name: String,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -98,13 +148,13 @@ pub struct CreateDelegationTokenResponse1 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateDelegationTokenResponse2 {
     pub error_code: Int16,
-    pub principal_type: CompactString,
-    pub principal_name: CompactString,
+    pub principal_type: String,
+    pub principal_name: String,
     pub issue_timestamp_ms: Int64,
     pub expiry_timestamp_ms: Int64,
     pub max_timestamp_ms: Int64,
-    pub token_id: CompactString,
-    pub hmac: CompactBytes,
+    pub token_id: String,
+    pub hmac: KafkaBytes,
     pub throttle_time_ms: Int32,
     pub tag_buffer: Optional<TagBuffer>,
 }
@@ -141,8 +191,8 @@ impl TryFrom<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenReq
             ));
         }
         Ok(CreateDelegationTokenRequestRenewers0 {
-            principal_type: latest.principal_type.into(),
-            principal_name: latest.principal_name.into(),
+            principal_type: latest.principal_type,
+            principal_name: latest.principal_name,
         })
     }
 }
@@ -179,8 +229,8 @@ impl TryFrom<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenReq
             ));
         }
         Ok(CreateDelegationTokenRequestRenewers1 {
-            principal_type: latest.principal_type.into(),
-            principal_name: latest.principal_name.into(),
+            principal_type: latest.principal_type,
+            principal_name: latest.principal_name,
         })
     }
 }
@@ -189,13 +239,13 @@ impl From<CreateDelegationTokenResponse0> for CreateDelegationTokenResponse2 {
     fn from(older: CreateDelegationTokenResponse0) -> Self {
         CreateDelegationTokenResponse2 {
             error_code: older.error_code,
-            principal_type: older.principal_type.into(),
-            principal_name: older.principal_name.into(),
+            principal_type: older.principal_type,
+            principal_name: older.principal_name,
             issue_timestamp_ms: older.issue_timestamp_ms,
             expiry_timestamp_ms: older.expiry_timestamp_ms,
             max_timestamp_ms: older.max_timestamp_ms,
-            token_id: older.token_id.into(),
-            hmac: older.hmac.into(),
+            token_id: older.token_id,
+            hmac: older.hmac,
             throttle_time_ms: older.throttle_time_ms,
             ..CreateDelegationTokenResponse2::default()
         }
@@ -206,13 +256,13 @@ impl From<CreateDelegationTokenResponse1> for CreateDelegationTokenResponse2 {
     fn from(older: CreateDelegationTokenResponse1) -> Self {
         CreateDelegationTokenResponse2 {
             error_code: older.error_code,
-            principal_type: older.principal_type.into(),
-            principal_name: older.principal_name.into(),
+            principal_type: older.principal_type,
+            principal_name: older.principal_name,
             issue_timestamp_ms: older.issue_timestamp_ms,
             expiry_timestamp_ms: older.expiry_timestamp_ms,
             max_timestamp_ms: older.max_timestamp_ms,
-            token_id: older.token_id.into(),
-            hmac: older.hmac.into(),
+            token_id: older.token_id,
+            hmac: older.hmac,
             throttle_time_ms: older.throttle_time_ms,
             ..CreateDelegationTokenResponse2::default()
         }

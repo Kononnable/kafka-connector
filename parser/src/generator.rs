@@ -53,6 +53,25 @@ fn generate_api_struct(api_call: &ApiEndpoint, api_name: &str) -> String {
         "fn get_api_key()->ApiNumbers{{\nApiNumbers::{}\n}}\n",
         api_name
     ));
+    def.push_str("fn is_flexible_version(version: i16) -> bool {\n match version{\n");
+    for (version, struct_definition) in api_call.responses.iter().enumerate() {
+        def.push_str(&format!(
+            "        {} =>  {},\n",
+            version,
+            struct_definition.first().unwrap().is_flexible_version
+        ));
+    }
+    def.push_str(&format!(
+        "        _ =>  {},\n",
+        api_call
+            .responses
+            .last()
+            .unwrap()
+            .first()
+            .unwrap()
+            .is_flexible_version
+    ));
+    def.push_str("}\n}\n");
 
     let request_version_call = serialize_api_request(&api_call.requests);
     let response_version_call = deserialize_api_response(&api_call.responses);
@@ -67,19 +86,30 @@ fn serialize_api_request(requests: &[Vec<ApiStructDefinition>]) -> String {
     let main_struct = requests.first().unwrap().first().unwrap();
     let struct_name = &main_struct.name;
     let mut fn_def =
-        "fn serialize(self,version:i16, buf: &mut BytesMut) -> Result<(),Error> {\n".to_owned();
+        "fn serialize(self,version:i16, buf: &mut BytesMut,correlation_id: i32,client_id: &str) -> Result<(),Error> {\n".to_owned();
+
+    fn_def.push_str("match Self::is_flexible_version(version) {\n");
+    fn_def.push_str(&format!("true => HeaderRequest2::new({}::get_api_key(), version, correlation_id, client_id).serialize(buf, false),\n",struct_name));
+    fn_def.push_str(&format!("false => HeaderRequest1::new({}::get_api_key(), version, correlation_id, client_id).serialize(buf, false),\n",struct_name));
+    fn_def.push_str("}\n");
+
     fn_def.push_str("    match version {\n");
+
     for version in 0..requests.len() - 1 {
         fn_def.push_str(&format!(
-            "        {} => ToBytes::serialize(&{}{}::try_from(self)?,buf),\n",
-            version, struct_name, version
+            "        {} => ToBytes::serialize(&{}{}::try_from(self)?,buf,Self::is_flexible_version(version)),\n",
+            version,
+            struct_name,
+            version,
         ));
     }
     fn_def.push_str(&format!(
-        "        {} => ToBytes::serialize(&self,buf),\n",
-        requests.len() - 1
+        "        {} => ToBytes::serialize(&self,buf, Self::is_flexible_version(version)),\n",
+        requests.len() - 1,
     ));
-    fn_def.push_str("        _ => ToBytes::serialize(&self,buf),\n");
+    fn_def.push_str(
+        "        _ => ToBytes::serialize(&self,buf, Self::is_flexible_version(version)),\n",
+    );
     fn_def.push_str("    }\n");
     fn_def.push_str("    Ok(())\n");
     fn_def.push_str("}\n");
@@ -90,26 +120,29 @@ fn deserialize_api_response(responses: &[Vec<ApiStructDefinition>]) -> String {
     let main_struct = responses.first().unwrap().first().unwrap();
     let struct_name = &main_struct.name;
     let mut fn_def = format!(
-        "fn deserialize_response(version:i16, buf: &mut Bytes) -> {} {{\n",
+        "fn deserialize_response(version:i16, buf: &mut Bytes) -> (i32,{}) {{\n",
         struct_name
     );
-    fn_def.push_str("    match version {\n");
+
+    fn_def.push_str("let header = HeaderResponse::deserialize(buf, false);\n");
+    fn_def.push_str("let response = match version {\n");
     for version in 0..responses.len() - 1 {
         fn_def.push_str(&format!(
-            "        {} =>  {}{}::deserialize(buf).into(),\n",
-            version, struct_name, version
+            "        {} =>  {}{}::deserialize(buf, Self::is_flexible_version(version)).into(),\n",
+            version, struct_name, version,
         ));
     }
     fn_def.push_str(&format!(
-        "        {} => {}::deserialize(buf),\n",
+        "        {} => {}::deserialize(buf, Self::is_flexible_version(version)),\n",
         responses.len() - 1,
-        struct_name
+        struct_name,
     ));
     fn_def.push_str(&format!(
-        "        _ => {}::deserialize(buf),\n",
+        "        _ => {}::deserialize(buf, Self::is_flexible_version(version)),\n",
         struct_name
     ));
-    fn_def.push_str("    }\n");
+    fn_def.push_str("    };\n");
+    fn_def.push_str("(header.correlation, response)\n");
     fn_def.push_str("}\n");
     fn_def
 }

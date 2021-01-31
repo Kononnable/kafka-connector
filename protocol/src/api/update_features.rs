@@ -13,18 +13,48 @@ impl ApiCall for UpdateFeaturesRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::UpdateFeatures
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                UpdateFeaturesRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                UpdateFeaturesRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> UpdateFeaturesResponse {
-        match version {
-            0 => UpdateFeaturesResponse::deserialize(buf),
-            _ => UpdateFeaturesResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, UpdateFeaturesResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => UpdateFeaturesResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => UpdateFeaturesResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -36,7 +66,7 @@ pub struct UpdateFeaturesRequest0 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateFeaturesRequestFeatureUpdates0 {
-    pub feature: CompactString,
+    pub feature: String,
     pub max_version_level: Int16,
     pub allow_downgrade: Boolean,
     pub tag_buffer: TagBuffer,
@@ -46,15 +76,15 @@ pub struct UpdateFeaturesRequestFeatureUpdates0 {
 pub struct UpdateFeaturesResponse0 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
-    pub error_message: CompactNullableString,
+    pub error_message: NullableString,
     pub results: Vec<UpdateFeaturesResponseResults0>,
     pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct UpdateFeaturesResponseResults0 {
-    pub feature: CompactString,
+    pub feature: String,
     pub error_code: Int16,
-    pub error_message: CompactNullableString,
+    pub error_message: NullableString,
     pub tag_buffer: TagBuffer,
 }

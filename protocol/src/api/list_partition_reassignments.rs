@@ -13,18 +13,57 @@ impl ApiCall for ListPartitionReassignmentsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ListPartitionReassignments
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                ListPartitionReassignmentsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                ListPartitionReassignmentsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> ListPartitionReassignmentsResponse {
-        match version {
-            0 => ListPartitionReassignmentsResponse::deserialize(buf),
-            _ => ListPartitionReassignmentsResponse::deserialize(buf),
-        }
+    fn deserialize_response(
+        version: i16,
+        buf: &mut Bytes,
+    ) -> (i32, ListPartitionReassignmentsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => ListPartitionReassignmentsResponse::deserialize(
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            _ => ListPartitionReassignmentsResponse::deserialize(
+                buf,
+                Self::is_flexible_version(version),
+            ),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -36,7 +75,7 @@ pub struct ListPartitionReassignmentsRequest0 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListPartitionReassignmentsRequestTopics0 {
-    pub name: CompactString,
+    pub name: String,
     pub partition_indexes: Vec<Int32>,
     pub tag_buffer: TagBuffer,
 }
@@ -45,14 +84,14 @@ pub struct ListPartitionReassignmentsRequestTopics0 {
 pub struct ListPartitionReassignmentsResponse0 {
     pub throttle_time_ms: Int32,
     pub error_code: Int16,
-    pub error_message: CompactNullableString,
+    pub error_message: NullableString,
     pub topics: Vec<ListPartitionReassignmentsResponseTopics0>,
     pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListPartitionReassignmentsResponseTopics0 {
-    pub name: CompactString,
+    pub name: String,
     pub partitions: Vec<ListPartitionReassignmentsResponseTopicsPartitions0>,
     pub tag_buffer: TagBuffer,
 }

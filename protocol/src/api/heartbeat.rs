@@ -13,26 +13,76 @@ impl ApiCall for HeartbeatRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::Heartbeat
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&HeartbeatRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&HeartbeatRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&HeartbeatRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&HeartbeatRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => false,
+            4 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                HeartbeatRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                HeartbeatRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &HeartbeatRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &HeartbeatRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &HeartbeatRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &HeartbeatRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> HeartbeatResponse {
-        match version {
-            0 => HeartbeatResponse0::deserialize(buf).into(),
-            1 => HeartbeatResponse1::deserialize(buf).into(),
-            2 => HeartbeatResponse2::deserialize(buf).into(),
-            3 => HeartbeatResponse3::deserialize(buf).into(),
-            4 => HeartbeatResponse::deserialize(buf),
-            _ => HeartbeatResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, HeartbeatResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => HeartbeatResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => HeartbeatResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => HeartbeatResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => HeartbeatResponse3::deserialize(buf, Self::is_flexible_version(version)).into(),
+            4 => HeartbeatResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => HeartbeatResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -66,10 +116,10 @@ pub struct HeartbeatRequest3 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct HeartbeatRequest4 {
-    pub group_id: CompactString,
+    pub group_id: String,
     pub generation_id: Int32,
-    pub member_id: CompactString,
-    pub group_instance_id: Optional<CompactNullableString>,
+    pub member_id: String,
+    pub group_instance_id: Optional<NullableString>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -117,9 +167,9 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest0 {
             return Err(Error::OldKafkaVersion("HeartbeatRequest", 0, "tag_buffer"));
         }
         Ok(HeartbeatRequest0 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.into(),
+            member_id: latest.member_id,
         })
     }
 }
@@ -138,9 +188,9 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest1 {
             return Err(Error::OldKafkaVersion("HeartbeatRequest", 1, "tag_buffer"));
         }
         Ok(HeartbeatRequest1 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.into(),
+            member_id: latest.member_id,
         })
     }
 }
@@ -159,9 +209,9 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest2 {
             return Err(Error::OldKafkaVersion("HeartbeatRequest", 2, "tag_buffer"));
         }
         Ok(HeartbeatRequest2 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.into(),
+            member_id: latest.member_id,
         })
     }
 }
@@ -173,10 +223,10 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest3 {
             return Err(Error::OldKafkaVersion("HeartbeatRequest", 3, "tag_buffer"));
         }
         Ok(HeartbeatRequest3 {
-            group_id: latest.group_id.into(),
+            group_id: latest.group_id,
             generation_id: latest.generation_id,
-            member_id: latest.member_id.into(),
-            group_instance_id: latest.group_instance_id.map(|val| val.into()),
+            member_id: latest.member_id,
+            group_instance_id: latest.group_instance_id,
         })
     }
 }

@@ -13,26 +13,76 @@ impl ApiCall for ListGroupsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ListGroups
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&ListGroupsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&ListGroupsRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&ListGroupsRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&ListGroupsRequest3::try_from(self)?, buf),
-            4 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => false,
+            3 => true,
+            4 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                ListGroupsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                ListGroupsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &ListGroupsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &ListGroupsRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &ListGroupsRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(
+                &ListGroupsRequest3::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            4 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> ListGroupsResponse {
-        match version {
-            0 => ListGroupsResponse0::deserialize(buf).into(),
-            1 => ListGroupsResponse1::deserialize(buf).into(),
-            2 => ListGroupsResponse2::deserialize(buf).into(),
-            3 => ListGroupsResponse3::deserialize(buf).into(),
-            4 => ListGroupsResponse::deserialize(buf),
-            _ => ListGroupsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, ListGroupsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => ListGroupsResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
+            1 => ListGroupsResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
+            2 => ListGroupsResponse2::deserialize(buf, Self::is_flexible_version(version)).into(),
+            3 => ListGroupsResponse3::deserialize(buf, Self::is_flexible_version(version)).into(),
+            4 => ListGroupsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => ListGroupsResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -51,7 +101,7 @@ pub struct ListGroupsRequest3 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListGroupsRequest4 {
-    pub states_filter: Optional<Vec<CompactString>>,
+    pub states_filter: Optional<Vec<String>>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -103,8 +153,8 @@ pub struct ListGroupsResponse3 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListGroupsResponseGroups3 {
-    pub group_id: CompactString,
-    pub protocol_type: CompactString,
+    pub group_id: String,
+    pub protocol_type: String,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -118,9 +168,9 @@ pub struct ListGroupsResponse4 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListGroupsResponseGroups4 {
-    pub group_id: CompactString,
-    pub protocol_type: CompactString,
-    pub group_state: Optional<CompactString>,
+    pub group_id: String,
+    pub protocol_type: String,
+    pub group_state: Optional<String>,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -204,8 +254,8 @@ impl From<ListGroupsResponse0> for ListGroupsResponse4 {
 impl From<ListGroupsResponseGroups0> for ListGroupsResponseGroups4 {
     fn from(older: ListGroupsResponseGroups0) -> Self {
         ListGroupsResponseGroups4 {
-            group_id: older.group_id.into(),
-            protocol_type: older.protocol_type.into(),
+            group_id: older.group_id,
+            protocol_type: older.protocol_type,
             ..ListGroupsResponseGroups4::default()
         }
     }
@@ -225,8 +275,8 @@ impl From<ListGroupsResponse1> for ListGroupsResponse4 {
 impl From<ListGroupsResponseGroups1> for ListGroupsResponseGroups4 {
     fn from(older: ListGroupsResponseGroups1) -> Self {
         ListGroupsResponseGroups4 {
-            group_id: older.group_id.into(),
-            protocol_type: older.protocol_type.into(),
+            group_id: older.group_id,
+            protocol_type: older.protocol_type,
             ..ListGroupsResponseGroups4::default()
         }
     }
@@ -246,8 +296,8 @@ impl From<ListGroupsResponse2> for ListGroupsResponse4 {
 impl From<ListGroupsResponseGroups2> for ListGroupsResponseGroups4 {
     fn from(older: ListGroupsResponseGroups2) -> Self {
         ListGroupsResponseGroups4 {
-            group_id: older.group_id.into(),
-            protocol_type: older.protocol_type.into(),
+            group_id: older.group_id,
+            protocol_type: older.protocol_type,
             ..ListGroupsResponseGroups4::default()
         }
     }

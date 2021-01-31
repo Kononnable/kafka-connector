@@ -13,24 +13,72 @@ impl ApiCall for CreatePartitionsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::CreatePartitions
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut) -> Result<(), Error> {
+    fn is_flexible_version(version: i16) -> bool {
         match version {
-            0 => ToBytes::serialize(&CreatePartitionsRequest0::try_from(self)?, buf),
-            1 => ToBytes::serialize(&CreatePartitionsRequest1::try_from(self)?, buf),
-            2 => ToBytes::serialize(&CreatePartitionsRequest2::try_from(self)?, buf),
-            3 => ToBytes::serialize(&self, buf),
-            _ => ToBytes::serialize(&self, buf),
+            0 => false,
+            1 => false,
+            2 => true,
+            3 => true,
+            _ => true,
+        }
+    }
+    fn serialize(
+        self,
+        version: i16,
+        buf: &mut BytesMut,
+        correlation_id: i32,
+        client_id: &str,
+    ) -> Result<(), Error> {
+        match Self::is_flexible_version(version) {
+            true => HeaderRequest2::new(
+                CreatePartitionsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+            false => HeaderRequest1::new(
+                CreatePartitionsRequest::get_api_key(),
+                version,
+                correlation_id,
+                client_id,
+            )
+            .serialize(buf, false),
+        }
+        match version {
+            0 => ToBytes::serialize(
+                &CreatePartitionsRequest0::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            1 => ToBytes::serialize(
+                &CreatePartitionsRequest1::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            2 => ToBytes::serialize(
+                &CreatePartitionsRequest2::try_from(self)?,
+                buf,
+                Self::is_flexible_version(version),
+            ),
+            3 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
+            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
         Ok(())
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> CreatePartitionsResponse {
-        match version {
-            0 => CreatePartitionsResponse0::deserialize(buf).into(),
-            1 => CreatePartitionsResponse1::deserialize(buf).into(),
-            2 => CreatePartitionsResponse2::deserialize(buf).into(),
-            3 => CreatePartitionsResponse::deserialize(buf),
-            _ => CreatePartitionsResponse::deserialize(buf),
-        }
+    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, CreatePartitionsResponse) {
+        let header = HeaderResponse::deserialize(buf, false);
+        let response = match version {
+            0 => CreatePartitionsResponse0::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            1 => CreatePartitionsResponse1::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            2 => CreatePartitionsResponse2::deserialize(buf, Self::is_flexible_version(version))
+                .into(),
+            3 => CreatePartitionsResponse::deserialize(buf, Self::is_flexible_version(version)),
+            _ => CreatePartitionsResponse::deserialize(buf, Self::is_flexible_version(version)),
+        };
+        (header.correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -81,7 +129,7 @@ pub struct CreatePartitionsRequest2 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreatePartitionsRequestTopics2 {
-    pub name: CompactString,
+    pub name: String,
     pub count: Int32,
     pub assignments: Vec<CreatePartitionsRequestTopicsAssignments2>,
     pub tag_buffer: Optional<TagBuffer>,
@@ -103,7 +151,7 @@ pub struct CreatePartitionsRequest3 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreatePartitionsRequestTopics3 {
-    pub name: CompactString,
+    pub name: String,
     pub count: Int32,
     pub assignments: Vec<CreatePartitionsRequestTopicsAssignments3>,
     pub tag_buffer: Optional<TagBuffer>,
@@ -150,9 +198,9 @@ pub struct CreatePartitionsResponse2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreatePartitionsResponseResults2 {
-    pub name: CompactString,
+    pub name: String,
     pub error_code: Int16,
-    pub error_message: CompactNullableString,
+    pub error_message: NullableString,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -165,9 +213,9 @@ pub struct CreatePartitionsResponse3 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreatePartitionsResponseResults3 {
-    pub name: CompactString,
+    pub name: String,
     pub error_code: Int16,
-    pub error_message: CompactNullableString,
+    pub error_message: NullableString,
     pub tag_buffer: Optional<TagBuffer>,
 }
 
@@ -204,7 +252,7 @@ impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics0 
             ));
         }
         Ok(CreatePartitionsRequestTopics0 {
-            name: latest.name.into(),
+            name: latest.name,
             count: latest.count,
             assignments: latest
                 .assignments
@@ -266,7 +314,7 @@ impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics1 
             ));
         }
         Ok(CreatePartitionsRequestTopics1 {
-            name: latest.name.into(),
+            name: latest.name,
             count: latest.count,
             assignments: latest
                 .assignments
@@ -352,9 +400,9 @@ impl From<CreatePartitionsResponse0> for CreatePartitionsResponse3 {
 impl From<CreatePartitionsResponseResults0> for CreatePartitionsResponseResults3 {
     fn from(older: CreatePartitionsResponseResults0) -> Self {
         CreatePartitionsResponseResults3 {
-            name: older.name.into(),
+            name: older.name,
             error_code: older.error_code,
-            error_message: older.error_message.into(),
+            error_message: older.error_message,
             ..CreatePartitionsResponseResults3::default()
         }
     }
@@ -373,9 +421,9 @@ impl From<CreatePartitionsResponse1> for CreatePartitionsResponse3 {
 impl From<CreatePartitionsResponseResults1> for CreatePartitionsResponseResults3 {
     fn from(older: CreatePartitionsResponseResults1) -> Self {
         CreatePartitionsResponseResults3 {
-            name: older.name.into(),
+            name: older.name,
             error_code: older.error_code,
-            error_message: older.error_message.into(),
+            error_message: older.error_message,
             ..CreatePartitionsResponseResults3::default()
         }
     }
