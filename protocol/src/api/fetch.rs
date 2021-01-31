@@ -894,12 +894,6 @@ impl TryFrom<FetchRequest12> for FetchRequest0 {
                 "forgotten_topics_data",
             ));
         }
-        if latest.rack_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 0, "rack_id"));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 0, "tag_buffer"));
-        }
         Ok(FetchRequest0 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
@@ -916,13 +910,6 @@ impl TryFrom<FetchRequest12> for FetchRequest0 {
 impl TryFrom<FetchRequestTopics12> for FetchRequestTopics0 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopics",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopics0 {
             topic: latest.topic,
             partitions: latest
@@ -958,13 +945,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions0 {
                 "log_start_offset",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopicsPartitions0 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
@@ -995,12 +975,6 @@ impl TryFrom<FetchRequest12> for FetchRequest1 {
                 "forgotten_topics_data",
             ));
         }
-        if latest.rack_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 1, "rack_id"));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 1, "tag_buffer"));
-        }
         Ok(FetchRequest1 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
@@ -1017,13 +991,6 @@ impl TryFrom<FetchRequest12> for FetchRequest1 {
 impl TryFrom<FetchRequestTopics12> for FetchRequestTopics1 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopics",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopics1 {
             topic: latest.topic,
             partitions: latest
@@ -1059,13 +1026,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions1 {
                 "log_start_offset",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopicsPartitions1 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
@@ -1096,12 +1056,6 @@ impl TryFrom<FetchRequest12> for FetchRequest2 {
                 "forgotten_topics_data",
             ));
         }
-        if latest.rack_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 2, "rack_id"));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 2, "tag_buffer"));
-        }
         Ok(FetchRequest2 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
@@ -1118,13 +1072,6 @@ impl TryFrom<FetchRequest12> for FetchRequest2 {
 impl TryFrom<FetchRequestTopics12> for FetchRequestTopics2 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopics",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopics2 {
             topic: latest.topic,
             partitions: latest
@@ -1160,13 +1107,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions2 {
                 "log_start_offset",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopicsPartitions2 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
@@ -1194,12 +1134,6 @@ impl TryFrom<FetchRequest12> for FetchRequest3 {
                 "forgotten_topics_data",
             ));
         }
-        if latest.rack_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 3, "rack_id"));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 3, "tag_buffer"));
-        }
         Ok(FetchRequest3 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
@@ -1217,13 +1151,6 @@ impl TryFrom<FetchRequest12> for FetchRequest3 {
 impl TryFrom<FetchRequestTopics12> for FetchRequestTopics3 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopics",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopics3 {
             topic: latest.topic,
             partitions: latest
@@ -1259,13 +1186,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions3 {
                 "log_start_offset",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopicsPartitions3 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
@@ -1290,12 +1210,6 @@ impl TryFrom<FetchRequest12> for FetchRequest4 {
                 "forgotten_topics_data",
             ));
         }
-        if latest.rack_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 4, "rack_id"));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 4, "tag_buffer"));
-        }
         Ok(FetchRequest4 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
@@ -1314,13 +1228,6 @@ impl TryFrom<FetchRequest12> for FetchRequest4 {
 impl TryFrom<FetchRequestTopics12> for FetchRequestTopics4 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopics",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopics4 {
             topic: latest.topic,
             partitions: latest
@@ -1356,13 +1263,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions4 {
                 "log_start_offset",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopicsPartitions4 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
@@ -1387,12 +1287,6 @@ impl TryFrom<FetchRequest12> for FetchRequest5 {
                 "forgotten_topics_data",
             ));
         }
-        if latest.rack_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 5, "rack_id"));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 5, "tag_buffer"));
-        }
         Ok(FetchRequest5 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
@@ -1411,13 +1305,6 @@ impl TryFrom<FetchRequest12> for FetchRequest5 {
 impl TryFrom<FetchRequestTopics12> for FetchRequestTopics5 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopics",
-                5,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopics5 {
             topic: latest.topic,
             partitions: latest
@@ -1446,13 +1333,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions5 {
                 "last_fetched_epoch",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                5,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopicsPartitions5 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
@@ -1478,12 +1358,6 @@ impl TryFrom<FetchRequest12> for FetchRequest6 {
                 "forgotten_topics_data",
             ));
         }
-        if latest.rack_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 6, "rack_id"));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 6, "tag_buffer"));
-        }
         Ok(FetchRequest6 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
@@ -1502,13 +1376,6 @@ impl TryFrom<FetchRequest12> for FetchRequest6 {
 impl TryFrom<FetchRequestTopics12> for FetchRequestTopics6 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopics",
-                6,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopics6 {
             topic: latest.topic,
             partitions: latest
@@ -1537,13 +1404,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions6 {
                 "last_fetched_epoch",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                6,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopicsPartitions6 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
@@ -1556,12 +1416,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions6 {
 impl TryFrom<FetchRequest12> for FetchRequest7 {
     type Error = Error;
     fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        if latest.rack_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 7, "rack_id"));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 7, "tag_buffer"));
-        }
         Ok(FetchRequest7 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
@@ -1590,13 +1444,6 @@ impl TryFrom<FetchRequest12> for FetchRequest7 {
 impl TryFrom<FetchRequestTopics12> for FetchRequestTopics7 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopics",
-                7,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopics7 {
             topic: latest.topic,
             partitions: latest
@@ -1625,13 +1472,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions7 {
                 "last_fetched_epoch",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                7,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopicsPartitions7 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
@@ -1644,13 +1484,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions7 {
 impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData7 {
     type Error = Error;
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestForgottenTopicsData",
-                7,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestForgottenTopicsData7 {
             topic: latest.topic,
             partitions: latest.partitions,
@@ -1661,12 +1494,6 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
 impl TryFrom<FetchRequest12> for FetchRequest8 {
     type Error = Error;
     fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        if latest.rack_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 8, "rack_id"));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 8, "tag_buffer"));
-        }
         Ok(FetchRequest8 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
@@ -1695,13 +1522,6 @@ impl TryFrom<FetchRequest12> for FetchRequest8 {
 impl TryFrom<FetchRequestTopics12> for FetchRequestTopics8 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopics",
-                8,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopics8 {
             topic: latest.topic,
             partitions: latest
@@ -1730,13 +1550,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions8 {
                 "last_fetched_epoch",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                8,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopicsPartitions8 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
@@ -1749,13 +1562,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions8 {
 impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData8 {
     type Error = Error;
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestForgottenTopicsData",
-                8,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestForgottenTopicsData8 {
             topic: latest.topic,
             partitions: latest.partitions,
@@ -1766,12 +1572,6 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
 impl TryFrom<FetchRequest12> for FetchRequest9 {
     type Error = Error;
     fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        if latest.rack_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 9, "rack_id"));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 9, "tag_buffer"));
-        }
         Ok(FetchRequest9 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
@@ -1800,13 +1600,6 @@ impl TryFrom<FetchRequest12> for FetchRequest9 {
 impl TryFrom<FetchRequestTopics12> for FetchRequestTopics9 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopics",
-                9,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopics9 {
             topic: latest.topic,
             partitions: latest
@@ -1828,13 +1621,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions9 {
                 "last_fetched_epoch",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                9,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopicsPartitions9 {
             partition: latest.partition,
             current_leader_epoch: latest.current_leader_epoch,
@@ -1848,13 +1634,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions9 {
 impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData9 {
     type Error = Error;
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestForgottenTopicsData",
-                9,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestForgottenTopicsData9 {
             topic: latest.topic,
             partitions: latest.partitions,
@@ -1865,12 +1644,6 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
 impl TryFrom<FetchRequest12> for FetchRequest10 {
     type Error = Error;
     fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        if latest.rack_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 10, "rack_id"));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 10, "tag_buffer"));
-        }
         Ok(FetchRequest10 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
@@ -1899,13 +1672,6 @@ impl TryFrom<FetchRequest12> for FetchRequest10 {
 impl TryFrom<FetchRequestTopics12> for FetchRequestTopics10 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopics",
-                10,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopics10 {
             topic: latest.topic,
             partitions: latest
@@ -1927,13 +1693,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions10 
                 "last_fetched_epoch",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                10,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopicsPartitions10 {
             partition: latest.partition,
             current_leader_epoch: latest.current_leader_epoch,
@@ -1947,13 +1706,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions10 
 impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData10 {
     type Error = Error;
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestForgottenTopicsData",
-                10,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestForgottenTopicsData10 {
             topic: latest.topic,
             partitions: latest.partitions,
@@ -1964,9 +1716,6 @@ impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsD
 impl TryFrom<FetchRequest12> for FetchRequest11 {
     type Error = Error;
     fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 11, "tag_buffer"));
-        }
         Ok(FetchRequest11 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
@@ -1996,13 +1745,6 @@ impl TryFrom<FetchRequest12> for FetchRequest11 {
 impl TryFrom<FetchRequestTopics12> for FetchRequestTopics11 {
     type Error = Error;
     fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopics",
-                11,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopics11 {
             topic: latest.topic,
             partitions: latest
@@ -2024,13 +1766,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions11 
                 "last_fetched_epoch",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                11,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestTopicsPartitions11 {
             partition: latest.partition,
             current_leader_epoch: latest.current_leader_epoch,
@@ -2044,13 +1779,6 @@ impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions11 
 impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData11 {
     type Error = Error;
     fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestForgottenTopicsData",
-                11,
-                "tag_buffer",
-            ));
-        }
         Ok(FetchRequestForgottenTopicsData11 {
             topic: latest.topic,
             partitions: latest.partitions,

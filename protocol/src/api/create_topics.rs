@@ -430,13 +430,6 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest0 {
                 "validate_only",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequest0 {
             topics: latest
                 .topics
@@ -451,13 +444,6 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest0 {
 impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics0 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopics",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopics0 {
             name: latest.name,
             num_partitions: latest.num_partitions,
@@ -479,13 +465,6 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics0 {
 impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopicsAssignments0 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopicsAssignments",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopicsAssignments0 {
             partition_index: latest.partition_index,
             broker_ids: latest.broker_ids,
@@ -496,13 +475,6 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
 impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsConfigs0 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopicsConfigs",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopicsConfigs0 {
             name: latest.name,
             value: latest.value,
@@ -513,13 +485,6 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
 impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest1 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequest6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequest1 {
             topics: latest
                 .topics
@@ -535,13 +500,6 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest1 {
 impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics1 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopics",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopics1 {
             name: latest.name,
             num_partitions: latest.num_partitions,
@@ -563,13 +521,6 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics1 {
 impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopicsAssignments1 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopicsAssignments",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopicsAssignments1 {
             partition_index: latest.partition_index,
             broker_ids: latest.broker_ids,
@@ -580,13 +531,6 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
 impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsConfigs1 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopicsConfigs",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopicsConfigs1 {
             name: latest.name,
             value: latest.value,
@@ -597,13 +541,6 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
 impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest2 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequest6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequest",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequest2 {
             topics: latest
                 .topics
@@ -619,13 +556,6 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest2 {
 impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics2 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopics",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopics2 {
             name: latest.name,
             num_partitions: latest.num_partitions,
@@ -647,13 +577,6 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics2 {
 impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopicsAssignments2 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopicsAssignments",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopicsAssignments2 {
             partition_index: latest.partition_index,
             broker_ids: latest.broker_ids,
@@ -664,13 +587,6 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
 impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsConfigs2 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopicsConfigs",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopicsConfigs2 {
             name: latest.name,
             value: latest.value,
@@ -681,13 +597,6 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
 impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest3 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequest6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequest",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequest3 {
             topics: latest
                 .topics
@@ -703,13 +612,6 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest3 {
 impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics3 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopics",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopics3 {
             name: latest.name,
             num_partitions: latest.num_partitions,
@@ -731,13 +633,6 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics3 {
 impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopicsAssignments3 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopicsAssignments",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopicsAssignments3 {
             partition_index: latest.partition_index,
             broker_ids: latest.broker_ids,
@@ -748,13 +643,6 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
 impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsConfigs3 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopicsConfigs",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopicsConfigs3 {
             name: latest.name,
             value: latest.value,
@@ -765,13 +653,6 @@ impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsCon
 impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest4 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequest6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequest",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequest4 {
             topics: latest
                 .topics
@@ -787,13 +668,6 @@ impl TryFrom<CreateTopicsRequest6> for CreateTopicsRequest4 {
 impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics4 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopics6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopics",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopics4 {
             name: latest.name,
             num_partitions: latest.num_partitions,
@@ -815,13 +689,6 @@ impl TryFrom<CreateTopicsRequestTopics6> for CreateTopicsRequestTopics4 {
 impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopicsAssignments4 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsAssignments6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopicsAssignments",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopicsAssignments4 {
             partition_index: latest.partition_index,
             broker_ids: latest.broker_ids,
@@ -832,13 +699,6 @@ impl TryFrom<CreateTopicsRequestTopicsAssignments6> for CreateTopicsRequestTopic
 impl TryFrom<CreateTopicsRequestTopicsConfigs6> for CreateTopicsRequestTopicsConfigs4 {
     type Error = Error;
     fn try_from(latest: CreateTopicsRequestTopicsConfigs6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateTopicsRequestTopicsConfigs",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateTopicsRequestTopicsConfigs4 {
             name: latest.name,
             value: latest.value,

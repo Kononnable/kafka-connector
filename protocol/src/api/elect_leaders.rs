@@ -183,13 +183,6 @@ impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest0 {
                 "election_type",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ElectLeadersRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(ElectLeadersRequest0 {
             topic_partitions: latest
                 .topic_partitions
@@ -204,13 +197,6 @@ impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest0 {
 impl TryFrom<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPartitions0 {
     type Error = Error;
     fn try_from(latest: ElectLeadersRequestTopicPartitions2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ElectLeadersRequestTopicPartitions",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(ElectLeadersRequestTopicPartitions0 {
             topic: latest.topic,
             partition_id: latest.partition_id,
@@ -221,13 +207,6 @@ impl TryFrom<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPa
 impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest1 {
     type Error = Error;
     fn try_from(latest: ElectLeadersRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ElectLeadersRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(ElectLeadersRequest1 {
             election_type: latest.election_type,
             topic_partitions: latest
@@ -243,13 +222,6 @@ impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest1 {
 impl TryFrom<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPartitions1 {
     type Error = Error;
     fn try_from(latest: ElectLeadersRequestTopicPartitions2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ElectLeadersRequestTopicPartitions",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(ElectLeadersRequestTopicPartitions1 {
             topic: latest.topic,
             partition_id: latest.partition_id,

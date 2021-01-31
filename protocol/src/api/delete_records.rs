@@ -194,13 +194,6 @@ pub struct DeleteRecordsResponseTopicsPartitions2 {
 impl TryFrom<DeleteRecordsRequest2> for DeleteRecordsRequest0 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteRecordsRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteRecordsRequest0 {
             topics: latest
                 .topics
@@ -215,13 +208,6 @@ impl TryFrom<DeleteRecordsRequest2> for DeleteRecordsRequest0 {
 impl TryFrom<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics0 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequestTopics2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteRecordsRequestTopics",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteRecordsRequestTopics0 {
             name: latest.name,
             partitions: latest
@@ -236,13 +222,6 @@ impl TryFrom<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics0 {
 impl TryFrom<DeleteRecordsRequestTopicsPartitions2> for DeleteRecordsRequestTopicsPartitions0 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequestTopicsPartitions2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteRecordsRequestTopicsPartitions",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteRecordsRequestTopicsPartitions0 {
             partition_index: latest.partition_index,
             offset: latest.offset,
@@ -253,13 +232,6 @@ impl TryFrom<DeleteRecordsRequestTopicsPartitions2> for DeleteRecordsRequestTopi
 impl TryFrom<DeleteRecordsRequest2> for DeleteRecordsRequest1 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteRecordsRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteRecordsRequest1 {
             topics: latest
                 .topics
@@ -274,13 +246,6 @@ impl TryFrom<DeleteRecordsRequest2> for DeleteRecordsRequest1 {
 impl TryFrom<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics1 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequestTopics2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteRecordsRequestTopics",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteRecordsRequestTopics1 {
             name: latest.name,
             partitions: latest
@@ -295,13 +260,6 @@ impl TryFrom<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics1 {
 impl TryFrom<DeleteRecordsRequestTopicsPartitions2> for DeleteRecordsRequestTopicsPartitions1 {
     type Error = Error;
     fn try_from(latest: DeleteRecordsRequestTopicsPartitions2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteRecordsRequestTopicsPartitions",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteRecordsRequestTopicsPartitions1 {
             partition_index: latest.partition_index,
             offset: latest.offset,

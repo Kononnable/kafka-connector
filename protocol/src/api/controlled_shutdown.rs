@@ -164,13 +164,6 @@ impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest0 {
                 "broker_epoch",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ControlledShutdownRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(ControlledShutdownRequest0 {
             broker_id: latest.broker_id,
         })
@@ -187,13 +180,6 @@ impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest1 {
                 "broker_epoch",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ControlledShutdownRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(ControlledShutdownRequest1 {
             broker_id: latest.broker_id,
         })
@@ -203,13 +189,6 @@ impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest1 {
 impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest2 {
     type Error = Error;
     fn try_from(latest: ControlledShutdownRequest3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ControlledShutdownRequest",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(ControlledShutdownRequest2 {
             broker_id: latest.broker_id,
             broker_epoch: latest.broker_epoch,

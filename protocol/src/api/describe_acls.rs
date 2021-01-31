@@ -188,13 +188,6 @@ impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest0 {
                 "pattern_type_filter",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeAclsRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(DescribeAclsRequest0 {
             resource_type_filter: latest.resource_type_filter,
             resource_name_filter: latest.resource_name_filter,
@@ -209,13 +202,6 @@ impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest0 {
 impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest1 {
     type Error = Error;
     fn try_from(latest: DescribeAclsRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeAclsRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(DescribeAclsRequest1 {
             resource_type_filter: latest.resource_type_filter,
             resource_name_filter: latest.resource_name_filter,

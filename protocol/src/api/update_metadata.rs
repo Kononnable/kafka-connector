@@ -413,13 +413,6 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest0 {
                 "topic_states",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequest0 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -441,20 +434,6 @@ impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBro
                 "UpdateMetadataRequestLiveBrokers",
                 0,
                 "endpoints",
-            ));
-        }
-        if latest.rack.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokers",
-                0,
-                "rack",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokers",
-                0,
-                "tag_buffer",
             ));
         }
         Ok(UpdateMetadataRequestLiveBrokers0 {
@@ -481,13 +460,6 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest1 {
                 "topic_states",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequest1 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -504,20 +476,6 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest1 {
 impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers1 {
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
-        if latest.rack.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokers",
-                1,
-                "rack",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokers",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequestLiveBrokers1 {
             id: latest.id,
             endpoints: latest
@@ -537,20 +495,6 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
 {
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
-        if latest.listener.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokersEndpoints",
-                1,
-                "listener",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokersEndpoints",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequestLiveBrokersEndpoints1 {
             port: latest.port,
             host: latest.host,
@@ -576,13 +520,6 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest2 {
                 "topic_states",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequest2 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -599,13 +536,6 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest2 {
 impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers2 {
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokers",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequestLiveBrokers2 {
             id: latest.id,
             endpoints: latest
@@ -626,20 +556,6 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
 {
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
-        if latest.listener.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokersEndpoints",
-                2,
-                "listener",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokersEndpoints",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequestLiveBrokersEndpoints2 {
             port: latest.port,
             host: latest.host,
@@ -665,13 +581,6 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest3 {
                 "topic_states",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequest3 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -688,13 +597,6 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest3 {
 impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers3 {
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokers",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequestLiveBrokers3 {
             id: latest.id,
             endpoints: latest
@@ -715,13 +617,6 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
 {
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokersEndpoints",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequestLiveBrokersEndpoints3 {
             port: latest.port,
             host: latest.host,
@@ -748,13 +643,6 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest4 {
                 "topic_states",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequest4 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -771,13 +659,6 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest4 {
 impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers4 {
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokers",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequestLiveBrokers4 {
             id: latest.id,
             endpoints: latest
@@ -798,13 +679,6 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
 {
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokersEndpoints",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequestLiveBrokersEndpoints4 {
             port: latest.port,
             host: latest.host,
@@ -817,13 +691,6 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
 impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest5 {
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequest6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                5,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequest5 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -848,13 +715,6 @@ impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest5 {
 impl TryFrom<UpdateMetadataRequestTopicStates6> for UpdateMetadataRequestTopicStates5 {
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequestTopicStates6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestTopicStates",
-                5,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequestTopicStates5 {
             topic_name: latest.topic_name,
             partition_states: latest
@@ -873,13 +733,6 @@ impl TryFrom<UpdateMetadataRequestTopicStatesPartitionStates6>
     fn try_from(
         latest: UpdateMetadataRequestTopicStatesPartitionStates6,
     ) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestTopicStatesPartitionStates",
-                5,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequestTopicStatesPartitionStates5 {
             partition_index: latest.partition_index,
             controller_epoch: latest.controller_epoch,
@@ -896,13 +749,6 @@ impl TryFrom<UpdateMetadataRequestTopicStatesPartitionStates6>
 impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers5 {
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokers",
-                5,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequestLiveBrokers5 {
             id: latest.id,
             endpoints: latest
@@ -923,13 +769,6 @@ impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
 {
     type Error = Error;
     fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokersEndpoints",
-                5,
-                "tag_buffer",
-            ));
-        }
         Ok(UpdateMetadataRequestLiveBrokersEndpoints5 {
             port: latest.port,
             host: latest.host,

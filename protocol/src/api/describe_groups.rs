@@ -299,13 +299,6 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest0 {
                 "include_authorized_operations",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeGroupsRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(DescribeGroupsRequest0 {
             groups: latest.groups,
         })
@@ -320,13 +313,6 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest1 {
                 "DescribeGroupsRequest",
                 1,
                 "include_authorized_operations",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeGroupsRequest",
-                1,
-                "tag_buffer",
             ));
         }
         Ok(DescribeGroupsRequest1 {
@@ -345,13 +331,6 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest2 {
                 "include_authorized_operations",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeGroupsRequest",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(DescribeGroupsRequest2 {
             groups: latest.groups,
         })
@@ -361,13 +340,6 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest2 {
 impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest3 {
     type Error = Error;
     fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeGroupsRequest",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(DescribeGroupsRequest3 {
             groups: latest.groups,
             include_authorized_operations: latest.include_authorized_operations,
@@ -378,13 +350,6 @@ impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest3 {
 impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest4 {
     type Error = Error;
     fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeGroupsRequest",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(DescribeGroupsRequest4 {
             groups: latest.groups,
             include_authorized_operations: latest.include_authorized_operations,

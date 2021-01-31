@@ -182,9 +182,6 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest0 {
         if latest.members.is_some() {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 0, "members"));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("LeaveGroupRequest", 0, "tag_buffer"));
-        }
         Ok(LeaveGroupRequest0 {
             group_id: latest.group_id,
             ..LeaveGroupRequest0::default()
@@ -197,9 +194,6 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest1 {
     fn try_from(latest: LeaveGroupRequest4) -> Result<Self, Self::Error> {
         if latest.members.is_some() {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 1, "members"));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("LeaveGroupRequest", 1, "tag_buffer"));
         }
         Ok(LeaveGroupRequest1 {
             group_id: latest.group_id,
@@ -214,9 +208,6 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest2 {
         if latest.members.is_some() {
             return Err(Error::OldKafkaVersion("LeaveGroupRequest", 2, "members"));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("LeaveGroupRequest", 2, "tag_buffer"));
-        }
         Ok(LeaveGroupRequest2 {
             group_id: latest.group_id,
             ..LeaveGroupRequest2::default()
@@ -227,9 +218,6 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest2 {
 impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest3 {
     type Error = Error;
     fn try_from(latest: LeaveGroupRequest4) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("LeaveGroupRequest", 3, "tag_buffer"));
-        }
         Ok(LeaveGroupRequest3 {
             group_id: latest.group_id,
             members: latest
@@ -247,13 +235,6 @@ impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest3 {
 impl TryFrom<LeaveGroupRequestMembers4> for LeaveGroupRequestMembers3 {
     type Error = Error;
     fn try_from(latest: LeaveGroupRequestMembers4) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaveGroupRequestMembers",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaveGroupRequestMembers3 {
             member_id: latest.member_id,
             group_instance_id: latest.group_instance_id,

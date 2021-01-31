@@ -154,27 +154,6 @@ pub struct ApiVersionsResponseApiKeys3 {
 impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest0 {
     type Error = Error;
     fn try_from(latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
-        if latest.client_software_name.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                0,
-                "client_software_name",
-            ));
-        }
-        if latest.client_software_version.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                0,
-                "client_software_version",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(ApiVersionsRequest0 {})
     }
 }
@@ -182,27 +161,6 @@ impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest0 {
 impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest1 {
     type Error = Error;
     fn try_from(latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
-        if latest.client_software_name.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                1,
-                "client_software_name",
-            ));
-        }
-        if latest.client_software_version.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                1,
-                "client_software_version",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(ApiVersionsRequest1 {})
     }
 }
@@ -210,27 +168,6 @@ impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest1 {
 impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest2 {
     type Error = Error;
     fn try_from(latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
-        if latest.client_software_name.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                2,
-                "client_software_name",
-            ));
-        }
-        if latest.client_software_version.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                2,
-                "client_software_version",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ApiVersionsRequest",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(ApiVersionsRequest2 {})
     }
 }

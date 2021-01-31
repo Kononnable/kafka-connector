@@ -162,13 +162,6 @@ pub struct CreateDelegationTokenResponse2 {
 impl TryFrom<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest0 {
     type Error = Error;
     fn try_from(latest: CreateDelegationTokenRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateDelegationTokenRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateDelegationTokenRequest0 {
             renewers: latest
                 .renewers
@@ -183,13 +176,6 @@ impl TryFrom<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest0 {
 impl TryFrom<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenRequestRenewers0 {
     type Error = Error;
     fn try_from(latest: CreateDelegationTokenRequestRenewers2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateDelegationTokenRequestRenewers",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateDelegationTokenRequestRenewers0 {
             principal_type: latest.principal_type,
             principal_name: latest.principal_name,
@@ -200,13 +186,6 @@ impl TryFrom<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenReq
 impl TryFrom<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest1 {
     type Error = Error;
     fn try_from(latest: CreateDelegationTokenRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateDelegationTokenRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateDelegationTokenRequest1 {
             renewers: latest
                 .renewers
@@ -221,13 +200,6 @@ impl TryFrom<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest1 {
 impl TryFrom<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenRequestRenewers1 {
     type Error = Error;
     fn try_from(latest: CreateDelegationTokenRequestRenewers2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateDelegationTokenRequestRenewers",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateDelegationTokenRequestRenewers1 {
             principal_type: latest.principal_type,
             principal_name: latest.principal_name,

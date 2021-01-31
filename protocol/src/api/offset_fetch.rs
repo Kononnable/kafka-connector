@@ -389,13 +389,6 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest0 {
                 "require_stable",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(OffsetFetchRequest0 {
             group_id: latest.group_id,
             topics: latest
@@ -410,13 +403,6 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest0 {
 impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics0 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequestTopics",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(OffsetFetchRequestTopics0 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
@@ -434,13 +420,6 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest1 {
                 "require_stable",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(OffsetFetchRequest1 {
             group_id: latest.group_id,
             topics: latest
@@ -455,13 +434,6 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest1 {
 impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics1 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequestTopics",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(OffsetFetchRequestTopics1 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
@@ -479,13 +451,6 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest2 {
                 "require_stable",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(OffsetFetchRequest2 {
             group_id: latest.group_id,
             topics: latest
@@ -500,13 +465,6 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest2 {
 impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics2 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequestTopics",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(OffsetFetchRequestTopics2 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
@@ -524,13 +482,6 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest3 {
                 "require_stable",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(OffsetFetchRequest3 {
             group_id: latest.group_id,
             topics: latest
@@ -545,13 +496,6 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest3 {
 impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics3 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequestTopics",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(OffsetFetchRequestTopics3 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
@@ -569,13 +513,6 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest4 {
                 "require_stable",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(OffsetFetchRequest4 {
             group_id: latest.group_id,
             topics: latest
@@ -590,13 +527,6 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest4 {
 impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics4 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequestTopics",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(OffsetFetchRequestTopics4 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
@@ -614,13 +544,6 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest5 {
                 "require_stable",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                5,
-                "tag_buffer",
-            ));
-        }
         Ok(OffsetFetchRequest5 {
             group_id: latest.group_id,
             topics: latest
@@ -635,13 +558,6 @@ impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest5 {
 impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics5 {
     type Error = Error;
     fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequestTopics",
-                5,
-                "tag_buffer",
-            ));
-        }
         Ok(OffsetFetchRequestTopics5 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,

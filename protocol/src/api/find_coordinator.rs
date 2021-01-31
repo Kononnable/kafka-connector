@@ -154,13 +154,6 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest0 {
                 "key_type",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FindCoordinatorRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(FindCoordinatorRequest0 { key: latest.key })
     }
 }
@@ -168,13 +161,6 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest0 {
 impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest1 {
     type Error = Error;
     fn try_from(latest: FindCoordinatorRequest3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FindCoordinatorRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(FindCoordinatorRequest1 {
             key: latest.key,
             key_type: latest.key_type,
@@ -185,13 +171,6 @@ impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest1 {
 impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest2 {
     type Error = Error;
     fn try_from(latest: FindCoordinatorRequest3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FindCoordinatorRequest",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(FindCoordinatorRequest2 {
             key: latest.key,
             key_type: latest.key_type,

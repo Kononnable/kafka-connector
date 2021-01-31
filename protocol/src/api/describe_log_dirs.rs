@@ -196,13 +196,6 @@ pub struct DescribeLogDirsResponseResultsTopicsPartitions2 {
 impl TryFrom<DescribeLogDirsRequest2> for DescribeLogDirsRequest0 {
     type Error = Error;
     fn try_from(latest: DescribeLogDirsRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeLogDirsRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(DescribeLogDirsRequest0 {
             topics: latest
                 .topics
@@ -216,13 +209,6 @@ impl TryFrom<DescribeLogDirsRequest2> for DescribeLogDirsRequest0 {
 impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics0 {
     type Error = Error;
     fn try_from(latest: DescribeLogDirsRequestTopics2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeLogDirsRequestTopics",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(DescribeLogDirsRequestTopics0 {
             topic: latest.topic,
             partition_index: latest.partition_index,
@@ -233,13 +219,6 @@ impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics0 {
 impl TryFrom<DescribeLogDirsRequest2> for DescribeLogDirsRequest1 {
     type Error = Error;
     fn try_from(latest: DescribeLogDirsRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeLogDirsRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(DescribeLogDirsRequest1 {
             topics: latest
                 .topics
@@ -253,13 +232,6 @@ impl TryFrom<DescribeLogDirsRequest2> for DescribeLogDirsRequest1 {
 impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics1 {
     type Error = Error;
     fn try_from(latest: DescribeLogDirsRequestTopics2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeLogDirsRequestTopics",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(DescribeLogDirsRequestTopics1 {
             topic: latest.topic,
             partition_index: latest.partition_index,

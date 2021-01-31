@@ -1,8 +1,5 @@
 use self::record_batch::RecordBatch;
 
-pub mod compact_bytes;
-pub mod compact_nullable_string;
-pub mod compact_string;
 pub mod optional;
 pub mod record_batch;
 pub mod tag_buffer;
@@ -22,6 +19,3 @@ pub type Int64 = i64;
 pub type Float64 = f64;
 pub type NullableString = Option<String>;
 pub type Records = RecordBatch;
-
-// TODO:
-pub type CompactRecords = RecordBatch;

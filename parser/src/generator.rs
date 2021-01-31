@@ -191,7 +191,9 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
                     latest.name, latest.version
                 ));
                 for field in &latest.fields {
-                    if call.fields.iter().find(|x| x.name == field.name).is_none() {
+                    if call.fields.iter().find(|x| x.name == field.name).is_none()
+                        && !field.is_compact_field
+                    {
                         impl_def
                             .push_str(&format!("        if latest.{}.is_some() {{\n", field.name));
                         impl_def.push_str(&format!(

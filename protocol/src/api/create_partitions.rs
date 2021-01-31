@@ -222,13 +222,6 @@ pub struct CreatePartitionsResponseResults3 {
 impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest0 {
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequest3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreatePartitionsRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(CreatePartitionsRequest0 {
             topics: latest
                 .topics
@@ -244,13 +237,6 @@ impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest0 {
 impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics0 {
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopics3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreatePartitionsRequestTopics",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(CreatePartitionsRequestTopics0 {
             name: latest.name,
             count: latest.count,
@@ -268,13 +254,6 @@ impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
 {
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopicsAssignments3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreatePartitionsRequestTopicsAssignments",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(CreatePartitionsRequestTopicsAssignments0 {
             broker_ids: latest.broker_ids,
         })
@@ -284,13 +263,6 @@ impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
 impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest1 {
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequest3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreatePartitionsRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(CreatePartitionsRequest1 {
             topics: latest
                 .topics
@@ -306,13 +278,6 @@ impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest1 {
 impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics1 {
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopics3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreatePartitionsRequestTopics",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(CreatePartitionsRequestTopics1 {
             name: latest.name,
             count: latest.count,
@@ -330,13 +295,6 @@ impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
 {
     type Error = Error;
     fn try_from(latest: CreatePartitionsRequestTopicsAssignments3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreatePartitionsRequestTopicsAssignments",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(CreatePartitionsRequestTopicsAssignments1 {
             broker_ids: latest.broker_ids,
         })

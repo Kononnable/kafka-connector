@@ -128,13 +128,6 @@ pub struct DeleteGroupsResponseResults2 {
 impl TryFrom<DeleteGroupsRequest2> for DeleteGroupsRequest0 {
     type Error = Error;
     fn try_from(latest: DeleteGroupsRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteGroupsRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteGroupsRequest0 {
             groups_names: latest.groups_names,
         })
@@ -144,13 +137,6 @@ impl TryFrom<DeleteGroupsRequest2> for DeleteGroupsRequest0 {
 impl TryFrom<DeleteGroupsRequest2> for DeleteGroupsRequest1 {
     type Error = Error;
     fn try_from(latest: DeleteGroupsRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteGroupsRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteGroupsRequest1 {
             groups_names: latest.groups_names,
         })

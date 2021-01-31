@@ -262,27 +262,6 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest0 {
                 "generation_id",
             ));
         }
-        if latest.member_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequest",
-                0,
-                "member_id",
-            ));
-        }
-        if latest.group_instance_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequest",
-                0,
-                "group_instance_id",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(TxnOffsetCommitRequest0 {
             transactional_id: latest.transactional_id,
             group_id: latest.group_id,
@@ -300,13 +279,6 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest0 {
 impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics0 {
     type Error = Error;
     fn try_from(latest: TxnOffsetCommitRequestTopics3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequestTopics",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(TxnOffsetCommitRequestTopics0 {
             name: latest.name,
             partitions: latest
@@ -328,13 +300,6 @@ impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequest
                 "committed_leader_epoch",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequestTopicsPartitions",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(TxnOffsetCommitRequestTopicsPartitions0 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
@@ -351,27 +316,6 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest1 {
                 "TxnOffsetCommitRequest",
                 1,
                 "generation_id",
-            ));
-        }
-        if latest.member_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequest",
-                1,
-                "member_id",
-            ));
-        }
-        if latest.group_instance_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequest",
-                1,
-                "group_instance_id",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequest",
-                1,
-                "tag_buffer",
             ));
         }
         Ok(TxnOffsetCommitRequest1 {
@@ -391,13 +335,6 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest1 {
 impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics1 {
     type Error = Error;
     fn try_from(latest: TxnOffsetCommitRequestTopics3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequestTopics",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(TxnOffsetCommitRequestTopics1 {
             name: latest.name,
             partitions: latest
@@ -419,13 +356,6 @@ impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequest
                 "committed_leader_epoch",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequestTopicsPartitions",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(TxnOffsetCommitRequestTopicsPartitions1 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
@@ -442,27 +372,6 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest2 {
                 "TxnOffsetCommitRequest",
                 2,
                 "generation_id",
-            ));
-        }
-        if latest.member_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequest",
-                2,
-                "member_id",
-            ));
-        }
-        if latest.group_instance_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequest",
-                2,
-                "group_instance_id",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequest",
-                2,
-                "tag_buffer",
             ));
         }
         Ok(TxnOffsetCommitRequest2 {
@@ -482,13 +391,6 @@ impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest2 {
 impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics2 {
     type Error = Error;
     fn try_from(latest: TxnOffsetCommitRequestTopics3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequestTopics",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(TxnOffsetCommitRequestTopics2 {
             name: latest.name,
             partitions: latest
@@ -503,13 +405,6 @@ impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics2 {
 impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequestTopicsPartitions2 {
     type Error = Error;
     fn try_from(latest: TxnOffsetCommitRequestTopicsPartitions3) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequestTopicsPartitions",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(TxnOffsetCommitRequestTopicsPartitions2 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,

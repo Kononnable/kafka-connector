@@ -153,13 +153,6 @@ pub struct IncrementalAlterConfigsResponseResponses1 {
 impl TryFrom<IncrementalAlterConfigsRequest1> for IncrementalAlterConfigsRequest0 {
     type Error = Error;
     fn try_from(latest: IncrementalAlterConfigsRequest1) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "IncrementalAlterConfigsRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(IncrementalAlterConfigsRequest0 {
             resources: latest
                 .resources
@@ -176,13 +169,6 @@ impl TryFrom<IncrementalAlterConfigsRequestResources1>
 {
     type Error = Error;
     fn try_from(latest: IncrementalAlterConfigsRequestResources1) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "IncrementalAlterConfigsRequestResources",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(IncrementalAlterConfigsRequestResources0 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,
@@ -202,13 +188,6 @@ impl TryFrom<IncrementalAlterConfigsRequestResourcesConfigs1>
     fn try_from(
         latest: IncrementalAlterConfigsRequestResourcesConfigs1,
     ) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "IncrementalAlterConfigsRequestResourcesConfigs",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(IncrementalAlterConfigsRequestResourcesConfigs0 {
             name: latest.name,
             config_operation: latest.config_operation,

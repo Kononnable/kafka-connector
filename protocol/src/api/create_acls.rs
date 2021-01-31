@@ -161,9 +161,6 @@ pub struct CreateAclsResponseResults2 {
 impl TryFrom<CreateAclsRequest2> for CreateAclsRequest0 {
     type Error = Error;
     fn try_from(latest: CreateAclsRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("CreateAclsRequest", 0, "tag_buffer"));
-        }
         Ok(CreateAclsRequest0 {
             creations: latest
                 .creations
@@ -184,13 +181,6 @@ impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations0 {
                 "resource_pattern_type",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateAclsRequestCreations",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateAclsRequestCreations0 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,
@@ -205,9 +195,6 @@ impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations0 {
 impl TryFrom<CreateAclsRequest2> for CreateAclsRequest1 {
     type Error = Error;
     fn try_from(latest: CreateAclsRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("CreateAclsRequest", 1, "tag_buffer"));
-        }
         Ok(CreateAclsRequest1 {
             creations: latest
                 .creations
@@ -221,13 +208,6 @@ impl TryFrom<CreateAclsRequest2> for CreateAclsRequest1 {
 impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations1 {
     type Error = Error;
     fn try_from(latest: CreateAclsRequestCreations2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateAclsRequestCreations",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(CreateAclsRequestCreations1 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,

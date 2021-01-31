@@ -604,9 +604,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest0 {
                 "include_topic_authorized_operations",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("MetadataRequest", 0, "tag_buffer"));
-        }
         Ok(MetadataRequest0 {
             topics: latest
                 .topics
@@ -620,13 +617,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest0 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics0 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequestTopics",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(MetadataRequestTopics0 { name: latest.name })
     }
 }
@@ -655,9 +645,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest1 {
                 "include_topic_authorized_operations",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("MetadataRequest", 1, "tag_buffer"));
-        }
         Ok(MetadataRequest1 {
             topics: latest
                 .topics
@@ -671,13 +658,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest1 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics1 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequestTopics",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(MetadataRequestTopics1 { name: latest.name })
     }
 }
@@ -706,9 +686,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest2 {
                 "include_topic_authorized_operations",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("MetadataRequest", 2, "tag_buffer"));
-        }
         Ok(MetadataRequest2 {
             topics: latest
                 .topics
@@ -722,13 +699,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest2 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics2 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequestTopics",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(MetadataRequestTopics2 { name: latest.name })
     }
 }
@@ -757,9 +727,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest3 {
                 "include_topic_authorized_operations",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("MetadataRequest", 3, "tag_buffer"));
-        }
         Ok(MetadataRequest3 {
             topics: latest
                 .topics
@@ -773,13 +740,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest3 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics3 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequestTopics",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(MetadataRequestTopics3 { name: latest.name })
     }
 }
@@ -801,9 +761,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest4 {
                 "include_topic_authorized_operations",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("MetadataRequest", 4, "tag_buffer"));
-        }
         Ok(MetadataRequest4 {
             topics: latest
                 .topics
@@ -818,13 +775,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest4 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics4 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequestTopics",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(MetadataRequestTopics4 { name: latest.name })
     }
 }
@@ -846,9 +796,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest5 {
                 "include_topic_authorized_operations",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("MetadataRequest", 5, "tag_buffer"));
-        }
         Ok(MetadataRequest5 {
             topics: latest
                 .topics
@@ -863,13 +810,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest5 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics5 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequestTopics",
-                5,
-                "tag_buffer",
-            ));
-        }
         Ok(MetadataRequestTopics5 { name: latest.name })
     }
 }
@@ -891,9 +831,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest6 {
                 "include_topic_authorized_operations",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("MetadataRequest", 6, "tag_buffer"));
-        }
         Ok(MetadataRequest6 {
             topics: latest
                 .topics
@@ -908,13 +845,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest6 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics6 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequestTopics",
-                6,
-                "tag_buffer",
-            ));
-        }
         Ok(MetadataRequestTopics6 { name: latest.name })
     }
 }
@@ -936,9 +866,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest7 {
                 "include_topic_authorized_operations",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("MetadataRequest", 7, "tag_buffer"));
-        }
         Ok(MetadataRequest7 {
             topics: latest
                 .topics
@@ -953,13 +880,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest7 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics7 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequestTopics",
-                7,
-                "tag_buffer",
-            ));
-        }
         Ok(MetadataRequestTopics7 { name: latest.name })
     }
 }
@@ -967,9 +887,6 @@ impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics7 {
 impl TryFrom<MetadataRequest9> for MetadataRequest8 {
     type Error = Error;
     fn try_from(latest: MetadataRequest9) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("MetadataRequest", 8, "tag_buffer"));
-        }
         Ok(MetadataRequest8 {
             topics: latest
                 .topics
@@ -986,13 +903,6 @@ impl TryFrom<MetadataRequest9> for MetadataRequest8 {
 impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics8 {
     type Error = Error;
     fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequestTopics",
-                8,
-                "tag_buffer",
-            ));
-        }
         Ok(MetadataRequestTopics8 { name: latest.name })
     }
 }

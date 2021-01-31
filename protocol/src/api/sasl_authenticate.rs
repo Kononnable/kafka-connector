@@ -116,13 +116,6 @@ pub struct SaslAuthenticateResponse2 {
 impl TryFrom<SaslAuthenticateRequest2> for SaslAuthenticateRequest0 {
     type Error = Error;
     fn try_from(latest: SaslAuthenticateRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "SaslAuthenticateRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(SaslAuthenticateRequest0 {
             auth_bytes: latest.auth_bytes,
         })
@@ -132,13 +125,6 @@ impl TryFrom<SaslAuthenticateRequest2> for SaslAuthenticateRequest0 {
 impl TryFrom<SaslAuthenticateRequest2> for SaslAuthenticateRequest1 {
     type Error = Error;
     fn try_from(latest: SaslAuthenticateRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "SaslAuthenticateRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(SaslAuthenticateRequest1 {
             auth_bytes: latest.auth_bytes,
         })

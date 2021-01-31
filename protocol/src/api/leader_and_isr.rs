@@ -334,13 +334,6 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest0 {
                 "topic_states",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaderAndIsrRequest0 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -357,13 +350,6 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest0 {
 impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders0 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequestLiveLeaders",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaderAndIsrRequestLiveLeaders0 {
             broker_id: latest.broker_id,
             host_name: latest.host_name,
@@ -389,13 +375,6 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest1 {
                 "topic_states",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaderAndIsrRequest1 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -412,13 +391,6 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest1 {
 impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders1 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequestLiveLeaders",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaderAndIsrRequestLiveLeaders1 {
             broker_id: latest.broker_id,
             host_name: latest.host_name,
@@ -430,13 +402,6 @@ impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders
 impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest2 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequest4) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequest",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaderAndIsrRequest2 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -461,13 +426,6 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest2 {
 impl TryFrom<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates2 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestTopicStates4) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequestTopicStates",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaderAndIsrRequestTopicStates2 {
             topic_name: latest.topic_name,
             partition_states: latest
@@ -500,13 +458,6 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
                 "removing_replicas",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequestTopicStatesPartitionStates",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaderAndIsrRequestTopicStatesPartitionStates2 {
             partition_index: latest.partition_index,
             controller_epoch: latest.controller_epoch,
@@ -523,13 +474,6 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
 impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders2 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequestLiveLeaders",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaderAndIsrRequestLiveLeaders2 {
             broker_id: latest.broker_id,
             host_name: latest.host_name,
@@ -541,13 +485,6 @@ impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders
 impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest3 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequest4) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequest",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaderAndIsrRequest3 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -572,13 +509,6 @@ impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest3 {
 impl TryFrom<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates3 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestTopicStates4) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequestTopicStates",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaderAndIsrRequestTopicStates3 {
             topic_name: latest.topic_name,
             partition_states: latest
@@ -597,13 +527,6 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
     fn try_from(
         latest: LeaderAndIsrRequestTopicStatesPartitionStates4,
     ) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequestTopicStatesPartitionStates",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaderAndIsrRequestTopicStatesPartitionStates3 {
             partition_index: latest.partition_index,
             controller_epoch: latest.controller_epoch,
@@ -622,13 +545,6 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
 impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders3 {
     type Error = Error;
     fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequestLiveLeaders",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(LeaderAndIsrRequestLiveLeaders3 {
             broker_id: latest.broker_id,
             host_name: latest.host_name,

@@ -177,16 +177,6 @@ pub struct ListGroupsResponseGroups4 {
 impl TryFrom<ListGroupsRequest4> for ListGroupsRequest0 {
     type Error = Error;
     fn try_from(latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
-        if latest.states_filter.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ListGroupsRequest",
-                0,
-                "states_filter",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("ListGroupsRequest", 0, "tag_buffer"));
-        }
         Ok(ListGroupsRequest0 {})
     }
 }
@@ -194,16 +184,6 @@ impl TryFrom<ListGroupsRequest4> for ListGroupsRequest0 {
 impl TryFrom<ListGroupsRequest4> for ListGroupsRequest1 {
     type Error = Error;
     fn try_from(latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
-        if latest.states_filter.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ListGroupsRequest",
-                1,
-                "states_filter",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("ListGroupsRequest", 1, "tag_buffer"));
-        }
         Ok(ListGroupsRequest1 {})
     }
 }
@@ -211,16 +191,6 @@ impl TryFrom<ListGroupsRequest4> for ListGroupsRequest1 {
 impl TryFrom<ListGroupsRequest4> for ListGroupsRequest2 {
     type Error = Error;
     fn try_from(latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
-        if latest.states_filter.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ListGroupsRequest",
-                2,
-                "states_filter",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("ListGroupsRequest", 2, "tag_buffer"));
-        }
         Ok(ListGroupsRequest2 {})
     }
 }
@@ -228,13 +198,6 @@ impl TryFrom<ListGroupsRequest4> for ListGroupsRequest2 {
 impl TryFrom<ListGroupsRequest4> for ListGroupsRequest3 {
     type Error = Error;
     fn try_from(latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
-        if latest.states_filter.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ListGroupsRequest",
-                3,
-                "states_filter",
-            ));
-        }
         Ok(ListGroupsRequest3 {
             tag_buffer: latest.tag_buffer,
         })

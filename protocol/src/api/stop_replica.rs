@@ -221,13 +221,6 @@ impl TryFrom<StopReplicaRequest3> for StopReplicaRequest0 {
                 "topic_states",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "StopReplicaRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(StopReplicaRequest0 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
@@ -244,13 +237,6 @@ impl TryFrom<StopReplicaRequest3> for StopReplicaRequest1 {
                 "StopReplicaRequest",
                 1,
                 "topic_states",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "StopReplicaRequest",
-                1,
-                "tag_buffer",
             ));
         }
         Ok(StopReplicaRequest1 {

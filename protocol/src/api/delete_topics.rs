@@ -209,13 +209,6 @@ pub struct DeleteTopicsResponseResponses5 {
 impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest0 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteTopicsRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteTopicsRequest0 {
             topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
@@ -226,13 +219,6 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest0 {
 impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest1 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteTopicsRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteTopicsRequest1 {
             topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
@@ -243,13 +229,6 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest1 {
 impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest2 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteTopicsRequest",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteTopicsRequest2 {
             topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
@@ -260,13 +239,6 @@ impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest2 {
 impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest3 {
     type Error = Error;
     fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteTopicsRequest",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteTopicsRequest3 {
             topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,

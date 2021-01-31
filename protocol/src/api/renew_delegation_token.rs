@@ -121,13 +121,6 @@ pub struct RenewDelegationTokenResponse2 {
 impl TryFrom<RenewDelegationTokenRequest2> for RenewDelegationTokenRequest0 {
     type Error = Error;
     fn try_from(latest: RenewDelegationTokenRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "RenewDelegationTokenRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(RenewDelegationTokenRequest0 {
             hmac: latest.hmac,
             renew_period_ms: latest.renew_period_ms,
@@ -138,13 +131,6 @@ impl TryFrom<RenewDelegationTokenRequest2> for RenewDelegationTokenRequest0 {
 impl TryFrom<RenewDelegationTokenRequest2> for RenewDelegationTokenRequest1 {
     type Error = Error;
     fn try_from(latest: RenewDelegationTokenRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "RenewDelegationTokenRequest",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(RenewDelegationTokenRequest1 {
             hmac: latest.hmac,
             renew_period_ms: latest.renew_period_ms,

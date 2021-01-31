@@ -187,13 +187,6 @@ impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest0 {
                 "producer_epoch",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "InitProducerIdRequest",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(InitProducerIdRequest0 {
             transactional_id: latest.transactional_id,
             transaction_timeout_ms: latest.transaction_timeout_ms,
@@ -216,13 +209,6 @@ impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest1 {
                 "InitProducerIdRequest",
                 1,
                 "producer_epoch",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "InitProducerIdRequest",
-                1,
-                "tag_buffer",
             ));
         }
         Ok(InitProducerIdRequest1 {

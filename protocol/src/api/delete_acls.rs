@@ -203,9 +203,6 @@ pub struct DeleteAclsResponseFilterResultsMatchingAcls2 {
 impl TryFrom<DeleteAclsRequest2> for DeleteAclsRequest0 {
     type Error = Error;
     fn try_from(latest: DeleteAclsRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("DeleteAclsRequest", 0, "tag_buffer"));
-        }
         Ok(DeleteAclsRequest0 {
             filters: latest
                 .filters
@@ -226,13 +223,6 @@ impl TryFrom<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters0 {
                 "pattern_type_filter",
             ));
         }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteAclsRequestFilters",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteAclsRequestFilters0 {
             resource_type_filter: latest.resource_type_filter,
             resource_name_filter: latest.resource_name_filter,
@@ -247,9 +237,6 @@ impl TryFrom<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters0 {
 impl TryFrom<DeleteAclsRequest2> for DeleteAclsRequest1 {
     type Error = Error;
     fn try_from(latest: DeleteAclsRequest2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("DeleteAclsRequest", 1, "tag_buffer"));
-        }
         Ok(DeleteAclsRequest1 {
             filters: latest
                 .filters
@@ -263,13 +250,6 @@ impl TryFrom<DeleteAclsRequest2> for DeleteAclsRequest1 {
 impl TryFrom<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters1 {
     type Error = Error;
     fn try_from(latest: DeleteAclsRequestFilters2) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteAclsRequestFilters",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(DeleteAclsRequestFilters1 {
             resource_type_filter: latest.resource_type_filter,
             resource_name_filter: latest.resource_name_filter,

@@ -392,16 +392,6 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest0 {
                 "rebalance_timeout_ms",
             ));
         }
-        if latest.group_instance_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "JoinGroupRequest",
-                0,
-                "group_instance_id",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("JoinGroupRequest", 0, "tag_buffer"));
-        }
         Ok(JoinGroupRequest0 {
             group_id: latest.group_id,
             session_timeout_ms: latest.session_timeout_ms,
@@ -419,13 +409,6 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest0 {
 impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols0 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "JoinGroupRequestProtocols",
-                0,
-                "tag_buffer",
-            ));
-        }
         Ok(JoinGroupRequestProtocols0 {
             name: latest.name,
             metadata: latest.metadata,
@@ -436,16 +419,6 @@ impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols0 {
 impl TryFrom<JoinGroupRequest7> for JoinGroupRequest1 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
-        if latest.group_instance_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "JoinGroupRequest",
-                1,
-                "group_instance_id",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("JoinGroupRequest", 1, "tag_buffer"));
-        }
         Ok(JoinGroupRequest1 {
             group_id: latest.group_id,
             session_timeout_ms: latest.session_timeout_ms,
@@ -464,13 +437,6 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest1 {
 impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols1 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "JoinGroupRequestProtocols",
-                1,
-                "tag_buffer",
-            ));
-        }
         Ok(JoinGroupRequestProtocols1 {
             name: latest.name,
             metadata: latest.metadata,
@@ -481,16 +447,6 @@ impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols1 {
 impl TryFrom<JoinGroupRequest7> for JoinGroupRequest2 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
-        if latest.group_instance_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "JoinGroupRequest",
-                2,
-                "group_instance_id",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("JoinGroupRequest", 2, "tag_buffer"));
-        }
         Ok(JoinGroupRequest2 {
             group_id: latest.group_id,
             session_timeout_ms: latest.session_timeout_ms,
@@ -509,13 +465,6 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest2 {
 impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols2 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "JoinGroupRequestProtocols",
-                2,
-                "tag_buffer",
-            ));
-        }
         Ok(JoinGroupRequestProtocols2 {
             name: latest.name,
             metadata: latest.metadata,
@@ -526,16 +475,6 @@ impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols2 {
 impl TryFrom<JoinGroupRequest7> for JoinGroupRequest3 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
-        if latest.group_instance_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "JoinGroupRequest",
-                3,
-                "group_instance_id",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("JoinGroupRequest", 3, "tag_buffer"));
-        }
         Ok(JoinGroupRequest3 {
             group_id: latest.group_id,
             session_timeout_ms: latest.session_timeout_ms,
@@ -554,13 +493,6 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest3 {
 impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols3 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "JoinGroupRequestProtocols",
-                3,
-                "tag_buffer",
-            ));
-        }
         Ok(JoinGroupRequestProtocols3 {
             name: latest.name,
             metadata: latest.metadata,
@@ -571,16 +503,6 @@ impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols3 {
 impl TryFrom<JoinGroupRequest7> for JoinGroupRequest4 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
-        if latest.group_instance_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "JoinGroupRequest",
-                4,
-                "group_instance_id",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("JoinGroupRequest", 4, "tag_buffer"));
-        }
         Ok(JoinGroupRequest4 {
             group_id: latest.group_id,
             session_timeout_ms: latest.session_timeout_ms,
@@ -599,13 +521,6 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest4 {
 impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols4 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "JoinGroupRequestProtocols",
-                4,
-                "tag_buffer",
-            ));
-        }
         Ok(JoinGroupRequestProtocols4 {
             name: latest.name,
             metadata: latest.metadata,
@@ -616,9 +531,6 @@ impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols4 {
 impl TryFrom<JoinGroupRequest7> for JoinGroupRequest5 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("JoinGroupRequest", 5, "tag_buffer"));
-        }
         Ok(JoinGroupRequest5 {
             group_id: latest.group_id,
             session_timeout_ms: latest.session_timeout_ms,
@@ -638,13 +550,6 @@ impl TryFrom<JoinGroupRequest7> for JoinGroupRequest5 {
 impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols5 {
     type Error = Error;
     fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "JoinGroupRequestProtocols",
-                5,
-                "tag_buffer",
-            ));
-        }
         Ok(JoinGroupRequestProtocols5 {
             name: latest.name,
             metadata: latest.metadata,

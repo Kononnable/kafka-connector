@@ -27,33 +27,33 @@ pub async fn main() -> anyhow::Result<()> {
     //     .supported_versions
     //     .get(&(ApiNumbers::Metadata as i16));
     // println!("supported_versions {:?}", supported_version);
-    // broker
-    //     .run_api_call(metadata_request.clone(), Some(0))
-    //     .await?;
-    // broker
-    //     .run_api_call(metadata_request.clone(), Some(1))
-    //     .await?;
-    // broker
-    //     .run_api_call(metadata_request.clone(), Some(2))
-    //     .await?;
-    // broker
-    //     .run_api_call(metadata_request.clone(), Some(3))
-    //     .await?;
-    // broker
-    //     .run_api_call(metadata_request.clone(), Some(4))
-    //     .await?;
-    // broker
-    //     .run_api_call(metadata_request.clone(), Some(5))
-    //     .await?;
-    // broker
-    //     .run_api_call(metadata_request.clone(), Some(6))
-    //     .await?;
-    // broker
-    //     .run_api_call(metadata_request.clone(), Some(7))
-    //     .await?;
-    // broker
-    //     .run_api_call(metadata_request.clone(), Some(8))
-    //     .await?;
+    broker
+        .run_api_call(metadata_request.clone(), Some(0))
+        .await?;
+    broker
+        .run_api_call(metadata_request.clone(), Some(1))
+        .await?;
+    broker
+        .run_api_call(metadata_request.clone(), Some(2))
+        .await?;
+    broker
+        .run_api_call(metadata_request.clone(), Some(3))
+        .await?;
+    broker
+        .run_api_call(metadata_request.clone(), Some(4))
+        .await?;
+    broker
+        .run_api_call(metadata_request.clone(), Some(5))
+        .await?;
+    broker
+        .run_api_call(metadata_request.clone(), Some(6))
+        .await?;
+    broker
+        .run_api_call(metadata_request.clone(), Some(7))
+        .await?;
+    broker
+        .run_api_call(metadata_request.clone(), Some(8))
+        .await?;
     let metadata = broker.run_api_call(metadata_request, Some(9)).await?;
     println!("{:#?}", metadata);
     // let fetch_request = protocol::api::fetch::FetchRequest {

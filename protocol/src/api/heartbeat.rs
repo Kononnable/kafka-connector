@@ -156,16 +156,6 @@ pub struct HeartbeatResponse4 {
 impl TryFrom<HeartbeatRequest4> for HeartbeatRequest0 {
     type Error = Error;
     fn try_from(latest: HeartbeatRequest4) -> Result<Self, Self::Error> {
-        if latest.group_instance_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "HeartbeatRequest",
-                0,
-                "group_instance_id",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("HeartbeatRequest", 0, "tag_buffer"));
-        }
         Ok(HeartbeatRequest0 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
@@ -177,16 +167,6 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest0 {
 impl TryFrom<HeartbeatRequest4> for HeartbeatRequest1 {
     type Error = Error;
     fn try_from(latest: HeartbeatRequest4) -> Result<Self, Self::Error> {
-        if latest.group_instance_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "HeartbeatRequest",
-                1,
-                "group_instance_id",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("HeartbeatRequest", 1, "tag_buffer"));
-        }
         Ok(HeartbeatRequest1 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
@@ -198,16 +178,6 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest1 {
 impl TryFrom<HeartbeatRequest4> for HeartbeatRequest2 {
     type Error = Error;
     fn try_from(latest: HeartbeatRequest4) -> Result<Self, Self::Error> {
-        if latest.group_instance_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "HeartbeatRequest",
-                2,
-                "group_instance_id",
-            ));
-        }
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("HeartbeatRequest", 2, "tag_buffer"));
-        }
         Ok(HeartbeatRequest2 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
@@ -219,9 +189,6 @@ impl TryFrom<HeartbeatRequest4> for HeartbeatRequest2 {
 impl TryFrom<HeartbeatRequest4> for HeartbeatRequest3 {
     type Error = Error;
     fn try_from(latest: HeartbeatRequest4) -> Result<Self, Self::Error> {
-        if latest.tag_buffer.is_some() {
-            return Err(Error::OldKafkaVersion("HeartbeatRequest", 3, "tag_buffer"));
-        }
         Ok(HeartbeatRequest3 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
