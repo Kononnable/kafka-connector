@@ -11,3 +11,4 @@ kafka-connector-derive = {version="0.1.0", path = "./../derive"}
 thiserror = "1.0.23"
 unsigned-varint = "0.6.0"
 log = "0.4.13"
+bitflags = "1.2.1"

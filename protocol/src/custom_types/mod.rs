@@ -1,4 +1,4 @@
-use self::record_batch::RecordBatch;
+use self::record_batch::record_batch_with_size::RecordBatchWithSize;
 
 pub mod optional;
 pub mod record_batch;
@@ -18,4 +18,4 @@ pub type Int32 = i32;
 pub type Int64 = i64;
 pub type Float64 = f64;
 pub type NullableString = Option<String>;
-pub type Records = RecordBatch;
+pub type Records = RecordBatchWithSize;

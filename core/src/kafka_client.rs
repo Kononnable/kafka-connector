@@ -95,8 +95,8 @@ impl BrokerClient {
         //     self.last_correlation + 1,
         //     self.client_id.to_owned(),
         // );
-        let mut buffer = BytesMut::with_capacity(4096);
-        // header.serialize(&mut buffer);
+        let mut buffer = BytesMut::with_capacity(4096); // TODO: Change size(?)
+                                                        // header.serialize(&mut buffer);
         request
             .serialize(
                 api_version,
@@ -114,6 +114,8 @@ impl BrokerClient {
         let mut buf2 = vec![0; cap as usize];
         self.connection.read_exact(&mut buf2).await.unwrap();
         let mut buf2 = Bytes::from(buf2);
+        log::trace!("Received bytes: {:?}", buf2);
+
         // let response_header = HeaderResponse::deserialize(&mut buf2);
         let (correlation, response) = T::deserialize_response(api_version, &mut buf2);
         self.last_correlation = correlation;
@@ -125,7 +127,6 @@ impl BrokerClient {
             .run_api_call(ApiVersionsRequest::default(), Some(0))
             .await
             .unwrap();
-        // TODO read last corelation
         if response.error_code != 0 {
             todo!("")
         }

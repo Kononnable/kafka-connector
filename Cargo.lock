@@ -416,6 +416,7 @@ dependencies = [
 name = "kafka-connector-protocol"
 version = "0.1.0"
 dependencies = [
+ "bitflags",
  "bytes",
  "kafka-connector-derive",
  "log",

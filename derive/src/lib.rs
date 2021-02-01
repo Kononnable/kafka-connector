@@ -90,7 +90,7 @@ fn generate_deserialize(data: &Data) -> quote::__private::TokenStream {
                             log::trace!("Deserializing field {}",#f_name);
                             let val = FromBytes::deserialize(buf, is_flexible_version);
                             log::trace!("Deserialized field {} {:?}",#f_name,val);
-                            log::trace!("Bytes left: {:?}",buf.to_vec());
+                            log::trace!("Bytes left: {:03?}",buf.to_vec());
                             val
                         },
                     }
