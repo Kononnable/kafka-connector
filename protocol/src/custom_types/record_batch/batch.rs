@@ -184,7 +184,7 @@ impl ToBytes for RecordBatch {
         let magic_byte = 2_i8;
         magic_byte.serialize(&mut batch_buffer, is_flexible_version);
 
-        let crc = crc32c::crc32c(&crc_buffer); // TODO: i32 or u32?
+        let crc = crc32c::crc32c(&crc_buffer);
         crc.serialize(&mut batch_buffer, is_flexible_version);
         batch_buffer.extend(crc_buffer);
 

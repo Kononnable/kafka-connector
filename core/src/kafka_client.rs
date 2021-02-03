@@ -89,14 +89,7 @@ impl BrokerClient {
             }
         };
 
-        // let header = HeaderRequest1::new(
-        //     T::get_api_key() as i16,
-        //     api_version,
-        //     self.last_correlation + 1,
-        //     self.client_id.to_owned(),
-        // );
         let mut buffer = BytesMut::with_capacity(4096); // TODO: Change size(?)
-                                                        // header.serialize(&mut buffer);
         request
             .serialize(
                 api_version,
@@ -116,7 +109,6 @@ impl BrokerClient {
         let mut buf2 = Bytes::from(buf2);
         log::trace!("Received bytes: {:?}", buf2);
 
-        // let response_header = HeaderResponse::deserialize(&mut buf2);
         let (correlation, response) = T::deserialize_response(api_version, &mut buf2);
         self.last_correlation = correlation;
         Ok(response)
