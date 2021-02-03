@@ -100,6 +100,11 @@ impl ToBytes for i32 {
         buf.put_i32(*self);
     }
 }
+impl ToBytes for u32 {
+    fn serialize(&self, buf: &mut BytesMut, _is_flexible_version: bool) {
+        buf.put_u32(*self);
+    }
+}
 impl ToBytes for i64 {
     fn serialize(&self, buf: &mut BytesMut, _is_flexible_version: bool) {
         buf.put_i64(*self);

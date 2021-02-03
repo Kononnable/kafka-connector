@@ -41,8 +41,11 @@ fn generate_serialize(data: &Data) -> quote::__private::TokenStream {
             Fields::Named(ref fields) => {
                 let recurse = fields.named.iter().map(|f| {
                     let name = &f.ident;
+                    let f_name = format!("{}", name.clone().unwrap());
                     quote_spanned! {f.span()=>
                         ToBytes::serialize(&self.#name,buf, is_flexible_version);
+                        log::trace!("Serialized field {}",#f_name);
+                        log::trace!("Bytes: {:03?}",buf.to_vec());
                     }
                 });
                 quote! {

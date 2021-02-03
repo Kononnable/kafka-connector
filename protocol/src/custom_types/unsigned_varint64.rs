@@ -13,7 +13,7 @@ pub fn deserialize_unsigned_varint_64(buf: &mut Bytes) -> u64 {
 }
 pub fn serialize_unsigned_varint_64(value: u64, buf: &mut BytesMut) {
     let mut t_buf = [0u8; 10];
-    let len = unsigned_varint::encode::u64((value + 1) as u64, &mut t_buf);
+    let len = unsigned_varint::encode::u64((value) as u64, &mut t_buf);
     buf.put_slice(len);
 }
 

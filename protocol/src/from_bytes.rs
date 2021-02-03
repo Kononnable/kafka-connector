@@ -96,6 +96,18 @@ impl FromBytes for i32 {
         i32::from_be_bytes(data)
     }
 }
+impl FromBytes for u32 {
+    fn deserialize(buf: &mut Bytes, _is_flexible_version: bool) -> Self {
+        let mut slice = buf.split_to(4).into_iter();
+        let data: [u8; 4] = [
+            slice.next().unwrap(),
+            slice.next().unwrap(),
+            slice.next().unwrap(),
+            slice.next().unwrap(),
+        ];
+        u32::from_be_bytes(data)
+    }
+}
 impl FromBytes for i64 {
     fn deserialize(buf: &mut Bytes, _is_flexible_version: bool) -> Self {
         let mut slice = buf.split_to(8).into_iter();

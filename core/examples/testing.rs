@@ -5,9 +5,17 @@ use protocol::{
     api::{
         fetch::{FetchRequestTopics12, FetchRequestTopicsPartitions12},
         metadata::MetadataRequestTopics9,
+        produce::{ProduceRequestTopicData8, ProduceRequestTopicDataData8},
         ApiNumbers,
     },
-    custom_types::{optional::Optional, tag_buffer::TagBuffer},
+    custom_types::{
+        optional::Optional,
+        record_batch::{
+            batch::RecordBatch, record::Record, record_batch_with_size::RecordBatchWithSize,
+        },
+        tag_buffer::TagBuffer,
+        zig_zag_vec::ZigZagVec,
+    },
 };
 
 const BROKER: &str = "127.0.0.1:9092";
@@ -68,6 +76,44 @@ pub async fn main() -> anyhow::Result<()> {
     println!("supported_versions {:?}", supported_version);
     let fetch = broker.run_api_call(fetch_request, Some(4)).await?;
     println!("{:#?}", fetch);
+
+    let records = RecordBatchWithSize {
+        batches: vec![RecordBatch {
+            attributes: 0,
+            base_sequence: -1,
+            partition_leader_epoch: 0,
+            producer_epoch: -1,
+            producer_id: -1,
+            records: vec![Record {
+                attributes: 0,
+                headers: ZigZagVec { value: vec![] },
+                key: ZigZagVec {
+                    value: b"test".to_vec(),
+                },
+                offset: 0,
+                timestamp: 1612286095600,
+                value: ZigZagVec {
+                    value: b"test".to_vec(),
+                },
+            }],
+        }],
+    };
+    let produce_request = protocol::api::produce::ProduceRequest {
+        transactional_id: Optional::Some(None),
+        acks: 1_i16,
+        timeout: 10_000,
+        topic_data: vec![ProduceRequestTopicData8 {
+            topic: "test3".to_owned(),
+            data: vec![ProduceRequestTopicDataData8 {
+                partition: 0,
+                record_set: records,
+            }],
+        }],
+    };
+    let supported_version = broker.supported_versions.get(&(ApiNumbers::Produce as i16));
+    println!("supported_versions {:?}", supported_version);
+    let produce = broker.run_api_call(produce_request, Some(4)).await?;
+    println!("{:#?}", produce);
 
     Ok(())
 }

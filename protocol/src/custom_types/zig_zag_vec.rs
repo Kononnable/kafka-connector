@@ -7,7 +7,7 @@ use super::zig_zag_varint32::ZigZagVarInt32;
 
 #[derive(Debug, Default, Clone)]
 pub struct ZigZagVec<T> {
-    value: Vec<T>,
+    pub value: Vec<T>,
 }
 impl<T> ToBytes for ZigZagVec<T>
 where

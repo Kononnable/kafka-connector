@@ -5,7 +5,7 @@ use crate::{from_bytes::FromBytes, to_bytes::ToBytes};
 use super::batch::RecordBatch;
 #[derive(Debug, Default, Clone)]
 pub struct RecordBatchWithSize {
-    batches: Vec<RecordBatch>,
+    pub batches: Vec<RecordBatch>,
 }
 
 impl FromBytes for RecordBatchWithSize {
