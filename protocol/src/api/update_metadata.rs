@@ -50,32 +50,32 @@ impl ApiCall for UpdateMetadataRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &UpdateMetadataRequest0::try_from(self)?,
+                &UpdateMetadataRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &UpdateMetadataRequest1::try_from(self)?,
+                &UpdateMetadataRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &UpdateMetadataRequest2::try_from(self)?,
+                &UpdateMetadataRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &UpdateMetadataRequest3::try_from(self)?,
+                &UpdateMetadataRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             4 => ToBytes::serialize(
-                &UpdateMetadataRequest4::try_from(self)?,
+                &UpdateMetadataRequest4::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             5 => ToBytes::serialize(
-                &UpdateMetadataRequest5::try_from(self)?,
+                &UpdateMetadataRequest5::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -159,7 +159,7 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers1 {
     pub id: Int32,
-    pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints1>>,
+    pub endpoints: Vec<UpdateMetadataRequestLiveBrokersEndpoints1>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -192,8 +192,8 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates2 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers2 {
     pub id: Int32,
-    pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints2>>,
-    pub rack: Optional<NullableString>,
+    pub endpoints: Vec<UpdateMetadataRequestLiveBrokersEndpoints2>,
+    pub rack: NullableString,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -226,15 +226,15 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates3 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers3 {
     pub id: Int32,
-    pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints3>>,
-    pub rack: Optional<NullableString>,
+    pub endpoints: Vec<UpdateMetadataRequestLiveBrokersEndpoints3>,
+    pub rack: NullableString,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints3 {
     pub port: Int32,
     pub host: String,
-    pub listener: Optional<String>,
+    pub listener: String,
     pub security_protocol: Int16,
 }
 
@@ -256,21 +256,21 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates4 {
     pub isr: Vec<Int32>,
     pub zk_version: Int32,
     pub replicas: Vec<Int32>,
-    pub offline_replicas: Optional<Vec<Int32>>,
+    pub offline_replicas: Vec<Int32>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers4 {
     pub id: Int32,
-    pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints4>>,
-    pub rack: Optional<NullableString>,
+    pub endpoints: Vec<UpdateMetadataRequestLiveBrokersEndpoints4>,
+    pub rack: NullableString,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints4 {
     pub port: Int32,
     pub host: String,
-    pub listener: Optional<String>,
+    pub listener: String,
     pub security_protocol: Int16,
 }
 
@@ -278,8 +278,8 @@ pub struct UpdateMetadataRequestLiveBrokersEndpoints4 {
 pub struct UpdateMetadataRequest5 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub broker_epoch: Optional<Int64>,
-    pub topic_states: Optional<Vec<UpdateMetadataRequestTopicStates5>>,
+    pub broker_epoch: Int64,
+    pub topic_states: Vec<UpdateMetadataRequestTopicStates5>,
     pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers5>,
 }
 
@@ -304,15 +304,15 @@ pub struct UpdateMetadataRequestTopicStatesPartitionStates5 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers5 {
     pub id: Int32,
-    pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints5>>,
-    pub rack: Optional<NullableString>,
+    pub endpoints: Vec<UpdateMetadataRequestLiveBrokersEndpoints5>,
+    pub rack: NullableString,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints5 {
     pub port: Int32,
     pub host: String,
-    pub listener: Optional<String>,
+    pub listener: String,
     pub security_protocol: Int16,
 }
 
@@ -320,17 +320,17 @@ pub struct UpdateMetadataRequestLiveBrokersEndpoints5 {
 pub struct UpdateMetadataRequest6 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub broker_epoch: Optional<Int64>,
-    pub topic_states: Optional<Vec<UpdateMetadataRequestTopicStates6>>,
+    pub broker_epoch: Int64,
+    pub topic_states: Vec<UpdateMetadataRequestTopicStates6>,
     pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers6>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestTopicStates6 {
     pub topic_name: String,
     pub partition_states: Vec<UpdateMetadataRequestTopicStatesPartitionStates6>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -343,24 +343,24 @@ pub struct UpdateMetadataRequestTopicStatesPartitionStates6 {
     pub zk_version: Int32,
     pub replicas: Vec<Int32>,
     pub offline_replicas: Vec<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers6 {
     pub id: Int32,
-    pub endpoints: Optional<Vec<UpdateMetadataRequestLiveBrokersEndpoints6>>,
-    pub rack: Optional<NullableString>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub endpoints: Vec<UpdateMetadataRequestLiveBrokersEndpoints6>,
+    pub rack: NullableString,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints6 {
     pub port: Int32,
     pub host: String,
-    pub listener: Optional<String>,
+    pub listener: String,
     pub security_protocol: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -396,347 +396,243 @@ pub struct UpdateMetadataResponse5 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct UpdateMetadataResponse6 {
     pub error_code: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest0 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequest6) -> Result<Self, Self::Error> {
-        if latest.broker_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                0,
-                "broker_epoch",
-            ));
-        }
-        if latest.topic_states.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                0,
-                "topic_states",
-            ));
-        }
-        Ok(UpdateMetadataRequest0 {
+impl From<UpdateMetadataRequest6> for UpdateMetadataRequest0 {
+    fn from(latest: UpdateMetadataRequest6) -> UpdateMetadataRequest0 {
+        log::debug!("Using old api format - UpdateMetadataRequest0, ignoring field broker_epoch");
+        log::debug!("Using old api format - UpdateMetadataRequest0, ignoring field topic_states");
+        UpdateMetadataRequest0 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             live_brokers: latest
                 .live_brokers
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+                .map(|ele| ele.into())
+                .collect(),
             ..UpdateMetadataRequest0::default()
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers0 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
-        if latest.endpoints.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequestLiveBrokers",
-                0,
-                "endpoints",
-            ));
-        }
-        Ok(UpdateMetadataRequestLiveBrokers0 {
+impl From<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers0 {
+    fn from(latest: UpdateMetadataRequestLiveBrokers6) -> UpdateMetadataRequestLiveBrokers0 {
+        log::debug!(
+            "Using old api format - UpdateMetadataRequestLiveBrokers0, ignoring field endpoints"
+        );
+        UpdateMetadataRequestLiveBrokers0 {
             id: latest.id,
             ..UpdateMetadataRequestLiveBrokers0::default()
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest1 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequest6) -> Result<Self, Self::Error> {
-        if latest.broker_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                1,
-                "broker_epoch",
-            ));
-        }
-        if latest.topic_states.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                1,
-                "topic_states",
-            ));
-        }
-        Ok(UpdateMetadataRequest1 {
+impl From<UpdateMetadataRequest6> for UpdateMetadataRequest1 {
+    fn from(latest: UpdateMetadataRequest6) -> UpdateMetadataRequest1 {
+        log::debug!("Using old api format - UpdateMetadataRequest1, ignoring field broker_epoch");
+        log::debug!("Using old api format - UpdateMetadataRequest1, ignoring field topic_states");
+        UpdateMetadataRequest1 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             live_brokers: latest
                 .live_brokers
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+                .map(|ele| ele.into())
+                .collect(),
             ..UpdateMetadataRequest1::default()
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers1 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequestLiveBrokers1 {
+impl From<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers1 {
+    fn from(latest: UpdateMetadataRequestLiveBrokers6) -> UpdateMetadataRequestLiveBrokers1 {
+        UpdateMetadataRequestLiveBrokers1 {
             id: latest.id,
-            endpoints: latest
-                .endpoints
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
-        })
+            endpoints: latest.endpoints.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
+impl From<UpdateMetadataRequestLiveBrokersEndpoints6>
     for UpdateMetadataRequestLiveBrokersEndpoints1
 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequestLiveBrokersEndpoints1 {
+    fn from(
+        latest: UpdateMetadataRequestLiveBrokersEndpoints6,
+    ) -> UpdateMetadataRequestLiveBrokersEndpoints1 {
+        UpdateMetadataRequestLiveBrokersEndpoints1 {
             port: latest.port,
             host: latest.host,
             security_protocol: latest.security_protocol,
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest2 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequest6) -> Result<Self, Self::Error> {
-        if latest.broker_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                2,
-                "broker_epoch",
-            ));
-        }
-        if latest.topic_states.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                2,
-                "topic_states",
-            ));
-        }
-        Ok(UpdateMetadataRequest2 {
+impl From<UpdateMetadataRequest6> for UpdateMetadataRequest2 {
+    fn from(latest: UpdateMetadataRequest6) -> UpdateMetadataRequest2 {
+        log::debug!("Using old api format - UpdateMetadataRequest2, ignoring field broker_epoch");
+        log::debug!("Using old api format - UpdateMetadataRequest2, ignoring field topic_states");
+        UpdateMetadataRequest2 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             live_brokers: latest
                 .live_brokers
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+                .map(|ele| ele.into())
+                .collect(),
             ..UpdateMetadataRequest2::default()
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers2 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequestLiveBrokers2 {
+impl From<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers2 {
+    fn from(latest: UpdateMetadataRequestLiveBrokers6) -> UpdateMetadataRequestLiveBrokers2 {
+        UpdateMetadataRequestLiveBrokers2 {
             id: latest.id,
-            endpoints: latest
-                .endpoints
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
+            endpoints: latest.endpoints.into_iter().map(|ele| ele.into()).collect(),
             rack: latest.rack,
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
+impl From<UpdateMetadataRequestLiveBrokersEndpoints6>
     for UpdateMetadataRequestLiveBrokersEndpoints2
 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequestLiveBrokersEndpoints2 {
+    fn from(
+        latest: UpdateMetadataRequestLiveBrokersEndpoints6,
+    ) -> UpdateMetadataRequestLiveBrokersEndpoints2 {
+        UpdateMetadataRequestLiveBrokersEndpoints2 {
             port: latest.port,
             host: latest.host,
             security_protocol: latest.security_protocol,
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest3 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequest6) -> Result<Self, Self::Error> {
-        if latest.broker_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                3,
-                "broker_epoch",
-            ));
-        }
-        if latest.topic_states.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                3,
-                "topic_states",
-            ));
-        }
-        Ok(UpdateMetadataRequest3 {
+impl From<UpdateMetadataRequest6> for UpdateMetadataRequest3 {
+    fn from(latest: UpdateMetadataRequest6) -> UpdateMetadataRequest3 {
+        log::debug!("Using old api format - UpdateMetadataRequest3, ignoring field broker_epoch");
+        log::debug!("Using old api format - UpdateMetadataRequest3, ignoring field topic_states");
+        UpdateMetadataRequest3 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             live_brokers: latest
                 .live_brokers
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+                .map(|ele| ele.into())
+                .collect(),
             ..UpdateMetadataRequest3::default()
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers3 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequestLiveBrokers3 {
+impl From<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers3 {
+    fn from(latest: UpdateMetadataRequestLiveBrokers6) -> UpdateMetadataRequestLiveBrokers3 {
+        UpdateMetadataRequestLiveBrokers3 {
             id: latest.id,
-            endpoints: latest
-                .endpoints
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
+            endpoints: latest.endpoints.into_iter().map(|ele| ele.into()).collect(),
             rack: latest.rack,
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
+impl From<UpdateMetadataRequestLiveBrokersEndpoints6>
     for UpdateMetadataRequestLiveBrokersEndpoints3
 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequestLiveBrokersEndpoints3 {
+    fn from(
+        latest: UpdateMetadataRequestLiveBrokersEndpoints6,
+    ) -> UpdateMetadataRequestLiveBrokersEndpoints3 {
+        UpdateMetadataRequestLiveBrokersEndpoints3 {
             port: latest.port,
             host: latest.host,
             listener: latest.listener,
             security_protocol: latest.security_protocol,
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest4 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequest6) -> Result<Self, Self::Error> {
-        if latest.broker_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                4,
-                "broker_epoch",
-            ));
-        }
-        if latest.topic_states.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "UpdateMetadataRequest",
-                4,
-                "topic_states",
-            ));
-        }
-        Ok(UpdateMetadataRequest4 {
+impl From<UpdateMetadataRequest6> for UpdateMetadataRequest4 {
+    fn from(latest: UpdateMetadataRequest6) -> UpdateMetadataRequest4 {
+        log::debug!("Using old api format - UpdateMetadataRequest4, ignoring field broker_epoch");
+        log::debug!("Using old api format - UpdateMetadataRequest4, ignoring field topic_states");
+        UpdateMetadataRequest4 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             live_brokers: latest
                 .live_brokers
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+                .map(|ele| ele.into())
+                .collect(),
             ..UpdateMetadataRequest4::default()
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers4 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequestLiveBrokers4 {
+impl From<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers4 {
+    fn from(latest: UpdateMetadataRequestLiveBrokers6) -> UpdateMetadataRequestLiveBrokers4 {
+        UpdateMetadataRequestLiveBrokers4 {
             id: latest.id,
-            endpoints: latest
-                .endpoints
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
+            endpoints: latest.endpoints.into_iter().map(|ele| ele.into()).collect(),
             rack: latest.rack,
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
+impl From<UpdateMetadataRequestLiveBrokersEndpoints6>
     for UpdateMetadataRequestLiveBrokersEndpoints4
 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequestLiveBrokersEndpoints4 {
+    fn from(
+        latest: UpdateMetadataRequestLiveBrokersEndpoints6,
+    ) -> UpdateMetadataRequestLiveBrokersEndpoints4 {
+        UpdateMetadataRequestLiveBrokersEndpoints4 {
             port: latest.port,
             host: latest.host,
             listener: latest.listener,
             security_protocol: latest.security_protocol,
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequest6> for UpdateMetadataRequest5 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequest6) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequest5 {
+impl From<UpdateMetadataRequest6> for UpdateMetadataRequest5 {
+    fn from(latest: UpdateMetadataRequest6) -> UpdateMetadataRequest5 {
+        UpdateMetadataRequest5 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             broker_epoch: latest.broker_epoch,
             topic_states: latest
                 .topic_states
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
             live_brokers: latest
                 .live_brokers
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestTopicStates6> for UpdateMetadataRequestTopicStates5 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequestTopicStates6) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequestTopicStates5 {
+impl From<UpdateMetadataRequestTopicStates6> for UpdateMetadataRequestTopicStates5 {
+    fn from(latest: UpdateMetadataRequestTopicStates6) -> UpdateMetadataRequestTopicStates5 {
+        UpdateMetadataRequestTopicStates5 {
             topic_name: latest.topic_name,
             partition_states: latest
                 .partition_states
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestTopicStatesPartitionStates6>
+impl From<UpdateMetadataRequestTopicStatesPartitionStates6>
     for UpdateMetadataRequestTopicStatesPartitionStates5
 {
-    type Error = Error;
-    fn try_from(
+    fn from(
         latest: UpdateMetadataRequestTopicStatesPartitionStates6,
-    ) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequestTopicStatesPartitionStates5 {
+    ) -> UpdateMetadataRequestTopicStatesPartitionStates5 {
+        UpdateMetadataRequestTopicStatesPartitionStates5 {
             partition_index: latest.partition_index,
             controller_epoch: latest.controller_epoch,
             leader: latest.leader,
@@ -745,39 +641,32 @@ impl TryFrom<UpdateMetadataRequestTopicStatesPartitionStates6>
             zk_version: latest.zk_version,
             replicas: latest.replicas,
             offline_replicas: latest.offline_replicas,
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers5 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequestLiveBrokers6) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequestLiveBrokers5 {
+impl From<UpdateMetadataRequestLiveBrokers6> for UpdateMetadataRequestLiveBrokers5 {
+    fn from(latest: UpdateMetadataRequestLiveBrokers6) -> UpdateMetadataRequestLiveBrokers5 {
+        UpdateMetadataRequestLiveBrokers5 {
             id: latest.id,
-            endpoints: latest
-                .endpoints
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
+            endpoints: latest.endpoints.into_iter().map(|ele| ele.into()).collect(),
             rack: latest.rack,
-        })
+        }
     }
 }
 
-impl TryFrom<UpdateMetadataRequestLiveBrokersEndpoints6>
+impl From<UpdateMetadataRequestLiveBrokersEndpoints6>
     for UpdateMetadataRequestLiveBrokersEndpoints5
 {
-    type Error = Error;
-    fn try_from(latest: UpdateMetadataRequestLiveBrokersEndpoints6) -> Result<Self, Self::Error> {
-        Ok(UpdateMetadataRequestLiveBrokersEndpoints5 {
+    fn from(
+        latest: UpdateMetadataRequestLiveBrokersEndpoints6,
+    ) -> UpdateMetadataRequestLiveBrokersEndpoints5 {
+        UpdateMetadataRequestLiveBrokersEndpoints5 {
             port: latest.port,
             host: latest.host,
             listener: latest.listener,
             security_protocol: latest.security_protocol,
-        })
+        }
     }
 }
 

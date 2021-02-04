@@ -46,12 +46,12 @@ impl ApiCall for DeleteGroupsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &DeleteGroupsRequest0::try_from(self)?,
+                &DeleteGroupsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &DeleteGroupsRequest1::try_from(self)?,
+                &DeleteGroupsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -87,7 +87,7 @@ pub struct DeleteGroupsRequest1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteGroupsRequest2 {
     pub groups_names: Vec<String>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -118,31 +118,29 @@ pub struct DeleteGroupsResponseResults1 {
 pub struct DeleteGroupsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DeleteGroupsResponseResults2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteGroupsResponseResults2 {
     pub group_id: String,
     pub error_code: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<DeleteGroupsRequest2> for DeleteGroupsRequest0 {
-    type Error = Error;
-    fn try_from(latest: DeleteGroupsRequest2) -> Result<Self, Self::Error> {
-        Ok(DeleteGroupsRequest0 {
+impl From<DeleteGroupsRequest2> for DeleteGroupsRequest0 {
+    fn from(latest: DeleteGroupsRequest2) -> DeleteGroupsRequest0 {
+        DeleteGroupsRequest0 {
             groups_names: latest.groups_names,
-        })
+        }
     }
 }
 
-impl TryFrom<DeleteGroupsRequest2> for DeleteGroupsRequest1 {
-    type Error = Error;
-    fn try_from(latest: DeleteGroupsRequest2) -> Result<Self, Self::Error> {
-        Ok(DeleteGroupsRequest1 {
+impl From<DeleteGroupsRequest2> for DeleteGroupsRequest1 {
+    fn from(latest: DeleteGroupsRequest2) -> DeleteGroupsRequest1 {
+        DeleteGroupsRequest1 {
             groups_names: latest.groups_names,
-        })
+        }
     }
 }
 

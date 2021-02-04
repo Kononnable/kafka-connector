@@ -46,12 +46,12 @@ impl ApiCall for CreateDelegationTokenRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &CreateDelegationTokenRequest0::try_from(self)?,
+                &CreateDelegationTokenRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &CreateDelegationTokenRequest1::try_from(self)?,
+                &CreateDelegationTokenRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -112,14 +112,14 @@ pub struct CreateDelegationTokenRequestRenewers1 {
 pub struct CreateDelegationTokenRequest2 {
     pub renewers: Vec<CreateDelegationTokenRequestRenewers2>,
     pub max_lifetime_ms: Int64,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateDelegationTokenRequestRenewers2 {
     pub principal_type: String,
     pub principal_name: String,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -159,54 +159,46 @@ pub struct CreateDelegationTokenResponse2 {
     pub token_id: String,
     pub hmac: KafkaBytes,
     pub throttle_time_ms: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest0 {
-    type Error = Error;
-    fn try_from(latest: CreateDelegationTokenRequest2) -> Result<Self, Self::Error> {
-        Ok(CreateDelegationTokenRequest0 {
-            renewers: latest
-                .renewers
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest0 {
+    fn from(latest: CreateDelegationTokenRequest2) -> CreateDelegationTokenRequest0 {
+        CreateDelegationTokenRequest0 {
+            renewers: latest.renewers.into_iter().map(|ele| ele.into()).collect(),
             max_lifetime_ms: latest.max_lifetime_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenRequestRenewers0 {
-    type Error = Error;
-    fn try_from(latest: CreateDelegationTokenRequestRenewers2) -> Result<Self, Self::Error> {
-        Ok(CreateDelegationTokenRequestRenewers0 {
+impl From<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenRequestRenewers0 {
+    fn from(
+        latest: CreateDelegationTokenRequestRenewers2,
+    ) -> CreateDelegationTokenRequestRenewers0 {
+        CreateDelegationTokenRequestRenewers0 {
             principal_type: latest.principal_type,
             principal_name: latest.principal_name,
-        })
+        }
     }
 }
 
-impl TryFrom<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest1 {
-    type Error = Error;
-    fn try_from(latest: CreateDelegationTokenRequest2) -> Result<Self, Self::Error> {
-        Ok(CreateDelegationTokenRequest1 {
-            renewers: latest
-                .renewers
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<CreateDelegationTokenRequest2> for CreateDelegationTokenRequest1 {
+    fn from(latest: CreateDelegationTokenRequest2) -> CreateDelegationTokenRequest1 {
+        CreateDelegationTokenRequest1 {
+            renewers: latest.renewers.into_iter().map(|ele| ele.into()).collect(),
             max_lifetime_ms: latest.max_lifetime_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenRequestRenewers1 {
-    type Error = Error;
-    fn try_from(latest: CreateDelegationTokenRequestRenewers2) -> Result<Self, Self::Error> {
-        Ok(CreateDelegationTokenRequestRenewers1 {
+impl From<CreateDelegationTokenRequestRenewers2> for CreateDelegationTokenRequestRenewers1 {
+    fn from(
+        latest: CreateDelegationTokenRequestRenewers2,
+    ) -> CreateDelegationTokenRequestRenewers1 {
+        CreateDelegationTokenRequestRenewers1 {
             principal_type: latest.principal_type,
             principal_name: latest.principal_name,
-        })
+        }
     }
 }
 

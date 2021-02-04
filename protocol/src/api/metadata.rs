@@ -53,47 +53,47 @@ impl ApiCall for MetadataRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &MetadataRequest0::try_from(self)?,
+                &MetadataRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &MetadataRequest1::try_from(self)?,
+                &MetadataRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &MetadataRequest2::try_from(self)?,
+                &MetadataRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &MetadataRequest3::try_from(self)?,
+                &MetadataRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             4 => ToBytes::serialize(
-                &MetadataRequest4::try_from(self)?,
+                &MetadataRequest4::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             5 => ToBytes::serialize(
-                &MetadataRequest5::try_from(self)?,
+                &MetadataRequest5::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             6 => ToBytes::serialize(
-                &MetadataRequest6::try_from(self)?,
+                &MetadataRequest6::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             7 => ToBytes::serialize(
-                &MetadataRequest7::try_from(self)?,
+                &MetadataRequest7::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             8 => ToBytes::serialize(
-                &MetadataRequest8::try_from(self)?,
+                &MetadataRequest8::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -166,7 +166,7 @@ pub struct MetadataRequestTopics3 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct MetadataRequest4 {
     pub topics: Vec<MetadataRequestTopics4>,
-    pub allow_auto_topic_creation: Optional<Boolean>,
+    pub allow_auto_topic_creation: Boolean,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -177,7 +177,7 @@ pub struct MetadataRequestTopics4 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct MetadataRequest5 {
     pub topics: Vec<MetadataRequestTopics5>,
-    pub allow_auto_topic_creation: Optional<Boolean>,
+    pub allow_auto_topic_creation: Boolean,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -188,7 +188,7 @@ pub struct MetadataRequestTopics5 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct MetadataRequest6 {
     pub topics: Vec<MetadataRequestTopics6>,
-    pub allow_auto_topic_creation: Optional<Boolean>,
+    pub allow_auto_topic_creation: Boolean,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -199,7 +199,7 @@ pub struct MetadataRequestTopics6 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct MetadataRequest7 {
     pub topics: Vec<MetadataRequestTopics7>,
-    pub allow_auto_topic_creation: Optional<Boolean>,
+    pub allow_auto_topic_creation: Boolean,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -210,9 +210,9 @@ pub struct MetadataRequestTopics7 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct MetadataRequest8 {
     pub topics: Vec<MetadataRequestTopics8>,
-    pub allow_auto_topic_creation: Optional<Boolean>,
-    pub include_cluster_authorized_operations: Optional<Boolean>,
-    pub include_topic_authorized_operations: Optional<Boolean>,
+    pub allow_auto_topic_creation: Boolean,
+    pub include_cluster_authorized_operations: Boolean,
+    pub include_topic_authorized_operations: Boolean,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -223,16 +223,16 @@ pub struct MetadataRequestTopics8 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct MetadataRequest9 {
     pub topics: Vec<MetadataRequestTopics9>,
-    pub allow_auto_topic_creation: Optional<Boolean>,
-    pub include_cluster_authorized_operations: Optional<Boolean>,
-    pub include_topic_authorized_operations: Optional<Boolean>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub allow_auto_topic_creation: Boolean,
+    pub include_cluster_authorized_operations: Boolean,
+    pub include_topic_authorized_operations: Boolean,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct MetadataRequestTopics9 {
     pub name: String,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -267,7 +267,7 @@ pub struct MetadataResponseTopicsPartitions0 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponse1 {
     pub brokers: Vec<MetadataResponseBrokers1>,
-    pub controller_id: Optional<Int32>,
+    pub controller_id: Option<Int32>,
     pub topics: Vec<MetadataResponseTopics1>,
 }
 
@@ -276,14 +276,14 @@ pub struct MetadataResponseBrokers1 {
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
-    pub rack: Optional<NullableString>,
+    pub rack: Option<NullableString>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponseTopics1 {
     pub error_code: Int16,
     pub name: String,
-    pub is_internal: Optional<Boolean>,
+    pub is_internal: Option<Boolean>,
     pub partitions: Vec<MetadataResponseTopicsPartitions1>,
 }
 
@@ -299,8 +299,8 @@ pub struct MetadataResponseTopicsPartitions1 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponse2 {
     pub brokers: Vec<MetadataResponseBrokers2>,
-    pub cluster_id: Optional<NullableString>,
-    pub controller_id: Optional<Int32>,
+    pub cluster_id: Option<NullableString>,
+    pub controller_id: Option<Int32>,
     pub topics: Vec<MetadataResponseTopics2>,
 }
 
@@ -309,14 +309,14 @@ pub struct MetadataResponseBrokers2 {
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
-    pub rack: Optional<NullableString>,
+    pub rack: Option<NullableString>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponseTopics2 {
     pub error_code: Int16,
     pub name: String,
-    pub is_internal: Optional<Boolean>,
+    pub is_internal: Option<Boolean>,
     pub partitions: Vec<MetadataResponseTopicsPartitions2>,
 }
 
@@ -331,10 +331,10 @@ pub struct MetadataResponseTopicsPartitions2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub brokers: Vec<MetadataResponseBrokers3>,
-    pub cluster_id: Optional<NullableString>,
-    pub controller_id: Optional<Int32>,
+    pub cluster_id: Option<NullableString>,
+    pub controller_id: Option<Int32>,
     pub topics: Vec<MetadataResponseTopics3>,
 }
 
@@ -343,14 +343,14 @@ pub struct MetadataResponseBrokers3 {
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
-    pub rack: Optional<NullableString>,
+    pub rack: Option<NullableString>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponseTopics3 {
     pub error_code: Int16,
     pub name: String,
-    pub is_internal: Optional<Boolean>,
+    pub is_internal: Option<Boolean>,
     pub partitions: Vec<MetadataResponseTopicsPartitions3>,
 }
 
@@ -365,10 +365,10 @@ pub struct MetadataResponseTopicsPartitions3 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponse4 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub brokers: Vec<MetadataResponseBrokers4>,
-    pub cluster_id: Optional<NullableString>,
-    pub controller_id: Optional<Int32>,
+    pub cluster_id: Option<NullableString>,
+    pub controller_id: Option<Int32>,
     pub topics: Vec<MetadataResponseTopics4>,
 }
 
@@ -377,14 +377,14 @@ pub struct MetadataResponseBrokers4 {
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
-    pub rack: Optional<NullableString>,
+    pub rack: Option<NullableString>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponseTopics4 {
     pub error_code: Int16,
     pub name: String,
-    pub is_internal: Optional<Boolean>,
+    pub is_internal: Option<Boolean>,
     pub partitions: Vec<MetadataResponseTopicsPartitions4>,
 }
 
@@ -399,10 +399,10 @@ pub struct MetadataResponseTopicsPartitions4 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponse5 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub brokers: Vec<MetadataResponseBrokers5>,
-    pub cluster_id: Optional<NullableString>,
-    pub controller_id: Optional<Int32>,
+    pub cluster_id: Option<NullableString>,
+    pub controller_id: Option<Int32>,
     pub topics: Vec<MetadataResponseTopics5>,
 }
 
@@ -411,14 +411,14 @@ pub struct MetadataResponseBrokers5 {
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
-    pub rack: Optional<NullableString>,
+    pub rack: Option<NullableString>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponseTopics5 {
     pub error_code: Int16,
     pub name: String,
-    pub is_internal: Optional<Boolean>,
+    pub is_internal: Option<Boolean>,
     pub partitions: Vec<MetadataResponseTopicsPartitions5>,
 }
 
@@ -429,15 +429,15 @@ pub struct MetadataResponseTopicsPartitions5 {
     pub leader_id: Int32,
     pub replica_nodes: Vec<Int32>,
     pub isr_nodes: Vec<Int32>,
-    pub offline_replicas: Optional<Vec<Int32>>,
+    pub offline_replicas: Option<Vec<Int32>>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponse6 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub brokers: Vec<MetadataResponseBrokers6>,
-    pub cluster_id: Optional<NullableString>,
-    pub controller_id: Optional<Int32>,
+    pub cluster_id: Option<NullableString>,
+    pub controller_id: Option<Int32>,
     pub topics: Vec<MetadataResponseTopics6>,
 }
 
@@ -446,14 +446,14 @@ pub struct MetadataResponseBrokers6 {
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
-    pub rack: Optional<NullableString>,
+    pub rack: Option<NullableString>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponseTopics6 {
     pub error_code: Int16,
     pub name: String,
-    pub is_internal: Optional<Boolean>,
+    pub is_internal: Option<Boolean>,
     pub partitions: Vec<MetadataResponseTopicsPartitions6>,
 }
 
@@ -464,15 +464,15 @@ pub struct MetadataResponseTopicsPartitions6 {
     pub leader_id: Int32,
     pub replica_nodes: Vec<Int32>,
     pub isr_nodes: Vec<Int32>,
-    pub offline_replicas: Optional<Vec<Int32>>,
+    pub offline_replicas: Option<Vec<Int32>>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponse7 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub brokers: Vec<MetadataResponseBrokers7>,
-    pub cluster_id: Optional<NullableString>,
-    pub controller_id: Optional<Int32>,
+    pub cluster_id: Option<NullableString>,
+    pub controller_id: Option<Int32>,
     pub topics: Vec<MetadataResponseTopics7>,
 }
 
@@ -481,14 +481,14 @@ pub struct MetadataResponseBrokers7 {
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
-    pub rack: Optional<NullableString>,
+    pub rack: Option<NullableString>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponseTopics7 {
     pub error_code: Int16,
     pub name: String,
-    pub is_internal: Optional<Boolean>,
+    pub is_internal: Option<Boolean>,
     pub partitions: Vec<MetadataResponseTopicsPartitions7>,
 }
 
@@ -497,20 +497,20 @@ pub struct MetadataResponseTopicsPartitions7 {
     pub error_code: Int16,
     pub partition_index: Int32,
     pub leader_id: Int32,
-    pub leader_epoch: Optional<Int32>,
+    pub leader_epoch: Option<Int32>,
     pub replica_nodes: Vec<Int32>,
     pub isr_nodes: Vec<Int32>,
-    pub offline_replicas: Optional<Vec<Int32>>,
+    pub offline_replicas: Option<Vec<Int32>>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponse8 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub brokers: Vec<MetadataResponseBrokers8>,
-    pub cluster_id: Optional<NullableString>,
-    pub controller_id: Optional<Int32>,
+    pub cluster_id: Option<NullableString>,
+    pub controller_id: Option<Int32>,
     pub topics: Vec<MetadataResponseTopics8>,
-    pub cluster_authorized_operations: Optional<Int32>,
+    pub cluster_authorized_operations: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -518,16 +518,16 @@ pub struct MetadataResponseBrokers8 {
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
-    pub rack: Optional<NullableString>,
+    pub rack: Option<NullableString>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponseTopics8 {
     pub error_code: Int16,
     pub name: String,
-    pub is_internal: Optional<Boolean>,
+    pub is_internal: Option<Boolean>,
     pub partitions: Vec<MetadataResponseTopicsPartitions8>,
-    pub topic_authorized_operations: Optional<Int32>,
+    pub topic_authorized_operations: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -535,21 +535,21 @@ pub struct MetadataResponseTopicsPartitions8 {
     pub error_code: Int16,
     pub partition_index: Int32,
     pub leader_id: Int32,
-    pub leader_epoch: Optional<Int32>,
+    pub leader_epoch: Option<Int32>,
     pub replica_nodes: Vec<Int32>,
     pub isr_nodes: Vec<Int32>,
-    pub offline_replicas: Optional<Vec<Int32>>,
+    pub offline_replicas: Option<Vec<Int32>>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponse9 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub brokers: Vec<MetadataResponseBrokers9>,
-    pub cluster_id: Optional<NullableString>,
-    pub controller_id: Optional<Int32>,
+    pub cluster_id: Option<NullableString>,
+    pub controller_id: Option<Int32>,
     pub topics: Vec<MetadataResponseTopics9>,
-    pub cluster_authorized_operations: Optional<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub cluster_authorized_operations: Option<Int32>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -557,18 +557,18 @@ pub struct MetadataResponseBrokers9 {
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
-    pub rack: Optional<NullableString>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub rack: Option<NullableString>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct MetadataResponseTopics9 {
     pub error_code: Int16,
     pub name: String,
-    pub is_internal: Optional<Boolean>,
+    pub is_internal: Option<Boolean>,
     pub partitions: Vec<MetadataResponseTopicsPartitions9>,
-    pub topic_authorized_operations: Optional<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub topic_authorized_operations: Option<Int32>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -576,337 +576,171 @@ pub struct MetadataResponseTopicsPartitions9 {
     pub error_code: Int16,
     pub partition_index: Int32,
     pub leader_id: Int32,
-    pub leader_epoch: Optional<Int32>,
+    pub leader_epoch: Option<Int32>,
     pub replica_nodes: Vec<Int32>,
     pub isr_nodes: Vec<Int32>,
-    pub offline_replicas: Optional<Vec<Int32>>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub offline_replicas: Option<Vec<Int32>>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<MetadataRequest9> for MetadataRequest0 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequest9) -> Result<Self, Self::Error> {
-        if latest.allow_auto_topic_creation.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                0,
-                "allow_auto_topic_creation",
-            ));
+impl From<MetadataRequest9> for MetadataRequest0 {
+    fn from(latest: MetadataRequest9) -> MetadataRequest0 {
+        log::debug!(
+            "Using old api format - MetadataRequest0, ignoring field allow_auto_topic_creation"
+        );
+        log::debug!("Using old api format - MetadataRequest0, ignoring field include_cluster_authorized_operations");
+        log::debug!("Using old api format - MetadataRequest0, ignoring field include_topic_authorized_operations");
+        MetadataRequest0 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
         }
-        if latest.include_cluster_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                0,
-                "include_cluster_authorized_operations",
-            ));
-        }
-        if latest.include_topic_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                0,
-                "include_topic_authorized_operations",
-            ));
-        }
-        Ok(MetadataRequest0 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics0 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics0 { name: latest.name })
+impl From<MetadataRequestTopics9> for MetadataRequestTopics0 {
+    fn from(latest: MetadataRequestTopics9) -> MetadataRequestTopics0 {
+        MetadataRequestTopics0 { name: latest.name }
     }
 }
 
-impl TryFrom<MetadataRequest9> for MetadataRequest1 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequest9) -> Result<Self, Self::Error> {
-        if latest.allow_auto_topic_creation.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                1,
-                "allow_auto_topic_creation",
-            ));
+impl From<MetadataRequest9> for MetadataRequest1 {
+    fn from(latest: MetadataRequest9) -> MetadataRequest1 {
+        log::debug!(
+            "Using old api format - MetadataRequest1, ignoring field allow_auto_topic_creation"
+        );
+        log::debug!("Using old api format - MetadataRequest1, ignoring field include_cluster_authorized_operations");
+        log::debug!("Using old api format - MetadataRequest1, ignoring field include_topic_authorized_operations");
+        MetadataRequest1 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
         }
-        if latest.include_cluster_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                1,
-                "include_cluster_authorized_operations",
-            ));
-        }
-        if latest.include_topic_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                1,
-                "include_topic_authorized_operations",
-            ));
-        }
-        Ok(MetadataRequest1 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics1 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics1 { name: latest.name })
+impl From<MetadataRequestTopics9> for MetadataRequestTopics1 {
+    fn from(latest: MetadataRequestTopics9) -> MetadataRequestTopics1 {
+        MetadataRequestTopics1 { name: latest.name }
     }
 }
 
-impl TryFrom<MetadataRequest9> for MetadataRequest2 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequest9) -> Result<Self, Self::Error> {
-        if latest.allow_auto_topic_creation.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                2,
-                "allow_auto_topic_creation",
-            ));
+impl From<MetadataRequest9> for MetadataRequest2 {
+    fn from(latest: MetadataRequest9) -> MetadataRequest2 {
+        log::debug!(
+            "Using old api format - MetadataRequest2, ignoring field allow_auto_topic_creation"
+        );
+        log::debug!("Using old api format - MetadataRequest2, ignoring field include_cluster_authorized_operations");
+        log::debug!("Using old api format - MetadataRequest2, ignoring field include_topic_authorized_operations");
+        MetadataRequest2 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
         }
-        if latest.include_cluster_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                2,
-                "include_cluster_authorized_operations",
-            ));
-        }
-        if latest.include_topic_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                2,
-                "include_topic_authorized_operations",
-            ));
-        }
-        Ok(MetadataRequest2 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics2 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics2 { name: latest.name })
+impl From<MetadataRequestTopics9> for MetadataRequestTopics2 {
+    fn from(latest: MetadataRequestTopics9) -> MetadataRequestTopics2 {
+        MetadataRequestTopics2 { name: latest.name }
     }
 }
 
-impl TryFrom<MetadataRequest9> for MetadataRequest3 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequest9) -> Result<Self, Self::Error> {
-        if latest.allow_auto_topic_creation.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                3,
-                "allow_auto_topic_creation",
-            ));
+impl From<MetadataRequest9> for MetadataRequest3 {
+    fn from(latest: MetadataRequest9) -> MetadataRequest3 {
+        log::debug!(
+            "Using old api format - MetadataRequest3, ignoring field allow_auto_topic_creation"
+        );
+        log::debug!("Using old api format - MetadataRequest3, ignoring field include_cluster_authorized_operations");
+        log::debug!("Using old api format - MetadataRequest3, ignoring field include_topic_authorized_operations");
+        MetadataRequest3 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
         }
-        if latest.include_cluster_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                3,
-                "include_cluster_authorized_operations",
-            ));
-        }
-        if latest.include_topic_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                3,
-                "include_topic_authorized_operations",
-            ));
-        }
-        Ok(MetadataRequest3 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics3 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics3 { name: latest.name })
+impl From<MetadataRequestTopics9> for MetadataRequestTopics3 {
+    fn from(latest: MetadataRequestTopics9) -> MetadataRequestTopics3 {
+        MetadataRequestTopics3 { name: latest.name }
     }
 }
 
-impl TryFrom<MetadataRequest9> for MetadataRequest4 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequest9) -> Result<Self, Self::Error> {
-        if latest.include_cluster_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                4,
-                "include_cluster_authorized_operations",
-            ));
-        }
-        if latest.include_topic_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                4,
-                "include_topic_authorized_operations",
-            ));
-        }
-        Ok(MetadataRequest4 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<MetadataRequest9> for MetadataRequest4 {
+    fn from(latest: MetadataRequest9) -> MetadataRequest4 {
+        log::debug!("Using old api format - MetadataRequest4, ignoring field include_cluster_authorized_operations");
+        log::debug!("Using old api format - MetadataRequest4, ignoring field include_topic_authorized_operations");
+        MetadataRequest4 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             allow_auto_topic_creation: latest.allow_auto_topic_creation,
-        })
+        }
     }
 }
 
-impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics4 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics4 { name: latest.name })
+impl From<MetadataRequestTopics9> for MetadataRequestTopics4 {
+    fn from(latest: MetadataRequestTopics9) -> MetadataRequestTopics4 {
+        MetadataRequestTopics4 { name: latest.name }
     }
 }
 
-impl TryFrom<MetadataRequest9> for MetadataRequest5 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequest9) -> Result<Self, Self::Error> {
-        if latest.include_cluster_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                5,
-                "include_cluster_authorized_operations",
-            ));
-        }
-        if latest.include_topic_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                5,
-                "include_topic_authorized_operations",
-            ));
-        }
-        Ok(MetadataRequest5 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<MetadataRequest9> for MetadataRequest5 {
+    fn from(latest: MetadataRequest9) -> MetadataRequest5 {
+        log::debug!("Using old api format - MetadataRequest5, ignoring field include_cluster_authorized_operations");
+        log::debug!("Using old api format - MetadataRequest5, ignoring field include_topic_authorized_operations");
+        MetadataRequest5 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             allow_auto_topic_creation: latest.allow_auto_topic_creation,
-        })
+        }
     }
 }
 
-impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics5 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics5 { name: latest.name })
+impl From<MetadataRequestTopics9> for MetadataRequestTopics5 {
+    fn from(latest: MetadataRequestTopics9) -> MetadataRequestTopics5 {
+        MetadataRequestTopics5 { name: latest.name }
     }
 }
 
-impl TryFrom<MetadataRequest9> for MetadataRequest6 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequest9) -> Result<Self, Self::Error> {
-        if latest.include_cluster_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                6,
-                "include_cluster_authorized_operations",
-            ));
-        }
-        if latest.include_topic_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                6,
-                "include_topic_authorized_operations",
-            ));
-        }
-        Ok(MetadataRequest6 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<MetadataRequest9> for MetadataRequest6 {
+    fn from(latest: MetadataRequest9) -> MetadataRequest6 {
+        log::debug!("Using old api format - MetadataRequest6, ignoring field include_cluster_authorized_operations");
+        log::debug!("Using old api format - MetadataRequest6, ignoring field include_topic_authorized_operations");
+        MetadataRequest6 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             allow_auto_topic_creation: latest.allow_auto_topic_creation,
-        })
+        }
     }
 }
 
-impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics6 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics6 { name: latest.name })
+impl From<MetadataRequestTopics9> for MetadataRequestTopics6 {
+    fn from(latest: MetadataRequestTopics9) -> MetadataRequestTopics6 {
+        MetadataRequestTopics6 { name: latest.name }
     }
 }
 
-impl TryFrom<MetadataRequest9> for MetadataRequest7 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequest9) -> Result<Self, Self::Error> {
-        if latest.include_cluster_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                7,
-                "include_cluster_authorized_operations",
-            ));
-        }
-        if latest.include_topic_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "MetadataRequest",
-                7,
-                "include_topic_authorized_operations",
-            ));
-        }
-        Ok(MetadataRequest7 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<MetadataRequest9> for MetadataRequest7 {
+    fn from(latest: MetadataRequest9) -> MetadataRequest7 {
+        log::debug!("Using old api format - MetadataRequest7, ignoring field include_cluster_authorized_operations");
+        log::debug!("Using old api format - MetadataRequest7, ignoring field include_topic_authorized_operations");
+        MetadataRequest7 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             allow_auto_topic_creation: latest.allow_auto_topic_creation,
-        })
+        }
     }
 }
 
-impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics7 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics7 { name: latest.name })
+impl From<MetadataRequestTopics9> for MetadataRequestTopics7 {
+    fn from(latest: MetadataRequestTopics9) -> MetadataRequestTopics7 {
+        MetadataRequestTopics7 { name: latest.name }
     }
 }
 
-impl TryFrom<MetadataRequest9> for MetadataRequest8 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequest9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequest8 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<MetadataRequest9> for MetadataRequest8 {
+    fn from(latest: MetadataRequest9) -> MetadataRequest8 {
+        MetadataRequest8 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             allow_auto_topic_creation: latest.allow_auto_topic_creation,
             include_cluster_authorized_operations: latest.include_cluster_authorized_operations,
             include_topic_authorized_operations: latest.include_topic_authorized_operations,
-        })
+        }
     }
 }
 
-impl TryFrom<MetadataRequestTopics9> for MetadataRequestTopics8 {
-    type Error = Error;
-    fn try_from(latest: MetadataRequestTopics9) -> Result<Self, Self::Error> {
-        Ok(MetadataRequestTopics8 { name: latest.name })
+impl From<MetadataRequestTopics9> for MetadataRequestTopics8 {
+    fn from(latest: MetadataRequestTopics9) -> MetadataRequestTopics8 {
+        MetadataRequestTopics8 { name: latest.name }
     }
 }
 

@@ -46,12 +46,12 @@ impl ApiCall for DescribeLogDirsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &DescribeLogDirsRequest0::try_from(self)?,
+                &DescribeLogDirsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &DescribeLogDirsRequest1::try_from(self)?,
+                &DescribeLogDirsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -101,14 +101,14 @@ pub struct DescribeLogDirsRequestTopics1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequest2 {
     pub topics: Vec<DescribeLogDirsRequestTopics2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequestTopics2 {
     pub topic: String,
     pub partition_index: Vec<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -169,7 +169,7 @@ pub struct DescribeLogDirsResponseResultsTopicsPartitions1 {
 pub struct DescribeLogDirsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<DescribeLogDirsResponseResults2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -177,14 +177,14 @@ pub struct DescribeLogDirsResponseResults2 {
     pub error_code: Int16,
     pub log_dir: String,
     pub topics: Vec<DescribeLogDirsResponseResultsTopics2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResultsTopics2 {
     pub name: String,
     pub partitions: Vec<DescribeLogDirsResponseResultsTopicsPartitions2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -193,52 +193,40 @@ pub struct DescribeLogDirsResponseResultsTopicsPartitions2 {
     pub partition_size: Int64,
     pub offset_lag: Int64,
     pub is_future_key: Boolean,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<DescribeLogDirsRequest2> for DescribeLogDirsRequest0 {
-    type Error = Error;
-    fn try_from(latest: DescribeLogDirsRequest2) -> Result<Self, Self::Error> {
-        Ok(DescribeLogDirsRequest0 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+impl From<DescribeLogDirsRequest2> for DescribeLogDirsRequest0 {
+    fn from(latest: DescribeLogDirsRequest2) -> DescribeLogDirsRequest0 {
+        DescribeLogDirsRequest0 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics0 {
-    type Error = Error;
-    fn try_from(latest: DescribeLogDirsRequestTopics2) -> Result<Self, Self::Error> {
-        Ok(DescribeLogDirsRequestTopics0 {
+impl From<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics0 {
+    fn from(latest: DescribeLogDirsRequestTopics2) -> DescribeLogDirsRequestTopics0 {
+        DescribeLogDirsRequestTopics0 {
             topic: latest.topic,
             partition_index: latest.partition_index,
-        })
+        }
     }
 }
 
-impl TryFrom<DescribeLogDirsRequest2> for DescribeLogDirsRequest1 {
-    type Error = Error;
-    fn try_from(latest: DescribeLogDirsRequest2) -> Result<Self, Self::Error> {
-        Ok(DescribeLogDirsRequest1 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+impl From<DescribeLogDirsRequest2> for DescribeLogDirsRequest1 {
+    fn from(latest: DescribeLogDirsRequest2) -> DescribeLogDirsRequest1 {
+        DescribeLogDirsRequest1 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics1 {
-    type Error = Error;
-    fn try_from(latest: DescribeLogDirsRequestTopics2) -> Result<Self, Self::Error> {
-        Ok(DescribeLogDirsRequestTopics1 {
+impl From<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics1 {
+    fn from(latest: DescribeLogDirsRequestTopics2) -> DescribeLogDirsRequestTopics1 {
+        DescribeLogDirsRequestTopics1 {
             topic: latest.topic,
             partition_index: latest.partition_index,
-        })
+        }
     }
 }
 

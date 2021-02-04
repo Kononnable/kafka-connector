@@ -52,42 +52,42 @@ impl ApiCall for ProduceRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &ProduceRequest0::try_from(self)?,
+                &ProduceRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &ProduceRequest1::try_from(self)?,
+                &ProduceRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &ProduceRequest2::try_from(self)?,
+                &ProduceRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &ProduceRequest3::try_from(self)?,
+                &ProduceRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             4 => ToBytes::serialize(
-                &ProduceRequest4::try_from(self)?,
+                &ProduceRequest4::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             5 => ToBytes::serialize(
-                &ProduceRequest5::try_from(self)?,
+                &ProduceRequest5::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             6 => ToBytes::serialize(
-                &ProduceRequest6::try_from(self)?,
+                &ProduceRequest6::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             7 => ToBytes::serialize(
-                &ProduceRequest7::try_from(self)?,
+                &ProduceRequest7::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -175,7 +175,7 @@ pub struct ProduceRequestTopicDataData2 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ProduceRequest3 {
-    pub transactional_id: Optional<NullableString>,
+    pub transactional_id: NullableString,
     pub acks: Int16,
     pub timeout: Int32,
     pub topic_data: Vec<ProduceRequestTopicData3>,
@@ -195,7 +195,7 @@ pub struct ProduceRequestTopicDataData3 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ProduceRequest4 {
-    pub transactional_id: Optional<NullableString>,
+    pub transactional_id: NullableString,
     pub acks: Int16,
     pub timeout: Int32,
     pub topic_data: Vec<ProduceRequestTopicData4>,
@@ -215,7 +215,7 @@ pub struct ProduceRequestTopicDataData4 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ProduceRequest5 {
-    pub transactional_id: Optional<NullableString>,
+    pub transactional_id: NullableString,
     pub acks: Int16,
     pub timeout: Int32,
     pub topic_data: Vec<ProduceRequestTopicData5>,
@@ -235,7 +235,7 @@ pub struct ProduceRequestTopicDataData5 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ProduceRequest6 {
-    pub transactional_id: Optional<NullableString>,
+    pub transactional_id: NullableString,
     pub acks: Int16,
     pub timeout: Int32,
     pub topic_data: Vec<ProduceRequestTopicData6>,
@@ -255,7 +255,7 @@ pub struct ProduceRequestTopicDataData6 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ProduceRequest7 {
-    pub transactional_id: Optional<NullableString>,
+    pub transactional_id: NullableString,
     pub acks: Int16,
     pub timeout: Int32,
     pub topic_data: Vec<ProduceRequestTopicData7>,
@@ -275,7 +275,7 @@ pub struct ProduceRequestTopicDataData7 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ProduceRequest8 {
-    pub transactional_id: Optional<NullableString>,
+    pub transactional_id: NullableString,
     pub acks: Int16,
     pub timeout: Int32,
     pub topic_data: Vec<ProduceRequestTopicData8>,
@@ -314,7 +314,7 @@ pub struct ProduceResponseResponsesPartitionResponses0 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ProduceResponse1 {
     pub responses: Vec<ProduceResponseResponses1>,
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -333,7 +333,7 @@ pub struct ProduceResponseResponsesPartitionResponses1 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ProduceResponse2 {
     pub responses: Vec<ProduceResponseResponses2>,
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -347,13 +347,13 @@ pub struct ProduceResponseResponsesPartitionResponses2 {
     pub partition: Int32,
     pub error_code: Int16,
     pub base_offset: Int64,
-    pub log_append_time: Optional<Int64>,
+    pub log_append_time: Option<Int64>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ProduceResponse3 {
     pub responses: Vec<ProduceResponseResponses3>,
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -367,13 +367,13 @@ pub struct ProduceResponseResponsesPartitionResponses3 {
     pub partition: Int32,
     pub error_code: Int16,
     pub base_offset: Int64,
-    pub log_append_time: Optional<Int64>,
+    pub log_append_time: Option<Int64>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ProduceResponse4 {
     pub responses: Vec<ProduceResponseResponses4>,
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -387,13 +387,13 @@ pub struct ProduceResponseResponsesPartitionResponses4 {
     pub partition: Int32,
     pub error_code: Int16,
     pub base_offset: Int64,
-    pub log_append_time: Optional<Int64>,
+    pub log_append_time: Option<Int64>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ProduceResponse5 {
     pub responses: Vec<ProduceResponseResponses5>,
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -407,14 +407,14 @@ pub struct ProduceResponseResponsesPartitionResponses5 {
     pub partition: Int32,
     pub error_code: Int16,
     pub base_offset: Int64,
-    pub log_append_time: Optional<Int64>,
-    pub log_start_offset: Optional<Int64>,
+    pub log_append_time: Option<Int64>,
+    pub log_start_offset: Option<Int64>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ProduceResponse6 {
     pub responses: Vec<ProduceResponseResponses6>,
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -428,14 +428,14 @@ pub struct ProduceResponseResponsesPartitionResponses6 {
     pub partition: Int32,
     pub error_code: Int16,
     pub base_offset: Int64,
-    pub log_append_time: Optional<Int64>,
-    pub log_start_offset: Optional<Int64>,
+    pub log_append_time: Option<Int64>,
+    pub log_start_offset: Option<Int64>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ProduceResponse7 {
     pub responses: Vec<ProduceResponseResponses7>,
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -449,14 +449,14 @@ pub struct ProduceResponseResponsesPartitionResponses7 {
     pub partition: Int32,
     pub error_code: Int16,
     pub base_offset: Int64,
-    pub log_append_time: Optional<Int64>,
-    pub log_start_offset: Optional<Int64>,
+    pub log_append_time: Option<Int64>,
+    pub log_start_offset: Option<Int64>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ProduceResponse8 {
     pub responses: Vec<ProduceResponseResponses8>,
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -470,10 +470,10 @@ pub struct ProduceResponseResponsesPartitionResponses8 {
     pub partition: Int32,
     pub error_code: Int16,
     pub base_offset: Int64,
-    pub log_append_time: Optional<Int64>,
-    pub log_start_offset: Optional<Int64>,
-    pub record_errors: Optional<Vec<ProduceResponseResponsesPartitionResponsesRecordErrors8>>,
-    pub error_message: Optional<NullableString>,
+    pub log_append_time: Option<Int64>,
+    pub log_start_offset: Option<Int64>,
+    pub record_errors: Option<Vec<ProduceResponseResponsesPartitionResponsesRecordErrors8>>,
+    pub error_message: Option<NullableString>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -482,341 +482,267 @@ pub struct ProduceResponseResponsesPartitionResponsesRecordErrors8 {
     pub batch_index_error_message: NullableString,
 }
 
-impl TryFrom<ProduceRequest8> for ProduceRequest0 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
-        if latest.transactional_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ProduceRequest",
-                0,
-                "transactional_id",
-            ));
+impl From<ProduceRequest8> for ProduceRequest0 {
+    fn from(latest: ProduceRequest8) -> ProduceRequest0 {
+        log::debug!("Using old api format - ProduceRequest0, ignoring field transactional_id");
+        ProduceRequest0 {
+            acks: latest.acks,
+            timeout: latest.timeout,
+            topic_data: latest
+                .topic_data
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
         }
-        Ok(ProduceRequest0 {
-            acks: latest.acks,
-            timeout: latest.timeout,
-            topic_data: latest
-                .topic_data
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData0 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicData0 {
+impl From<ProduceRequestTopicData8> for ProduceRequestTopicData0 {
+    fn from(latest: ProduceRequestTopicData8) -> ProduceRequestTopicData0 {
+        ProduceRequestTopicData0 {
             topic: latest.topic,
-            data: latest
-                .data
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
-    }
-}
-
-impl TryFrom<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData0 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicDataData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicDataData0 {
-            partition: latest.partition,
-            record_set: latest.record_set,
-        })
-    }
-}
-
-impl TryFrom<ProduceRequest8> for ProduceRequest1 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
-        if latest.transactional_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ProduceRequest",
-                1,
-                "transactional_id",
-            ));
+            data: latest.data.into_iter().map(|ele| ele.into()).collect(),
         }
-        Ok(ProduceRequest1 {
-            acks: latest.acks,
-            timeout: latest.timeout,
-            topic_data: latest
-                .topic_data
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData1 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicData1 {
-            topic: latest.topic,
-            data: latest
-                .data
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
-    }
-}
-
-impl TryFrom<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData1 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicDataData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicDataData1 {
+impl From<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData0 {
+    fn from(latest: ProduceRequestTopicDataData8) -> ProduceRequestTopicDataData0 {
+        ProduceRequestTopicDataData0 {
             partition: latest.partition,
             record_set: latest.record_set,
-        })
-    }
-}
-
-impl TryFrom<ProduceRequest8> for ProduceRequest2 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
-        if latest.transactional_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ProduceRequest",
-                2,
-                "transactional_id",
-            ));
         }
-        Ok(ProduceRequest2 {
+    }
+}
+
+impl From<ProduceRequest8> for ProduceRequest1 {
+    fn from(latest: ProduceRequest8) -> ProduceRequest1 {
+        log::debug!("Using old api format - ProduceRequest1, ignoring field transactional_id");
+        ProduceRequest1 {
             acks: latest.acks,
             timeout: latest.timeout,
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData2 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicData2 {
+impl From<ProduceRequestTopicData8> for ProduceRequestTopicData1 {
+    fn from(latest: ProduceRequestTopicData8) -> ProduceRequestTopicData1 {
+        ProduceRequestTopicData1 {
             topic: latest.topic,
-            data: latest
-                .data
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            data: latest.data.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData2 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicDataData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicDataData2 {
+impl From<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData1 {
+    fn from(latest: ProduceRequestTopicDataData8) -> ProduceRequestTopicDataData1 {
+        ProduceRequestTopicDataData1 {
             partition: latest.partition,
             record_set: latest.record_set,
-        })
+        }
     }
 }
 
-impl TryFrom<ProduceRequest8> for ProduceRequest3 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequest3 {
+impl From<ProduceRequest8> for ProduceRequest2 {
+    fn from(latest: ProduceRequest8) -> ProduceRequest2 {
+        log::debug!("Using old api format - ProduceRequest2, ignoring field transactional_id");
+        ProduceRequest2 {
+            acks: latest.acks,
+            timeout: latest.timeout,
+            topic_data: latest
+                .topic_data
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
+        }
+    }
+}
+
+impl From<ProduceRequestTopicData8> for ProduceRequestTopicData2 {
+    fn from(latest: ProduceRequestTopicData8) -> ProduceRequestTopicData2 {
+        ProduceRequestTopicData2 {
+            topic: latest.topic,
+            data: latest.data.into_iter().map(|ele| ele.into()).collect(),
+        }
+    }
+}
+
+impl From<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData2 {
+    fn from(latest: ProduceRequestTopicDataData8) -> ProduceRequestTopicDataData2 {
+        ProduceRequestTopicDataData2 {
+            partition: latest.partition,
+            record_set: latest.record_set,
+        }
+    }
+}
+
+impl From<ProduceRequest8> for ProduceRequest3 {
+    fn from(latest: ProduceRequest8) -> ProduceRequest3 {
+        ProduceRequest3 {
             transactional_id: latest.transactional_id,
             acks: latest.acks,
             timeout: latest.timeout,
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData3 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicData3 {
+impl From<ProduceRequestTopicData8> for ProduceRequestTopicData3 {
+    fn from(latest: ProduceRequestTopicData8) -> ProduceRequestTopicData3 {
+        ProduceRequestTopicData3 {
             topic: latest.topic,
-            data: latest
-                .data
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            data: latest.data.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData3 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicDataData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicDataData3 {
+impl From<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData3 {
+    fn from(latest: ProduceRequestTopicDataData8) -> ProduceRequestTopicDataData3 {
+        ProduceRequestTopicDataData3 {
             partition: latest.partition,
             record_set: latest.record_set,
-        })
+        }
     }
 }
 
-impl TryFrom<ProduceRequest8> for ProduceRequest4 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequest4 {
+impl From<ProduceRequest8> for ProduceRequest4 {
+    fn from(latest: ProduceRequest8) -> ProduceRequest4 {
+        ProduceRequest4 {
             transactional_id: latest.transactional_id,
             acks: latest.acks,
             timeout: latest.timeout,
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData4 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicData4 {
+impl From<ProduceRequestTopicData8> for ProduceRequestTopicData4 {
+    fn from(latest: ProduceRequestTopicData8) -> ProduceRequestTopicData4 {
+        ProduceRequestTopicData4 {
             topic: latest.topic,
-            data: latest
-                .data
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            data: latest.data.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData4 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicDataData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicDataData4 {
+impl From<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData4 {
+    fn from(latest: ProduceRequestTopicDataData8) -> ProduceRequestTopicDataData4 {
+        ProduceRequestTopicDataData4 {
             partition: latest.partition,
             record_set: latest.record_set,
-        })
+        }
     }
 }
 
-impl TryFrom<ProduceRequest8> for ProduceRequest5 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequest5 {
+impl From<ProduceRequest8> for ProduceRequest5 {
+    fn from(latest: ProduceRequest8) -> ProduceRequest5 {
+        ProduceRequest5 {
             transactional_id: latest.transactional_id,
             acks: latest.acks,
             timeout: latest.timeout,
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData5 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicData5 {
+impl From<ProduceRequestTopicData8> for ProduceRequestTopicData5 {
+    fn from(latest: ProduceRequestTopicData8) -> ProduceRequestTopicData5 {
+        ProduceRequestTopicData5 {
             topic: latest.topic,
-            data: latest
-                .data
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            data: latest.data.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData5 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicDataData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicDataData5 {
+impl From<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData5 {
+    fn from(latest: ProduceRequestTopicDataData8) -> ProduceRequestTopicDataData5 {
+        ProduceRequestTopicDataData5 {
             partition: latest.partition,
             record_set: latest.record_set,
-        })
+        }
     }
 }
 
-impl TryFrom<ProduceRequest8> for ProduceRequest6 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequest6 {
+impl From<ProduceRequest8> for ProduceRequest6 {
+    fn from(latest: ProduceRequest8) -> ProduceRequest6 {
+        ProduceRequest6 {
             transactional_id: latest.transactional_id,
             acks: latest.acks,
             timeout: latest.timeout,
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData6 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicData6 {
+impl From<ProduceRequestTopicData8> for ProduceRequestTopicData6 {
+    fn from(latest: ProduceRequestTopicData8) -> ProduceRequestTopicData6 {
+        ProduceRequestTopicData6 {
             topic: latest.topic,
-            data: latest
-                .data
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            data: latest.data.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData6 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicDataData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicDataData6 {
+impl From<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData6 {
+    fn from(latest: ProduceRequestTopicDataData8) -> ProduceRequestTopicDataData6 {
+        ProduceRequestTopicDataData6 {
             partition: latest.partition,
             record_set: latest.record_set,
-        })
+        }
     }
 }
 
-impl TryFrom<ProduceRequest8> for ProduceRequest7 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequest8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequest7 {
+impl From<ProduceRequest8> for ProduceRequest7 {
+    fn from(latest: ProduceRequest8) -> ProduceRequest7 {
+        ProduceRequest7 {
             transactional_id: latest.transactional_id,
             acks: latest.acks,
             timeout: latest.timeout,
             topic_data: latest
                 .topic_data
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<ProduceRequestTopicData8> for ProduceRequestTopicData7 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicData7 {
+impl From<ProduceRequestTopicData8> for ProduceRequestTopicData7 {
+    fn from(latest: ProduceRequestTopicData8) -> ProduceRequestTopicData7 {
+        ProduceRequestTopicData7 {
             topic: latest.topic,
-            data: latest
-                .data
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            data: latest.data.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData7 {
-    type Error = Error;
-    fn try_from(latest: ProduceRequestTopicDataData8) -> Result<Self, Self::Error> {
-        Ok(ProduceRequestTopicDataData7 {
+impl From<ProduceRequestTopicDataData8> for ProduceRequestTopicDataData7 {
+    fn from(latest: ProduceRequestTopicDataData8) -> ProduceRequestTopicDataData7 {
+        ProduceRequestTopicDataData7 {
             partition: latest.partition,
             record_set: latest.record_set,
-        })
+        }
     }
 }
 

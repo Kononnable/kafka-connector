@@ -49,27 +49,27 @@ impl ApiCall for ListOffsetsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &ListOffsetsRequest0::try_from(self)?,
+                &ListOffsetsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &ListOffsetsRequest1::try_from(self)?,
+                &ListOffsetsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &ListOffsetsRequest2::try_from(self)?,
+                &ListOffsetsRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &ListOffsetsRequest3::try_from(self)?,
+                &ListOffsetsRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             4 => ToBytes::serialize(
-                &ListOffsetsRequest4::try_from(self)?,
+                &ListOffsetsRequest4::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -135,7 +135,7 @@ pub struct ListOffsetsRequestTopicsPartitions1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequest2 {
     pub replica_id: Int32,
-    pub isolation_level: Optional<Int8>,
+    pub isolation_level: Int8,
     pub topics: Vec<ListOffsetsRequestTopics2>,
 }
 
@@ -154,7 +154,7 @@ pub struct ListOffsetsRequestTopicsPartitions2 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequest3 {
     pub replica_id: Int32,
-    pub isolation_level: Optional<Int8>,
+    pub isolation_level: Int8,
     pub topics: Vec<ListOffsetsRequestTopics3>,
 }
 
@@ -173,7 +173,7 @@ pub struct ListOffsetsRequestTopicsPartitions3 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequest4 {
     pub replica_id: Int32,
-    pub isolation_level: Optional<Int8>,
+    pub isolation_level: Int8,
     pub topics: Vec<ListOffsetsRequestTopics4>,
 }
 
@@ -186,14 +186,14 @@ pub struct ListOffsetsRequestTopics4 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopicsPartitions4 {
     pub partition_index: Int32,
-    pub current_leader_epoch: Optional<Int32>,
+    pub current_leader_epoch: Int32,
     pub timestamp: Int64,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequest5 {
     pub replica_id: Int32,
-    pub isolation_level: Optional<Int8>,
+    pub isolation_level: Int8,
     pub topics: Vec<ListOffsetsRequestTopics5>,
 }
 
@@ -206,7 +206,7 @@ pub struct ListOffsetsRequestTopics5 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListOffsetsRequestTopicsPartitions5 {
     pub partition_index: Int32,
-    pub current_leader_epoch: Optional<Int32>,
+    pub current_leader_epoch: Int32,
     pub timestamp: Int64,
 }
 
@@ -243,13 +243,13 @@ pub struct ListOffsetsResponseTopics1 {
 pub struct ListOffsetsResponseTopicsPartitions1 {
     pub partition_index: Int32,
     pub error_code: Int16,
-    pub timestamp: Optional<Int64>,
-    pub offset: Optional<Int64>,
+    pub timestamp: Option<Int64>,
+    pub offset: Option<Int64>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponse2 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub topics: Vec<ListOffsetsResponseTopics2>,
 }
 
@@ -263,13 +263,13 @@ pub struct ListOffsetsResponseTopics2 {
 pub struct ListOffsetsResponseTopicsPartitions2 {
     pub partition_index: Int32,
     pub error_code: Int16,
-    pub timestamp: Optional<Int64>,
-    pub offset: Optional<Int64>,
+    pub timestamp: Option<Int64>,
+    pub offset: Option<Int64>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub topics: Vec<ListOffsetsResponseTopics3>,
 }
 
@@ -283,13 +283,13 @@ pub struct ListOffsetsResponseTopics3 {
 pub struct ListOffsetsResponseTopicsPartitions3 {
     pub partition_index: Int32,
     pub error_code: Int16,
-    pub timestamp: Optional<Int64>,
-    pub offset: Optional<Int64>,
+    pub timestamp: Option<Int64>,
+    pub offset: Option<Int64>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponse4 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub topics: Vec<ListOffsetsResponseTopics4>,
 }
 
@@ -303,14 +303,14 @@ pub struct ListOffsetsResponseTopics4 {
 pub struct ListOffsetsResponseTopicsPartitions4 {
     pub partition_index: Int32,
     pub error_code: Int16,
-    pub timestamp: Optional<Int64>,
-    pub offset: Optional<Int64>,
-    pub leader_epoch: Optional<Int32>,
+    pub timestamp: Option<Int64>,
+    pub offset: Option<Int64>,
+    pub leader_epoch: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListOffsetsResponse5 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub topics: Vec<ListOffsetsResponseTopics5>,
 }
 
@@ -324,245 +324,174 @@ pub struct ListOffsetsResponseTopics5 {
 pub struct ListOffsetsResponseTopicsPartitions5 {
     pub partition_index: Int32,
     pub error_code: Int16,
-    pub timestamp: Optional<Int64>,
-    pub offset: Optional<Int64>,
-    pub leader_epoch: Optional<Int32>,
+    pub timestamp: Option<Int64>,
+    pub offset: Option<Int64>,
+    pub leader_epoch: Option<Int32>,
 }
 
-impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest0 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequest5) -> Result<Self, Self::Error> {
-        if latest.isolation_level.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ListOffsetsRequest",
-                0,
-                "isolation_level",
-            ));
-        }
-        Ok(ListOffsetsRequest0 {
+impl From<ListOffsetsRequest5> for ListOffsetsRequest0 {
+    fn from(latest: ListOffsetsRequest5) -> ListOffsetsRequest0 {
+        log::debug!("Using old api format - ListOffsetsRequest0, ignoring field isolation_level");
+        ListOffsetsRequest0 {
             replica_id: latest.replica_id,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics0 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequestTopics5) -> Result<Self, Self::Error> {
-        Ok(ListOffsetsRequestTopics0 {
+impl From<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics0 {
+    fn from(latest: ListOffsetsRequestTopics5) -> ListOffsetsRequestTopics0 {
+        ListOffsetsRequestTopics0 {
             name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPartitions0 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequestTopicsPartitions5) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ListOffsetsRequestTopicsPartitions",
-                0,
-                "current_leader_epoch",
-            ));
-        }
-        Ok(ListOffsetsRequestTopicsPartitions0 {
+impl From<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPartitions0 {
+    fn from(latest: ListOffsetsRequestTopicsPartitions5) -> ListOffsetsRequestTopicsPartitions0 {
+        log::debug!("Using old api format - ListOffsetsRequestTopicsPartitions0, ignoring field current_leader_epoch");
+        ListOffsetsRequestTopicsPartitions0 {
             partition_index: latest.partition_index,
             timestamp: latest.timestamp,
             ..ListOffsetsRequestTopicsPartitions0::default()
-        })
-    }
-}
-
-impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest1 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequest5) -> Result<Self, Self::Error> {
-        if latest.isolation_level.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ListOffsetsRequest",
-                1,
-                "isolation_level",
-            ));
         }
-        Ok(ListOffsetsRequest1 {
-            replica_id: latest.replica_id,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics1 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequestTopics5) -> Result<Self, Self::Error> {
-        Ok(ListOffsetsRequestTopics1 {
+impl From<ListOffsetsRequest5> for ListOffsetsRequest1 {
+    fn from(latest: ListOffsetsRequest5) -> ListOffsetsRequest1 {
+        log::debug!("Using old api format - ListOffsetsRequest1, ignoring field isolation_level");
+        ListOffsetsRequest1 {
+            replica_id: latest.replica_id,
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
+    }
+}
+
+impl From<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics1 {
+    fn from(latest: ListOffsetsRequestTopics5) -> ListOffsetsRequestTopics1 {
+        ListOffsetsRequestTopics1 {
             name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPartitions1 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequestTopicsPartitions5) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ListOffsetsRequestTopicsPartitions",
-                1,
-                "current_leader_epoch",
-            ));
-        }
-        Ok(ListOffsetsRequestTopicsPartitions1 {
+impl From<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPartitions1 {
+    fn from(latest: ListOffsetsRequestTopicsPartitions5) -> ListOffsetsRequestTopicsPartitions1 {
+        log::debug!("Using old api format - ListOffsetsRequestTopicsPartitions1, ignoring field current_leader_epoch");
+        ListOffsetsRequestTopicsPartitions1 {
             partition_index: latest.partition_index,
             timestamp: latest.timestamp,
-        })
+        }
     }
 }
 
-impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest2 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequest5) -> Result<Self, Self::Error> {
-        Ok(ListOffsetsRequest2 {
+impl From<ListOffsetsRequest5> for ListOffsetsRequest2 {
+    fn from(latest: ListOffsetsRequest5) -> ListOffsetsRequest2 {
+        ListOffsetsRequest2 {
             replica_id: latest.replica_id,
             isolation_level: latest.isolation_level,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics2 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequestTopics5) -> Result<Self, Self::Error> {
-        Ok(ListOffsetsRequestTopics2 {
+impl From<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics2 {
+    fn from(latest: ListOffsetsRequestTopics5) -> ListOffsetsRequestTopics2 {
+        ListOffsetsRequestTopics2 {
             name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPartitions2 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequestTopicsPartitions5) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ListOffsetsRequestTopicsPartitions",
-                2,
-                "current_leader_epoch",
-            ));
-        }
-        Ok(ListOffsetsRequestTopicsPartitions2 {
+impl From<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPartitions2 {
+    fn from(latest: ListOffsetsRequestTopicsPartitions5) -> ListOffsetsRequestTopicsPartitions2 {
+        log::debug!("Using old api format - ListOffsetsRequestTopicsPartitions2, ignoring field current_leader_epoch");
+        ListOffsetsRequestTopicsPartitions2 {
             partition_index: latest.partition_index,
             timestamp: latest.timestamp,
-        })
+        }
     }
 }
 
-impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest3 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequest5) -> Result<Self, Self::Error> {
-        Ok(ListOffsetsRequest3 {
+impl From<ListOffsetsRequest5> for ListOffsetsRequest3 {
+    fn from(latest: ListOffsetsRequest5) -> ListOffsetsRequest3 {
+        ListOffsetsRequest3 {
             replica_id: latest.replica_id,
             isolation_level: latest.isolation_level,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics3 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequestTopics5) -> Result<Self, Self::Error> {
-        Ok(ListOffsetsRequestTopics3 {
+impl From<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics3 {
+    fn from(latest: ListOffsetsRequestTopics5) -> ListOffsetsRequestTopics3 {
+        ListOffsetsRequestTopics3 {
             name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPartitions3 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequestTopicsPartitions5) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ListOffsetsRequestTopicsPartitions",
-                3,
-                "current_leader_epoch",
-            ));
-        }
-        Ok(ListOffsetsRequestTopicsPartitions3 {
+impl From<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPartitions3 {
+    fn from(latest: ListOffsetsRequestTopicsPartitions5) -> ListOffsetsRequestTopicsPartitions3 {
+        log::debug!("Using old api format - ListOffsetsRequestTopicsPartitions3, ignoring field current_leader_epoch");
+        ListOffsetsRequestTopicsPartitions3 {
             partition_index: latest.partition_index,
             timestamp: latest.timestamp,
-        })
+        }
     }
 }
 
-impl TryFrom<ListOffsetsRequest5> for ListOffsetsRequest4 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequest5) -> Result<Self, Self::Error> {
-        Ok(ListOffsetsRequest4 {
+impl From<ListOffsetsRequest5> for ListOffsetsRequest4 {
+    fn from(latest: ListOffsetsRequest5) -> ListOffsetsRequest4 {
+        ListOffsetsRequest4 {
             replica_id: latest.replica_id,
             isolation_level: latest.isolation_level,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics4 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequestTopics5) -> Result<Self, Self::Error> {
-        Ok(ListOffsetsRequestTopics4 {
+impl From<ListOffsetsRequestTopics5> for ListOffsetsRequestTopics4 {
+    fn from(latest: ListOffsetsRequestTopics5) -> ListOffsetsRequestTopics4 {
+        ListOffsetsRequestTopics4 {
             name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPartitions4 {
-    type Error = Error;
-    fn try_from(latest: ListOffsetsRequestTopicsPartitions5) -> Result<Self, Self::Error> {
-        Ok(ListOffsetsRequestTopicsPartitions4 {
+impl From<ListOffsetsRequestTopicsPartitions5> for ListOffsetsRequestTopicsPartitions4 {
+    fn from(latest: ListOffsetsRequestTopicsPartitions5) -> ListOffsetsRequestTopicsPartitions4 {
+        ListOffsetsRequestTopicsPartitions4 {
             partition_index: latest.partition_index,
             current_leader_epoch: latest.current_leader_epoch,
             timestamp: latest.timestamp,
-        })
+        }
     }
 }
 

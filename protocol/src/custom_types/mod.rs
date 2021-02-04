@@ -1,6 +1,7 @@
 use self::record_batch::record_batch_with_size::RecordBatchWithSize;
 
-pub mod optional;
+pub mod nullable_str;
+pub mod nullable_string;
 pub mod record_batch;
 pub mod tag_buffer;
 pub mod unsigned_varint32;
@@ -17,5 +18,4 @@ pub type Int16 = i16;
 pub type Int32 = i32;
 pub type Int64 = i64;
 pub type Float64 = f64;
-pub type NullableString = Option<String>;
 pub type Records = RecordBatchWithSize;

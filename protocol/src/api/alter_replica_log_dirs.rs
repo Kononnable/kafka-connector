@@ -45,7 +45,7 @@ impl ApiCall for AlterReplicaLogDirsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &AlterReplicaLogDirsRequest0::try_from(self)?,
+                &AlterReplicaLogDirsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -138,40 +138,31 @@ pub struct AlterReplicaLogDirsResponseResultsPartitions1 {
     pub error_code: Int16,
 }
 
-impl TryFrom<AlterReplicaLogDirsRequest1> for AlterReplicaLogDirsRequest0 {
-    type Error = Error;
-    fn try_from(latest: AlterReplicaLogDirsRequest1) -> Result<Self, Self::Error> {
-        Ok(AlterReplicaLogDirsRequest0 {
-            dirs: latest
-                .dirs
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+impl From<AlterReplicaLogDirsRequest1> for AlterReplicaLogDirsRequest0 {
+    fn from(latest: AlterReplicaLogDirsRequest1) -> AlterReplicaLogDirsRequest0 {
+        AlterReplicaLogDirsRequest0 {
+            dirs: latest.dirs.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<AlterReplicaLogDirsRequestDirs1> for AlterReplicaLogDirsRequestDirs0 {
-    type Error = Error;
-    fn try_from(latest: AlterReplicaLogDirsRequestDirs1) -> Result<Self, Self::Error> {
-        Ok(AlterReplicaLogDirsRequestDirs0 {
+impl From<AlterReplicaLogDirsRequestDirs1> for AlterReplicaLogDirsRequestDirs0 {
+    fn from(latest: AlterReplicaLogDirsRequestDirs1) -> AlterReplicaLogDirsRequestDirs0 {
+        AlterReplicaLogDirsRequestDirs0 {
             path: latest.path,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<AlterReplicaLogDirsRequestDirsTopics1> for AlterReplicaLogDirsRequestDirsTopics0 {
-    type Error = Error;
-    fn try_from(latest: AlterReplicaLogDirsRequestDirsTopics1) -> Result<Self, Self::Error> {
-        Ok(AlterReplicaLogDirsRequestDirsTopics0 {
+impl From<AlterReplicaLogDirsRequestDirsTopics1> for AlterReplicaLogDirsRequestDirsTopics0 {
+    fn from(
+        latest: AlterReplicaLogDirsRequestDirsTopics1,
+    ) -> AlterReplicaLogDirsRequestDirsTopics0 {
+        AlterReplicaLogDirsRequestDirsTopics0 {
             name: latest.name,
             partitions: latest.partitions,
-        })
+        }
     }
 }
 

@@ -56,62 +56,62 @@ impl ApiCall for FetchRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &FetchRequest0::try_from(self)?,
+                &FetchRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &FetchRequest1::try_from(self)?,
+                &FetchRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &FetchRequest2::try_from(self)?,
+                &FetchRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &FetchRequest3::try_from(self)?,
+                &FetchRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             4 => ToBytes::serialize(
-                &FetchRequest4::try_from(self)?,
+                &FetchRequest4::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             5 => ToBytes::serialize(
-                &FetchRequest5::try_from(self)?,
+                &FetchRequest5::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             6 => ToBytes::serialize(
-                &FetchRequest6::try_from(self)?,
+                &FetchRequest6::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             7 => ToBytes::serialize(
-                &FetchRequest7::try_from(self)?,
+                &FetchRequest7::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             8 => ToBytes::serialize(
-                &FetchRequest8::try_from(self)?,
+                &FetchRequest8::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             9 => ToBytes::serialize(
-                &FetchRequest9::try_from(self)?,
+                &FetchRequest9::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             10 => ToBytes::serialize(
-                &FetchRequest10::try_from(self)?,
+                &FetchRequest10::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             11 => ToBytes::serialize(
-                &FetchRequest11::try_from(self)?,
+                &FetchRequest11::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -212,7 +212,7 @@ pub struct FetchRequest3 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
     pub min_bytes: Int32,
-    pub max_bytes: Optional<Int32>,
+    pub max_bytes: Int32,
     pub topics: Vec<FetchRequestTopics3>,
 }
 
@@ -234,8 +234,8 @@ pub struct FetchRequest4 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
     pub min_bytes: Int32,
-    pub max_bytes: Optional<Int32>,
-    pub isolation_level: Optional<Int8>,
+    pub max_bytes: Int32,
+    pub isolation_level: Int8,
     pub topics: Vec<FetchRequestTopics4>,
 }
 
@@ -257,8 +257,8 @@ pub struct FetchRequest5 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
     pub min_bytes: Int32,
-    pub max_bytes: Optional<Int32>,
-    pub isolation_level: Optional<Int8>,
+    pub max_bytes: Int32,
+    pub isolation_level: Int8,
     pub topics: Vec<FetchRequestTopics5>,
 }
 
@@ -272,7 +272,7 @@ pub struct FetchRequestTopics5 {
 pub struct FetchRequestTopicsPartitions5 {
     pub partition: Int32,
     pub fetch_offset: Int64,
-    pub log_start_offset: Optional<Int64>,
+    pub log_start_offset: Int64,
     pub partition_max_bytes: Int32,
 }
 
@@ -281,8 +281,8 @@ pub struct FetchRequest6 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
     pub min_bytes: Int32,
-    pub max_bytes: Optional<Int32>,
-    pub isolation_level: Optional<Int8>,
+    pub max_bytes: Int32,
+    pub isolation_level: Int8,
     pub topics: Vec<FetchRequestTopics6>,
 }
 
@@ -296,7 +296,7 @@ pub struct FetchRequestTopics6 {
 pub struct FetchRequestTopicsPartitions6 {
     pub partition: Int32,
     pub fetch_offset: Int64,
-    pub log_start_offset: Optional<Int64>,
+    pub log_start_offset: Int64,
     pub partition_max_bytes: Int32,
 }
 
@@ -305,12 +305,12 @@ pub struct FetchRequest7 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
     pub min_bytes: Int32,
-    pub max_bytes: Optional<Int32>,
-    pub isolation_level: Optional<Int8>,
-    pub session_id: Optional<Int32>,
-    pub session_epoch: Optional<Int32>,
+    pub max_bytes: Int32,
+    pub isolation_level: Int8,
+    pub session_id: Int32,
+    pub session_epoch: Int32,
     pub topics: Vec<FetchRequestTopics7>,
-    pub forgotten_topics_data: Optional<Vec<FetchRequestForgottenTopicsData7>>,
+    pub forgotten_topics_data: Vec<FetchRequestForgottenTopicsData7>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -323,7 +323,7 @@ pub struct FetchRequestTopics7 {
 pub struct FetchRequestTopicsPartitions7 {
     pub partition: Int32,
     pub fetch_offset: Int64,
-    pub log_start_offset: Optional<Int64>,
+    pub log_start_offset: Int64,
     pub partition_max_bytes: Int32,
 }
 
@@ -338,12 +338,12 @@ pub struct FetchRequest8 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
     pub min_bytes: Int32,
-    pub max_bytes: Optional<Int32>,
-    pub isolation_level: Optional<Int8>,
-    pub session_id: Optional<Int32>,
-    pub session_epoch: Optional<Int32>,
+    pub max_bytes: Int32,
+    pub isolation_level: Int8,
+    pub session_id: Int32,
+    pub session_epoch: Int32,
     pub topics: Vec<FetchRequestTopics8>,
-    pub forgotten_topics_data: Optional<Vec<FetchRequestForgottenTopicsData8>>,
+    pub forgotten_topics_data: Vec<FetchRequestForgottenTopicsData8>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -356,7 +356,7 @@ pub struct FetchRequestTopics8 {
 pub struct FetchRequestTopicsPartitions8 {
     pub partition: Int32,
     pub fetch_offset: Int64,
-    pub log_start_offset: Optional<Int64>,
+    pub log_start_offset: Int64,
     pub partition_max_bytes: Int32,
 }
 
@@ -371,12 +371,12 @@ pub struct FetchRequest9 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
     pub min_bytes: Int32,
-    pub max_bytes: Optional<Int32>,
-    pub isolation_level: Optional<Int8>,
-    pub session_id: Optional<Int32>,
-    pub session_epoch: Optional<Int32>,
+    pub max_bytes: Int32,
+    pub isolation_level: Int8,
+    pub session_id: Int32,
+    pub session_epoch: Int32,
     pub topics: Vec<FetchRequestTopics9>,
-    pub forgotten_topics_data: Optional<Vec<FetchRequestForgottenTopicsData9>>,
+    pub forgotten_topics_data: Vec<FetchRequestForgottenTopicsData9>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -388,9 +388,9 @@ pub struct FetchRequestTopics9 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions9 {
     pub partition: Int32,
-    pub current_leader_epoch: Optional<Int32>,
+    pub current_leader_epoch: Int32,
     pub fetch_offset: Int64,
-    pub log_start_offset: Optional<Int64>,
+    pub log_start_offset: Int64,
     pub partition_max_bytes: Int32,
 }
 
@@ -405,12 +405,12 @@ pub struct FetchRequest10 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
     pub min_bytes: Int32,
-    pub max_bytes: Optional<Int32>,
-    pub isolation_level: Optional<Int8>,
-    pub session_id: Optional<Int32>,
-    pub session_epoch: Optional<Int32>,
+    pub max_bytes: Int32,
+    pub isolation_level: Int8,
+    pub session_id: Int32,
+    pub session_epoch: Int32,
     pub topics: Vec<FetchRequestTopics10>,
-    pub forgotten_topics_data: Optional<Vec<FetchRequestForgottenTopicsData10>>,
+    pub forgotten_topics_data: Vec<FetchRequestForgottenTopicsData10>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -422,9 +422,9 @@ pub struct FetchRequestTopics10 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions10 {
     pub partition: Int32,
-    pub current_leader_epoch: Optional<Int32>,
+    pub current_leader_epoch: Int32,
     pub fetch_offset: Int64,
-    pub log_start_offset: Optional<Int64>,
+    pub log_start_offset: Int64,
     pub partition_max_bytes: Int32,
 }
 
@@ -439,13 +439,13 @@ pub struct FetchRequest11 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
     pub min_bytes: Int32,
-    pub max_bytes: Optional<Int32>,
-    pub isolation_level: Optional<Int8>,
-    pub session_id: Optional<Int32>,
-    pub session_epoch: Optional<Int32>,
+    pub max_bytes: Int32,
+    pub isolation_level: Int8,
+    pub session_id: Int32,
+    pub session_epoch: Int32,
     pub topics: Vec<FetchRequestTopics11>,
-    pub forgotten_topics_data: Optional<Vec<FetchRequestForgottenTopicsData11>>,
-    pub rack_id: Optional<String>,
+    pub forgotten_topics_data: Vec<FetchRequestForgottenTopicsData11>,
+    pub rack_id: String,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -457,9 +457,9 @@ pub struct FetchRequestTopics11 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions11 {
     pub partition: Int32,
-    pub current_leader_epoch: Optional<Int32>,
+    pub current_leader_epoch: Int32,
     pub fetch_offset: Int64,
-    pub log_start_offset: Optional<Int64>,
+    pub log_start_offset: Int64,
     pub partition_max_bytes: Int32,
 }
 
@@ -474,39 +474,39 @@ pub struct FetchRequest12 {
     pub replica_id: Int32,
     pub max_wait_ms: Int32,
     pub min_bytes: Int32,
-    pub max_bytes: Optional<Int32>,
-    pub isolation_level: Optional<Int8>,
-    pub session_id: Optional<Int32>,
-    pub session_epoch: Optional<Int32>,
+    pub max_bytes: Int32,
+    pub isolation_level: Int8,
+    pub session_id: Int32,
+    pub session_epoch: Int32,
     pub topics: Vec<FetchRequestTopics12>,
-    pub forgotten_topics_data: Optional<Vec<FetchRequestForgottenTopicsData12>>,
-    pub rack_id: Optional<String>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub forgotten_topics_data: Vec<FetchRequestForgottenTopicsData12>,
+    pub rack_id: String,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopics12 {
     pub topic: String,
     pub partitions: Vec<FetchRequestTopicsPartitions12>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestTopicsPartitions12 {
     pub partition: Int32,
-    pub current_leader_epoch: Optional<Int32>,
+    pub current_leader_epoch: Int32,
     pub fetch_offset: Int64,
-    pub last_fetched_epoch: Optional<Int32>,
-    pub log_start_offset: Optional<Int64>,
+    pub last_fetched_epoch: Int32,
+    pub log_start_offset: Int64,
     pub partition_max_bytes: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct FetchRequestForgottenTopicsData12 {
     pub topic: String,
     pub partitions: Vec<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -530,7 +530,7 @@ pub struct FetchResponseResponsesPartitionResponses0 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse1 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub responses: Vec<FetchResponseResponses1>,
 }
 
@@ -550,7 +550,7 @@ pub struct FetchResponseResponsesPartitionResponses1 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse2 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub responses: Vec<FetchResponseResponses2>,
 }
 
@@ -570,7 +570,7 @@ pub struct FetchResponseResponsesPartitionResponses2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub responses: Vec<FetchResponseResponses3>,
 }
 
@@ -590,7 +590,7 @@ pub struct FetchResponseResponsesPartitionResponses3 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse4 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub responses: Vec<FetchResponseResponses4>,
 }
 
@@ -605,9 +605,9 @@ pub struct FetchResponseResponsesPartitionResponses4 {
     pub partition: Int32,
     pub error_code: Int16,
     pub high_watermark: Int64,
-    pub last_stable_offset: Optional<Int64>,
+    pub last_stable_offset: Option<Int64>,
     pub aborted_transactions:
-        Optional<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions4>>,
+        Option<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions4>>,
     pub record_set: Records,
 }
 
@@ -619,7 +619,7 @@ pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions4 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse5 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub responses: Vec<FetchResponseResponses5>,
 }
 
@@ -634,10 +634,10 @@ pub struct FetchResponseResponsesPartitionResponses5 {
     pub partition: Int32,
     pub error_code: Int16,
     pub high_watermark: Int64,
-    pub last_stable_offset: Optional<Int64>,
-    pub log_start_offset: Optional<Int64>,
+    pub last_stable_offset: Option<Int64>,
+    pub log_start_offset: Option<Int64>,
     pub aborted_transactions:
-        Optional<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions5>>,
+        Option<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions5>>,
     pub record_set: Records,
 }
 
@@ -649,7 +649,7 @@ pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions5 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse6 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub responses: Vec<FetchResponseResponses6>,
 }
 
@@ -664,10 +664,10 @@ pub struct FetchResponseResponsesPartitionResponses6 {
     pub partition: Int32,
     pub error_code: Int16,
     pub high_watermark: Int64,
-    pub last_stable_offset: Optional<Int64>,
-    pub log_start_offset: Optional<Int64>,
+    pub last_stable_offset: Option<Int64>,
+    pub log_start_offset: Option<Int64>,
     pub aborted_transactions:
-        Optional<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions6>>,
+        Option<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions6>>,
     pub record_set: Records,
 }
 
@@ -679,9 +679,9 @@ pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions6 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse7 {
-    pub throttle_time_ms: Optional<Int32>,
-    pub error_code: Optional<Int16>,
-    pub session_id: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
+    pub error_code: Option<Int16>,
+    pub session_id: Option<Int32>,
     pub responses: Vec<FetchResponseResponses7>,
 }
 
@@ -696,10 +696,10 @@ pub struct FetchResponseResponsesPartitionResponses7 {
     pub partition: Int32,
     pub error_code: Int16,
     pub high_watermark: Int64,
-    pub last_stable_offset: Optional<Int64>,
-    pub log_start_offset: Optional<Int64>,
+    pub last_stable_offset: Option<Int64>,
+    pub log_start_offset: Option<Int64>,
     pub aborted_transactions:
-        Optional<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions7>>,
+        Option<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions7>>,
     pub record_set: Records,
 }
 
@@ -711,9 +711,9 @@ pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions7 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse8 {
-    pub throttle_time_ms: Optional<Int32>,
-    pub error_code: Optional<Int16>,
-    pub session_id: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
+    pub error_code: Option<Int16>,
+    pub session_id: Option<Int32>,
     pub responses: Vec<FetchResponseResponses8>,
 }
 
@@ -728,10 +728,10 @@ pub struct FetchResponseResponsesPartitionResponses8 {
     pub partition: Int32,
     pub error_code: Int16,
     pub high_watermark: Int64,
-    pub last_stable_offset: Optional<Int64>,
-    pub log_start_offset: Optional<Int64>,
+    pub last_stable_offset: Option<Int64>,
+    pub log_start_offset: Option<Int64>,
     pub aborted_transactions:
-        Optional<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions8>>,
+        Option<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions8>>,
     pub record_set: Records,
 }
 
@@ -743,9 +743,9 @@ pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions8 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse9 {
-    pub throttle_time_ms: Optional<Int32>,
-    pub error_code: Optional<Int16>,
-    pub session_id: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
+    pub error_code: Option<Int16>,
+    pub session_id: Option<Int32>,
     pub responses: Vec<FetchResponseResponses9>,
 }
 
@@ -760,10 +760,10 @@ pub struct FetchResponseResponsesPartitionResponses9 {
     pub partition: Int32,
     pub error_code: Int16,
     pub high_watermark: Int64,
-    pub last_stable_offset: Optional<Int64>,
-    pub log_start_offset: Optional<Int64>,
+    pub last_stable_offset: Option<Int64>,
+    pub log_start_offset: Option<Int64>,
     pub aborted_transactions:
-        Optional<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions9>>,
+        Option<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions9>>,
     pub record_set: Records,
 }
 
@@ -775,9 +775,9 @@ pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions9 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse10 {
-    pub throttle_time_ms: Optional<Int32>,
-    pub error_code: Optional<Int16>,
-    pub session_id: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
+    pub error_code: Option<Int16>,
+    pub session_id: Option<Int32>,
     pub responses: Vec<FetchResponseResponses10>,
 }
 
@@ -792,10 +792,10 @@ pub struct FetchResponseResponsesPartitionResponses10 {
     pub partition: Int32,
     pub error_code: Int16,
     pub high_watermark: Int64,
-    pub last_stable_offset: Optional<Int64>,
-    pub log_start_offset: Optional<Int64>,
+    pub last_stable_offset: Option<Int64>,
+    pub log_start_offset: Option<Int64>,
     pub aborted_transactions:
-        Optional<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions10>>,
+        Option<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions10>>,
     pub record_set: Records,
 }
 
@@ -807,9 +807,9 @@ pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions10 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse11 {
-    pub throttle_time_ms: Optional<Int32>,
-    pub error_code: Optional<Int16>,
-    pub session_id: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
+    pub error_code: Option<Int16>,
+    pub session_id: Option<Int32>,
     pub responses: Vec<FetchResponseResponses11>,
 }
 
@@ -824,11 +824,11 @@ pub struct FetchResponseResponsesPartitionResponses11 {
     pub partition: Int32,
     pub error_code: Int16,
     pub high_watermark: Int64,
-    pub last_stable_offset: Optional<Int64>,
-    pub log_start_offset: Optional<Int64>,
+    pub last_stable_offset: Option<Int64>,
+    pub log_start_offset: Option<Int64>,
     pub aborted_transactions:
-        Optional<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions11>>,
-    pub preferred_read_replica: Optional<Int32>,
+        Option<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions11>>,
+    pub preferred_read_replica: Option<Int32>,
     pub record_set: Records,
 }
 
@@ -840,18 +840,18 @@ pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions11 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponse12 {
-    pub throttle_time_ms: Optional<Int32>,
-    pub error_code: Optional<Int16>,
-    pub session_id: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
+    pub error_code: Option<Int16>,
+    pub session_id: Option<Int32>,
     pub responses: Vec<FetchResponseResponses12>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponses12 {
     pub topic: String,
     pub partition_responses: Vec<FetchResponseResponsesPartitionResponses12>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -859,567 +859,329 @@ pub struct FetchResponseResponsesPartitionResponses12 {
     pub partition: Int32,
     pub error_code: Int16,
     pub high_watermark: Int64,
-    pub last_stable_offset: Optional<Int64>,
-    pub log_start_offset: Optional<Int64>,
+    pub last_stable_offset: Option<Int64>,
+    pub log_start_offset: Option<Int64>,
     pub aborted_transactions:
-        Optional<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions12>>,
-    pub preferred_read_replica: Optional<Int32>,
+        Option<Vec<FetchResponseResponsesPartitionResponsesAbortedTransactions12>>,
+    pub preferred_read_replica: Option<Int32>,
     pub record_set: Records,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions12 {
     pub producer_id: Int64,
     pub first_offset: Int64,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<FetchRequest12> for FetchRequest0 {
-    type Error = Error;
-    fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        if latest.max_bytes.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 0, "max_bytes"));
-        }
-        if latest.isolation_level.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 0, "isolation_level"));
-        }
-        if latest.session_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 0, "session_id"));
-        }
-        if latest.session_epoch.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 0, "session_epoch"));
-        }
-        if latest.forgotten_topics_data.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequest",
-                0,
-                "forgotten_topics_data",
-            ));
-        }
-        Ok(FetchRequest0 {
+impl From<FetchRequest12> for FetchRequest0 {
+    fn from(latest: FetchRequest12) -> FetchRequest0 {
+        log::debug!("Using old api format - FetchRequest0, ignoring field max_bytes");
+        log::debug!("Using old api format - FetchRequest0, ignoring field isolation_level");
+        log::debug!("Using old api format - FetchRequest0, ignoring field session_id");
+        log::debug!("Using old api format - FetchRequest0, ignoring field session_epoch");
+        log::debug!("Using old api format - FetchRequest0, ignoring field forgotten_topics_data");
+        FetchRequest0 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopics12> for FetchRequestTopics0 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestTopics0 {
+impl From<FetchRequestTopics12> for FetchRequestTopics0 {
+    fn from(latest: FetchRequestTopics12) -> FetchRequestTopics0 {
+        FetchRequestTopics0 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions0 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopicsPartitions12) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                0,
-                "current_leader_epoch",
-            ));
-        }
-        if latest.last_fetched_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                0,
-                "last_fetched_epoch",
-            ));
-        }
-        if latest.log_start_offset.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                0,
-                "log_start_offset",
-            ));
-        }
-        Ok(FetchRequestTopicsPartitions0 {
+impl From<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions0 {
+    fn from(latest: FetchRequestTopicsPartitions12) -> FetchRequestTopicsPartitions0 {
+        log::debug!("Using old api format - FetchRequestTopicsPartitions0, ignoring field current_leader_epoch");
+        log::debug!("Using old api format - FetchRequestTopicsPartitions0, ignoring field last_fetched_epoch");
+        log::debug!(
+            "Using old api format - FetchRequestTopicsPartitions0, ignoring field log_start_offset"
+        );
+        FetchRequestTopicsPartitions0 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
             partition_max_bytes: latest.partition_max_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequest12> for FetchRequest1 {
-    type Error = Error;
-    fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        if latest.max_bytes.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 1, "max_bytes"));
-        }
-        if latest.isolation_level.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 1, "isolation_level"));
-        }
-        if latest.session_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 1, "session_id"));
-        }
-        if latest.session_epoch.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 1, "session_epoch"));
-        }
-        if latest.forgotten_topics_data.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequest",
-                1,
-                "forgotten_topics_data",
-            ));
-        }
-        Ok(FetchRequest1 {
+impl From<FetchRequest12> for FetchRequest1 {
+    fn from(latest: FetchRequest12) -> FetchRequest1 {
+        log::debug!("Using old api format - FetchRequest1, ignoring field max_bytes");
+        log::debug!("Using old api format - FetchRequest1, ignoring field isolation_level");
+        log::debug!("Using old api format - FetchRequest1, ignoring field session_id");
+        log::debug!("Using old api format - FetchRequest1, ignoring field session_epoch");
+        log::debug!("Using old api format - FetchRequest1, ignoring field forgotten_topics_data");
+        FetchRequest1 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopics12> for FetchRequestTopics1 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestTopics1 {
+impl From<FetchRequestTopics12> for FetchRequestTopics1 {
+    fn from(latest: FetchRequestTopics12) -> FetchRequestTopics1 {
+        FetchRequestTopics1 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions1 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopicsPartitions12) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                1,
-                "current_leader_epoch",
-            ));
-        }
-        if latest.last_fetched_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                1,
-                "last_fetched_epoch",
-            ));
-        }
-        if latest.log_start_offset.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                1,
-                "log_start_offset",
-            ));
-        }
-        Ok(FetchRequestTopicsPartitions1 {
+impl From<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions1 {
+    fn from(latest: FetchRequestTopicsPartitions12) -> FetchRequestTopicsPartitions1 {
+        log::debug!("Using old api format - FetchRequestTopicsPartitions1, ignoring field current_leader_epoch");
+        log::debug!("Using old api format - FetchRequestTopicsPartitions1, ignoring field last_fetched_epoch");
+        log::debug!(
+            "Using old api format - FetchRequestTopicsPartitions1, ignoring field log_start_offset"
+        );
+        FetchRequestTopicsPartitions1 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
             partition_max_bytes: latest.partition_max_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequest12> for FetchRequest2 {
-    type Error = Error;
-    fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        if latest.max_bytes.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 2, "max_bytes"));
-        }
-        if latest.isolation_level.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 2, "isolation_level"));
-        }
-        if latest.session_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 2, "session_id"));
-        }
-        if latest.session_epoch.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 2, "session_epoch"));
-        }
-        if latest.forgotten_topics_data.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequest",
-                2,
-                "forgotten_topics_data",
-            ));
-        }
-        Ok(FetchRequest2 {
+impl From<FetchRequest12> for FetchRequest2 {
+    fn from(latest: FetchRequest12) -> FetchRequest2 {
+        log::debug!("Using old api format - FetchRequest2, ignoring field max_bytes");
+        log::debug!("Using old api format - FetchRequest2, ignoring field isolation_level");
+        log::debug!("Using old api format - FetchRequest2, ignoring field session_id");
+        log::debug!("Using old api format - FetchRequest2, ignoring field session_epoch");
+        log::debug!("Using old api format - FetchRequest2, ignoring field forgotten_topics_data");
+        FetchRequest2 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopics12> for FetchRequestTopics2 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestTopics2 {
+impl From<FetchRequestTopics12> for FetchRequestTopics2 {
+    fn from(latest: FetchRequestTopics12) -> FetchRequestTopics2 {
+        FetchRequestTopics2 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions2 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopicsPartitions12) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                2,
-                "current_leader_epoch",
-            ));
-        }
-        if latest.last_fetched_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                2,
-                "last_fetched_epoch",
-            ));
-        }
-        if latest.log_start_offset.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                2,
-                "log_start_offset",
-            ));
-        }
-        Ok(FetchRequestTopicsPartitions2 {
+impl From<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions2 {
+    fn from(latest: FetchRequestTopicsPartitions12) -> FetchRequestTopicsPartitions2 {
+        log::debug!("Using old api format - FetchRequestTopicsPartitions2, ignoring field current_leader_epoch");
+        log::debug!("Using old api format - FetchRequestTopicsPartitions2, ignoring field last_fetched_epoch");
+        log::debug!(
+            "Using old api format - FetchRequestTopicsPartitions2, ignoring field log_start_offset"
+        );
+        FetchRequestTopicsPartitions2 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
             partition_max_bytes: latest.partition_max_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequest12> for FetchRequest3 {
-    type Error = Error;
-    fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        if latest.isolation_level.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 3, "isolation_level"));
-        }
-        if latest.session_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 3, "session_id"));
-        }
-        if latest.session_epoch.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 3, "session_epoch"));
-        }
-        if latest.forgotten_topics_data.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequest",
-                3,
-                "forgotten_topics_data",
-            ));
-        }
-        Ok(FetchRequest3 {
+impl From<FetchRequest12> for FetchRequest3 {
+    fn from(latest: FetchRequest12) -> FetchRequest3 {
+        log::debug!("Using old api format - FetchRequest3, ignoring field isolation_level");
+        log::debug!("Using old api format - FetchRequest3, ignoring field session_id");
+        log::debug!("Using old api format - FetchRequest3, ignoring field session_epoch");
+        log::debug!("Using old api format - FetchRequest3, ignoring field forgotten_topics_data");
+        FetchRequest3 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
             max_bytes: latest.max_bytes,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopics12> for FetchRequestTopics3 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestTopics3 {
+impl From<FetchRequestTopics12> for FetchRequestTopics3 {
+    fn from(latest: FetchRequestTopics12) -> FetchRequestTopics3 {
+        FetchRequestTopics3 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions3 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopicsPartitions12) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                3,
-                "current_leader_epoch",
-            ));
-        }
-        if latest.last_fetched_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                3,
-                "last_fetched_epoch",
-            ));
-        }
-        if latest.log_start_offset.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                3,
-                "log_start_offset",
-            ));
-        }
-        Ok(FetchRequestTopicsPartitions3 {
+impl From<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions3 {
+    fn from(latest: FetchRequestTopicsPartitions12) -> FetchRequestTopicsPartitions3 {
+        log::debug!("Using old api format - FetchRequestTopicsPartitions3, ignoring field current_leader_epoch");
+        log::debug!("Using old api format - FetchRequestTopicsPartitions3, ignoring field last_fetched_epoch");
+        log::debug!(
+            "Using old api format - FetchRequestTopicsPartitions3, ignoring field log_start_offset"
+        );
+        FetchRequestTopicsPartitions3 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
             partition_max_bytes: latest.partition_max_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequest12> for FetchRequest4 {
-    type Error = Error;
-    fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        if latest.session_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 4, "session_id"));
-        }
-        if latest.session_epoch.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 4, "session_epoch"));
-        }
-        if latest.forgotten_topics_data.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequest",
-                4,
-                "forgotten_topics_data",
-            ));
-        }
-        Ok(FetchRequest4 {
+impl From<FetchRequest12> for FetchRequest4 {
+    fn from(latest: FetchRequest12) -> FetchRequest4 {
+        log::debug!("Using old api format - FetchRequest4, ignoring field session_id");
+        log::debug!("Using old api format - FetchRequest4, ignoring field session_epoch");
+        log::debug!("Using old api format - FetchRequest4, ignoring field forgotten_topics_data");
+        FetchRequest4 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
             max_bytes: latest.max_bytes,
             isolation_level: latest.isolation_level,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopics12> for FetchRequestTopics4 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestTopics4 {
+impl From<FetchRequestTopics12> for FetchRequestTopics4 {
+    fn from(latest: FetchRequestTopics12) -> FetchRequestTopics4 {
+        FetchRequestTopics4 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions4 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopicsPartitions12) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                4,
-                "current_leader_epoch",
-            ));
-        }
-        if latest.last_fetched_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                4,
-                "last_fetched_epoch",
-            ));
-        }
-        if latest.log_start_offset.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                4,
-                "log_start_offset",
-            ));
-        }
-        Ok(FetchRequestTopicsPartitions4 {
+impl From<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions4 {
+    fn from(latest: FetchRequestTopicsPartitions12) -> FetchRequestTopicsPartitions4 {
+        log::debug!("Using old api format - FetchRequestTopicsPartitions4, ignoring field current_leader_epoch");
+        log::debug!("Using old api format - FetchRequestTopicsPartitions4, ignoring field last_fetched_epoch");
+        log::debug!(
+            "Using old api format - FetchRequestTopicsPartitions4, ignoring field log_start_offset"
+        );
+        FetchRequestTopicsPartitions4 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
             partition_max_bytes: latest.partition_max_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequest12> for FetchRequest5 {
-    type Error = Error;
-    fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        if latest.session_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 5, "session_id"));
-        }
-        if latest.session_epoch.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 5, "session_epoch"));
-        }
-        if latest.forgotten_topics_data.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequest",
-                5,
-                "forgotten_topics_data",
-            ));
-        }
-        Ok(FetchRequest5 {
+impl From<FetchRequest12> for FetchRequest5 {
+    fn from(latest: FetchRequest12) -> FetchRequest5 {
+        log::debug!("Using old api format - FetchRequest5, ignoring field session_id");
+        log::debug!("Using old api format - FetchRequest5, ignoring field session_epoch");
+        log::debug!("Using old api format - FetchRequest5, ignoring field forgotten_topics_data");
+        FetchRequest5 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
             max_bytes: latest.max_bytes,
             isolation_level: latest.isolation_level,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopics12> for FetchRequestTopics5 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestTopics5 {
+impl From<FetchRequestTopics12> for FetchRequestTopics5 {
+    fn from(latest: FetchRequestTopics12) -> FetchRequestTopics5 {
+        FetchRequestTopics5 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions5 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopicsPartitions12) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                5,
-                "current_leader_epoch",
-            ));
-        }
-        if latest.last_fetched_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                5,
-                "last_fetched_epoch",
-            ));
-        }
-        Ok(FetchRequestTopicsPartitions5 {
+impl From<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions5 {
+    fn from(latest: FetchRequestTopicsPartitions12) -> FetchRequestTopicsPartitions5 {
+        log::debug!("Using old api format - FetchRequestTopicsPartitions5, ignoring field current_leader_epoch");
+        log::debug!("Using old api format - FetchRequestTopicsPartitions5, ignoring field last_fetched_epoch");
+        FetchRequestTopicsPartitions5 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
             log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequest12> for FetchRequest6 {
-    type Error = Error;
-    fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        if latest.session_id.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 6, "session_id"));
-        }
-        if latest.session_epoch.is_some() {
-            return Err(Error::OldKafkaVersion("FetchRequest", 6, "session_epoch"));
-        }
-        if latest.forgotten_topics_data.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequest",
-                6,
-                "forgotten_topics_data",
-            ));
-        }
-        Ok(FetchRequest6 {
+impl From<FetchRequest12> for FetchRequest6 {
+    fn from(latest: FetchRequest12) -> FetchRequest6 {
+        log::debug!("Using old api format - FetchRequest6, ignoring field session_id");
+        log::debug!("Using old api format - FetchRequest6, ignoring field session_epoch");
+        log::debug!("Using old api format - FetchRequest6, ignoring field forgotten_topics_data");
+        FetchRequest6 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
             max_bytes: latest.max_bytes,
             isolation_level: latest.isolation_level,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopics12> for FetchRequestTopics6 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestTopics6 {
+impl From<FetchRequestTopics12> for FetchRequestTopics6 {
+    fn from(latest: FetchRequestTopics12) -> FetchRequestTopics6 {
+        FetchRequestTopics6 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions6 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopicsPartitions12) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                6,
-                "current_leader_epoch",
-            ));
-        }
-        if latest.last_fetched_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                6,
-                "last_fetched_epoch",
-            ));
-        }
-        Ok(FetchRequestTopicsPartitions6 {
+impl From<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions6 {
+    fn from(latest: FetchRequestTopicsPartitions12) -> FetchRequestTopicsPartitions6 {
+        log::debug!("Using old api format - FetchRequestTopicsPartitions6, ignoring field current_leader_epoch");
+        log::debug!("Using old api format - FetchRequestTopicsPartitions6, ignoring field last_fetched_epoch");
+        FetchRequestTopicsPartitions6 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
             log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequest12> for FetchRequest7 {
-    type Error = Error;
-    fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        Ok(FetchRequest7 {
+impl From<FetchRequest12> for FetchRequest7 {
+    fn from(latest: FetchRequest12) -> FetchRequest7 {
+        FetchRequest7 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
@@ -1427,77 +1189,54 @@ impl TryFrom<FetchRequest12> for FetchRequest7 {
             isolation_level: latest.isolation_level,
             session_id: latest.session_id,
             session_epoch: latest.session_epoch,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             forgotten_topics_data: latest
                 .forgotten_topics_data
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
-        })
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopics12> for FetchRequestTopics7 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestTopics7 {
+impl From<FetchRequestTopics12> for FetchRequestTopics7 {
+    fn from(latest: FetchRequestTopics12) -> FetchRequestTopics7 {
+        FetchRequestTopics7 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions7 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopicsPartitions12) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                7,
-                "current_leader_epoch",
-            ));
-        }
-        if latest.last_fetched_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                7,
-                "last_fetched_epoch",
-            ));
-        }
-        Ok(FetchRequestTopicsPartitions7 {
+impl From<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions7 {
+    fn from(latest: FetchRequestTopicsPartitions12) -> FetchRequestTopicsPartitions7 {
+        log::debug!("Using old api format - FetchRequestTopicsPartitions7, ignoring field current_leader_epoch");
+        log::debug!("Using old api format - FetchRequestTopicsPartitions7, ignoring field last_fetched_epoch");
+        FetchRequestTopicsPartitions7 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
             log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData7 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestForgottenTopicsData7 {
+impl From<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData7 {
+    fn from(latest: FetchRequestForgottenTopicsData12) -> FetchRequestForgottenTopicsData7 {
+        FetchRequestForgottenTopicsData7 {
             topic: latest.topic,
             partitions: latest.partitions,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequest12> for FetchRequest8 {
-    type Error = Error;
-    fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        Ok(FetchRequest8 {
+impl From<FetchRequest12> for FetchRequest8 {
+    fn from(latest: FetchRequest12) -> FetchRequest8 {
+        FetchRequest8 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
@@ -1505,77 +1244,54 @@ impl TryFrom<FetchRequest12> for FetchRequest8 {
             isolation_level: latest.isolation_level,
             session_id: latest.session_id,
             session_epoch: latest.session_epoch,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             forgotten_topics_data: latest
                 .forgotten_topics_data
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
-        })
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopics12> for FetchRequestTopics8 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestTopics8 {
+impl From<FetchRequestTopics12> for FetchRequestTopics8 {
+    fn from(latest: FetchRequestTopics12) -> FetchRequestTopics8 {
+        FetchRequestTopics8 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions8 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopicsPartitions12) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                8,
-                "current_leader_epoch",
-            ));
-        }
-        if latest.last_fetched_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                8,
-                "last_fetched_epoch",
-            ));
-        }
-        Ok(FetchRequestTopicsPartitions8 {
+impl From<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions8 {
+    fn from(latest: FetchRequestTopicsPartitions12) -> FetchRequestTopicsPartitions8 {
+        log::debug!("Using old api format - FetchRequestTopicsPartitions8, ignoring field current_leader_epoch");
+        log::debug!("Using old api format - FetchRequestTopicsPartitions8, ignoring field last_fetched_epoch");
+        FetchRequestTopicsPartitions8 {
             partition: latest.partition,
             fetch_offset: latest.fetch_offset,
             log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData8 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestForgottenTopicsData8 {
+impl From<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData8 {
+    fn from(latest: FetchRequestForgottenTopicsData12) -> FetchRequestForgottenTopicsData8 {
+        FetchRequestForgottenTopicsData8 {
             topic: latest.topic,
             partitions: latest.partitions,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequest12> for FetchRequest9 {
-    type Error = Error;
-    fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        Ok(FetchRequest9 {
+impl From<FetchRequest12> for FetchRequest9 {
+    fn from(latest: FetchRequest12) -> FetchRequest9 {
+        FetchRequest9 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
@@ -1583,71 +1299,54 @@ impl TryFrom<FetchRequest12> for FetchRequest9 {
             isolation_level: latest.isolation_level,
             session_id: latest.session_id,
             session_epoch: latest.session_epoch,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             forgotten_topics_data: latest
                 .forgotten_topics_data
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
-        })
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopics12> for FetchRequestTopics9 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestTopics9 {
+impl From<FetchRequestTopics12> for FetchRequestTopics9 {
+    fn from(latest: FetchRequestTopics12) -> FetchRequestTopics9 {
+        FetchRequestTopics9 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions9 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopicsPartitions12) -> Result<Self, Self::Error> {
-        if latest.last_fetched_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                9,
-                "last_fetched_epoch",
-            ));
-        }
-        Ok(FetchRequestTopicsPartitions9 {
+impl From<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions9 {
+    fn from(latest: FetchRequestTopicsPartitions12) -> FetchRequestTopicsPartitions9 {
+        log::debug!("Using old api format - FetchRequestTopicsPartitions9, ignoring field last_fetched_epoch");
+        FetchRequestTopicsPartitions9 {
             partition: latest.partition,
             current_leader_epoch: latest.current_leader_epoch,
             fetch_offset: latest.fetch_offset,
             log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData9 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestForgottenTopicsData9 {
+impl From<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData9 {
+    fn from(latest: FetchRequestForgottenTopicsData12) -> FetchRequestForgottenTopicsData9 {
+        FetchRequestForgottenTopicsData9 {
             topic: latest.topic,
             partitions: latest.partitions,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequest12> for FetchRequest10 {
-    type Error = Error;
-    fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        Ok(FetchRequest10 {
+impl From<FetchRequest12> for FetchRequest10 {
+    fn from(latest: FetchRequest12) -> FetchRequest10 {
+        FetchRequest10 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
@@ -1655,71 +1354,54 @@ impl TryFrom<FetchRequest12> for FetchRequest10 {
             isolation_level: latest.isolation_level,
             session_id: latest.session_id,
             session_epoch: latest.session_epoch,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             forgotten_topics_data: latest
                 .forgotten_topics_data
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
-        })
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopics12> for FetchRequestTopics10 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestTopics10 {
+impl From<FetchRequestTopics12> for FetchRequestTopics10 {
+    fn from(latest: FetchRequestTopics12) -> FetchRequestTopics10 {
+        FetchRequestTopics10 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions10 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopicsPartitions12) -> Result<Self, Self::Error> {
-        if latest.last_fetched_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                10,
-                "last_fetched_epoch",
-            ));
-        }
-        Ok(FetchRequestTopicsPartitions10 {
+impl From<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions10 {
+    fn from(latest: FetchRequestTopicsPartitions12) -> FetchRequestTopicsPartitions10 {
+        log::debug!("Using old api format - FetchRequestTopicsPartitions10, ignoring field last_fetched_epoch");
+        FetchRequestTopicsPartitions10 {
             partition: latest.partition,
             current_leader_epoch: latest.current_leader_epoch,
             fetch_offset: latest.fetch_offset,
             log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData10 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestForgottenTopicsData10 {
+impl From<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData10 {
+    fn from(latest: FetchRequestForgottenTopicsData12) -> FetchRequestForgottenTopicsData10 {
+        FetchRequestForgottenTopicsData10 {
             topic: latest.topic,
             partitions: latest.partitions,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequest12> for FetchRequest11 {
-    type Error = Error;
-    fn try_from(latest: FetchRequest12) -> Result<Self, Self::Error> {
-        Ok(FetchRequest11 {
+impl From<FetchRequest12> for FetchRequest11 {
+    fn from(latest: FetchRequest12) -> FetchRequest11 {
+        FetchRequest11 {
             replica_id: latest.replica_id,
             max_wait_ms: latest.max_wait_ms,
             min_bytes: latest.min_bytes,
@@ -1727,65 +1409,49 @@ impl TryFrom<FetchRequest12> for FetchRequest11 {
             isolation_level: latest.isolation_level,
             session_id: latest.session_id,
             session_epoch: latest.session_epoch,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             forgotten_topics_data: latest
                 .forgotten_topics_data
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
             rack_id: latest.rack_id,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopics12> for FetchRequestTopics11 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopics12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestTopics11 {
+impl From<FetchRequestTopics12> for FetchRequestTopics11 {
+    fn from(latest: FetchRequestTopics12) -> FetchRequestTopics11 {
+        FetchRequestTopics11 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions11 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestTopicsPartitions12) -> Result<Self, Self::Error> {
-        if latest.last_fetched_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FetchRequestTopicsPartitions",
-                11,
-                "last_fetched_epoch",
-            ));
-        }
-        Ok(FetchRequestTopicsPartitions11 {
+impl From<FetchRequestTopicsPartitions12> for FetchRequestTopicsPartitions11 {
+    fn from(latest: FetchRequestTopicsPartitions12) -> FetchRequestTopicsPartitions11 {
+        log::debug!("Using old api format - FetchRequestTopicsPartitions11, ignoring field last_fetched_epoch");
+        FetchRequestTopicsPartitions11 {
             partition: latest.partition,
             current_leader_epoch: latest.current_leader_epoch,
             fetch_offset: latest.fetch_offset,
             log_start_offset: latest.log_start_offset,
             partition_max_bytes: latest.partition_max_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData11 {
-    type Error = Error;
-    fn try_from(latest: FetchRequestForgottenTopicsData12) -> Result<Self, Self::Error> {
-        Ok(FetchRequestForgottenTopicsData11 {
+impl From<FetchRequestForgottenTopicsData12> for FetchRequestForgottenTopicsData11 {
+    fn from(latest: FetchRequestForgottenTopicsData12) -> FetchRequestForgottenTopicsData11 {
+        FetchRequestForgottenTopicsData11 {
             topic: latest.topic,
             partitions: latest.partitions,
-        })
+        }
     }
 }
 

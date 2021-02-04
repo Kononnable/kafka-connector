@@ -47,17 +47,17 @@ impl ApiCall for CreatePartitionsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &CreatePartitionsRequest0::try_from(self)?,
+                &CreatePartitionsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &CreatePartitionsRequest1::try_from(self)?,
+                &CreatePartitionsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &CreatePartitionsRequest2::try_from(self)?,
+                &CreatePartitionsRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -127,7 +127,7 @@ pub struct CreatePartitionsRequest2 {
     pub topics: Vec<CreatePartitionsRequestTopics2>,
     pub timeout_ms: Int32,
     pub validate_only: Boolean,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -135,13 +135,13 @@ pub struct CreatePartitionsRequestTopics2 {
     pub name: String,
     pub count: Int32,
     pub assignments: Vec<CreatePartitionsRequestTopicsAssignments2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreatePartitionsRequestTopicsAssignments2 {
     pub broker_ids: Vec<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -149,7 +149,7 @@ pub struct CreatePartitionsRequest3 {
     pub topics: Vec<CreatePartitionsRequestTopics3>,
     pub timeout_ms: Int32,
     pub validate_only: Boolean,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -157,13 +157,13 @@ pub struct CreatePartitionsRequestTopics3 {
     pub name: String,
     pub count: Int32,
     pub assignments: Vec<CreatePartitionsRequestTopicsAssignments3>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreatePartitionsRequestTopicsAssignments3 {
     pub broker_ids: Vec<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -196,7 +196,7 @@ pub struct CreatePartitionsResponseResults1 {
 pub struct CreatePartitionsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreatePartitionsResponseResults2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -204,14 +204,14 @@ pub struct CreatePartitionsResponseResults2 {
     pub name: String,
     pub error_code: Int16,
     pub error_message: NullableString,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreatePartitionsResponse3 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreatePartitionsResponseResults3>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -219,132 +219,111 @@ pub struct CreatePartitionsResponseResults3 {
     pub name: String,
     pub error_code: Int16,
     pub error_message: NullableString,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest0 {
-    type Error = Error;
-    fn try_from(latest: CreatePartitionsRequest3) -> Result<Self, Self::Error> {
-        Ok(CreatePartitionsRequest0 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<CreatePartitionsRequest3> for CreatePartitionsRequest0 {
+    fn from(latest: CreatePartitionsRequest3) -> CreatePartitionsRequest0 {
+        CreatePartitionsRequest0 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
-        })
+        }
     }
 }
 
-impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics0 {
-    type Error = Error;
-    fn try_from(latest: CreatePartitionsRequestTopics3) -> Result<Self, Self::Error> {
-        Ok(CreatePartitionsRequestTopics0 {
+impl From<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics0 {
+    fn from(latest: CreatePartitionsRequestTopics3) -> CreatePartitionsRequestTopics0 {
+        CreatePartitionsRequestTopics0 {
             name: latest.name,
             count: latest.count,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
-    for CreatePartitionsRequestTopicsAssignments0
-{
-    type Error = Error;
-    fn try_from(latest: CreatePartitionsRequestTopicsAssignments3) -> Result<Self, Self::Error> {
-        Ok(CreatePartitionsRequestTopicsAssignments0 {
+impl From<CreatePartitionsRequestTopicsAssignments3> for CreatePartitionsRequestTopicsAssignments0 {
+    fn from(
+        latest: CreatePartitionsRequestTopicsAssignments3,
+    ) -> CreatePartitionsRequestTopicsAssignments0 {
+        CreatePartitionsRequestTopicsAssignments0 {
             broker_ids: latest.broker_ids,
-        })
+        }
     }
 }
 
-impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest1 {
-    type Error = Error;
-    fn try_from(latest: CreatePartitionsRequest3) -> Result<Self, Self::Error> {
-        Ok(CreatePartitionsRequest1 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<CreatePartitionsRequest3> for CreatePartitionsRequest1 {
+    fn from(latest: CreatePartitionsRequest3) -> CreatePartitionsRequest1 {
+        CreatePartitionsRequest1 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
-        })
+        }
     }
 }
 
-impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics1 {
-    type Error = Error;
-    fn try_from(latest: CreatePartitionsRequestTopics3) -> Result<Self, Self::Error> {
-        Ok(CreatePartitionsRequestTopics1 {
+impl From<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics1 {
+    fn from(latest: CreatePartitionsRequestTopics3) -> CreatePartitionsRequestTopics1 {
+        CreatePartitionsRequestTopics1 {
             name: latest.name,
             count: latest.count,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
-    for CreatePartitionsRequestTopicsAssignments1
-{
-    type Error = Error;
-    fn try_from(latest: CreatePartitionsRequestTopicsAssignments3) -> Result<Self, Self::Error> {
-        Ok(CreatePartitionsRequestTopicsAssignments1 {
+impl From<CreatePartitionsRequestTopicsAssignments3> for CreatePartitionsRequestTopicsAssignments1 {
+    fn from(
+        latest: CreatePartitionsRequestTopicsAssignments3,
+    ) -> CreatePartitionsRequestTopicsAssignments1 {
+        CreatePartitionsRequestTopicsAssignments1 {
             broker_ids: latest.broker_ids,
-        })
+        }
     }
 }
 
-impl TryFrom<CreatePartitionsRequest3> for CreatePartitionsRequest2 {
-    type Error = Error;
-    fn try_from(latest: CreatePartitionsRequest3) -> Result<Self, Self::Error> {
-        Ok(CreatePartitionsRequest2 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<CreatePartitionsRequest3> for CreatePartitionsRequest2 {
+    fn from(latest: CreatePartitionsRequest3) -> CreatePartitionsRequest2 {
+        CreatePartitionsRequest2 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             timeout_ms: latest.timeout_ms,
             validate_only: latest.validate_only,
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 
-impl TryFrom<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics2 {
-    type Error = Error;
-    fn try_from(latest: CreatePartitionsRequestTopics3) -> Result<Self, Self::Error> {
-        Ok(CreatePartitionsRequestTopics2 {
+impl From<CreatePartitionsRequestTopics3> for CreatePartitionsRequestTopics2 {
+    fn from(latest: CreatePartitionsRequestTopics3) -> CreatePartitionsRequestTopics2 {
+        CreatePartitionsRequestTopics2 {
             name: latest.name,
             count: latest.count,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+                .map(|ele| ele.into())
+                .collect(),
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 
-impl TryFrom<CreatePartitionsRequestTopicsAssignments3>
-    for CreatePartitionsRequestTopicsAssignments2
-{
-    type Error = Error;
-    fn try_from(latest: CreatePartitionsRequestTopicsAssignments3) -> Result<Self, Self::Error> {
-        Ok(CreatePartitionsRequestTopicsAssignments2 {
+impl From<CreatePartitionsRequestTopicsAssignments3> for CreatePartitionsRequestTopicsAssignments2 {
+    fn from(
+        latest: CreatePartitionsRequestTopicsAssignments3,
+    ) -> CreatePartitionsRequestTopicsAssignments2 {
+        CreatePartitionsRequestTopicsAssignments2 {
             broker_ids: latest.broker_ids,
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 

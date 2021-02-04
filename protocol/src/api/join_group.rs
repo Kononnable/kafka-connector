@@ -51,37 +51,37 @@ impl ApiCall for JoinGroupRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &JoinGroupRequest0::try_from(self)?,
+                &JoinGroupRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &JoinGroupRequest1::try_from(self)?,
+                &JoinGroupRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &JoinGroupRequest2::try_from(self)?,
+                &JoinGroupRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &JoinGroupRequest3::try_from(self)?,
+                &JoinGroupRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             4 => ToBytes::serialize(
-                &JoinGroupRequest4::try_from(self)?,
+                &JoinGroupRequest4::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             5 => ToBytes::serialize(
-                &JoinGroupRequest5::try_from(self)?,
+                &JoinGroupRequest5::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             6 => ToBytes::serialize(
-                &JoinGroupRequest6::try_from(self)?,
+                &JoinGroupRequest6::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -128,7 +128,7 @@ pub struct JoinGroupRequestProtocols0 {
 pub struct JoinGroupRequest1 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
-    pub rebalance_timeout_ms: Optional<Int32>,
+    pub rebalance_timeout_ms: Int32,
     pub member_id: String,
     pub protocol_type: String,
     pub protocols: Vec<JoinGroupRequestProtocols1>,
@@ -144,7 +144,7 @@ pub struct JoinGroupRequestProtocols1 {
 pub struct JoinGroupRequest2 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
-    pub rebalance_timeout_ms: Optional<Int32>,
+    pub rebalance_timeout_ms: Int32,
     pub member_id: String,
     pub protocol_type: String,
     pub protocols: Vec<JoinGroupRequestProtocols2>,
@@ -160,7 +160,7 @@ pub struct JoinGroupRequestProtocols2 {
 pub struct JoinGroupRequest3 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
-    pub rebalance_timeout_ms: Optional<Int32>,
+    pub rebalance_timeout_ms: Int32,
     pub member_id: String,
     pub protocol_type: String,
     pub protocols: Vec<JoinGroupRequestProtocols3>,
@@ -176,7 +176,7 @@ pub struct JoinGroupRequestProtocols3 {
 pub struct JoinGroupRequest4 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
-    pub rebalance_timeout_ms: Optional<Int32>,
+    pub rebalance_timeout_ms: Int32,
     pub member_id: String,
     pub protocol_type: String,
     pub protocols: Vec<JoinGroupRequestProtocols4>,
@@ -192,9 +192,9 @@ pub struct JoinGroupRequestProtocols4 {
 pub struct JoinGroupRequest5 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
-    pub rebalance_timeout_ms: Optional<Int32>,
+    pub rebalance_timeout_ms: Int32,
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
+    pub group_instance_id: NullableString,
     pub protocol_type: String,
     pub protocols: Vec<JoinGroupRequestProtocols5>,
 }
@@ -209,38 +209,38 @@ pub struct JoinGroupRequestProtocols5 {
 pub struct JoinGroupRequest6 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
-    pub rebalance_timeout_ms: Optional<Int32>,
+    pub rebalance_timeout_ms: Int32,
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
+    pub group_instance_id: NullableString,
     pub protocol_type: String,
     pub protocols: Vec<JoinGroupRequestProtocols6>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequestProtocols6 {
     pub name: String,
     pub metadata: KafkaBytes,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequest7 {
     pub group_id: String,
     pub session_timeout_ms: Int32,
-    pub rebalance_timeout_ms: Optional<Int32>,
+    pub rebalance_timeout_ms: Int32,
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
+    pub group_instance_id: NullableString,
     pub protocol_type: String,
     pub protocols: Vec<JoinGroupRequestProtocols7>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct JoinGroupRequestProtocols7 {
     pub name: String,
     pub metadata: KafkaBytes,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -277,7 +277,7 @@ pub struct JoinGroupResponseMembers1 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse2 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub generation_id: Int32,
     pub protocol_name: String,
@@ -294,7 +294,7 @@ pub struct JoinGroupResponseMembers2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub generation_id: Int32,
     pub protocol_name: String,
@@ -311,7 +311,7 @@ pub struct JoinGroupResponseMembers3 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse4 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub generation_id: Int32,
     pub protocol_name: String,
@@ -328,7 +328,7 @@ pub struct JoinGroupResponseMembers4 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse5 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub generation_id: Int32,
     pub protocol_name: String,
@@ -340,254 +340,208 @@ pub struct JoinGroupResponse5 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponseMembers5 {
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
+    pub group_instance_id: Option<NullableString>,
     pub metadata: KafkaBytes,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse6 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub generation_id: Int32,
     pub protocol_name: String,
     pub leader: String,
     pub member_id: String,
     pub members: Vec<JoinGroupResponseMembers6>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponseMembers6 {
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
+    pub group_instance_id: Option<NullableString>,
     pub metadata: KafkaBytes,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponse7 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub generation_id: Int32,
-    pub protocol_type: Optional<NullableString>,
+    pub protocol_type: Option<NullableString>,
     pub protocol_name: NullableString,
     pub leader: String,
     pub member_id: String,
     pub members: Vec<JoinGroupResponseMembers7>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct JoinGroupResponseMembers7 {
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
+    pub group_instance_id: Option<NullableString>,
     pub metadata: KafkaBytes,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<JoinGroupRequest7> for JoinGroupRequest0 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
-        if latest.rebalance_timeout_ms.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "JoinGroupRequest",
-                0,
-                "rebalance_timeout_ms",
-            ));
+impl From<JoinGroupRequest7> for JoinGroupRequest0 {
+    fn from(latest: JoinGroupRequest7) -> JoinGroupRequest0 {
+        log::debug!(
+            "Using old api format - JoinGroupRequest0, ignoring field rebalance_timeout_ms"
+        );
+        JoinGroupRequest0 {
+            group_id: latest.group_id,
+            session_timeout_ms: latest.session_timeout_ms,
+            member_id: latest.member_id,
+            protocol_type: latest.protocol_type,
+            protocols: latest.protocols.into_iter().map(|ele| ele.into()).collect(),
         }
-        Ok(JoinGroupRequest0 {
-            group_id: latest.group_id,
-            session_timeout_ms: latest.session_timeout_ms,
-            member_id: latest.member_id,
-            protocol_type: latest.protocol_type,
-            protocols: latest
-                .protocols
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols0 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequestProtocols0 {
+impl From<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols0 {
+    fn from(latest: JoinGroupRequestProtocols7) -> JoinGroupRequestProtocols0 {
+        JoinGroupRequestProtocols0 {
             name: latest.name,
             metadata: latest.metadata,
-        })
+        }
     }
 }
 
-impl TryFrom<JoinGroupRequest7> for JoinGroupRequest1 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequest1 {
+impl From<JoinGroupRequest7> for JoinGroupRequest1 {
+    fn from(latest: JoinGroupRequest7) -> JoinGroupRequest1 {
+        JoinGroupRequest1 {
             group_id: latest.group_id,
             session_timeout_ms: latest.session_timeout_ms,
             rebalance_timeout_ms: latest.rebalance_timeout_ms,
             member_id: latest.member_id,
             protocol_type: latest.protocol_type,
-            protocols: latest
-                .protocols
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            protocols: latest.protocols.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols1 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequestProtocols1 {
+impl From<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols1 {
+    fn from(latest: JoinGroupRequestProtocols7) -> JoinGroupRequestProtocols1 {
+        JoinGroupRequestProtocols1 {
             name: latest.name,
             metadata: latest.metadata,
-        })
+        }
     }
 }
 
-impl TryFrom<JoinGroupRequest7> for JoinGroupRequest2 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequest2 {
+impl From<JoinGroupRequest7> for JoinGroupRequest2 {
+    fn from(latest: JoinGroupRequest7) -> JoinGroupRequest2 {
+        JoinGroupRequest2 {
             group_id: latest.group_id,
             session_timeout_ms: latest.session_timeout_ms,
             rebalance_timeout_ms: latest.rebalance_timeout_ms,
             member_id: latest.member_id,
             protocol_type: latest.protocol_type,
-            protocols: latest
-                .protocols
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            protocols: latest.protocols.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols2 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequestProtocols2 {
+impl From<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols2 {
+    fn from(latest: JoinGroupRequestProtocols7) -> JoinGroupRequestProtocols2 {
+        JoinGroupRequestProtocols2 {
             name: latest.name,
             metadata: latest.metadata,
-        })
+        }
     }
 }
 
-impl TryFrom<JoinGroupRequest7> for JoinGroupRequest3 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequest3 {
+impl From<JoinGroupRequest7> for JoinGroupRequest3 {
+    fn from(latest: JoinGroupRequest7) -> JoinGroupRequest3 {
+        JoinGroupRequest3 {
             group_id: latest.group_id,
             session_timeout_ms: latest.session_timeout_ms,
             rebalance_timeout_ms: latest.rebalance_timeout_ms,
             member_id: latest.member_id,
             protocol_type: latest.protocol_type,
-            protocols: latest
-                .protocols
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            protocols: latest.protocols.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols3 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequestProtocols3 {
+impl From<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols3 {
+    fn from(latest: JoinGroupRequestProtocols7) -> JoinGroupRequestProtocols3 {
+        JoinGroupRequestProtocols3 {
             name: latest.name,
             metadata: latest.metadata,
-        })
+        }
     }
 }
 
-impl TryFrom<JoinGroupRequest7> for JoinGroupRequest4 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequest4 {
+impl From<JoinGroupRequest7> for JoinGroupRequest4 {
+    fn from(latest: JoinGroupRequest7) -> JoinGroupRequest4 {
+        JoinGroupRequest4 {
             group_id: latest.group_id,
             session_timeout_ms: latest.session_timeout_ms,
             rebalance_timeout_ms: latest.rebalance_timeout_ms,
             member_id: latest.member_id,
             protocol_type: latest.protocol_type,
-            protocols: latest
-                .protocols
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            protocols: latest.protocols.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols4 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequestProtocols4 {
+impl From<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols4 {
+    fn from(latest: JoinGroupRequestProtocols7) -> JoinGroupRequestProtocols4 {
+        JoinGroupRequestProtocols4 {
             name: latest.name,
             metadata: latest.metadata,
-        })
+        }
     }
 }
 
-impl TryFrom<JoinGroupRequest7> for JoinGroupRequest5 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequest5 {
+impl From<JoinGroupRequest7> for JoinGroupRequest5 {
+    fn from(latest: JoinGroupRequest7) -> JoinGroupRequest5 {
+        JoinGroupRequest5 {
             group_id: latest.group_id,
             session_timeout_ms: latest.session_timeout_ms,
             rebalance_timeout_ms: latest.rebalance_timeout_ms,
             member_id: latest.member_id,
             group_instance_id: latest.group_instance_id,
             protocol_type: latest.protocol_type,
-            protocols: latest
-                .protocols
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            protocols: latest.protocols.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols5 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequestProtocols5 {
+impl From<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols5 {
+    fn from(latest: JoinGroupRequestProtocols7) -> JoinGroupRequestProtocols5 {
+        JoinGroupRequestProtocols5 {
             name: latest.name,
             metadata: latest.metadata,
-        })
+        }
     }
 }
 
-impl TryFrom<JoinGroupRequest7> for JoinGroupRequest6 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequest7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequest6 {
+impl From<JoinGroupRequest7> for JoinGroupRequest6 {
+    fn from(latest: JoinGroupRequest7) -> JoinGroupRequest6 {
+        JoinGroupRequest6 {
             group_id: latest.group_id,
             session_timeout_ms: latest.session_timeout_ms,
             rebalance_timeout_ms: latest.rebalance_timeout_ms,
             member_id: latest.member_id,
             group_instance_id: latest.group_instance_id,
             protocol_type: latest.protocol_type,
-            protocols: latest
-                .protocols
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+            protocols: latest.protocols.into_iter().map(|ele| ele.into()).collect(),
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 
-impl TryFrom<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols6 {
-    type Error = Error;
-    fn try_from(latest: JoinGroupRequestProtocols7) -> Result<Self, Self::Error> {
-        Ok(JoinGroupRequestProtocols6 {
+impl From<JoinGroupRequestProtocols7> for JoinGroupRequestProtocols6 {
+    fn from(latest: JoinGroupRequestProtocols7) -> JoinGroupRequestProtocols6 {
+        JoinGroupRequestProtocols6 {
             name: latest.name,
             metadata: latest.metadata,
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 

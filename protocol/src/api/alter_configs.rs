@@ -45,7 +45,7 @@ impl ApiCall for AlterConfigsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &AlterConfigsRequest0::try_from(self)?,
+                &AlterConfigsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -133,42 +133,31 @@ pub struct AlterConfigsResponseResponses1 {
     pub resource_name: String,
 }
 
-impl TryFrom<AlterConfigsRequest1> for AlterConfigsRequest0 {
-    type Error = Error;
-    fn try_from(latest: AlterConfigsRequest1) -> Result<Self, Self::Error> {
-        Ok(AlterConfigsRequest0 {
-            resources: latest
-                .resources
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<AlterConfigsRequest1> for AlterConfigsRequest0 {
+    fn from(latest: AlterConfigsRequest1) -> AlterConfigsRequest0 {
+        AlterConfigsRequest0 {
+            resources: latest.resources.into_iter().map(|ele| ele.into()).collect(),
             validate_only: latest.validate_only,
-        })
+        }
     }
 }
 
-impl TryFrom<AlterConfigsRequestResources1> for AlterConfigsRequestResources0 {
-    type Error = Error;
-    fn try_from(latest: AlterConfigsRequestResources1) -> Result<Self, Self::Error> {
-        Ok(AlterConfigsRequestResources0 {
+impl From<AlterConfigsRequestResources1> for AlterConfigsRequestResources0 {
+    fn from(latest: AlterConfigsRequestResources1) -> AlterConfigsRequestResources0 {
+        AlterConfigsRequestResources0 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,
-            configs: latest
-                .configs
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            configs: latest.configs.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<AlterConfigsRequestResourcesConfigs1> for AlterConfigsRequestResourcesConfigs0 {
-    type Error = Error;
-    fn try_from(latest: AlterConfigsRequestResourcesConfigs1) -> Result<Self, Self::Error> {
-        Ok(AlterConfigsRequestResourcesConfigs0 {
+impl From<AlterConfigsRequestResourcesConfigs1> for AlterConfigsRequestResourcesConfigs0 {
+    fn from(latest: AlterConfigsRequestResourcesConfigs1) -> AlterConfigsRequestResourcesConfigs0 {
+        AlterConfigsRequestResourcesConfigs0 {
             name: latest.name,
             value: latest.value,
-        })
+        }
     }
 }
 

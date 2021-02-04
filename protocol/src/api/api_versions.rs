@@ -47,17 +47,17 @@ impl ApiCall for ApiVersionsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &ApiVersionsRequest0::try_from(self)?,
+                &ApiVersionsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &ApiVersionsRequest1::try_from(self)?,
+                &ApiVersionsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &ApiVersionsRequest2::try_from(self)?,
+                &ApiVersionsRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -92,9 +92,9 @@ pub struct ApiVersionsRequest2 {}
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ApiVersionsRequest3 {
-    pub client_software_name: Optional<String>,
-    pub client_software_version: Optional<String>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub client_software_name: String,
+    pub client_software_version: String,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -114,7 +114,7 @@ pub struct ApiVersionsResponseApiKeys0 {
 pub struct ApiVersionsResponse1 {
     pub error_code: Int16,
     pub api_keys: Vec<ApiVersionsResponseApiKeys1>,
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -128,7 +128,7 @@ pub struct ApiVersionsResponseApiKeys1 {
 pub struct ApiVersionsResponse2 {
     pub error_code: Int16,
     pub api_keys: Vec<ApiVersionsResponseApiKeys2>,
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -142,8 +142,8 @@ pub struct ApiVersionsResponseApiKeys2 {
 pub struct ApiVersionsResponse3 {
     pub error_code: Int16,
     pub api_keys: Vec<ApiVersionsResponseApiKeys3>,
-    pub throttle_time_ms: Optional<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub throttle_time_ms: Option<Int32>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -151,27 +151,24 @@ pub struct ApiVersionsResponseApiKeys3 {
     pub api_key: Int16,
     pub min_version: Int16,
     pub max_version: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest0 {
-    type Error = Error;
-    fn try_from(_latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
-        Ok(ApiVersionsRequest0 {})
+impl From<ApiVersionsRequest3> for ApiVersionsRequest0 {
+    fn from(_latest: ApiVersionsRequest3) -> ApiVersionsRequest0 {
+        ApiVersionsRequest0 {}
     }
 }
 
-impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest1 {
-    type Error = Error;
-    fn try_from(_latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
-        Ok(ApiVersionsRequest1 {})
+impl From<ApiVersionsRequest3> for ApiVersionsRequest1 {
+    fn from(_latest: ApiVersionsRequest3) -> ApiVersionsRequest1 {
+        ApiVersionsRequest1 {}
     }
 }
 
-impl TryFrom<ApiVersionsRequest3> for ApiVersionsRequest2 {
-    type Error = Error;
-    fn try_from(_latest: ApiVersionsRequest3) -> Result<Self, Self::Error> {
-        Ok(ApiVersionsRequest2 {})
+impl From<ApiVersionsRequest3> for ApiVersionsRequest2 {
+    fn from(_latest: ApiVersionsRequest3) -> ApiVersionsRequest2 {
+        ApiVersionsRequest2 {}
     }
 }
 

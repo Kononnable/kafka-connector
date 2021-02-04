@@ -46,12 +46,12 @@ impl ApiCall for CreateAclsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &CreateAclsRequest0::try_from(self)?,
+                &CreateAclsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &CreateAclsRequest1::try_from(self)?,
+                &CreateAclsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -98,7 +98,7 @@ pub struct CreateAclsRequest1 {
 pub struct CreateAclsRequestCreations1 {
     pub resource_type: Int8,
     pub resource_name: String,
-    pub resource_pattern_type: Optional<Int8>,
+    pub resource_pattern_type: Int8,
     pub principal: String,
     pub host: String,
     pub operation: Int8,
@@ -108,19 +108,19 @@ pub struct CreateAclsRequestCreations1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateAclsRequest2 {
     pub creations: Vec<CreateAclsRequestCreations2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct CreateAclsRequestCreations2 {
     pub resource_type: Int8,
     pub resource_name: String,
-    pub resource_pattern_type: Optional<Int8>,
+    pub resource_pattern_type: Int8,
     pub principal: String,
     pub host: String,
     pub operation: Int8,
     pub permission_type: Int8,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -151,67 +151,49 @@ pub struct CreateAclsResponseResults1 {
 pub struct CreateAclsResponse2 {
     pub throttle_time_ms: Int32,
     pub results: Vec<CreateAclsResponseResults2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct CreateAclsResponseResults2 {
     pub error_code: Int16,
     pub error_message: NullableString,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<CreateAclsRequest2> for CreateAclsRequest0 {
-    type Error = Error;
-    fn try_from(latest: CreateAclsRequest2) -> Result<Self, Self::Error> {
-        Ok(CreateAclsRequest0 {
-            creations: latest
-                .creations
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+impl From<CreateAclsRequest2> for CreateAclsRequest0 {
+    fn from(latest: CreateAclsRequest2) -> CreateAclsRequest0 {
+        CreateAclsRequest0 {
+            creations: latest.creations.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations0 {
-    type Error = Error;
-    fn try_from(latest: CreateAclsRequestCreations2) -> Result<Self, Self::Error> {
-        if latest.resource_pattern_type.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "CreateAclsRequestCreations",
-                0,
-                "resource_pattern_type",
-            ));
-        }
-        Ok(CreateAclsRequestCreations0 {
+impl From<CreateAclsRequestCreations2> for CreateAclsRequestCreations0 {
+    fn from(latest: CreateAclsRequestCreations2) -> CreateAclsRequestCreations0 {
+        log::debug!("Using old api format - CreateAclsRequestCreations0, ignoring field resource_pattern_type");
+        CreateAclsRequestCreations0 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,
             principal: latest.principal,
             host: latest.host,
             operation: latest.operation,
             permission_type: latest.permission_type,
-        })
+        }
     }
 }
 
-impl TryFrom<CreateAclsRequest2> for CreateAclsRequest1 {
-    type Error = Error;
-    fn try_from(latest: CreateAclsRequest2) -> Result<Self, Self::Error> {
-        Ok(CreateAclsRequest1 {
-            creations: latest
-                .creations
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+impl From<CreateAclsRequest2> for CreateAclsRequest1 {
+    fn from(latest: CreateAclsRequest2) -> CreateAclsRequest1 {
+        CreateAclsRequest1 {
+            creations: latest.creations.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations1 {
-    type Error = Error;
-    fn try_from(latest: CreateAclsRequestCreations2) -> Result<Self, Self::Error> {
-        Ok(CreateAclsRequestCreations1 {
+impl From<CreateAclsRequestCreations2> for CreateAclsRequestCreations1 {
+    fn from(latest: CreateAclsRequestCreations2) -> CreateAclsRequestCreations1 {
+        CreateAclsRequestCreations1 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,
             resource_pattern_type: latest.resource_pattern_type,
@@ -219,7 +201,7 @@ impl TryFrom<CreateAclsRequestCreations2> for CreateAclsRequestCreations1 {
             host: latest.host,
             operation: latest.operation,
             permission_type: latest.permission_type,
-        })
+        }
     }
 }
 

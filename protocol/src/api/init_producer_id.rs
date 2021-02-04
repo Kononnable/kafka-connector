@@ -48,22 +48,22 @@ impl ApiCall for InitProducerIdRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &InitProducerIdRequest0::try_from(self)?,
+                &InitProducerIdRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &InitProducerIdRequest1::try_from(self)?,
+                &InitProducerIdRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &InitProducerIdRequest2::try_from(self)?,
+                &InitProducerIdRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &InitProducerIdRequest3::try_from(self)?,
+                &InitProducerIdRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -109,25 +109,25 @@ pub struct InitProducerIdRequest1 {
 pub struct InitProducerIdRequest2 {
     pub transactional_id: NullableString,
     pub transaction_timeout_ms: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct InitProducerIdRequest3 {
     pub transactional_id: NullableString,
     pub transaction_timeout_ms: Int32,
-    pub producer_id: Optional<Int64>,
-    pub producer_epoch: Optional<Int16>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub producer_id: Int64,
+    pub producer_epoch: Int16,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct InitProducerIdRequest4 {
     pub transactional_id: NullableString,
     pub transaction_timeout_ms: Int32,
-    pub producer_id: Optional<Int64>,
-    pub producer_epoch: Optional<Int16>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub producer_id: Int64,
+    pub producer_epoch: Int16,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -152,7 +152,7 @@ pub struct InitProducerIdResponse2 {
     pub error_code: Int16,
     pub producer_id: Int64,
     pub producer_epoch: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -161,7 +161,7 @@ pub struct InitProducerIdResponse3 {
     pub error_code: Int16,
     pub producer_id: Int64,
     pub producer_epoch: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -170,92 +170,52 @@ pub struct InitProducerIdResponse4 {
     pub error_code: Int16,
     pub producer_id: Int64,
     pub producer_epoch: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest0 {
-    type Error = Error;
-    fn try_from(latest: InitProducerIdRequest4) -> Result<Self, Self::Error> {
-        if latest.producer_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "InitProducerIdRequest",
-                0,
-                "producer_id",
-            ));
-        }
-        if latest.producer_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "InitProducerIdRequest",
-                0,
-                "producer_epoch",
-            ));
-        }
-        Ok(InitProducerIdRequest0 {
+impl From<InitProducerIdRequest4> for InitProducerIdRequest0 {
+    fn from(latest: InitProducerIdRequest4) -> InitProducerIdRequest0 {
+        log::debug!("Using old api format - InitProducerIdRequest0, ignoring field producer_id");
+        log::debug!("Using old api format - InitProducerIdRequest0, ignoring field producer_epoch");
+        InitProducerIdRequest0 {
             transactional_id: latest.transactional_id,
             transaction_timeout_ms: latest.transaction_timeout_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest1 {
-    type Error = Error;
-    fn try_from(latest: InitProducerIdRequest4) -> Result<Self, Self::Error> {
-        if latest.producer_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "InitProducerIdRequest",
-                1,
-                "producer_id",
-            ));
-        }
-        if latest.producer_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "InitProducerIdRequest",
-                1,
-                "producer_epoch",
-            ));
-        }
-        Ok(InitProducerIdRequest1 {
+impl From<InitProducerIdRequest4> for InitProducerIdRequest1 {
+    fn from(latest: InitProducerIdRequest4) -> InitProducerIdRequest1 {
+        log::debug!("Using old api format - InitProducerIdRequest1, ignoring field producer_id");
+        log::debug!("Using old api format - InitProducerIdRequest1, ignoring field producer_epoch");
+        InitProducerIdRequest1 {
             transactional_id: latest.transactional_id,
             transaction_timeout_ms: latest.transaction_timeout_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest2 {
-    type Error = Error;
-    fn try_from(latest: InitProducerIdRequest4) -> Result<Self, Self::Error> {
-        if latest.producer_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "InitProducerIdRequest",
-                2,
-                "producer_id",
-            ));
-        }
-        if latest.producer_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "InitProducerIdRequest",
-                2,
-                "producer_epoch",
-            ));
-        }
-        Ok(InitProducerIdRequest2 {
+impl From<InitProducerIdRequest4> for InitProducerIdRequest2 {
+    fn from(latest: InitProducerIdRequest4) -> InitProducerIdRequest2 {
+        log::debug!("Using old api format - InitProducerIdRequest2, ignoring field producer_id");
+        log::debug!("Using old api format - InitProducerIdRequest2, ignoring field producer_epoch");
+        InitProducerIdRequest2 {
             transactional_id: latest.transactional_id,
             transaction_timeout_ms: latest.transaction_timeout_ms,
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 
-impl TryFrom<InitProducerIdRequest4> for InitProducerIdRequest3 {
-    type Error = Error;
-    fn try_from(latest: InitProducerIdRequest4) -> Result<Self, Self::Error> {
-        Ok(InitProducerIdRequest3 {
+impl From<InitProducerIdRequest4> for InitProducerIdRequest3 {
+    fn from(latest: InitProducerIdRequest4) -> InitProducerIdRequest3 {
+        InitProducerIdRequest3 {
             transactional_id: latest.transactional_id,
             transaction_timeout_ms: latest.transaction_timeout_ms,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 

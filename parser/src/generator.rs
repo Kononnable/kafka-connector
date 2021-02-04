@@ -97,7 +97,7 @@ fn serialize_api_request(requests: &[Vec<ApiStructDefinition>]) -> String {
 
     for version in 0..requests.len() - 1 {
         fn_def.push_str(&format!(
-            "        {} => ToBytes::serialize(&{}{}::try_from(self)?,buf,Self::is_flexible_version(version)),\n",
+            "        {} => ToBytes::serialize(&{}{}::from(self),buf,Self::is_flexible_version(version)),\n",
             version,
             struct_name,
             version,
@@ -186,7 +186,7 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
             None => {}
             Some(latest) => {
                 impl_def.push_str(&format!(
-                    "impl TryFrom<{}{}> for {}{}{{\n",
+                    "impl From<{}{}> for {}{}{{\n",
                     latest.name, latest.version, call.name, call.version
                 ));
                 let latest_str = if call.fields.is_empty() {
@@ -194,25 +194,21 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
                 } else {
                     "latest"
                 };
-                impl_def.push_str("    type Error = Error;\n");
                 impl_def.push_str(&format!(
-                    "    fn try_from({}:{}{}) -> Result<Self, Self::Error> {{\n",
-                    latest_str, latest.name, latest.version
+                    "    fn from({}:{}{}) -> {}{} {{\n",
+                    latest_str, latest.name, latest.version, call.name, call.version
                 ));
                 for field in &latest.fields {
                     if call.fields.iter().find(|x| x.name == field.name).is_none()
                         && !field.is_compact_field
                     {
-                        impl_def
-                            .push_str(&format!("        if latest.{}.is_some() {{\n", field.name));
                         impl_def.push_str(&format!(
-                            "            return Err(Error::OldKafkaVersion(\"{}\",{},\"{}\"))\n",
+                            "            log::debug!(\"Using old api format - {}{}, ignoring field {}\");\n",
                             call.name, call.version, field.name
                         ));
-                        impl_def.push_str(&"        }\n");
                     }
                 }
-                impl_def.push_str(&format!("        Ok({}{}{{\n", call.name, call.version));
+                impl_def.push_str(&format!("        {}{}{{\n", call.name, call.version));
                 for field in &call.fields {
                     let latest_field = latest
                         .fields
@@ -227,18 +223,14 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
                             ".into_iter().collect()"
                         } else if latest_field.is_simple_type && !field.is_vec {
                             ""
-                        } else if !latest_field.is_simple_type && field.is_vec && !field.is_optional && field.is_easily_convertable{
+                        } else if !latest_field.is_simple_type && field.is_vec && !field.is_optional
+                        {
                             ".into_iter().map(|ele|ele.into()).collect()"
-                        }  else if !latest_field.is_simple_type && field.is_vec && field.is_optional && field.is_easily_convertable{
-                            ".map(|val|val.into_iter().map(|el|el.into()).collect()"
-                        } else if !latest_field.is_simple_type && field.is_vec && !field.is_optional && !field.is_easily_convertable{
-                            ".into_iter().map(|ele|ele.try_into()).collect::<Result<_, Error>>()?"
-                        }  else if !latest_field.is_simple_type && field.is_vec && field.is_optional && !field.is_easily_convertable{
-                            ".map(|val|val.into_iter().map(|el|el.try_into()).collect::<Result<_, Error>>()).wrap_result()?"
-                        } else if !latest_field.is_simple_type {
+                        } else if !latest_field.is_simple_type && field.is_vec && field.is_optional
+                        {
+                            ".map(|val|val.into_iter().map(|el|el.into()).collect())"
+                        } else {
                             ".into()"
-                        }else {
-                            ".try_into()?"
                         }
                         .to_owned();
                         if field.is_optional && (field.is_simple_type || !field.is_vec) {
@@ -268,7 +260,7 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
                     ));
                 }
 
-                impl_def.push_str(&"        })\n");
+                impl_def.push_str(&"        }\n");
                 impl_def.push_str(&"    }\n");
                 impl_def.push_str(&"}\n\n");
             }

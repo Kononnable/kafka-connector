@@ -46,12 +46,12 @@ impl ApiCall for DeleteAclsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &DeleteAclsRequest0::try_from(self)?,
+                &DeleteAclsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &DeleteAclsRequest1::try_from(self)?,
+                &DeleteAclsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -98,7 +98,7 @@ pub struct DeleteAclsRequest1 {
 pub struct DeleteAclsRequestFilters1 {
     pub resource_type_filter: Int8,
     pub resource_name_filter: NullableString,
-    pub pattern_type_filter: Optional<Int8>,
+    pub pattern_type_filter: Int8,
     pub principal_filter: NullableString,
     pub host_filter: NullableString,
     pub operation: Int8,
@@ -108,19 +108,19 @@ pub struct DeleteAclsRequestFilters1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteAclsRequest2 {
     pub filters: Vec<DeleteAclsRequestFilters2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteAclsRequestFilters2 {
     pub resource_type_filter: Int8,
     pub resource_name_filter: NullableString,
-    pub pattern_type_filter: Optional<Int8>,
+    pub pattern_type_filter: Int8,
     pub principal_filter: NullableString,
     pub host_filter: NullableString,
     pub operation: Int8,
     pub permission_type: Int8,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -167,7 +167,7 @@ pub struct DeleteAclsResponseFilterResultsMatchingAcls1 {
     pub error_message: NullableString,
     pub resource_type: Int8,
     pub resource_name: String,
-    pub pattern_type: Optional<Int8>,
+    pub pattern_type: Option<Int8>,
     pub principal: String,
     pub host: String,
     pub operation: Int8,
@@ -178,7 +178,7 @@ pub struct DeleteAclsResponseFilterResultsMatchingAcls1 {
 pub struct DeleteAclsResponse2 {
     pub throttle_time_ms: Int32,
     pub filter_results: Vec<DeleteAclsResponseFilterResults2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -186,7 +186,7 @@ pub struct DeleteAclsResponseFilterResults2 {
     pub error_code: Int16,
     pub error_message: NullableString,
     pub matching_acls: Vec<DeleteAclsResponseFilterResultsMatchingAcls2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -195,65 +195,49 @@ pub struct DeleteAclsResponseFilterResultsMatchingAcls2 {
     pub error_message: NullableString,
     pub resource_type: Int8,
     pub resource_name: String,
-    pub pattern_type: Optional<Int8>,
+    pub pattern_type: Option<Int8>,
     pub principal: String,
     pub host: String,
     pub operation: Int8,
     pub permission_type: Int8,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<DeleteAclsRequest2> for DeleteAclsRequest0 {
-    type Error = Error;
-    fn try_from(latest: DeleteAclsRequest2) -> Result<Self, Self::Error> {
-        Ok(DeleteAclsRequest0 {
-            filters: latest
-                .filters
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+impl From<DeleteAclsRequest2> for DeleteAclsRequest0 {
+    fn from(latest: DeleteAclsRequest2) -> DeleteAclsRequest0 {
+        DeleteAclsRequest0 {
+            filters: latest.filters.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters0 {
-    type Error = Error;
-    fn try_from(latest: DeleteAclsRequestFilters2) -> Result<Self, Self::Error> {
-        if latest.pattern_type_filter.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DeleteAclsRequestFilters",
-                0,
-                "pattern_type_filter",
-            ));
-        }
-        Ok(DeleteAclsRequestFilters0 {
+impl From<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters0 {
+    fn from(latest: DeleteAclsRequestFilters2) -> DeleteAclsRequestFilters0 {
+        log::debug!(
+            "Using old api format - DeleteAclsRequestFilters0, ignoring field pattern_type_filter"
+        );
+        DeleteAclsRequestFilters0 {
             resource_type_filter: latest.resource_type_filter,
             resource_name_filter: latest.resource_name_filter,
             principal_filter: latest.principal_filter,
             host_filter: latest.host_filter,
             operation: latest.operation,
             permission_type: latest.permission_type,
-        })
+        }
     }
 }
 
-impl TryFrom<DeleteAclsRequest2> for DeleteAclsRequest1 {
-    type Error = Error;
-    fn try_from(latest: DeleteAclsRequest2) -> Result<Self, Self::Error> {
-        Ok(DeleteAclsRequest1 {
-            filters: latest
-                .filters
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+impl From<DeleteAclsRequest2> for DeleteAclsRequest1 {
+    fn from(latest: DeleteAclsRequest2) -> DeleteAclsRequest1 {
+        DeleteAclsRequest1 {
+            filters: latest.filters.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters1 {
-    type Error = Error;
-    fn try_from(latest: DeleteAclsRequestFilters2) -> Result<Self, Self::Error> {
-        Ok(DeleteAclsRequestFilters1 {
+impl From<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters1 {
+    fn from(latest: DeleteAclsRequestFilters2) -> DeleteAclsRequestFilters1 {
+        DeleteAclsRequestFilters1 {
             resource_type_filter: latest.resource_type_filter,
             resource_name_filter: latest.resource_name_filter,
             pattern_type_filter: latest.pattern_type_filter,
@@ -261,7 +245,7 @@ impl TryFrom<DeleteAclsRequestFilters2> for DeleteAclsRequestFilters1 {
             host_filter: latest.host_filter,
             operation: latest.operation,
             permission_type: latest.permission_type,
-        })
+        }
     }
 }
 

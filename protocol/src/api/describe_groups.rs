@@ -49,27 +49,27 @@ impl ApiCall for DescribeGroupsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &DescribeGroupsRequest0::try_from(self)?,
+                &DescribeGroupsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &DescribeGroupsRequest1::try_from(self)?,
+                &DescribeGroupsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &DescribeGroupsRequest2::try_from(self)?,
+                &DescribeGroupsRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &DescribeGroupsRequest3::try_from(self)?,
+                &DescribeGroupsRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             4 => ToBytes::serialize(
-                &DescribeGroupsRequest4::try_from(self)?,
+                &DescribeGroupsRequest4::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -119,20 +119,20 @@ pub struct DescribeGroupsRequest2 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeGroupsRequest3 {
     pub groups: Vec<String>,
-    pub include_authorized_operations: Optional<Boolean>,
+    pub include_authorized_operations: Boolean,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeGroupsRequest4 {
     pub groups: Vec<String>,
-    pub include_authorized_operations: Optional<Boolean>,
+    pub include_authorized_operations: Boolean,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeGroupsRequest5 {
     pub groups: Vec<String>,
-    pub include_authorized_operations: Optional<Boolean>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub include_authorized_operations: Boolean,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -161,7 +161,7 @@ pub struct DescribeGroupsResponseGroupsMembers0 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeGroupsResponse1 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub groups: Vec<DescribeGroupsResponseGroups1>,
 }
 
@@ -186,7 +186,7 @@ pub struct DescribeGroupsResponseGroupsMembers1 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeGroupsResponse2 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub groups: Vec<DescribeGroupsResponseGroups2>,
 }
 
@@ -211,7 +211,7 @@ pub struct DescribeGroupsResponseGroupsMembers2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeGroupsResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub groups: Vec<DescribeGroupsResponseGroups3>,
 }
 
@@ -223,7 +223,7 @@ pub struct DescribeGroupsResponseGroups3 {
     pub protocol_type: String,
     pub protocol_data: String,
     pub members: Vec<DescribeGroupsResponseGroupsMembers3>,
-    pub authorized_operations: Optional<Int32>,
+    pub authorized_operations: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -237,7 +237,7 @@ pub struct DescribeGroupsResponseGroupsMembers3 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeGroupsResponse4 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub groups: Vec<DescribeGroupsResponseGroups4>,
 }
 
@@ -249,13 +249,13 @@ pub struct DescribeGroupsResponseGroups4 {
     pub protocol_type: String,
     pub protocol_data: String,
     pub members: Vec<DescribeGroupsResponseGroupsMembers4>,
-    pub authorized_operations: Optional<Int32>,
+    pub authorized_operations: Option<Int32>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeGroupsResponseGroupsMembers4 {
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
+    pub group_instance_id: Option<NullableString>,
     pub client_id: String,
     pub client_host: String,
     pub member_metadata: KafkaBytes,
@@ -264,9 +264,9 @@ pub struct DescribeGroupsResponseGroupsMembers4 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeGroupsResponse5 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub groups: Vec<DescribeGroupsResponseGroups5>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -277,86 +277,63 @@ pub struct DescribeGroupsResponseGroups5 {
     pub protocol_type: String,
     pub protocol_data: String,
     pub members: Vec<DescribeGroupsResponseGroupsMembers5>,
-    pub authorized_operations: Optional<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub authorized_operations: Option<Int32>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeGroupsResponseGroupsMembers5 {
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
+    pub group_instance_id: Option<NullableString>,
     pub client_id: String,
     pub client_host: String,
     pub member_metadata: KafkaBytes,
     pub member_assignment: KafkaBytes,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest0 {
-    type Error = Error;
-    fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
-        if latest.include_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeGroupsRequest",
-                0,
-                "include_authorized_operations",
-            ));
-        }
-        Ok(DescribeGroupsRequest0 {
+impl From<DescribeGroupsRequest5> for DescribeGroupsRequest0 {
+    fn from(latest: DescribeGroupsRequest5) -> DescribeGroupsRequest0 {
+        log::debug!("Using old api format - DescribeGroupsRequest0, ignoring field include_authorized_operations");
+        DescribeGroupsRequest0 {
             groups: latest.groups,
-        })
+        }
     }
 }
 
-impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest1 {
-    type Error = Error;
-    fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
-        if latest.include_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeGroupsRequest",
-                1,
-                "include_authorized_operations",
-            ));
-        }
-        Ok(DescribeGroupsRequest1 {
+impl From<DescribeGroupsRequest5> for DescribeGroupsRequest1 {
+    fn from(latest: DescribeGroupsRequest5) -> DescribeGroupsRequest1 {
+        log::debug!("Using old api format - DescribeGroupsRequest1, ignoring field include_authorized_operations");
+        DescribeGroupsRequest1 {
             groups: latest.groups,
-        })
+        }
     }
 }
 
-impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest2 {
-    type Error = Error;
-    fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
-        if latest.include_authorized_operations.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeGroupsRequest",
-                2,
-                "include_authorized_operations",
-            ));
-        }
-        Ok(DescribeGroupsRequest2 {
+impl From<DescribeGroupsRequest5> for DescribeGroupsRequest2 {
+    fn from(latest: DescribeGroupsRequest5) -> DescribeGroupsRequest2 {
+        log::debug!("Using old api format - DescribeGroupsRequest2, ignoring field include_authorized_operations");
+        DescribeGroupsRequest2 {
             groups: latest.groups,
-        })
+        }
     }
 }
 
-impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest3 {
-    type Error = Error;
-    fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
-        Ok(DescribeGroupsRequest3 {
+impl From<DescribeGroupsRequest5> for DescribeGroupsRequest3 {
+    fn from(latest: DescribeGroupsRequest5) -> DescribeGroupsRequest3 {
+        DescribeGroupsRequest3 {
             groups: latest.groups,
             include_authorized_operations: latest.include_authorized_operations,
-        })
+        }
     }
 }
 
-impl TryFrom<DescribeGroupsRequest5> for DescribeGroupsRequest4 {
-    type Error = Error;
-    fn try_from(latest: DescribeGroupsRequest5) -> Result<Self, Self::Error> {
-        Ok(DescribeGroupsRequest4 {
+impl From<DescribeGroupsRequest5> for DescribeGroupsRequest4 {
+    fn from(latest: DescribeGroupsRequest5) -> DescribeGroupsRequest4 {
+        DescribeGroupsRequest4 {
             groups: latest.groups,
             include_authorized_operations: latest.include_authorized_operations,
-        })
+        }
     }
 }
 

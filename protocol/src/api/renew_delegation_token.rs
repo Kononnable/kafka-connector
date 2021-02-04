@@ -46,12 +46,12 @@ impl ApiCall for RenewDelegationTokenRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &RenewDelegationTokenRequest0::try_from(self)?,
+                &RenewDelegationTokenRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &RenewDelegationTokenRequest1::try_from(self)?,
+                &RenewDelegationTokenRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -96,7 +96,7 @@ pub struct RenewDelegationTokenRequest1 {
 pub struct RenewDelegationTokenRequest2 {
     pub hmac: KafkaBytes,
     pub renew_period_ms: Int64,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -118,26 +118,24 @@ pub struct RenewDelegationTokenResponse2 {
     pub error_code: Int16,
     pub expiry_timestamp_ms: Int64,
     pub throttle_time_ms: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<RenewDelegationTokenRequest2> for RenewDelegationTokenRequest0 {
-    type Error = Error;
-    fn try_from(latest: RenewDelegationTokenRequest2) -> Result<Self, Self::Error> {
-        Ok(RenewDelegationTokenRequest0 {
+impl From<RenewDelegationTokenRequest2> for RenewDelegationTokenRequest0 {
+    fn from(latest: RenewDelegationTokenRequest2) -> RenewDelegationTokenRequest0 {
+        RenewDelegationTokenRequest0 {
             hmac: latest.hmac,
             renew_period_ms: latest.renew_period_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<RenewDelegationTokenRequest2> for RenewDelegationTokenRequest1 {
-    type Error = Error;
-    fn try_from(latest: RenewDelegationTokenRequest2) -> Result<Self, Self::Error> {
-        Ok(RenewDelegationTokenRequest1 {
+impl From<RenewDelegationTokenRequest2> for RenewDelegationTokenRequest1 {
+    fn from(latest: RenewDelegationTokenRequest2) -> RenewDelegationTokenRequest1 {
+        RenewDelegationTokenRequest1 {
             hmac: latest.hmac,
             renew_period_ms: latest.renew_period_ms,
-        })
+        }
     }
 }
 

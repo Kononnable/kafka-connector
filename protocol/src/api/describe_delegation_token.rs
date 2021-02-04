@@ -46,12 +46,12 @@ impl ApiCall for DescribeDelegationTokenRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &DescribeDelegationTokenRequest0::try_from(self)?,
+                &DescribeDelegationTokenRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &DescribeDelegationTokenRequest1::try_from(self)?,
+                &DescribeDelegationTokenRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -116,14 +116,14 @@ pub struct DescribeDelegationTokenRequestOwners1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeDelegationTokenRequest2 {
     pub owners: Vec<DescribeDelegationTokenRequestOwners2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeDelegationTokenRequestOwners2 {
     pub principal_type: String,
     pub principal_name: String,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -181,7 +181,7 @@ pub struct DescribeDelegationTokenResponse2 {
     pub error_code: Int16,
     pub tokens: Vec<DescribeDelegationTokenResponseTokens2>,
     pub throttle_time_ms: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -194,59 +194,51 @@ pub struct DescribeDelegationTokenResponseTokens2 {
     pub token_id: String,
     pub hmac: KafkaBytes,
     pub renewers: Vec<DescribeDelegationTokenResponseTokensRenewers2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeDelegationTokenResponseTokensRenewers2 {
     pub principal_type: String,
     pub principal_name: String,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<DescribeDelegationTokenRequest2> for DescribeDelegationTokenRequest0 {
-    type Error = Error;
-    fn try_from(latest: DescribeDelegationTokenRequest2) -> Result<Self, Self::Error> {
-        Ok(DescribeDelegationTokenRequest0 {
-            owners: latest
-                .owners
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+impl From<DescribeDelegationTokenRequest2> for DescribeDelegationTokenRequest0 {
+    fn from(latest: DescribeDelegationTokenRequest2) -> DescribeDelegationTokenRequest0 {
+        DescribeDelegationTokenRequest0 {
+            owners: latest.owners.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<DescribeDelegationTokenRequestOwners2> for DescribeDelegationTokenRequestOwners0 {
-    type Error = Error;
-    fn try_from(latest: DescribeDelegationTokenRequestOwners2) -> Result<Self, Self::Error> {
-        Ok(DescribeDelegationTokenRequestOwners0 {
+impl From<DescribeDelegationTokenRequestOwners2> for DescribeDelegationTokenRequestOwners0 {
+    fn from(
+        latest: DescribeDelegationTokenRequestOwners2,
+    ) -> DescribeDelegationTokenRequestOwners0 {
+        DescribeDelegationTokenRequestOwners0 {
             principal_type: latest.principal_type,
             principal_name: latest.principal_name,
-        })
+        }
     }
 }
 
-impl TryFrom<DescribeDelegationTokenRequest2> for DescribeDelegationTokenRequest1 {
-    type Error = Error;
-    fn try_from(latest: DescribeDelegationTokenRequest2) -> Result<Self, Self::Error> {
-        Ok(DescribeDelegationTokenRequest1 {
-            owners: latest
-                .owners
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+impl From<DescribeDelegationTokenRequest2> for DescribeDelegationTokenRequest1 {
+    fn from(latest: DescribeDelegationTokenRequest2) -> DescribeDelegationTokenRequest1 {
+        DescribeDelegationTokenRequest1 {
+            owners: latest.owners.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<DescribeDelegationTokenRequestOwners2> for DescribeDelegationTokenRequestOwners1 {
-    type Error = Error;
-    fn try_from(latest: DescribeDelegationTokenRequestOwners2) -> Result<Self, Self::Error> {
-        Ok(DescribeDelegationTokenRequestOwners1 {
+impl From<DescribeDelegationTokenRequestOwners2> for DescribeDelegationTokenRequestOwners1 {
+    fn from(
+        latest: DescribeDelegationTokenRequestOwners2,
+    ) -> DescribeDelegationTokenRequestOwners1 {
+        DescribeDelegationTokenRequestOwners1 {
             principal_type: latest.principal_type,
             principal_name: latest.principal_name,
-        })
+        }
     }
 }
 

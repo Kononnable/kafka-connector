@@ -47,17 +47,17 @@ impl ApiCall for FindCoordinatorRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &FindCoordinatorRequest0::try_from(self)?,
+                &FindCoordinatorRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &FindCoordinatorRequest1::try_from(self)?,
+                &FindCoordinatorRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &FindCoordinatorRequest2::try_from(self)?,
+                &FindCoordinatorRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -92,20 +92,20 @@ pub struct FindCoordinatorRequest0 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct FindCoordinatorRequest1 {
     pub key: String,
-    pub key_type: Optional<Int8>,
+    pub key_type: Int8,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct FindCoordinatorRequest2 {
     pub key: String,
-    pub key_type: Optional<Int8>,
+    pub key_type: Int8,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct FindCoordinatorRequest3 {
     pub key: String,
-    pub key_type: Optional<Int8>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub key_type: Int8,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -118,9 +118,9 @@ pub struct FindCoordinatorResponse0 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FindCoordinatorResponse1 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
-    pub error_message: Optional<NullableString>,
+    pub error_message: Option<NullableString>,
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
@@ -128,9 +128,9 @@ pub struct FindCoordinatorResponse1 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FindCoordinatorResponse2 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
-    pub error_message: Optional<NullableString>,
+    pub error_message: Option<NullableString>,
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
@@ -138,46 +138,37 @@ pub struct FindCoordinatorResponse2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct FindCoordinatorResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
-    pub error_message: Optional<NullableString>,
+    pub error_message: Option<NullableString>,
     pub node_id: Int32,
     pub host: String,
     pub port: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest0 {
-    type Error = Error;
-    fn try_from(latest: FindCoordinatorRequest3) -> Result<Self, Self::Error> {
-        if latest.key_type.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "FindCoordinatorRequest",
-                0,
-                "key_type",
-            ));
+impl From<FindCoordinatorRequest3> for FindCoordinatorRequest0 {
+    fn from(latest: FindCoordinatorRequest3) -> FindCoordinatorRequest0 {
+        log::debug!("Using old api format - FindCoordinatorRequest0, ignoring field key_type");
+        FindCoordinatorRequest0 { key: latest.key }
+    }
+}
+
+impl From<FindCoordinatorRequest3> for FindCoordinatorRequest1 {
+    fn from(latest: FindCoordinatorRequest3) -> FindCoordinatorRequest1 {
+        FindCoordinatorRequest1 {
+            key: latest.key,
+            key_type: latest.key_type,
         }
-        Ok(FindCoordinatorRequest0 { key: latest.key })
     }
 }
 
-impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest1 {
-    type Error = Error;
-    fn try_from(latest: FindCoordinatorRequest3) -> Result<Self, Self::Error> {
-        Ok(FindCoordinatorRequest1 {
+impl From<FindCoordinatorRequest3> for FindCoordinatorRequest2 {
+    fn from(latest: FindCoordinatorRequest3) -> FindCoordinatorRequest2 {
+        FindCoordinatorRequest2 {
             key: latest.key,
             key_type: latest.key_type,
-        })
-    }
-}
-
-impl TryFrom<FindCoordinatorRequest3> for FindCoordinatorRequest2 {
-    type Error = Error;
-    fn try_from(latest: FindCoordinatorRequest3) -> Result<Self, Self::Error> {
-        Ok(FindCoordinatorRequest2 {
-            key: latest.key,
-            key_type: latest.key_type,
-        })
+        }
     }
 }
 

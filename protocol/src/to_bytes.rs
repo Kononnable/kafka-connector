@@ -56,30 +56,7 @@ impl ToBytes for String {
         self.as_str().serialize(buf, is_flexible_version)
     }
 }
-impl ToBytes for Option<&str> {
-    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
-        match &self {
-            Some(str) => str.serialize(buf, is_flexible_version),
-            None => match is_flexible_version {
-                true => {
-                    UnsignedVarInt32::new(0).serialize(buf, is_flexible_version);
-                }
-                false => {
-                    buf.put_i16(-1_i16);
-                }
-            },
-        }
-    }
-}
-impl ToBytes for Option<String> {
-    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
-        let opt = match &self {
-            Some(str) => Some(str.as_str()),
-            None => None,
-        };
-        opt.serialize(buf, is_flexible_version);
-    }
-}
+
 impl ToBytes for bool {
     fn serialize(&self, buf: &mut BytesMut, _is_flexible_version: bool) {
         buf.put_i8(*self as i8);
@@ -113,5 +90,16 @@ impl ToBytes for i64 {
 impl ToBytes for f64 {
     fn serialize(&self, buf: &mut BytesMut, _is_flexible_version: bool) {
         buf.put_f64(*self);
+    }
+}
+impl<T> ToBytes for Option<T>
+where
+    T: ToBytes + Default,
+{
+    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
+        match self {
+            Some(value) => T::serialize(value, buf, is_flexible_version),
+            None => T::serialize(&T::default(), buf, is_flexible_version),
+        }
     }
 }

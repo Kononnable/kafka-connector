@@ -45,7 +45,7 @@ impl ApiCall for SaslHandshakeRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &SaslHandshakeRequest0::try_from(self)?,
+                &SaslHandshakeRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -91,12 +91,11 @@ pub struct SaslHandshakeResponse1 {
     pub mechanisms: Vec<String>,
 }
 
-impl TryFrom<SaslHandshakeRequest1> for SaslHandshakeRequest0 {
-    type Error = Error;
-    fn try_from(latest: SaslHandshakeRequest1) -> Result<Self, Self::Error> {
-        Ok(SaslHandshakeRequest0 {
+impl From<SaslHandshakeRequest1> for SaslHandshakeRequest0 {
+    fn from(latest: SaslHandshakeRequest1) -> SaslHandshakeRequest0 {
+        SaslHandshakeRequest0 {
             mechanism: latest.mechanism,
-        })
+        }
     }
 }
 

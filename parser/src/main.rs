@@ -1,5 +1,5 @@
 use std::{
-    fs::{remove_dir_all, DirBuilder, File},
+    fs::{read_to_string, remove_dir_all, DirBuilder, File},
     io::Write,
     path::Path,
 };
@@ -12,10 +12,11 @@ use regex::Regex;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let body = reqwest::get("https://kafka.apache.org/protocol")
-        .await?
-        .text()
-        .await?;
+    // let body = reqwest::get("https://kafka.apache.org/protocol")
+    //     .await?
+    //     .text()
+    // .await?;
+    let body = read_to_string("./parser/protocol.html")?;
 
     let regex = Regex::new(r"(?m)<pre>([^<]+)</pre>").unwrap();
     let capture_groups = regex.captures_iter(&body);
@@ -36,9 +37,7 @@ async fn main() -> anyhow::Result<()> {
     remove_dir_all(base_path)?;
     DirBuilder::new().recursive(true).create(base_path)?;
 
-    for (key, grouped_call) in transformed_definitions.into_iter()
-    // .filter(|x| x.0 == "DeleteGroups")
-    {
+    for (key, grouped_call) in transformed_definitions.into_iter() {
         let file_name = format!("{}{}.rs", &base_path.display(), to_snake_case(key));
         let path = Path::new(&file_name);
         println!("{}", path.display());

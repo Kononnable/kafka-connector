@@ -46,12 +46,12 @@ impl ApiCall for DescribeAclsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &DescribeAclsRequest0::try_from(self)?,
+                &DescribeAclsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &DescribeAclsRequest1::try_from(self)?,
+                &DescribeAclsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -88,7 +88,7 @@ pub struct DescribeAclsRequest0 {
 pub struct DescribeAclsRequest1 {
     pub resource_type_filter: Int8,
     pub resource_name_filter: NullableString,
-    pub pattern_type_filter: Optional<Int8>,
+    pub pattern_type_filter: Int8,
     pub principal_filter: NullableString,
     pub host_filter: NullableString,
     pub operation: Int8,
@@ -99,12 +99,12 @@ pub struct DescribeAclsRequest1 {
 pub struct DescribeAclsRequest2 {
     pub resource_type_filter: Int8,
     pub resource_name_filter: NullableString,
-    pub pattern_type_filter: Optional<Int8>,
+    pub pattern_type_filter: Int8,
     pub principal_filter: NullableString,
     pub host_filter: NullableString,
     pub operation: Int8,
     pub permission_type: Int8,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -142,7 +142,7 @@ pub struct DescribeAclsResponse1 {
 pub struct DescribeAclsResponseResources1 {
     pub resource_type: Int8,
     pub resource_name: String,
-    pub pattern_type: Optional<Int8>,
+    pub pattern_type: Option<Int8>,
     pub acls: Vec<DescribeAclsResponseResourcesAcls1>,
 }
 
@@ -160,16 +160,16 @@ pub struct DescribeAclsResponse2 {
     pub error_code: Int16,
     pub error_message: NullableString,
     pub resources: Vec<DescribeAclsResponseResources2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeAclsResponseResources2 {
     pub resource_type: Int8,
     pub resource_name: String,
-    pub pattern_type: Optional<Int8>,
+    pub pattern_type: Option<Int8>,
     pub acls: Vec<DescribeAclsResponseResourcesAcls2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -178,34 +178,28 @@ pub struct DescribeAclsResponseResourcesAcls2 {
     pub host: String,
     pub operation: Int8,
     pub permission_type: Int8,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest0 {
-    type Error = Error;
-    fn try_from(latest: DescribeAclsRequest2) -> Result<Self, Self::Error> {
-        if latest.pattern_type_filter.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeAclsRequest",
-                0,
-                "pattern_type_filter",
-            ));
-        }
-        Ok(DescribeAclsRequest0 {
+impl From<DescribeAclsRequest2> for DescribeAclsRequest0 {
+    fn from(latest: DescribeAclsRequest2) -> DescribeAclsRequest0 {
+        log::debug!(
+            "Using old api format - DescribeAclsRequest0, ignoring field pattern_type_filter"
+        );
+        DescribeAclsRequest0 {
             resource_type_filter: latest.resource_type_filter,
             resource_name_filter: latest.resource_name_filter,
             principal_filter: latest.principal_filter,
             host_filter: latest.host_filter,
             operation: latest.operation,
             permission_type: latest.permission_type,
-        })
+        }
     }
 }
 
-impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest1 {
-    type Error = Error;
-    fn try_from(latest: DescribeAclsRequest2) -> Result<Self, Self::Error> {
-        Ok(DescribeAclsRequest1 {
+impl From<DescribeAclsRequest2> for DescribeAclsRequest1 {
+    fn from(latest: DescribeAclsRequest2) -> DescribeAclsRequest1 {
+        DescribeAclsRequest1 {
             resource_type_filter: latest.resource_type_filter,
             resource_name_filter: latest.resource_name_filter,
             pattern_type_filter: latest.pattern_type_filter,
@@ -213,7 +207,7 @@ impl TryFrom<DescribeAclsRequest2> for DescribeAclsRequest1 {
             host_filter: latest.host_filter,
             operation: latest.operation,
             permission_type: latest.permission_type,
-        })
+        }
     }
 }
 

@@ -46,12 +46,12 @@ impl ApiCall for DeleteRecordsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &DeleteRecordsRequest0::try_from(self)?,
+                &DeleteRecordsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &DeleteRecordsRequest1::try_from(self)?,
+                &DeleteRecordsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -117,21 +117,21 @@ pub struct DeleteRecordsRequestTopicsPartitions1 {
 pub struct DeleteRecordsRequest2 {
     pub topics: Vec<DeleteRecordsRequestTopics2>,
     pub timeout_ms: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequestTopics2 {
     pub name: String,
     pub partitions: Vec<DeleteRecordsRequestTopicsPartitions2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteRecordsRequestTopicsPartitions2 {
     pub partition_index: Int32,
     pub offset: Int64,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -176,14 +176,14 @@ pub struct DeleteRecordsResponseTopicsPartitions1 {
 pub struct DeleteRecordsResponse2 {
     pub throttle_time_ms: Int32,
     pub topics: Vec<DeleteRecordsResponseTopics2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteRecordsResponseTopics2 {
     pub name: String,
     pub partitions: Vec<DeleteRecordsResponseTopicsPartitions2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -191,82 +191,72 @@ pub struct DeleteRecordsResponseTopicsPartitions2 {
     pub partition_index: Int32,
     pub low_watermark: Int64,
     pub error_code: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<DeleteRecordsRequest2> for DeleteRecordsRequest0 {
-    type Error = Error;
-    fn try_from(latest: DeleteRecordsRequest2) -> Result<Self, Self::Error> {
-        Ok(DeleteRecordsRequest0 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<DeleteRecordsRequest2> for DeleteRecordsRequest0 {
+    fn from(latest: DeleteRecordsRequest2) -> DeleteRecordsRequest0 {
+        DeleteRecordsRequest0 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             timeout_ms: latest.timeout_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics0 {
-    type Error = Error;
-    fn try_from(latest: DeleteRecordsRequestTopics2) -> Result<Self, Self::Error> {
-        Ok(DeleteRecordsRequestTopics0 {
+impl From<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics0 {
+    fn from(latest: DeleteRecordsRequestTopics2) -> DeleteRecordsRequestTopics0 {
+        DeleteRecordsRequestTopics0 {
             name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<DeleteRecordsRequestTopicsPartitions2> for DeleteRecordsRequestTopicsPartitions0 {
-    type Error = Error;
-    fn try_from(latest: DeleteRecordsRequestTopicsPartitions2) -> Result<Self, Self::Error> {
-        Ok(DeleteRecordsRequestTopicsPartitions0 {
+impl From<DeleteRecordsRequestTopicsPartitions2> for DeleteRecordsRequestTopicsPartitions0 {
+    fn from(
+        latest: DeleteRecordsRequestTopicsPartitions2,
+    ) -> DeleteRecordsRequestTopicsPartitions0 {
+        DeleteRecordsRequestTopicsPartitions0 {
             partition_index: latest.partition_index,
             offset: latest.offset,
-        })
+        }
     }
 }
 
-impl TryFrom<DeleteRecordsRequest2> for DeleteRecordsRequest1 {
-    type Error = Error;
-    fn try_from(latest: DeleteRecordsRequest2) -> Result<Self, Self::Error> {
-        Ok(DeleteRecordsRequest1 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<DeleteRecordsRequest2> for DeleteRecordsRequest1 {
+    fn from(latest: DeleteRecordsRequest2) -> DeleteRecordsRequest1 {
+        DeleteRecordsRequest1 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             timeout_ms: latest.timeout_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics1 {
-    type Error = Error;
-    fn try_from(latest: DeleteRecordsRequestTopics2) -> Result<Self, Self::Error> {
-        Ok(DeleteRecordsRequestTopics1 {
+impl From<DeleteRecordsRequestTopics2> for DeleteRecordsRequestTopics1 {
+    fn from(latest: DeleteRecordsRequestTopics2) -> DeleteRecordsRequestTopics1 {
+        DeleteRecordsRequestTopics1 {
             name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<DeleteRecordsRequestTopicsPartitions2> for DeleteRecordsRequestTopicsPartitions1 {
-    type Error = Error;
-    fn try_from(latest: DeleteRecordsRequestTopicsPartitions2) -> Result<Self, Self::Error> {
-        Ok(DeleteRecordsRequestTopicsPartitions1 {
+impl From<DeleteRecordsRequestTopicsPartitions2> for DeleteRecordsRequestTopicsPartitions1 {
+    fn from(
+        latest: DeleteRecordsRequestTopicsPartitions2,
+    ) -> DeleteRecordsRequestTopicsPartitions1 {
+        DeleteRecordsRequestTopicsPartitions1 {
             partition_index: latest.partition_index,
             offset: latest.offset,
-        })
+        }
     }
 }
 

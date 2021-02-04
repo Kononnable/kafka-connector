@@ -1,3 +1,5 @@
+use std::vec;
+
 use kafka_connector::kafka_client::BrokerClient;
 
 use kafka_connector::protocol;
@@ -9,7 +11,7 @@ use protocol::{
         ApiNumbers,
     },
     custom_types::{
-        optional::Optional,
+        nullable_string::NullableString,
         record_batch::{
             batch::RecordBatch, record::Record, record_batch_with_size::RecordBatchWithSize,
         },
@@ -29,12 +31,12 @@ pub async fn main() -> anyhow::Result<()> {
     let metadata_request = protocol::api::metadata::MetadataRequest {
         topics: vec![MetadataRequestTopics9 {
             name: "test2".to_owned(),
-            tag_buffer: Optional::Some(TagBuffer {}),
+            tag_buffer: TagBuffer {},
         }],
-        allow_auto_topic_creation: Optional::None,
-        include_cluster_authorized_operations: Optional::None,
-        include_topic_authorized_operations: Optional::None,
-        tag_buffer: Optional::Some(TagBuffer {}),
+        allow_auto_topic_creation: false,
+        include_cluster_authorized_operations: false,
+        include_topic_authorized_operations: false,
+        tag_buffer: TagBuffer {},
     };
     let supported_version = broker
         .supported_versions
@@ -45,30 +47,30 @@ pub async fn main() -> anyhow::Result<()> {
 
     let partition = FetchRequestTopicsPartitions12 {
         partition: 0,
-        current_leader_epoch: Optional::None,
+        current_leader_epoch: 0,
         fetch_offset: 0,
-        last_fetched_epoch: Optional::None,
-        log_start_offset: Optional::None,
+        last_fetched_epoch: 0,
+        log_start_offset: 0,
         partition_max_bytes: 100000,
-        tag_buffer: Optional::None,
+        tag_buffer: TagBuffer {},
     };
 
     let fetch_request = protocol::api::fetch::FetchRequest {
-        forgotten_topics_data: Optional::None,
-        isolation_level: Optional::Some(1),
+        forgotten_topics_data: vec![],
+        isolation_level: 1,
         replica_id: -1,
         max_wait_ms: 10000,
         min_bytes: 100,
-        max_bytes: Optional::Some(3200000),
-        session_id: Optional::None,
-        session_epoch: Optional::None,
+        max_bytes: 3200000,
+        session_id: 0,
+        session_epoch: 0,
         topics: vec![FetchRequestTopics12 {
             topic: "test3".to_owned(),
-            tag_buffer: Optional::Some(TagBuffer {}),
+            tag_buffer: TagBuffer {},
             partitions: vec![partition],
         }],
-        rack_id: Optional::Some("".to_owned()),
-        tag_buffer: Optional::None,
+        rack_id: "".to_owned(),
+        tag_buffer: TagBuffer {},
     };
     println!("{:#?}", fetch_request);
 
@@ -99,7 +101,7 @@ pub async fn main() -> anyhow::Result<()> {
         }],
     };
     let produce_request = protocol::api::produce::ProduceRequest {
-        transactional_id: Optional::Some(None),
+        transactional_id: NullableString::None,
         acks: 1_i16,
         timeout: 10_000,
         topic_data: vec![ProduceRequestTopicData8 {

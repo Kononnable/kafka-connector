@@ -46,12 +46,12 @@ impl ApiCall for ElectLeadersRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &ElectLeadersRequest0::try_from(self)?,
+                &ElectLeadersRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &ElectLeadersRequest1::try_from(self)?,
+                &ElectLeadersRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -88,7 +88,7 @@ pub struct ElectLeadersRequestTopicPartitions0 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ElectLeadersRequest1 {
-    pub election_type: Optional<Int8>,
+    pub election_type: Int8,
     pub topic_partitions: Vec<ElectLeadersRequestTopicPartitions1>,
     pub timeout_ms: Int32,
 }
@@ -101,17 +101,17 @@ pub struct ElectLeadersRequestTopicPartitions1 {
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ElectLeadersRequest2 {
-    pub election_type: Optional<Int8>,
+    pub election_type: Int8,
     pub topic_partitions: Vec<ElectLeadersRequestTopicPartitions2>,
     pub timeout_ms: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ElectLeadersRequestTopicPartitions2 {
     pub topic: String,
     pub partition_id: Vec<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -136,7 +136,7 @@ pub struct ElectLeadersResponseReplicaElectionResultsPartitionResult0 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponse1 {
     pub throttle_time_ms: Int32,
-    pub error_code: Optional<Int16>,
+    pub error_code: Option<Int16>,
     pub replica_election_results: Vec<ElectLeadersResponseReplicaElectionResults1>,
 }
 
@@ -156,16 +156,16 @@ pub struct ElectLeadersResponseReplicaElectionResultsPartitionResult1 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponse2 {
     pub throttle_time_ms: Int32,
-    pub error_code: Optional<Int16>,
+    pub error_code: Option<Int16>,
     pub replica_election_results: Vec<ElectLeadersResponseReplicaElectionResults2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ElectLeadersResponseReplicaElectionResults2 {
     pub topic: String,
     pub partition_result: Vec<ElectLeadersResponseReplicaElectionResultsPartitionResult2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -173,62 +173,52 @@ pub struct ElectLeadersResponseReplicaElectionResultsPartitionResult2 {
     pub partition_id: Int32,
     pub error_code: Int16,
     pub error_message: NullableString,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest0 {
-    type Error = Error;
-    fn try_from(latest: ElectLeadersRequest2) -> Result<Self, Self::Error> {
-        if latest.election_type.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ElectLeadersRequest",
-                0,
-                "election_type",
-            ));
-        }
-        Ok(ElectLeadersRequest0 {
+impl From<ElectLeadersRequest2> for ElectLeadersRequest0 {
+    fn from(latest: ElectLeadersRequest2) -> ElectLeadersRequest0 {
+        log::debug!("Using old api format - ElectLeadersRequest0, ignoring field election_type");
+        ElectLeadersRequest0 {
             topic_partitions: latest
                 .topic_partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+                .map(|ele| ele.into())
+                .collect(),
             timeout_ms: latest.timeout_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPartitions0 {
-    type Error = Error;
-    fn try_from(latest: ElectLeadersRequestTopicPartitions2) -> Result<Self, Self::Error> {
-        Ok(ElectLeadersRequestTopicPartitions0 {
+impl From<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPartitions0 {
+    fn from(latest: ElectLeadersRequestTopicPartitions2) -> ElectLeadersRequestTopicPartitions0 {
+        ElectLeadersRequestTopicPartitions0 {
             topic: latest.topic,
             partition_id: latest.partition_id,
-        })
+        }
     }
 }
 
-impl TryFrom<ElectLeadersRequest2> for ElectLeadersRequest1 {
-    type Error = Error;
-    fn try_from(latest: ElectLeadersRequest2) -> Result<Self, Self::Error> {
-        Ok(ElectLeadersRequest1 {
+impl From<ElectLeadersRequest2> for ElectLeadersRequest1 {
+    fn from(latest: ElectLeadersRequest2) -> ElectLeadersRequest1 {
+        ElectLeadersRequest1 {
             election_type: latest.election_type,
             topic_partitions: latest
                 .topic_partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+                .map(|ele| ele.into())
+                .collect(),
             timeout_ms: latest.timeout_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPartitions1 {
-    type Error = Error;
-    fn try_from(latest: ElectLeadersRequestTopicPartitions2) -> Result<Self, Self::Error> {
-        Ok(ElectLeadersRequestTopicPartitions1 {
+impl From<ElectLeadersRequestTopicPartitions2> for ElectLeadersRequestTopicPartitions1 {
+    fn from(latest: ElectLeadersRequestTopicPartitions2) -> ElectLeadersRequestTopicPartitions1 {
+        ElectLeadersRequestTopicPartitions1 {
             topic: latest.topic,
             partition_id: latest.partition_id,
-        })
+        }
     }
 }
 

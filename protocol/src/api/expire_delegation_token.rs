@@ -46,12 +46,12 @@ impl ApiCall for ExpireDelegationTokenRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &ExpireDelegationTokenRequest0::try_from(self)?,
+                &ExpireDelegationTokenRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &ExpireDelegationTokenRequest1::try_from(self)?,
+                &ExpireDelegationTokenRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -100,7 +100,7 @@ pub struct ExpireDelegationTokenRequest1 {
 pub struct ExpireDelegationTokenRequest2 {
     pub hmac: KafkaBytes,
     pub expiry_time_period_ms: Int64,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -122,26 +122,24 @@ pub struct ExpireDelegationTokenResponse2 {
     pub error_code: Int16,
     pub expiry_timestamp_ms: Int64,
     pub throttle_time_ms: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<ExpireDelegationTokenRequest2> for ExpireDelegationTokenRequest0 {
-    type Error = Error;
-    fn try_from(latest: ExpireDelegationTokenRequest2) -> Result<Self, Self::Error> {
-        Ok(ExpireDelegationTokenRequest0 {
+impl From<ExpireDelegationTokenRequest2> for ExpireDelegationTokenRequest0 {
+    fn from(latest: ExpireDelegationTokenRequest2) -> ExpireDelegationTokenRequest0 {
+        ExpireDelegationTokenRequest0 {
             hmac: latest.hmac,
             expiry_time_period_ms: latest.expiry_time_period_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<ExpireDelegationTokenRequest2> for ExpireDelegationTokenRequest1 {
-    type Error = Error;
-    fn try_from(latest: ExpireDelegationTokenRequest2) -> Result<Self, Self::Error> {
-        Ok(ExpireDelegationTokenRequest1 {
+impl From<ExpireDelegationTokenRequest2> for ExpireDelegationTokenRequest1 {
+    fn from(latest: ExpireDelegationTokenRequest2) -> ExpireDelegationTokenRequest1 {
+        ExpireDelegationTokenRequest1 {
             hmac: latest.hmac,
             expiry_time_period_ms: latest.expiry_time_period_ms,
-        })
+        }
     }
 }
 

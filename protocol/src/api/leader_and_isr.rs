@@ -48,22 +48,22 @@ impl ApiCall for LeaderAndIsrRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &LeaderAndIsrRequest0::try_from(self)?,
+                &LeaderAndIsrRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &LeaderAndIsrRequest1::try_from(self)?,
+                &LeaderAndIsrRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &LeaderAndIsrRequest2::try_from(self)?,
+                &LeaderAndIsrRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &LeaderAndIsrRequest3::try_from(self)?,
+                &LeaderAndIsrRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -133,7 +133,7 @@ pub struct LeaderAndIsrRequestUngroupedPartitionStates1 {
     pub isr: Vec<Int32>,
     pub zk_version: Int32,
     pub replicas: Vec<Int32>,
-    pub is_new: Optional<Boolean>,
+    pub is_new: Boolean,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -147,8 +147,8 @@ pub struct LeaderAndIsrRequestLiveLeaders1 {
 pub struct LeaderAndIsrRequest2 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub broker_epoch: Optional<Int64>,
-    pub topic_states: Optional<Vec<LeaderAndIsrRequestTopicStates2>>,
+    pub broker_epoch: Int64,
+    pub topic_states: Vec<LeaderAndIsrRequestTopicStates2>,
     pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders2>,
 }
 
@@ -181,8 +181,8 @@ pub struct LeaderAndIsrRequestLiveLeaders2 {
 pub struct LeaderAndIsrRequest3 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub broker_epoch: Optional<Int64>,
-    pub topic_states: Optional<Vec<LeaderAndIsrRequestTopicStates3>>,
+    pub broker_epoch: Int64,
+    pub topic_states: Vec<LeaderAndIsrRequestTopicStates3>,
     pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders3>,
 }
 
@@ -201,8 +201,8 @@ pub struct LeaderAndIsrRequestTopicStatesPartitionStates3 {
     pub isr: Vec<Int32>,
     pub zk_version: Int32,
     pub replicas: Vec<Int32>,
-    pub adding_replicas: Optional<Vec<Int32>>,
-    pub removing_replicas: Optional<Vec<Int32>>,
+    pub adding_replicas: Vec<Int32>,
+    pub removing_replicas: Vec<Int32>,
     pub is_new: Boolean,
 }
 
@@ -217,17 +217,17 @@ pub struct LeaderAndIsrRequestLiveLeaders3 {
 pub struct LeaderAndIsrRequest4 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub broker_epoch: Optional<Int64>,
-    pub topic_states: Optional<Vec<LeaderAndIsrRequestTopicStates4>>,
+    pub broker_epoch: Int64,
+    pub topic_states: Vec<LeaderAndIsrRequestTopicStates4>,
     pub live_leaders: Vec<LeaderAndIsrRequestLiveLeaders4>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaderAndIsrRequestTopicStates4 {
     pub topic_name: String,
     pub partition_states: Vec<LeaderAndIsrRequestTopicStatesPartitionStates4>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -239,10 +239,10 @@ pub struct LeaderAndIsrRequestTopicStatesPartitionStates4 {
     pub isr: Vec<Int32>,
     pub zk_version: Int32,
     pub replicas: Vec<Int32>,
-    pub adding_replicas: Optional<Vec<Int32>>,
-    pub removing_replicas: Optional<Vec<Int32>>,
+    pub adding_replicas: Vec<Int32>,
+    pub removing_replicas: Vec<Int32>,
     pub is_new: Boolean,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -250,7 +250,7 @@ pub struct LeaderAndIsrRequestLiveLeaders4 {
     pub broker_id: Int32,
     pub host_name: String,
     pub port: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -309,7 +309,7 @@ pub struct LeaderAndIsrResponsePartitionErrors3 {
 pub struct LeaderAndIsrResponse4 {
     pub error_code: Int16,
     pub partition_errors: Vec<LeaderAndIsrResponsePartitionErrors4>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -317,151 +317,105 @@ pub struct LeaderAndIsrResponsePartitionErrors4 {
     pub topic_name: String,
     pub partition_index: Int32,
     pub error_code: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest0 {
-    type Error = Error;
-    fn try_from(latest: LeaderAndIsrRequest4) -> Result<Self, Self::Error> {
-        if latest.broker_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequest",
-                0,
-                "broker_epoch",
-            ));
-        }
-        if latest.topic_states.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequest",
-                0,
-                "topic_states",
-            ));
-        }
-        Ok(LeaderAndIsrRequest0 {
+impl From<LeaderAndIsrRequest4> for LeaderAndIsrRequest0 {
+    fn from(latest: LeaderAndIsrRequest4) -> LeaderAndIsrRequest0 {
+        log::debug!("Using old api format - LeaderAndIsrRequest0, ignoring field broker_epoch");
+        log::debug!("Using old api format - LeaderAndIsrRequest0, ignoring field topic_states");
+        LeaderAndIsrRequest0 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             live_leaders: latest
                 .live_leaders
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+                .map(|ele| ele.into())
+                .collect(),
             ..LeaderAndIsrRequest0::default()
-        })
+        }
     }
 }
 
-impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders0 {
-    type Error = Error;
-    fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
-        Ok(LeaderAndIsrRequestLiveLeaders0 {
+impl From<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders0 {
+    fn from(latest: LeaderAndIsrRequestLiveLeaders4) -> LeaderAndIsrRequestLiveLeaders0 {
+        LeaderAndIsrRequestLiveLeaders0 {
             broker_id: latest.broker_id,
             host_name: latest.host_name,
             port: latest.port,
-        })
+        }
     }
 }
 
-impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest1 {
-    type Error = Error;
-    fn try_from(latest: LeaderAndIsrRequest4) -> Result<Self, Self::Error> {
-        if latest.broker_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequest",
-                1,
-                "broker_epoch",
-            ));
-        }
-        if latest.topic_states.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequest",
-                1,
-                "topic_states",
-            ));
-        }
-        Ok(LeaderAndIsrRequest1 {
+impl From<LeaderAndIsrRequest4> for LeaderAndIsrRequest1 {
+    fn from(latest: LeaderAndIsrRequest4) -> LeaderAndIsrRequest1 {
+        log::debug!("Using old api format - LeaderAndIsrRequest1, ignoring field broker_epoch");
+        log::debug!("Using old api format - LeaderAndIsrRequest1, ignoring field topic_states");
+        LeaderAndIsrRequest1 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             live_leaders: latest
                 .live_leaders
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+                .map(|ele| ele.into())
+                .collect(),
             ..LeaderAndIsrRequest1::default()
-        })
+        }
     }
 }
 
-impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders1 {
-    type Error = Error;
-    fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
-        Ok(LeaderAndIsrRequestLiveLeaders1 {
+impl From<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders1 {
+    fn from(latest: LeaderAndIsrRequestLiveLeaders4) -> LeaderAndIsrRequestLiveLeaders1 {
+        LeaderAndIsrRequestLiveLeaders1 {
             broker_id: latest.broker_id,
             host_name: latest.host_name,
             port: latest.port,
-        })
+        }
     }
 }
 
-impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest2 {
-    type Error = Error;
-    fn try_from(latest: LeaderAndIsrRequest4) -> Result<Self, Self::Error> {
-        Ok(LeaderAndIsrRequest2 {
+impl From<LeaderAndIsrRequest4> for LeaderAndIsrRequest2 {
+    fn from(latest: LeaderAndIsrRequest4) -> LeaderAndIsrRequest2 {
+        LeaderAndIsrRequest2 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             broker_epoch: latest.broker_epoch,
             topic_states: latest
                 .topic_states
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
             live_leaders: latest
                 .live_leaders
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates2 {
-    type Error = Error;
-    fn try_from(latest: LeaderAndIsrRequestTopicStates4) -> Result<Self, Self::Error> {
-        Ok(LeaderAndIsrRequestTopicStates2 {
+impl From<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates2 {
+    fn from(latest: LeaderAndIsrRequestTopicStates4) -> LeaderAndIsrRequestTopicStates2 {
+        LeaderAndIsrRequestTopicStates2 {
             topic_name: latest.topic_name,
             partition_states: latest
                 .partition_states
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
+impl From<LeaderAndIsrRequestTopicStatesPartitionStates4>
     for LeaderAndIsrRequestTopicStatesPartitionStates2
 {
-    type Error = Error;
-    fn try_from(
+    fn from(
         latest: LeaderAndIsrRequestTopicStatesPartitionStates4,
-    ) -> Result<Self, Self::Error> {
-        if latest.adding_replicas.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequestTopicStatesPartitionStates",
-                2,
-                "adding_replicas",
-            ));
-        }
-        if latest.removing_replicas.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "LeaderAndIsrRequestTopicStatesPartitionStates",
-                2,
-                "removing_replicas",
-            ));
-        }
-        Ok(LeaderAndIsrRequestTopicStatesPartitionStates2 {
+    ) -> LeaderAndIsrRequestTopicStatesPartitionStates2 {
+        log::debug!("Using old api format - LeaderAndIsrRequestTopicStatesPartitionStates2, ignoring field adding_replicas");
+        log::debug!("Using old api format - LeaderAndIsrRequestTopicStatesPartitionStates2, ignoring field removing_replicas");
+        LeaderAndIsrRequestTopicStatesPartitionStates2 {
             partition_index: latest.partition_index,
             controller_epoch: latest.controller_epoch,
             leader: latest.leader,
@@ -470,67 +424,60 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
             zk_version: latest.zk_version,
             replicas: latest.replicas,
             is_new: latest.is_new,
-        })
+        }
     }
 }
 
-impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders2 {
-    type Error = Error;
-    fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
-        Ok(LeaderAndIsrRequestLiveLeaders2 {
+impl From<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders2 {
+    fn from(latest: LeaderAndIsrRequestLiveLeaders4) -> LeaderAndIsrRequestLiveLeaders2 {
+        LeaderAndIsrRequestLiveLeaders2 {
             broker_id: latest.broker_id,
             host_name: latest.host_name,
             port: latest.port,
-        })
+        }
     }
 }
 
-impl TryFrom<LeaderAndIsrRequest4> for LeaderAndIsrRequest3 {
-    type Error = Error;
-    fn try_from(latest: LeaderAndIsrRequest4) -> Result<Self, Self::Error> {
-        Ok(LeaderAndIsrRequest3 {
+impl From<LeaderAndIsrRequest4> for LeaderAndIsrRequest3 {
+    fn from(latest: LeaderAndIsrRequest4) -> LeaderAndIsrRequest3 {
+        LeaderAndIsrRequest3 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             broker_epoch: latest.broker_epoch,
             topic_states: latest
                 .topic_states
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
+                .into_iter()
+                .map(|ele| ele.into())
+                .collect(),
             live_leaders: latest
                 .live_leaders
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates3 {
-    type Error = Error;
-    fn try_from(latest: LeaderAndIsrRequestTopicStates4) -> Result<Self, Self::Error> {
-        Ok(LeaderAndIsrRequestTopicStates3 {
+impl From<LeaderAndIsrRequestTopicStates4> for LeaderAndIsrRequestTopicStates3 {
+    fn from(latest: LeaderAndIsrRequestTopicStates4) -> LeaderAndIsrRequestTopicStates3 {
+        LeaderAndIsrRequestTopicStates3 {
             topic_name: latest.topic_name,
             partition_states: latest
                 .partition_states
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
+impl From<LeaderAndIsrRequestTopicStatesPartitionStates4>
     for LeaderAndIsrRequestTopicStatesPartitionStates3
 {
-    type Error = Error;
-    fn try_from(
+    fn from(
         latest: LeaderAndIsrRequestTopicStatesPartitionStates4,
-    ) -> Result<Self, Self::Error> {
-        Ok(LeaderAndIsrRequestTopicStatesPartitionStates3 {
+    ) -> LeaderAndIsrRequestTopicStatesPartitionStates3 {
+        LeaderAndIsrRequestTopicStatesPartitionStates3 {
             partition_index: latest.partition_index,
             controller_epoch: latest.controller_epoch,
             leader: latest.leader,
@@ -541,18 +488,17 @@ impl TryFrom<LeaderAndIsrRequestTopicStatesPartitionStates4>
             adding_replicas: latest.adding_replicas,
             removing_replicas: latest.removing_replicas,
             is_new: latest.is_new,
-        })
+        }
     }
 }
 
-impl TryFrom<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders3 {
-    type Error = Error;
-    fn try_from(latest: LeaderAndIsrRequestLiveLeaders4) -> Result<Self, Self::Error> {
-        Ok(LeaderAndIsrRequestLiveLeaders3 {
+impl From<LeaderAndIsrRequestLiveLeaders4> for LeaderAndIsrRequestLiveLeaders3 {
+    fn from(latest: LeaderAndIsrRequestLiveLeaders4) -> LeaderAndIsrRequestLiveLeaders3 {
+        LeaderAndIsrRequestLiveLeaders3 {
             broker_id: latest.broker_id,
             host_name: latest.host_name,
             port: latest.port,
-        })
+        }
     }
 }
 

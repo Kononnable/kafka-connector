@@ -51,37 +51,37 @@ impl ApiCall for OffsetFetchRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &OffsetFetchRequest0::try_from(self)?,
+                &OffsetFetchRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &OffsetFetchRequest1::try_from(self)?,
+                &OffsetFetchRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &OffsetFetchRequest2::try_from(self)?,
+                &OffsetFetchRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &OffsetFetchRequest3::try_from(self)?,
+                &OffsetFetchRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             4 => ToBytes::serialize(
-                &OffsetFetchRequest4::try_from(self)?,
+                &OffsetFetchRequest4::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             5 => ToBytes::serialize(
-                &OffsetFetchRequest5::try_from(self)?,
+                &OffsetFetchRequest5::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             6 => ToBytes::serialize(
-                &OffsetFetchRequest6::try_from(self)?,
+                &OffsetFetchRequest6::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -185,29 +185,29 @@ pub struct OffsetFetchRequestTopics5 {
 pub struct OffsetFetchRequest6 {
     pub group_id: String,
     pub topics: Vec<OffsetFetchRequestTopics6>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics6 {
     pub name: String,
     pub partition_indexes: Vec<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequest7 {
     pub group_id: String,
     pub topics: Vec<OffsetFetchRequestTopics7>,
-    pub require_stable: Optional<Boolean>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub require_stable: Boolean,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetFetchRequestTopics7 {
     pub name: String,
     pub partition_indexes: Vec<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -251,7 +251,7 @@ pub struct OffsetFetchResponseTopicsPartitions1 {
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse2 {
     pub topics: Vec<OffsetFetchResponseTopics2>,
-    pub error_code: Optional<Int16>,
+    pub error_code: Option<Int16>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -270,9 +270,9 @@ pub struct OffsetFetchResponseTopicsPartitions2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub topics: Vec<OffsetFetchResponseTopics3>,
-    pub error_code: Optional<Int16>,
+    pub error_code: Option<Int16>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -291,9 +291,9 @@ pub struct OffsetFetchResponseTopicsPartitions3 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse4 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub topics: Vec<OffsetFetchResponseTopics4>,
-    pub error_code: Optional<Int16>,
+    pub error_code: Option<Int16>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -312,9 +312,9 @@ pub struct OffsetFetchResponseTopicsPartitions4 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse5 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub topics: Vec<OffsetFetchResponseTopics5>,
-    pub error_code: Optional<Int16>,
+    pub error_code: Option<Int16>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -327,277 +327,193 @@ pub struct OffsetFetchResponseTopics5 {
 pub struct OffsetFetchResponseTopicsPartitions5 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
-    pub committed_leader_epoch: Optional<Int32>,
+    pub committed_leader_epoch: Option<Int32>,
     pub metadata: NullableString,
     pub error_code: Int16,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse6 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub topics: Vec<OffsetFetchResponseTopics6>,
-    pub error_code: Optional<Int16>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub error_code: Option<Int16>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics6 {
     pub name: String,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions6>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopicsPartitions6 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
-    pub committed_leader_epoch: Optional<Int32>,
+    pub committed_leader_epoch: Option<Int32>,
     pub metadata: NullableString,
     pub error_code: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponse7 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub topics: Vec<OffsetFetchResponseTopics7>,
-    pub error_code: Optional<Int16>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub error_code: Option<Int16>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopics7 {
     pub name: String,
     pub partitions: Vec<OffsetFetchResponseTopicsPartitions7>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetFetchResponseTopicsPartitions7 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
-    pub committed_leader_epoch: Optional<Int32>,
+    pub committed_leader_epoch: Option<Int32>,
     pub metadata: NullableString,
     pub error_code: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest0 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequest7) -> Result<Self, Self::Error> {
-        if latest.require_stable.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                0,
-                "require_stable",
-            ));
-        }
-        Ok(OffsetFetchRequest0 {
+impl From<OffsetFetchRequest7> for OffsetFetchRequest0 {
+    fn from(latest: OffsetFetchRequest7) -> OffsetFetchRequest0 {
+        log::debug!("Using old api format - OffsetFetchRequest0, ignoring field require_stable");
+        OffsetFetchRequest0 {
             group_id: latest.group_id,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics0 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        Ok(OffsetFetchRequestTopics0 {
+impl From<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics0 {
+    fn from(latest: OffsetFetchRequestTopics7) -> OffsetFetchRequestTopics0 {
+        OffsetFetchRequestTopics0 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
-        })
-    }
-}
-
-impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest1 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequest7) -> Result<Self, Self::Error> {
-        if latest.require_stable.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                1,
-                "require_stable",
-            ));
         }
-        Ok(OffsetFetchRequest1 {
-            group_id: latest.group_id,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics1 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        Ok(OffsetFetchRequestTopics1 {
+impl From<OffsetFetchRequest7> for OffsetFetchRequest1 {
+    fn from(latest: OffsetFetchRequest7) -> OffsetFetchRequest1 {
+        log::debug!("Using old api format - OffsetFetchRequest1, ignoring field require_stable");
+        OffsetFetchRequest1 {
+            group_id: latest.group_id,
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
+    }
+}
+
+impl From<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics1 {
+    fn from(latest: OffsetFetchRequestTopics7) -> OffsetFetchRequestTopics1 {
+        OffsetFetchRequestTopics1 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
-        })
-    }
-}
-
-impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest2 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequest7) -> Result<Self, Self::Error> {
-        if latest.require_stable.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                2,
-                "require_stable",
-            ));
         }
-        Ok(OffsetFetchRequest2 {
-            group_id: latest.group_id,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics2 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        Ok(OffsetFetchRequestTopics2 {
+impl From<OffsetFetchRequest7> for OffsetFetchRequest2 {
+    fn from(latest: OffsetFetchRequest7) -> OffsetFetchRequest2 {
+        log::debug!("Using old api format - OffsetFetchRequest2, ignoring field require_stable");
+        OffsetFetchRequest2 {
+            group_id: latest.group_id,
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
+    }
+}
+
+impl From<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics2 {
+    fn from(latest: OffsetFetchRequestTopics7) -> OffsetFetchRequestTopics2 {
+        OffsetFetchRequestTopics2 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
-        })
-    }
-}
-
-impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest3 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequest7) -> Result<Self, Self::Error> {
-        if latest.require_stable.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                3,
-                "require_stable",
-            ));
         }
-        Ok(OffsetFetchRequest3 {
-            group_id: latest.group_id,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics3 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        Ok(OffsetFetchRequestTopics3 {
+impl From<OffsetFetchRequest7> for OffsetFetchRequest3 {
+    fn from(latest: OffsetFetchRequest7) -> OffsetFetchRequest3 {
+        log::debug!("Using old api format - OffsetFetchRequest3, ignoring field require_stable");
+        OffsetFetchRequest3 {
+            group_id: latest.group_id,
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
+    }
+}
+
+impl From<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics3 {
+    fn from(latest: OffsetFetchRequestTopics7) -> OffsetFetchRequestTopics3 {
+        OffsetFetchRequestTopics3 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
-        })
-    }
-}
-
-impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest4 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequest7) -> Result<Self, Self::Error> {
-        if latest.require_stable.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                4,
-                "require_stable",
-            ));
         }
-        Ok(OffsetFetchRequest4 {
-            group_id: latest.group_id,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics4 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        Ok(OffsetFetchRequestTopics4 {
+impl From<OffsetFetchRequest7> for OffsetFetchRequest4 {
+    fn from(latest: OffsetFetchRequest7) -> OffsetFetchRequest4 {
+        log::debug!("Using old api format - OffsetFetchRequest4, ignoring field require_stable");
+        OffsetFetchRequest4 {
+            group_id: latest.group_id,
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
+    }
+}
+
+impl From<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics4 {
+    fn from(latest: OffsetFetchRequestTopics7) -> OffsetFetchRequestTopics4 {
+        OffsetFetchRequestTopics4 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
-        })
-    }
-}
-
-impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest5 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequest7) -> Result<Self, Self::Error> {
-        if latest.require_stable.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                5,
-                "require_stable",
-            ));
         }
-        Ok(OffsetFetchRequest5 {
-            group_id: latest.group_id,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics5 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        Ok(OffsetFetchRequestTopics5 {
+impl From<OffsetFetchRequest7> for OffsetFetchRequest5 {
+    fn from(latest: OffsetFetchRequest7) -> OffsetFetchRequest5 {
+        log::debug!("Using old api format - OffsetFetchRequest5, ignoring field require_stable");
+        OffsetFetchRequest5 {
+            group_id: latest.group_id,
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
+    }
+}
+
+impl From<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics5 {
+    fn from(latest: OffsetFetchRequestTopics7) -> OffsetFetchRequestTopics5 {
+        OffsetFetchRequestTopics5 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
-        })
+        }
     }
 }
 
-impl TryFrom<OffsetFetchRequest7> for OffsetFetchRequest6 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequest7) -> Result<Self, Self::Error> {
-        if latest.require_stable.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetFetchRequest",
-                6,
-                "require_stable",
-            ));
-        }
-        Ok(OffsetFetchRequest6 {
+impl From<OffsetFetchRequest7> for OffsetFetchRequest6 {
+    fn from(latest: OffsetFetchRequest7) -> OffsetFetchRequest6 {
+        log::debug!("Using old api format - OffsetFetchRequest6, ignoring field require_stable");
+        OffsetFetchRequest6 {
             group_id: latest.group_id,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 
-impl TryFrom<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics6 {
-    type Error = Error;
-    fn try_from(latest: OffsetFetchRequestTopics7) -> Result<Self, Self::Error> {
-        Ok(OffsetFetchRequestTopics6 {
+impl From<OffsetFetchRequestTopics7> for OffsetFetchRequestTopics6 {
+    fn from(latest: OffsetFetchRequestTopics7) -> OffsetFetchRequestTopics6 {
+        OffsetFetchRequestTopics6 {
             name: latest.name,
             partition_indexes: latest.partition_indexes,
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 

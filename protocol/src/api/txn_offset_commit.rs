@@ -47,17 +47,17 @@ impl ApiCall for TxnOffsetCommitRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &TxnOffsetCommitRequest0::try_from(self)?,
+                &TxnOffsetCommitRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &TxnOffsetCommitRequest1::try_from(self)?,
+                &TxnOffsetCommitRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &TxnOffsetCommitRequest2::try_from(self)?,
+                &TxnOffsetCommitRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -147,7 +147,7 @@ pub struct TxnOffsetCommitRequestTopics2 {
 pub struct TxnOffsetCommitRequestTopicsPartitions2 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
-    pub committed_leader_epoch: Optional<Int32>,
+    pub committed_leader_epoch: Int32,
     pub committed_metadata: NullableString,
 }
 
@@ -157,27 +157,27 @@ pub struct TxnOffsetCommitRequest3 {
     pub group_id: String,
     pub producer_id: Int64,
     pub producer_epoch: Int16,
-    pub generation_id: Optional<Int32>,
-    pub member_id: Optional<String>,
-    pub group_instance_id: Optional<NullableString>,
+    pub generation_id: Int32,
+    pub member_id: String,
+    pub group_instance_id: NullableString,
     pub topics: Vec<TxnOffsetCommitRequestTopics3>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct TxnOffsetCommitRequestTopics3 {
     pub name: String,
     pub partitions: Vec<TxnOffsetCommitRequestTopicsPartitions3>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct TxnOffsetCommitRequestTopicsPartitions3 {
     pub partition_index: Int32,
     pub committed_offset: Int64,
-    pub committed_leader_epoch: Optional<Int32>,
+    pub committed_leader_epoch: Int32,
     pub committed_metadata: NullableString,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -238,182 +238,137 @@ pub struct TxnOffsetCommitResponseTopicsPartitions2 {
 pub struct TxnOffsetCommitResponse3 {
     pub throttle_time_ms: Int32,
     pub topics: Vec<TxnOffsetCommitResponseTopics3>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct TxnOffsetCommitResponseTopics3 {
     pub name: String,
     pub partitions: Vec<TxnOffsetCommitResponseTopicsPartitions3>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct TxnOffsetCommitResponseTopicsPartitions3 {
     pub partition_index: Int32,
     pub error_code: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest0 {
-    type Error = Error;
-    fn try_from(latest: TxnOffsetCommitRequest3) -> Result<Self, Self::Error> {
-        if latest.generation_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequest",
-                0,
-                "generation_id",
-            ));
-        }
-        Ok(TxnOffsetCommitRequest0 {
+impl From<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest0 {
+    fn from(latest: TxnOffsetCommitRequest3) -> TxnOffsetCommitRequest0 {
+        log::debug!("Using old api format - TxnOffsetCommitRequest0, ignoring field generation_id");
+        TxnOffsetCommitRequest0 {
             transactional_id: latest.transactional_id,
             group_id: latest.group_id,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics0 {
-    type Error = Error;
-    fn try_from(latest: TxnOffsetCommitRequestTopics3) -> Result<Self, Self::Error> {
-        Ok(TxnOffsetCommitRequestTopics0 {
+impl From<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics0 {
+    fn from(latest: TxnOffsetCommitRequestTopics3) -> TxnOffsetCommitRequestTopics0 {
+        TxnOffsetCommitRequestTopics0 {
             name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequestTopicsPartitions0 {
-    type Error = Error;
-    fn try_from(latest: TxnOffsetCommitRequestTopicsPartitions3) -> Result<Self, Self::Error> {
-        if latest.committed_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequestTopicsPartitions",
-                0,
-                "committed_leader_epoch",
-            ));
-        }
-        Ok(TxnOffsetCommitRequestTopicsPartitions0 {
+impl From<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequestTopicsPartitions0 {
+    fn from(
+        latest: TxnOffsetCommitRequestTopicsPartitions3,
+    ) -> TxnOffsetCommitRequestTopicsPartitions0 {
+        log::debug!("Using old api format - TxnOffsetCommitRequestTopicsPartitions0, ignoring field committed_leader_epoch");
+        TxnOffsetCommitRequestTopicsPartitions0 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
             committed_metadata: latest.committed_metadata,
-        })
+        }
     }
 }
 
-impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest1 {
-    type Error = Error;
-    fn try_from(latest: TxnOffsetCommitRequest3) -> Result<Self, Self::Error> {
-        if latest.generation_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequest",
-                1,
-                "generation_id",
-            ));
-        }
-        Ok(TxnOffsetCommitRequest1 {
+impl From<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest1 {
+    fn from(latest: TxnOffsetCommitRequest3) -> TxnOffsetCommitRequest1 {
+        log::debug!("Using old api format - TxnOffsetCommitRequest1, ignoring field generation_id");
+        TxnOffsetCommitRequest1 {
             transactional_id: latest.transactional_id,
             group_id: latest.group_id,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics1 {
-    type Error = Error;
-    fn try_from(latest: TxnOffsetCommitRequestTopics3) -> Result<Self, Self::Error> {
-        Ok(TxnOffsetCommitRequestTopics1 {
+impl From<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics1 {
+    fn from(latest: TxnOffsetCommitRequestTopics3) -> TxnOffsetCommitRequestTopics1 {
+        TxnOffsetCommitRequestTopics1 {
             name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequestTopicsPartitions1 {
-    type Error = Error;
-    fn try_from(latest: TxnOffsetCommitRequestTopicsPartitions3) -> Result<Self, Self::Error> {
-        if latest.committed_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequestTopicsPartitions",
-                1,
-                "committed_leader_epoch",
-            ));
-        }
-        Ok(TxnOffsetCommitRequestTopicsPartitions1 {
+impl From<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequestTopicsPartitions1 {
+    fn from(
+        latest: TxnOffsetCommitRequestTopicsPartitions3,
+    ) -> TxnOffsetCommitRequestTopicsPartitions1 {
+        log::debug!("Using old api format - TxnOffsetCommitRequestTopicsPartitions1, ignoring field committed_leader_epoch");
+        TxnOffsetCommitRequestTopicsPartitions1 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
             committed_metadata: latest.committed_metadata,
-        })
+        }
     }
 }
 
-impl TryFrom<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest2 {
-    type Error = Error;
-    fn try_from(latest: TxnOffsetCommitRequest3) -> Result<Self, Self::Error> {
-        if latest.generation_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "TxnOffsetCommitRequest",
-                2,
-                "generation_id",
-            ));
-        }
-        Ok(TxnOffsetCommitRequest2 {
+impl From<TxnOffsetCommitRequest3> for TxnOffsetCommitRequest2 {
+    fn from(latest: TxnOffsetCommitRequest3) -> TxnOffsetCommitRequest2 {
+        log::debug!("Using old api format - TxnOffsetCommitRequest2, ignoring field generation_id");
+        TxnOffsetCommitRequest2 {
             transactional_id: latest.transactional_id,
             group_id: latest.group_id,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics2 {
-    type Error = Error;
-    fn try_from(latest: TxnOffsetCommitRequestTopics3) -> Result<Self, Self::Error> {
-        Ok(TxnOffsetCommitRequestTopics2 {
+impl From<TxnOffsetCommitRequestTopics3> for TxnOffsetCommitRequestTopics2 {
+    fn from(latest: TxnOffsetCommitRequestTopics3) -> TxnOffsetCommitRequestTopics2 {
+        TxnOffsetCommitRequestTopics2 {
             name: latest.name,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequestTopicsPartitions2 {
-    type Error = Error;
-    fn try_from(latest: TxnOffsetCommitRequestTopicsPartitions3) -> Result<Self, Self::Error> {
-        Ok(TxnOffsetCommitRequestTopicsPartitions2 {
+impl From<TxnOffsetCommitRequestTopicsPartitions3> for TxnOffsetCommitRequestTopicsPartitions2 {
+    fn from(
+        latest: TxnOffsetCommitRequestTopicsPartitions3,
+    ) -> TxnOffsetCommitRequestTopicsPartitions2 {
+        TxnOffsetCommitRequestTopicsPartitions2 {
             partition_index: latest.partition_index,
             committed_offset: latest.committed_offset,
             committed_leader_epoch: latest.committed_leader_epoch,
             committed_metadata: latest.committed_metadata,
-        })
+        }
     }
 }
 

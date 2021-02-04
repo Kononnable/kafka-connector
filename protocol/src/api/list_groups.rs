@@ -48,22 +48,22 @@ impl ApiCall for ListGroupsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &ListGroupsRequest0::try_from(self)?,
+                &ListGroupsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &ListGroupsRequest1::try_from(self)?,
+                &ListGroupsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &ListGroupsRequest2::try_from(self)?,
+                &ListGroupsRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &ListGroupsRequest3::try_from(self)?,
+                &ListGroupsRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -99,13 +99,13 @@ pub struct ListGroupsRequest2 {}
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListGroupsRequest3 {
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ListGroupsRequest4 {
-    pub states_filter: Optional<Vec<String>>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub states_filter: Vec<String>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -122,7 +122,7 @@ pub struct ListGroupsResponseGroups0 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListGroupsResponse1 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub groups: Vec<ListGroupsResponseGroups1>,
 }
@@ -135,7 +135,7 @@ pub struct ListGroupsResponseGroups1 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListGroupsResponse2 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub groups: Vec<ListGroupsResponseGroups2>,
 }
@@ -148,62 +148,58 @@ pub struct ListGroupsResponseGroups2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListGroupsResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub groups: Vec<ListGroupsResponseGroups3>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListGroupsResponseGroups3 {
     pub group_id: String,
     pub protocol_type: String,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListGroupsResponse4 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub groups: Vec<ListGroupsResponseGroups4>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ListGroupsResponseGroups4 {
     pub group_id: String,
     pub protocol_type: String,
-    pub group_state: Optional<String>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub group_state: Option<String>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<ListGroupsRequest4> for ListGroupsRequest0 {
-    type Error = Error;
-    fn try_from(_latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
-        Ok(ListGroupsRequest0 {})
+impl From<ListGroupsRequest4> for ListGroupsRequest0 {
+    fn from(_latest: ListGroupsRequest4) -> ListGroupsRequest0 {
+        ListGroupsRequest0 {}
     }
 }
 
-impl TryFrom<ListGroupsRequest4> for ListGroupsRequest1 {
-    type Error = Error;
-    fn try_from(_latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
-        Ok(ListGroupsRequest1 {})
+impl From<ListGroupsRequest4> for ListGroupsRequest1 {
+    fn from(_latest: ListGroupsRequest4) -> ListGroupsRequest1 {
+        ListGroupsRequest1 {}
     }
 }
 
-impl TryFrom<ListGroupsRequest4> for ListGroupsRequest2 {
-    type Error = Error;
-    fn try_from(_latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
-        Ok(ListGroupsRequest2 {})
+impl From<ListGroupsRequest4> for ListGroupsRequest2 {
+    fn from(_latest: ListGroupsRequest4) -> ListGroupsRequest2 {
+        ListGroupsRequest2 {}
     }
 }
 
-impl TryFrom<ListGroupsRequest4> for ListGroupsRequest3 {
-    type Error = Error;
-    fn try_from(latest: ListGroupsRequest4) -> Result<Self, Self::Error> {
-        Ok(ListGroupsRequest3 {
+impl From<ListGroupsRequest4> for ListGroupsRequest3 {
+    fn from(latest: ListGroupsRequest4) -> ListGroupsRequest3 {
+        ListGroupsRequest3 {
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 

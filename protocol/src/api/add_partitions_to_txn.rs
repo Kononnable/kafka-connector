@@ -46,12 +46,12 @@ impl ApiCall for AddPartitionsToTxnRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &AddPartitionsToTxnRequest0::try_from(self)?,
+                &AddPartitionsToTxnRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &AddPartitionsToTxnRequest1::try_from(self)?,
+                &AddPartitionsToTxnRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -172,55 +172,43 @@ pub struct AddPartitionsToTxnResponseResultsResults2 {
     pub error_code: Int16,
 }
 
-impl TryFrom<AddPartitionsToTxnRequest2> for AddPartitionsToTxnRequest0 {
-    type Error = Error;
-    fn try_from(latest: AddPartitionsToTxnRequest2) -> Result<Self, Self::Error> {
-        Ok(AddPartitionsToTxnRequest0 {
+impl From<AddPartitionsToTxnRequest2> for AddPartitionsToTxnRequest0 {
+    fn from(latest: AddPartitionsToTxnRequest2) -> AddPartitionsToTxnRequest0 {
+        AddPartitionsToTxnRequest0 {
             transactional_id: latest.transactional_id,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<AddPartitionsToTxnRequestTopics2> for AddPartitionsToTxnRequestTopics0 {
-    type Error = Error;
-    fn try_from(latest: AddPartitionsToTxnRequestTopics2) -> Result<Self, Self::Error> {
-        Ok(AddPartitionsToTxnRequestTopics0 {
+impl From<AddPartitionsToTxnRequestTopics2> for AddPartitionsToTxnRequestTopics0 {
+    fn from(latest: AddPartitionsToTxnRequestTopics2) -> AddPartitionsToTxnRequestTopics0 {
+        AddPartitionsToTxnRequestTopics0 {
             name: latest.name,
             partitions: latest.partitions,
-        })
+        }
     }
 }
 
-impl TryFrom<AddPartitionsToTxnRequest2> for AddPartitionsToTxnRequest1 {
-    type Error = Error;
-    fn try_from(latest: AddPartitionsToTxnRequest2) -> Result<Self, Self::Error> {
-        Ok(AddPartitionsToTxnRequest1 {
+impl From<AddPartitionsToTxnRequest2> for AddPartitionsToTxnRequest1 {
+    fn from(latest: AddPartitionsToTxnRequest2) -> AddPartitionsToTxnRequest1 {
+        AddPartitionsToTxnRequest1 {
             transactional_id: latest.transactional_id,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<AddPartitionsToTxnRequestTopics2> for AddPartitionsToTxnRequestTopics1 {
-    type Error = Error;
-    fn try_from(latest: AddPartitionsToTxnRequestTopics2) -> Result<Self, Self::Error> {
-        Ok(AddPartitionsToTxnRequestTopics1 {
+impl From<AddPartitionsToTxnRequestTopics2> for AddPartitionsToTxnRequestTopics1 {
+    fn from(latest: AddPartitionsToTxnRequestTopics2) -> AddPartitionsToTxnRequestTopics1 {
+        AddPartitionsToTxnRequestTopics1 {
             name: latest.name,
             partitions: latest.partitions,
-        })
+        }
     }
 }
 

@@ -47,17 +47,17 @@ impl ApiCall for ControlledShutdownRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &ControlledShutdownRequest0::try_from(self)?,
+                &ControlledShutdownRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &ControlledShutdownRequest1::try_from(self)?,
+                &ControlledShutdownRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &ControlledShutdownRequest2::try_from(self)?,
+                &ControlledShutdownRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -97,14 +97,14 @@ pub struct ControlledShutdownRequest1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ControlledShutdownRequest2 {
     pub broker_id: Int32,
-    pub broker_epoch: Optional<Int64>,
+    pub broker_epoch: Int64,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct ControlledShutdownRequest3 {
     pub broker_id: Int32,
-    pub broker_epoch: Optional<Int64>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub broker_epoch: Int64,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -147,55 +147,44 @@ pub struct ControlledShutdownResponseRemainingPartitions2 {
 pub struct ControlledShutdownResponse3 {
     pub error_code: Int16,
     pub remaining_partitions: Vec<ControlledShutdownResponseRemainingPartitions3>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct ControlledShutdownResponseRemainingPartitions3 {
     pub topic_name: String,
     pub partition_index: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest0 {
-    type Error = Error;
-    fn try_from(latest: ControlledShutdownRequest3) -> Result<Self, Self::Error> {
-        if latest.broker_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ControlledShutdownRequest",
-                0,
-                "broker_epoch",
-            ));
-        }
-        Ok(ControlledShutdownRequest0 {
+impl From<ControlledShutdownRequest3> for ControlledShutdownRequest0 {
+    fn from(latest: ControlledShutdownRequest3) -> ControlledShutdownRequest0 {
+        log::debug!(
+            "Using old api format - ControlledShutdownRequest0, ignoring field broker_epoch"
+        );
+        ControlledShutdownRequest0 {
             broker_id: latest.broker_id,
-        })
+        }
     }
 }
 
-impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest1 {
-    type Error = Error;
-    fn try_from(latest: ControlledShutdownRequest3) -> Result<Self, Self::Error> {
-        if latest.broker_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "ControlledShutdownRequest",
-                1,
-                "broker_epoch",
-            ));
-        }
-        Ok(ControlledShutdownRequest1 {
+impl From<ControlledShutdownRequest3> for ControlledShutdownRequest1 {
+    fn from(latest: ControlledShutdownRequest3) -> ControlledShutdownRequest1 {
+        log::debug!(
+            "Using old api format - ControlledShutdownRequest1, ignoring field broker_epoch"
+        );
+        ControlledShutdownRequest1 {
             broker_id: latest.broker_id,
-        })
+        }
     }
 }
 
-impl TryFrom<ControlledShutdownRequest3> for ControlledShutdownRequest2 {
-    type Error = Error;
-    fn try_from(latest: ControlledShutdownRequest3) -> Result<Self, Self::Error> {
-        Ok(ControlledShutdownRequest2 {
+impl From<ControlledShutdownRequest3> for ControlledShutdownRequest2 {
+    fn from(latest: ControlledShutdownRequest3) -> ControlledShutdownRequest2 {
+        ControlledShutdownRequest2 {
             broker_id: latest.broker_id,
             broker_epoch: latest.broker_epoch,
-        })
+        }
     }
 }
 

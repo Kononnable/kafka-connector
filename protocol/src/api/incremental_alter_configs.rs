@@ -45,7 +45,7 @@ impl ApiCall for IncrementalAlterConfigsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &IncrementalAlterConfigsRequest0::try_from(self)?,
+                &IncrementalAlterConfigsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -104,7 +104,7 @@ pub struct IncrementalAlterConfigsRequestResourcesConfigs0 {
 pub struct IncrementalAlterConfigsRequest1 {
     pub resources: Vec<IncrementalAlterConfigsRequestResources1>,
     pub validate_only: Boolean,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -112,7 +112,7 @@ pub struct IncrementalAlterConfigsRequestResources1 {
     pub resource_type: Int8,
     pub resource_name: String,
     pub configs: Vec<IncrementalAlterConfigsRequestResourcesConfigs1>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -120,7 +120,7 @@ pub struct IncrementalAlterConfigsRequestResourcesConfigs1 {
     pub name: String,
     pub config_operation: Int8,
     pub value: NullableString,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -141,7 +141,7 @@ pub struct IncrementalAlterConfigsResponseResponses0 {
 pub struct IncrementalAlterConfigsResponse1 {
     pub throttle_time_ms: Int32,
     pub responses: Vec<IncrementalAlterConfigsResponseResponses1>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -150,52 +150,41 @@ pub struct IncrementalAlterConfigsResponseResponses1 {
     pub error_message: NullableString,
     pub resource_type: Int8,
     pub resource_name: String,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<IncrementalAlterConfigsRequest1> for IncrementalAlterConfigsRequest0 {
-    type Error = Error;
-    fn try_from(latest: IncrementalAlterConfigsRequest1) -> Result<Self, Self::Error> {
-        Ok(IncrementalAlterConfigsRequest0 {
-            resources: latest
-                .resources
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<IncrementalAlterConfigsRequest1> for IncrementalAlterConfigsRequest0 {
+    fn from(latest: IncrementalAlterConfigsRequest1) -> IncrementalAlterConfigsRequest0 {
+        IncrementalAlterConfigsRequest0 {
+            resources: latest.resources.into_iter().map(|ele| ele.into()).collect(),
             validate_only: latest.validate_only,
-        })
+        }
     }
 }
 
-impl TryFrom<IncrementalAlterConfigsRequestResources1>
-    for IncrementalAlterConfigsRequestResources0
-{
-    type Error = Error;
-    fn try_from(latest: IncrementalAlterConfigsRequestResources1) -> Result<Self, Self::Error> {
-        Ok(IncrementalAlterConfigsRequestResources0 {
+impl From<IncrementalAlterConfigsRequestResources1> for IncrementalAlterConfigsRequestResources0 {
+    fn from(
+        latest: IncrementalAlterConfigsRequestResources1,
+    ) -> IncrementalAlterConfigsRequestResources0 {
+        IncrementalAlterConfigsRequestResources0 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,
-            configs: latest
-                .configs
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+            configs: latest.configs.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<IncrementalAlterConfigsRequestResourcesConfigs1>
+impl From<IncrementalAlterConfigsRequestResourcesConfigs1>
     for IncrementalAlterConfigsRequestResourcesConfigs0
 {
-    type Error = Error;
-    fn try_from(
+    fn from(
         latest: IncrementalAlterConfigsRequestResourcesConfigs1,
-    ) -> Result<Self, Self::Error> {
-        Ok(IncrementalAlterConfigsRequestResourcesConfigs0 {
+    ) -> IncrementalAlterConfigsRequestResourcesConfigs0 {
+        IncrementalAlterConfigsRequestResourcesConfigs0 {
             name: latest.name,
             config_operation: latest.config_operation,
             value: latest.value,
-        })
+        }
     }
 }
 

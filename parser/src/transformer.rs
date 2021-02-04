@@ -23,7 +23,6 @@ pub fn group_api_calls(api_calls: Vec<ApiCall>) -> HashMap<&str, ApiEndpoint> {
     }
 
     for definition in endpoints.values_mut() {
-        mark_new_fields_as_optional(&mut definition.requests);
         mark_new_fields_as_optional(&mut definition.responses);
     }
 
@@ -60,7 +59,7 @@ fn mark_new_fields_as_optional(endpoint_definitions: &mut Vec<Vec<ApiStructDefin
                         .find(|x| x.name == field.name)
                         .is_none()
                     {
-                        field.ty = format!("Optional<{}>", field.ty);
+                        field.ty = format!("Option<{}>", field.ty);
                         field.is_optional = true;
                     }
                 }

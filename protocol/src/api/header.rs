@@ -7,7 +7,7 @@ pub struct HeaderRequest1<'a> {
     pub api_key: Int16,
     pub api_version: Int16,
     pub correlation_id: Int32,
-    pub client_id: Option<&'a str>,
+    pub client_id: NullableStr<'a>,
 }
 
 impl<'a> HeaderRequest1<'a> {
@@ -21,7 +21,7 @@ impl<'a> HeaderRequest1<'a> {
             api_key: api_key as i16,
             api_version,
             correlation_id,
-            client_id: Some(client_id),
+            client_id: NullableStr::Some(client_id),
         }
     }
 }
@@ -31,7 +31,7 @@ pub struct HeaderRequest2<'a> {
     pub api_key: Int16,
     pub api_version: Int16,
     pub correlation_id: Int32,
-    pub client_id: Option<&'a str>,
+    pub client_id: NullableStr<'a>,
     pub tag_buffer: TagBuffer,
 }
 
@@ -46,7 +46,7 @@ impl<'a> HeaderRequest2<'a> {
             api_key: api_key as i16,
             api_version,
             correlation_id,
-            client_id: Some(client_id),
+            client_id: NullableStr::Some(client_id),
             tag_buffer: TagBuffer {},
         }
     }

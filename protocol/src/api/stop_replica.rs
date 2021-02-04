@@ -47,17 +47,17 @@ impl ApiCall for StopReplicaRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &StopReplicaRequest0::try_from(self)?,
+                &StopReplicaRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &StopReplicaRequest1::try_from(self)?,
+                &StopReplicaRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &StopReplicaRequest2::try_from(self)?,
+                &StopReplicaRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -99,9 +99,9 @@ pub struct StopReplicaRequestUngroupedPartitions0 {
 pub struct StopReplicaRequest1 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub broker_epoch: Optional<Int64>,
+    pub broker_epoch: Int64,
     pub delete_partitions: Boolean,
-    pub topics: Optional<Vec<StopReplicaRequestTopics1>>,
+    pub topics: Vec<StopReplicaRequestTopics1>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -114,26 +114,26 @@ pub struct StopReplicaRequestTopics1 {
 pub struct StopReplicaRequest2 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub broker_epoch: Optional<Int64>,
+    pub broker_epoch: Int64,
     pub delete_partitions: Boolean,
-    pub topics: Optional<Vec<StopReplicaRequestTopics2>>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub topics: Vec<StopReplicaRequestTopics2>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequestTopics2 {
     pub name: String,
     pub partition_indexes: Vec<Int32>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct StopReplicaRequest3 {
     pub controller_id: Int32,
     pub controller_epoch: Int32,
-    pub broker_epoch: Optional<Int64>,
-    pub topic_states: Optional<Vec<StopReplicaRequestTopicStates3>>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub broker_epoch: Int64,
+    pub topic_states: Vec<StopReplicaRequestTopicStates3>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -181,7 +181,7 @@ pub struct StopReplicaResponsePartitionErrors1 {
 pub struct StopReplicaResponse2 {
     pub error_code: Int16,
     pub partition_errors: Vec<StopReplicaResponsePartitionErrors2>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -189,14 +189,14 @@ pub struct StopReplicaResponsePartitionErrors2 {
     pub topic_name: String,
     pub partition_index: Int32,
     pub error_code: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct StopReplicaResponse3 {
     pub error_code: Int16,
     pub partition_errors: Vec<StopReplicaResponsePartitionErrors3>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -204,70 +204,43 @@ pub struct StopReplicaResponsePartitionErrors3 {
     pub topic_name: String,
     pub partition_index: Int32,
     pub error_code: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<StopReplicaRequest3> for StopReplicaRequest0 {
-    type Error = Error;
-    fn try_from(latest: StopReplicaRequest3) -> Result<Self, Self::Error> {
-        if latest.broker_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "StopReplicaRequest",
-                0,
-                "broker_epoch",
-            ));
-        }
-        if latest.topic_states.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "StopReplicaRequest",
-                0,
-                "topic_states",
-            ));
-        }
-        Ok(StopReplicaRequest0 {
+impl From<StopReplicaRequest3> for StopReplicaRequest0 {
+    fn from(latest: StopReplicaRequest3) -> StopReplicaRequest0 {
+        log::debug!("Using old api format - StopReplicaRequest0, ignoring field broker_epoch");
+        log::debug!("Using old api format - StopReplicaRequest0, ignoring field topic_states");
+        StopReplicaRequest0 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             ..StopReplicaRequest0::default()
-        })
+        }
     }
 }
 
-impl TryFrom<StopReplicaRequest3> for StopReplicaRequest1 {
-    type Error = Error;
-    fn try_from(latest: StopReplicaRequest3) -> Result<Self, Self::Error> {
-        if latest.topic_states.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "StopReplicaRequest",
-                1,
-                "topic_states",
-            ));
-        }
-        Ok(StopReplicaRequest1 {
+impl From<StopReplicaRequest3> for StopReplicaRequest1 {
+    fn from(latest: StopReplicaRequest3) -> StopReplicaRequest1 {
+        log::debug!("Using old api format - StopReplicaRequest1, ignoring field topic_states");
+        StopReplicaRequest1 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             broker_epoch: latest.broker_epoch,
             ..StopReplicaRequest1::default()
-        })
+        }
     }
 }
 
-impl TryFrom<StopReplicaRequest3> for StopReplicaRequest2 {
-    type Error = Error;
-    fn try_from(latest: StopReplicaRequest3) -> Result<Self, Self::Error> {
-        if latest.topic_states.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "StopReplicaRequest",
-                2,
-                "topic_states",
-            ));
-        }
-        Ok(StopReplicaRequest2 {
+impl From<StopReplicaRequest3> for StopReplicaRequest2 {
+    fn from(latest: StopReplicaRequest3) -> StopReplicaRequest2 {
+        log::debug!("Using old api format - StopReplicaRequest2, ignoring field topic_states");
+        StopReplicaRequest2 {
             controller_id: latest.controller_id,
             controller_epoch: latest.controller_epoch,
             broker_epoch: latest.broker_epoch,
             tag_buffer: latest.tag_buffer,
             ..StopReplicaRequest2::default()
-        })
+        }
     }
 }
 

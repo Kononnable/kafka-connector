@@ -46,12 +46,12 @@ impl ApiCall for AddOffsetsToTxnRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &AddOffsetsToTxnRequest0::try_from(self)?,
+                &AddOffsetsToTxnRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &AddOffsetsToTxnRequest1::try_from(self)?,
+                &AddOffsetsToTxnRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -118,27 +118,25 @@ pub struct AddOffsetsToTxnResponse2 {
     pub error_code: Int16,
 }
 
-impl TryFrom<AddOffsetsToTxnRequest2> for AddOffsetsToTxnRequest0 {
-    type Error = Error;
-    fn try_from(latest: AddOffsetsToTxnRequest2) -> Result<Self, Self::Error> {
-        Ok(AddOffsetsToTxnRequest0 {
+impl From<AddOffsetsToTxnRequest2> for AddOffsetsToTxnRequest0 {
+    fn from(latest: AddOffsetsToTxnRequest2) -> AddOffsetsToTxnRequest0 {
+        AddOffsetsToTxnRequest0 {
             transactional_id: latest.transactional_id,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
             group_id: latest.group_id,
-        })
+        }
     }
 }
 
-impl TryFrom<AddOffsetsToTxnRequest2> for AddOffsetsToTxnRequest1 {
-    type Error = Error;
-    fn try_from(latest: AddOffsetsToTxnRequest2) -> Result<Self, Self::Error> {
-        Ok(AddOffsetsToTxnRequest1 {
+impl From<AddOffsetsToTxnRequest2> for AddOffsetsToTxnRequest1 {
+    fn from(latest: AddOffsetsToTxnRequest2) -> AddOffsetsToTxnRequest1 {
+        AddOffsetsToTxnRequest1 {
             transactional_id: latest.transactional_id,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
             group_id: latest.group_id,
-        })
+        }
     }
 }
 

@@ -114,7 +114,8 @@ pub enum ApiNumbers {
 }
 
 mod prelude {
-    pub use super::super::custom_types::optional::Optional;
+    pub use super::super::custom_types::nullable_str::NullableStr;
+    pub use super::super::custom_types::nullable_string::NullableString;
     pub use super::super::custom_types::tag_buffer::TagBuffer;
     pub use super::super::custom_types::*;
     pub use super::super::error::Error;

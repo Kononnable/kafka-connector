@@ -49,27 +49,27 @@ impl ApiCall for SyncGroupRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &SyncGroupRequest0::try_from(self)?,
+                &SyncGroupRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &SyncGroupRequest1::try_from(self)?,
+                &SyncGroupRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &SyncGroupRequest2::try_from(self)?,
+                &SyncGroupRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &SyncGroupRequest3::try_from(self)?,
+                &SyncGroupRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             4 => ToBytes::serialize(
-                &SyncGroupRequest4::try_from(self)?,
+                &SyncGroupRequest4::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -142,7 +142,7 @@ pub struct SyncGroupRequest3 {
     pub group_id: String,
     pub generation_id: Int32,
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
+    pub group_instance_id: NullableString,
     pub assignments: Vec<SyncGroupRequestAssignments3>,
 }
 
@@ -157,16 +157,16 @@ pub struct SyncGroupRequest4 {
     pub group_id: String,
     pub generation_id: Int32,
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
+    pub group_instance_id: NullableString,
     pub assignments: Vec<SyncGroupRequestAssignments4>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequestAssignments4 {
     pub member_id: String,
     pub assignment: KafkaBytes,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -174,18 +174,18 @@ pub struct SyncGroupRequest5 {
     pub group_id: String,
     pub generation_id: Int32,
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
-    pub protocol_type: Optional<NullableString>,
-    pub protocol_name: Optional<NullableString>,
+    pub group_instance_id: NullableString,
+    pub protocol_type: NullableString,
+    pub protocol_name: NullableString,
     pub assignments: Vec<SyncGroupRequestAssignments5>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct SyncGroupRequestAssignments5 {
     pub member_id: String,
     pub assignment: KafkaBytes,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -196,125 +196,118 @@ pub struct SyncGroupResponse0 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct SyncGroupResponse1 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub assignment: KafkaBytes,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct SyncGroupResponse2 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub assignment: KafkaBytes,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct SyncGroupResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub assignment: KafkaBytes,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct SyncGroupResponse4 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
     pub assignment: KafkaBytes,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct SyncGroupResponse5 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
-    pub protocol_type: Optional<NullableString>,
-    pub protocol_name: Optional<NullableString>,
+    pub protocol_type: Option<NullableString>,
+    pub protocol_name: Option<NullableString>,
     pub assignment: KafkaBytes,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<SyncGroupRequest5> for SyncGroupRequest0 {
-    type Error = Error;
-    fn try_from(latest: SyncGroupRequest5) -> Result<Self, Self::Error> {
-        Ok(SyncGroupRequest0 {
+impl From<SyncGroupRequest5> for SyncGroupRequest0 {
+    fn from(latest: SyncGroupRequest5) -> SyncGroupRequest0 {
+        SyncGroupRequest0 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments0 {
-    type Error = Error;
-    fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
-        Ok(SyncGroupRequestAssignments0 {
+impl From<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments0 {
+    fn from(latest: SyncGroupRequestAssignments5) -> SyncGroupRequestAssignments0 {
+        SyncGroupRequestAssignments0 {
             member_id: latest.member_id,
             assignment: latest.assignment,
-        })
+        }
     }
 }
 
-impl TryFrom<SyncGroupRequest5> for SyncGroupRequest1 {
-    type Error = Error;
-    fn try_from(latest: SyncGroupRequest5) -> Result<Self, Self::Error> {
-        Ok(SyncGroupRequest1 {
+impl From<SyncGroupRequest5> for SyncGroupRequest1 {
+    fn from(latest: SyncGroupRequest5) -> SyncGroupRequest1 {
+        SyncGroupRequest1 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments1 {
-    type Error = Error;
-    fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
-        Ok(SyncGroupRequestAssignments1 {
+impl From<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments1 {
+    fn from(latest: SyncGroupRequestAssignments5) -> SyncGroupRequestAssignments1 {
+        SyncGroupRequestAssignments1 {
             member_id: latest.member_id,
             assignment: latest.assignment,
-        })
+        }
     }
 }
 
-impl TryFrom<SyncGroupRequest5> for SyncGroupRequest2 {
-    type Error = Error;
-    fn try_from(latest: SyncGroupRequest5) -> Result<Self, Self::Error> {
-        Ok(SyncGroupRequest2 {
+impl From<SyncGroupRequest5> for SyncGroupRequest2 {
+    fn from(latest: SyncGroupRequest5) -> SyncGroupRequest2 {
+        SyncGroupRequest2 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments2 {
-    type Error = Error;
-    fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
-        Ok(SyncGroupRequestAssignments2 {
+impl From<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments2 {
+    fn from(latest: SyncGroupRequestAssignments5) -> SyncGroupRequestAssignments2 {
+        SyncGroupRequestAssignments2 {
             member_id: latest.member_id,
             assignment: latest.assignment,
-        })
+        }
     }
 }
 
-impl TryFrom<SyncGroupRequest5> for SyncGroupRequest3 {
-    type Error = Error;
-    fn try_from(latest: SyncGroupRequest5) -> Result<Self, Self::Error> {
-        Ok(SyncGroupRequest3 {
+impl From<SyncGroupRequest5> for SyncGroupRequest3 {
+    fn from(latest: SyncGroupRequest5) -> SyncGroupRequest3 {
+        SyncGroupRequest3 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
@@ -322,26 +315,24 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest3 {
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments3 {
-    type Error = Error;
-    fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
-        Ok(SyncGroupRequestAssignments3 {
+impl From<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments3 {
+    fn from(latest: SyncGroupRequestAssignments5) -> SyncGroupRequestAssignments3 {
+        SyncGroupRequestAssignments3 {
             member_id: latest.member_id,
             assignment: latest.assignment,
-        })
+        }
     }
 }
 
-impl TryFrom<SyncGroupRequest5> for SyncGroupRequest4 {
-    type Error = Error;
-    fn try_from(latest: SyncGroupRequest5) -> Result<Self, Self::Error> {
-        Ok(SyncGroupRequest4 {
+impl From<SyncGroupRequest5> for SyncGroupRequest4 {
+    fn from(latest: SyncGroupRequest5) -> SyncGroupRequest4 {
+        SyncGroupRequest4 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
@@ -349,21 +340,20 @@ impl TryFrom<SyncGroupRequest5> for SyncGroupRequest4 {
             assignments: latest
                 .assignments
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+                .map(|ele| ele.into())
+                .collect(),
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 
-impl TryFrom<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments4 {
-    type Error = Error;
-    fn try_from(latest: SyncGroupRequestAssignments5) -> Result<Self, Self::Error> {
-        Ok(SyncGroupRequestAssignments4 {
+impl From<SyncGroupRequestAssignments5> for SyncGroupRequestAssignments4 {
+    fn from(latest: SyncGroupRequestAssignments5) -> SyncGroupRequestAssignments4 {
+        SyncGroupRequestAssignments4 {
             member_id: latest.member_id,
             assignment: latest.assignment,
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 

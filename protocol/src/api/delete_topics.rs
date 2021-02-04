@@ -49,27 +49,27 @@ impl ApiCall for DeleteTopicsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &DeleteTopicsRequest0::try_from(self)?,
+                &DeleteTopicsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &DeleteTopicsRequest1::try_from(self)?,
+                &DeleteTopicsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &DeleteTopicsRequest2::try_from(self)?,
+                &DeleteTopicsRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &DeleteTopicsRequest3::try_from(self)?,
+                &DeleteTopicsRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             4 => ToBytes::serialize(
-                &DeleteTopicsRequest4::try_from(self)?,
+                &DeleteTopicsRequest4::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -123,14 +123,14 @@ pub struct DeleteTopicsRequest3 {
 pub struct DeleteTopicsRequest4 {
     pub topic_names: Vec<String>,
     pub timeout_ms: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DeleteTopicsRequest5 {
     pub topic_names: Vec<String>,
     pub timeout_ms: Int32,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -146,7 +146,7 @@ pub struct DeleteTopicsResponseResponses0 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponse1 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub responses: Vec<DeleteTopicsResponseResponses1>,
 }
 
@@ -158,7 +158,7 @@ pub struct DeleteTopicsResponseResponses1 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponse2 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub responses: Vec<DeleteTopicsResponseResponses2>,
 }
 
@@ -170,7 +170,7 @@ pub struct DeleteTopicsResponseResponses2 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub responses: Vec<DeleteTopicsResponseResponses3>,
 }
 
@@ -182,81 +182,76 @@ pub struct DeleteTopicsResponseResponses3 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponse4 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub responses: Vec<DeleteTopicsResponseResponses4>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponseResponses4 {
     pub name: String,
     pub error_code: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponse5 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub responses: Vec<DeleteTopicsResponseResponses5>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DeleteTopicsResponseResponses5 {
     pub name: String,
     pub error_code: Int16,
-    pub error_message: Optional<NullableString>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub error_message: Option<NullableString>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest0 {
-    type Error = Error;
-    fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
-        Ok(DeleteTopicsRequest0 {
+impl From<DeleteTopicsRequest5> for DeleteTopicsRequest0 {
+    fn from(latest: DeleteTopicsRequest5) -> DeleteTopicsRequest0 {
+        DeleteTopicsRequest0 {
             topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest1 {
-    type Error = Error;
-    fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
-        Ok(DeleteTopicsRequest1 {
+impl From<DeleteTopicsRequest5> for DeleteTopicsRequest1 {
+    fn from(latest: DeleteTopicsRequest5) -> DeleteTopicsRequest1 {
+        DeleteTopicsRequest1 {
             topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest2 {
-    type Error = Error;
-    fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
-        Ok(DeleteTopicsRequest2 {
+impl From<DeleteTopicsRequest5> for DeleteTopicsRequest2 {
+    fn from(latest: DeleteTopicsRequest5) -> DeleteTopicsRequest2 {
+        DeleteTopicsRequest2 {
             topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest3 {
-    type Error = Error;
-    fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
-        Ok(DeleteTopicsRequest3 {
+impl From<DeleteTopicsRequest5> for DeleteTopicsRequest3 {
+    fn from(latest: DeleteTopicsRequest5) -> DeleteTopicsRequest3 {
+        DeleteTopicsRequest3 {
             topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
-        })
+        }
     }
 }
 
-impl TryFrom<DeleteTopicsRequest5> for DeleteTopicsRequest4 {
-    type Error = Error;
-    fn try_from(latest: DeleteTopicsRequest5) -> Result<Self, Self::Error> {
-        Ok(DeleteTopicsRequest4 {
+impl From<DeleteTopicsRequest5> for DeleteTopicsRequest4 {
+    fn from(latest: DeleteTopicsRequest5) -> DeleteTopicsRequest4 {
+        DeleteTopicsRequest4 {
             topic_names: latest.topic_names,
             timeout_ms: latest.timeout_ms,
             tag_buffer: latest.tag_buffer,
-        })
+        }
     }
 }
 

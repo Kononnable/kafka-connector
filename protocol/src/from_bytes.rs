@@ -51,20 +51,6 @@ impl FromBytes for String {
     }
 }
 
-impl FromBytes for Option<String> {
-    fn deserialize(buf: &mut Bytes, is_flexible_version: bool) -> Self {
-        let len: i16 = match is_flexible_version {
-            true => UnsignedVarInt32::deserialize(buf, is_flexible_version).value as i16 - 1,
-            false => FromBytes::deserialize(buf, is_flexible_version),
-        };
-        if len == -1 {
-            return None;
-        }
-        let slice = buf.split_to(len as usize).into_iter();
-        let data: Vec<u8> = slice.take(len as usize).collect();
-        Some(String::from_utf8_lossy(&data).to_string())
-    }
-}
 impl FromBytes for i8 {
     fn deserialize(buf: &mut Bytes, _is_flexible_version: bool) -> Self {
         let data: [u8; 1] = [buf.split_to(1).into_iter().next().unwrap()];
@@ -138,5 +124,14 @@ impl FromBytes for f64 {
             slice.next().unwrap(),
         ];
         f64::from_be_bytes(data)
+    }
+}
+
+impl<T> FromBytes for Option<T>
+where
+    T: FromBytes,
+{
+    fn deserialize(buf: &mut Bytes, is_flexible_version: bool) -> Self {
+        Some(T::deserialize(buf, is_flexible_version))
     }
 }

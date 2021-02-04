@@ -48,22 +48,22 @@ impl ApiCall for LeaveGroupRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &LeaveGroupRequest0::try_from(self)?,
+                &LeaveGroupRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &LeaveGroupRequest1::try_from(self)?,
+                &LeaveGroupRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &LeaveGroupRequest2::try_from(self)?,
+                &LeaveGroupRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &LeaveGroupRequest3::try_from(self)?,
+                &LeaveGroupRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -109,7 +109,7 @@ pub struct LeaveGroupRequest2 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequest3 {
     pub group_id: String,
-    pub members: Optional<Vec<LeaveGroupRequestMembers3>>,
+    pub members: Vec<LeaveGroupRequestMembers3>,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -121,15 +121,15 @@ pub struct LeaveGroupRequestMembers3 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequest4 {
     pub group_id: String,
-    pub members: Optional<Vec<LeaveGroupRequestMembers4>>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub members: Vec<LeaveGroupRequestMembers4>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct LeaveGroupRequestMembers4 {
     pub member_id: String,
     pub group_instance_id: NullableString,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -139,21 +139,21 @@ pub struct LeaveGroupResponse0 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaveGroupResponse1 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaveGroupResponse2 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaveGroupResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
-    pub members: Optional<Vec<LeaveGroupResponseMembers3>>,
+    pub members: Option<Vec<LeaveGroupResponseMembers3>>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -165,10 +165,10 @@ pub struct LeaveGroupResponseMembers3 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct LeaveGroupResponse4 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
-    pub members: Optional<Vec<LeaveGroupResponseMembers4>>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub members: Option<Vec<LeaveGroupResponseMembers4>>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -176,72 +176,54 @@ pub struct LeaveGroupResponseMembers4 {
     pub member_id: String,
     pub group_instance_id: NullableString,
     pub error_code: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest0 {
-    type Error = Error;
-    fn try_from(latest: LeaveGroupRequest4) -> Result<Self, Self::Error> {
-        if latest.members.is_some() {
-            return Err(Error::OldKafkaVersion("LeaveGroupRequest", 0, "members"));
-        }
-        Ok(LeaveGroupRequest0 {
+impl From<LeaveGroupRequest4> for LeaveGroupRequest0 {
+    fn from(latest: LeaveGroupRequest4) -> LeaveGroupRequest0 {
+        log::debug!("Using old api format - LeaveGroupRequest0, ignoring field members");
+        LeaveGroupRequest0 {
             group_id: latest.group_id,
             ..LeaveGroupRequest0::default()
-        })
+        }
     }
 }
 
-impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest1 {
-    type Error = Error;
-    fn try_from(latest: LeaveGroupRequest4) -> Result<Self, Self::Error> {
-        if latest.members.is_some() {
-            return Err(Error::OldKafkaVersion("LeaveGroupRequest", 1, "members"));
-        }
-        Ok(LeaveGroupRequest1 {
+impl From<LeaveGroupRequest4> for LeaveGroupRequest1 {
+    fn from(latest: LeaveGroupRequest4) -> LeaveGroupRequest1 {
+        log::debug!("Using old api format - LeaveGroupRequest1, ignoring field members");
+        LeaveGroupRequest1 {
             group_id: latest.group_id,
             ..LeaveGroupRequest1::default()
-        })
+        }
     }
 }
 
-impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest2 {
-    type Error = Error;
-    fn try_from(latest: LeaveGroupRequest4) -> Result<Self, Self::Error> {
-        if latest.members.is_some() {
-            return Err(Error::OldKafkaVersion("LeaveGroupRequest", 2, "members"));
-        }
-        Ok(LeaveGroupRequest2 {
+impl From<LeaveGroupRequest4> for LeaveGroupRequest2 {
+    fn from(latest: LeaveGroupRequest4) -> LeaveGroupRequest2 {
+        log::debug!("Using old api format - LeaveGroupRequest2, ignoring field members");
+        LeaveGroupRequest2 {
             group_id: latest.group_id,
             ..LeaveGroupRequest2::default()
-        })
+        }
     }
 }
 
-impl TryFrom<LeaveGroupRequest4> for LeaveGroupRequest3 {
-    type Error = Error;
-    fn try_from(latest: LeaveGroupRequest4) -> Result<Self, Self::Error> {
-        Ok(LeaveGroupRequest3 {
+impl From<LeaveGroupRequest4> for LeaveGroupRequest3 {
+    fn from(latest: LeaveGroupRequest4) -> LeaveGroupRequest3 {
+        LeaveGroupRequest3 {
             group_id: latest.group_id,
-            members: latest
-                .members
-                .map(|val| {
-                    val.into_iter()
-                        .map(|el| el.try_into())
-                        .collect::<Result<_, Error>>()
-                })
-                .wrap_result()?,
-        })
+            members: latest.members.into_iter().map(|ele| ele.into()).collect(),
+        }
     }
 }
 
-impl TryFrom<LeaveGroupRequestMembers4> for LeaveGroupRequestMembers3 {
-    type Error = Error;
-    fn try_from(latest: LeaveGroupRequestMembers4) -> Result<Self, Self::Error> {
-        Ok(LeaveGroupRequestMembers3 {
+impl From<LeaveGroupRequestMembers4> for LeaveGroupRequestMembers3 {
+    fn from(latest: LeaveGroupRequestMembers4) -> LeaveGroupRequestMembers3 {
+        LeaveGroupRequestMembers3 {
             member_id: latest.member_id,
             group_instance_id: latest.group_instance_id,
-        })
+        }
     }
 }
 

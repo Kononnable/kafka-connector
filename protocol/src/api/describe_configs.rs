@@ -47,17 +47,17 @@ impl ApiCall for DescribeConfigsRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &DescribeConfigsRequest0::try_from(self)?,
+                &DescribeConfigsRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &DescribeConfigsRequest1::try_from(self)?,
+                &DescribeConfigsRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &DescribeConfigsRequest2::try_from(self)?,
+                &DescribeConfigsRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -99,7 +99,7 @@ pub struct DescribeConfigsRequestResources0 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeConfigsRequest1 {
     pub resources: Vec<DescribeConfigsRequestResources1>,
-    pub include_synonyms: Optional<Boolean>,
+    pub include_synonyms: Boolean,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -112,7 +112,7 @@ pub struct DescribeConfigsRequestResources1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeConfigsRequest2 {
     pub resources: Vec<DescribeConfigsRequestResources2>,
-    pub include_synonyms: Optional<Boolean>,
+    pub include_synonyms: Boolean,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -125,8 +125,8 @@ pub struct DescribeConfigsRequestResources2 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeConfigsRequest3 {
     pub resources: Vec<DescribeConfigsRequestResources3>,
-    pub include_synonyms: Optional<Boolean>,
-    pub include_documentation: Optional<Boolean>,
+    pub include_synonyms: Boolean,
+    pub include_documentation: Boolean,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -180,9 +180,9 @@ pub struct DescribeConfigsResponseResultsConfigs1 {
     pub name: String,
     pub value: NullableString,
     pub read_only: Boolean,
-    pub config_source: Optional<Int8>,
+    pub config_source: Option<Int8>,
     pub is_sensitive: Boolean,
-    pub synonyms: Optional<Vec<DescribeConfigsResponseResultsConfigsSynonyms1>>,
+    pub synonyms: Option<Vec<DescribeConfigsResponseResultsConfigsSynonyms1>>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -212,9 +212,9 @@ pub struct DescribeConfigsResponseResultsConfigs2 {
     pub name: String,
     pub value: NullableString,
     pub read_only: Boolean,
-    pub config_source: Optional<Int8>,
+    pub config_source: Option<Int8>,
     pub is_sensitive: Boolean,
-    pub synonyms: Optional<Vec<DescribeConfigsResponseResultsConfigsSynonyms2>>,
+    pub synonyms: Option<Vec<DescribeConfigsResponseResultsConfigsSynonyms2>>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -244,11 +244,11 @@ pub struct DescribeConfigsResponseResultsConfigs3 {
     pub name: String,
     pub value: NullableString,
     pub read_only: Boolean,
-    pub config_source: Optional<Int8>,
+    pub config_source: Option<Int8>,
     pub is_sensitive: Boolean,
-    pub synonyms: Optional<Vec<DescribeConfigsResponseResultsConfigsSynonyms3>>,
-    pub config_type: Optional<Int8>,
-    pub documentation: Optional<NullableString>,
+    pub synonyms: Option<Vec<DescribeConfigsResponseResultsConfigsSynonyms3>>,
+    pub config_type: Option<Int8>,
+    pub documentation: Option<NullableString>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -258,105 +258,71 @@ pub struct DescribeConfigsResponseResultsConfigsSynonyms3 {
     pub source: Int8,
 }
 
-impl TryFrom<DescribeConfigsRequest3> for DescribeConfigsRequest0 {
-    type Error = Error;
-    fn try_from(latest: DescribeConfigsRequest3) -> Result<Self, Self::Error> {
-        if latest.include_synonyms.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeConfigsRequest",
-                0,
-                "include_synonyms",
-            ));
+impl From<DescribeConfigsRequest3> for DescribeConfigsRequest0 {
+    fn from(latest: DescribeConfigsRequest3) -> DescribeConfigsRequest0 {
+        log::debug!(
+            "Using old api format - DescribeConfigsRequest0, ignoring field include_synonyms"
+        );
+        log::debug!(
+            "Using old api format - DescribeConfigsRequest0, ignoring field include_documentation"
+        );
+        DescribeConfigsRequest0 {
+            resources: latest.resources.into_iter().map(|ele| ele.into()).collect(),
         }
-        if latest.include_documentation.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeConfigsRequest",
-                0,
-                "include_documentation",
-            ));
-        }
-        Ok(DescribeConfigsRequest0 {
-            resources: latest
-                .resources
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<DescribeConfigsRequestResources3> for DescribeConfigsRequestResources0 {
-    type Error = Error;
-    fn try_from(latest: DescribeConfigsRequestResources3) -> Result<Self, Self::Error> {
-        Ok(DescribeConfigsRequestResources0 {
+impl From<DescribeConfigsRequestResources3> for DescribeConfigsRequestResources0 {
+    fn from(latest: DescribeConfigsRequestResources3) -> DescribeConfigsRequestResources0 {
+        DescribeConfigsRequestResources0 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,
             configuration_keys: latest.configuration_keys,
-        })
+        }
     }
 }
 
-impl TryFrom<DescribeConfigsRequest3> for DescribeConfigsRequest1 {
-    type Error = Error;
-    fn try_from(latest: DescribeConfigsRequest3) -> Result<Self, Self::Error> {
-        if latest.include_documentation.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeConfigsRequest",
-                1,
-                "include_documentation",
-            ));
-        }
-        Ok(DescribeConfigsRequest1 {
-            resources: latest
-                .resources
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
+impl From<DescribeConfigsRequest3> for DescribeConfigsRequest1 {
+    fn from(latest: DescribeConfigsRequest3) -> DescribeConfigsRequest1 {
+        log::debug!(
+            "Using old api format - DescribeConfigsRequest1, ignoring field include_documentation"
+        );
+        DescribeConfigsRequest1 {
+            resources: latest.resources.into_iter().map(|ele| ele.into()).collect(),
             include_synonyms: latest.include_synonyms,
-        })
-    }
-}
-
-impl TryFrom<DescribeConfigsRequestResources3> for DescribeConfigsRequestResources1 {
-    type Error = Error;
-    fn try_from(latest: DescribeConfigsRequestResources3) -> Result<Self, Self::Error> {
-        Ok(DescribeConfigsRequestResources1 {
-            resource_type: latest.resource_type,
-            resource_name: latest.resource_name,
-            configuration_keys: latest.configuration_keys,
-        })
-    }
-}
-
-impl TryFrom<DescribeConfigsRequest3> for DescribeConfigsRequest2 {
-    type Error = Error;
-    fn try_from(latest: DescribeConfigsRequest3) -> Result<Self, Self::Error> {
-        if latest.include_documentation.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "DescribeConfigsRequest",
-                2,
-                "include_documentation",
-            ));
         }
-        Ok(DescribeConfigsRequest2 {
-            resources: latest
-                .resources
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-            include_synonyms: latest.include_synonyms,
-        })
     }
 }
 
-impl TryFrom<DescribeConfigsRequestResources3> for DescribeConfigsRequestResources2 {
-    type Error = Error;
-    fn try_from(latest: DescribeConfigsRequestResources3) -> Result<Self, Self::Error> {
-        Ok(DescribeConfigsRequestResources2 {
+impl From<DescribeConfigsRequestResources3> for DescribeConfigsRequestResources1 {
+    fn from(latest: DescribeConfigsRequestResources3) -> DescribeConfigsRequestResources1 {
+        DescribeConfigsRequestResources1 {
             resource_type: latest.resource_type,
             resource_name: latest.resource_name,
             configuration_keys: latest.configuration_keys,
-        })
+        }
+    }
+}
+
+impl From<DescribeConfigsRequest3> for DescribeConfigsRequest2 {
+    fn from(latest: DescribeConfigsRequest3) -> DescribeConfigsRequest2 {
+        log::debug!(
+            "Using old api format - DescribeConfigsRequest2, ignoring field include_documentation"
+        );
+        DescribeConfigsRequest2 {
+            resources: latest.resources.into_iter().map(|ele| ele.into()).collect(),
+            include_synonyms: latest.include_synonyms,
+        }
+    }
+}
+
+impl From<DescribeConfigsRequestResources3> for DescribeConfigsRequestResources2 {
+    fn from(latest: DescribeConfigsRequestResources3) -> DescribeConfigsRequestResources2 {
+        DescribeConfigsRequestResources2 {
+            resource_type: latest.resource_type,
+            resource_name: latest.resource_name,
+            configuration_keys: latest.configuration_keys,
+        }
     }
 }
 

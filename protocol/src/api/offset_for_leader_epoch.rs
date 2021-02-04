@@ -47,17 +47,17 @@ impl ApiCall for OffsetForLeaderEpochRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &OffsetForLeaderEpochRequest0::try_from(self)?,
+                &OffsetForLeaderEpochRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &OffsetForLeaderEpochRequest1::try_from(self)?,
+                &OffsetForLeaderEpochRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &OffsetForLeaderEpochRequest2::try_from(self)?,
+                &OffsetForLeaderEpochRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -138,13 +138,13 @@ pub struct OffsetForLeaderEpochRequestTopics2 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequestTopicsPartitions2 {
     pub partition: Int32,
-    pub current_leader_epoch: Optional<Int32>,
+    pub current_leader_epoch: Int32,
     pub leader_epoch: Int32,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequest3 {
-    pub replica_id: Optional<Int32>,
+    pub replica_id: Int32,
     pub topics: Vec<OffsetForLeaderEpochRequestTopics3>,
 }
 
@@ -157,7 +157,7 @@ pub struct OffsetForLeaderEpochRequestTopics3 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct OffsetForLeaderEpochRequestTopicsPartitions3 {
     pub partition: Int32,
-    pub current_leader_epoch: Optional<Int32>,
+    pub current_leader_epoch: Int32,
     pub leader_epoch: Int32,
 }
 
@@ -194,13 +194,13 @@ pub struct OffsetForLeaderEpochResponseTopics1 {
 pub struct OffsetForLeaderEpochResponseTopicsPartitions1 {
     pub error_code: Int16,
     pub partition: Int32,
-    pub leader_epoch: Optional<Int32>,
+    pub leader_epoch: Option<Int32>,
     pub end_offset: Int64,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponse2 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub topics: Vec<OffsetForLeaderEpochResponseTopics2>,
 }
 
@@ -214,13 +214,13 @@ pub struct OffsetForLeaderEpochResponseTopics2 {
 pub struct OffsetForLeaderEpochResponseTopicsPartitions2 {
     pub error_code: Int16,
     pub partition: Int32,
-    pub leader_epoch: Optional<Int32>,
+    pub leader_epoch: Option<Int32>,
     pub end_offset: Int64,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct OffsetForLeaderEpochResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub topics: Vec<OffsetForLeaderEpochResponseTopics3>,
 }
 
@@ -234,160 +234,121 @@ pub struct OffsetForLeaderEpochResponseTopics3 {
 pub struct OffsetForLeaderEpochResponseTopicsPartitions3 {
     pub error_code: Int16,
     pub partition: Int32,
-    pub leader_epoch: Optional<Int32>,
+    pub leader_epoch: Option<Int32>,
     pub end_offset: Int64,
 }
 
-impl TryFrom<OffsetForLeaderEpochRequest3> for OffsetForLeaderEpochRequest0 {
-    type Error = Error;
-    fn try_from(latest: OffsetForLeaderEpochRequest3) -> Result<Self, Self::Error> {
-        if latest.replica_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetForLeaderEpochRequest",
-                0,
-                "replica_id",
-            ));
+impl From<OffsetForLeaderEpochRequest3> for OffsetForLeaderEpochRequest0 {
+    fn from(latest: OffsetForLeaderEpochRequest3) -> OffsetForLeaderEpochRequest0 {
+        log::debug!(
+            "Using old api format - OffsetForLeaderEpochRequest0, ignoring field replica_id"
+        );
+        OffsetForLeaderEpochRequest0 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
         }
-        Ok(OffsetForLeaderEpochRequest0 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<OffsetForLeaderEpochRequestTopics3> for OffsetForLeaderEpochRequestTopics0 {
-    type Error = Error;
-    fn try_from(latest: OffsetForLeaderEpochRequestTopics3) -> Result<Self, Self::Error> {
-        Ok(OffsetForLeaderEpochRequestTopics0 {
+impl From<OffsetForLeaderEpochRequestTopics3> for OffsetForLeaderEpochRequestTopics0 {
+    fn from(latest: OffsetForLeaderEpochRequestTopics3) -> OffsetForLeaderEpochRequestTopics0 {
+        OffsetForLeaderEpochRequestTopics0 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<OffsetForLeaderEpochRequestTopicsPartitions3>
+impl From<OffsetForLeaderEpochRequestTopicsPartitions3>
     for OffsetForLeaderEpochRequestTopicsPartitions0
 {
-    type Error = Error;
-    fn try_from(latest: OffsetForLeaderEpochRequestTopicsPartitions3) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetForLeaderEpochRequestTopicsPartitions",
-                0,
-                "current_leader_epoch",
-            ));
-        }
-        Ok(OffsetForLeaderEpochRequestTopicsPartitions0 {
+    fn from(
+        latest: OffsetForLeaderEpochRequestTopicsPartitions3,
+    ) -> OffsetForLeaderEpochRequestTopicsPartitions0 {
+        log::debug!("Using old api format - OffsetForLeaderEpochRequestTopicsPartitions0, ignoring field current_leader_epoch");
+        OffsetForLeaderEpochRequestTopicsPartitions0 {
             partition: latest.partition,
             leader_epoch: latest.leader_epoch,
-        })
-    }
-}
-
-impl TryFrom<OffsetForLeaderEpochRequest3> for OffsetForLeaderEpochRequest1 {
-    type Error = Error;
-    fn try_from(latest: OffsetForLeaderEpochRequest3) -> Result<Self, Self::Error> {
-        if latest.replica_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetForLeaderEpochRequest",
-                1,
-                "replica_id",
-            ));
         }
-        Ok(OffsetForLeaderEpochRequest1 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<OffsetForLeaderEpochRequestTopics3> for OffsetForLeaderEpochRequestTopics1 {
-    type Error = Error;
-    fn try_from(latest: OffsetForLeaderEpochRequestTopics3) -> Result<Self, Self::Error> {
-        Ok(OffsetForLeaderEpochRequestTopics1 {
+impl From<OffsetForLeaderEpochRequest3> for OffsetForLeaderEpochRequest1 {
+    fn from(latest: OffsetForLeaderEpochRequest3) -> OffsetForLeaderEpochRequest1 {
+        log::debug!(
+            "Using old api format - OffsetForLeaderEpochRequest1, ignoring field replica_id"
+        );
+        OffsetForLeaderEpochRequest1 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
+    }
+}
+
+impl From<OffsetForLeaderEpochRequestTopics3> for OffsetForLeaderEpochRequestTopics1 {
+    fn from(latest: OffsetForLeaderEpochRequestTopics3) -> OffsetForLeaderEpochRequestTopics1 {
+        OffsetForLeaderEpochRequestTopics1 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<OffsetForLeaderEpochRequestTopicsPartitions3>
+impl From<OffsetForLeaderEpochRequestTopicsPartitions3>
     for OffsetForLeaderEpochRequestTopicsPartitions1
 {
-    type Error = Error;
-    fn try_from(latest: OffsetForLeaderEpochRequestTopicsPartitions3) -> Result<Self, Self::Error> {
-        if latest.current_leader_epoch.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetForLeaderEpochRequestTopicsPartitions",
-                1,
-                "current_leader_epoch",
-            ));
-        }
-        Ok(OffsetForLeaderEpochRequestTopicsPartitions1 {
+    fn from(
+        latest: OffsetForLeaderEpochRequestTopicsPartitions3,
+    ) -> OffsetForLeaderEpochRequestTopicsPartitions1 {
+        log::debug!("Using old api format - OffsetForLeaderEpochRequestTopicsPartitions1, ignoring field current_leader_epoch");
+        OffsetForLeaderEpochRequestTopicsPartitions1 {
             partition: latest.partition,
             leader_epoch: latest.leader_epoch,
-        })
-    }
-}
-
-impl TryFrom<OffsetForLeaderEpochRequest3> for OffsetForLeaderEpochRequest2 {
-    type Error = Error;
-    fn try_from(latest: OffsetForLeaderEpochRequest3) -> Result<Self, Self::Error> {
-        if latest.replica_id.is_some() {
-            return Err(Error::OldKafkaVersion(
-                "OffsetForLeaderEpochRequest",
-                2,
-                "replica_id",
-            ));
         }
-        Ok(OffsetForLeaderEpochRequest2 {
-            topics: latest
-                .topics
-                .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
     }
 }
 
-impl TryFrom<OffsetForLeaderEpochRequestTopics3> for OffsetForLeaderEpochRequestTopics2 {
-    type Error = Error;
-    fn try_from(latest: OffsetForLeaderEpochRequestTopics3) -> Result<Self, Self::Error> {
-        Ok(OffsetForLeaderEpochRequestTopics2 {
+impl From<OffsetForLeaderEpochRequest3> for OffsetForLeaderEpochRequest2 {
+    fn from(latest: OffsetForLeaderEpochRequest3) -> OffsetForLeaderEpochRequest2 {
+        log::debug!(
+            "Using old api format - OffsetForLeaderEpochRequest2, ignoring field replica_id"
+        );
+        OffsetForLeaderEpochRequest2 {
+            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
+        }
+    }
+}
+
+impl From<OffsetForLeaderEpochRequestTopics3> for OffsetForLeaderEpochRequestTopics2 {
+    fn from(latest: OffsetForLeaderEpochRequestTopics3) -> OffsetForLeaderEpochRequestTopics2 {
+        OffsetForLeaderEpochRequestTopics2 {
             topic: latest.topic,
             partitions: latest
                 .partitions
                 .into_iter()
-                .map(|ele| ele.try_into())
-                .collect::<Result<_, Error>>()?,
-        })
+                .map(|ele| ele.into())
+                .collect(),
+        }
     }
 }
 
-impl TryFrom<OffsetForLeaderEpochRequestTopicsPartitions3>
+impl From<OffsetForLeaderEpochRequestTopicsPartitions3>
     for OffsetForLeaderEpochRequestTopicsPartitions2
 {
-    type Error = Error;
-    fn try_from(latest: OffsetForLeaderEpochRequestTopicsPartitions3) -> Result<Self, Self::Error> {
-        Ok(OffsetForLeaderEpochRequestTopicsPartitions2 {
+    fn from(
+        latest: OffsetForLeaderEpochRequestTopicsPartitions3,
+    ) -> OffsetForLeaderEpochRequestTopicsPartitions2 {
+        OffsetForLeaderEpochRequestTopicsPartitions2 {
             partition: latest.partition,
             current_leader_epoch: latest.current_leader_epoch,
             leader_epoch: latest.leader_epoch,
-        })
+        }
     }
 }
 

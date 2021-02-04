@@ -46,12 +46,12 @@ impl ApiCall for EndTxnRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &EndTxnRequest0::try_from(self)?,
+                &EndTxnRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &EndTxnRequest1::try_from(self)?,
+                &EndTxnRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -116,27 +116,25 @@ pub struct EndTxnResponse2 {
     pub error_code: Int16,
 }
 
-impl TryFrom<EndTxnRequest2> for EndTxnRequest0 {
-    type Error = Error;
-    fn try_from(latest: EndTxnRequest2) -> Result<Self, Self::Error> {
-        Ok(EndTxnRequest0 {
+impl From<EndTxnRequest2> for EndTxnRequest0 {
+    fn from(latest: EndTxnRequest2) -> EndTxnRequest0 {
+        EndTxnRequest0 {
             transactional_id: latest.transactional_id,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
             committed: latest.committed,
-        })
+        }
     }
 }
 
-impl TryFrom<EndTxnRequest2> for EndTxnRequest1 {
-    type Error = Error;
-    fn try_from(latest: EndTxnRequest2) -> Result<Self, Self::Error> {
-        Ok(EndTxnRequest1 {
+impl From<EndTxnRequest2> for EndTxnRequest1 {
+    fn from(latest: EndTxnRequest2) -> EndTxnRequest1 {
+        EndTxnRequest1 {
             transactional_id: latest.transactional_id,
             producer_id: latest.producer_id,
             producer_epoch: latest.producer_epoch,
             committed: latest.committed,
-        })
+        }
     }
 }
 

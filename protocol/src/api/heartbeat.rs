@@ -48,22 +48,22 @@ impl ApiCall for HeartbeatRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &HeartbeatRequest0::try_from(self)?,
+                &HeartbeatRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &HeartbeatRequest1::try_from(self)?,
+                &HeartbeatRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             2 => ToBytes::serialize(
-                &HeartbeatRequest2::try_from(self)?,
+                &HeartbeatRequest2::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             3 => ToBytes::serialize(
-                &HeartbeatRequest3::try_from(self)?,
+                &HeartbeatRequest3::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -114,7 +114,7 @@ pub struct HeartbeatRequest3 {
     pub group_id: String,
     pub generation_id: Int32,
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
+    pub group_instance_id: NullableString,
 }
 
 #[derive(Default, Debug, Clone, ToBytes)]
@@ -122,8 +122,8 @@ pub struct HeartbeatRequest4 {
     pub group_id: String,
     pub generation_id: Int32,
     pub member_id: String,
-    pub group_instance_id: Optional<NullableString>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub group_instance_id: NullableString,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -133,71 +133,67 @@ pub struct HeartbeatResponse0 {
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct HeartbeatResponse1 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct HeartbeatResponse2 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct HeartbeatResponse3 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct HeartbeatResponse4 {
-    pub throttle_time_ms: Optional<Int32>,
+    pub throttle_time_ms: Option<Int32>,
     pub error_code: Int16,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<HeartbeatRequest4> for HeartbeatRequest0 {
-    type Error = Error;
-    fn try_from(latest: HeartbeatRequest4) -> Result<Self, Self::Error> {
-        Ok(HeartbeatRequest0 {
+impl From<HeartbeatRequest4> for HeartbeatRequest0 {
+    fn from(latest: HeartbeatRequest4) -> HeartbeatRequest0 {
+        HeartbeatRequest0 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
-        })
+        }
     }
 }
 
-impl TryFrom<HeartbeatRequest4> for HeartbeatRequest1 {
-    type Error = Error;
-    fn try_from(latest: HeartbeatRequest4) -> Result<Self, Self::Error> {
-        Ok(HeartbeatRequest1 {
+impl From<HeartbeatRequest4> for HeartbeatRequest1 {
+    fn from(latest: HeartbeatRequest4) -> HeartbeatRequest1 {
+        HeartbeatRequest1 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
-        })
+        }
     }
 }
 
-impl TryFrom<HeartbeatRequest4> for HeartbeatRequest2 {
-    type Error = Error;
-    fn try_from(latest: HeartbeatRequest4) -> Result<Self, Self::Error> {
-        Ok(HeartbeatRequest2 {
+impl From<HeartbeatRequest4> for HeartbeatRequest2 {
+    fn from(latest: HeartbeatRequest4) -> HeartbeatRequest2 {
+        HeartbeatRequest2 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
-        })
+        }
     }
 }
 
-impl TryFrom<HeartbeatRequest4> for HeartbeatRequest3 {
-    type Error = Error;
-    fn try_from(latest: HeartbeatRequest4) -> Result<Self, Self::Error> {
-        Ok(HeartbeatRequest3 {
+impl From<HeartbeatRequest4> for HeartbeatRequest3 {
+    fn from(latest: HeartbeatRequest4) -> HeartbeatRequest3 {
+        HeartbeatRequest3 {
             group_id: latest.group_id,
             generation_id: latest.generation_id,
             member_id: latest.member_id,
             group_instance_id: latest.group_instance_id,
-        })
+        }
     }
 }
 

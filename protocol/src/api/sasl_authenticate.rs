@@ -46,12 +46,12 @@ impl ApiCall for SaslAuthenticateRequest {
         }
         match version {
             0 => ToBytes::serialize(
-                &SaslAuthenticateRequest0::try_from(self)?,
+                &SaslAuthenticateRequest0::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
             1 => ToBytes::serialize(
-                &SaslAuthenticateRequest1::try_from(self)?,
+                &SaslAuthenticateRequest1::from(self),
                 buf,
                 Self::is_flexible_version(version),
             ),
@@ -89,7 +89,7 @@ pub struct SaslAuthenticateRequest1 {
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct SaslAuthenticateRequest2 {
     pub auth_bytes: KafkaBytes,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub tag_buffer: TagBuffer,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -104,7 +104,7 @@ pub struct SaslAuthenticateResponse1 {
     pub error_code: Int16,
     pub error_message: NullableString,
     pub auth_bytes: KafkaBytes,
-    pub session_lifetime_ms: Optional<Int64>,
+    pub session_lifetime_ms: Option<Int64>,
 }
 
 #[derive(Default, Debug, Clone, FromBytes)]
@@ -112,25 +112,23 @@ pub struct SaslAuthenticateResponse2 {
     pub error_code: Int16,
     pub error_message: NullableString,
     pub auth_bytes: KafkaBytes,
-    pub session_lifetime_ms: Optional<Int64>,
-    pub tag_buffer: Optional<TagBuffer>,
+    pub session_lifetime_ms: Option<Int64>,
+    pub tag_buffer: Option<TagBuffer>,
 }
 
-impl TryFrom<SaslAuthenticateRequest2> for SaslAuthenticateRequest0 {
-    type Error = Error;
-    fn try_from(latest: SaslAuthenticateRequest2) -> Result<Self, Self::Error> {
-        Ok(SaslAuthenticateRequest0 {
+impl From<SaslAuthenticateRequest2> for SaslAuthenticateRequest0 {
+    fn from(latest: SaslAuthenticateRequest2) -> SaslAuthenticateRequest0 {
+        SaslAuthenticateRequest0 {
             auth_bytes: latest.auth_bytes,
-        })
+        }
     }
 }
 
-impl TryFrom<SaslAuthenticateRequest2> for SaslAuthenticateRequest1 {
-    type Error = Error;
-    fn try_from(latest: SaslAuthenticateRequest2) -> Result<Self, Self::Error> {
-        Ok(SaslAuthenticateRequest1 {
+impl From<SaslAuthenticateRequest2> for SaslAuthenticateRequest1 {
+    fn from(latest: SaslAuthenticateRequest2) -> SaslAuthenticateRequest1 {
+        SaslAuthenticateRequest1 {
             auth_bytes: latest.auth_bytes,
-        })
+        }
     }
 }
 
