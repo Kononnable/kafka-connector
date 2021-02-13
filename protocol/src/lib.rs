@@ -3,6 +3,7 @@ use bytes::{Bytes, BytesMut};
 use error::Error;
 
 pub mod api;
+pub mod api_error;
 pub mod custom_types;
 pub mod error;
 pub mod from_bytes;
