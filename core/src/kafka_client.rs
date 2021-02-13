@@ -6,7 +6,10 @@ use tokio::{
     net::TcpStream,
 };
 
-use kafka_connector_protocol::{api::api_versions::ApiVersionsRequest, ApiCall};
+use kafka_connector_protocol::{
+    api::{api_versions::ApiVersionsRequest, ApiNumbers},
+    ApiCall,
+};
 
 use crate::error::{KafkaApiCallError, KafkaConnectionError};
 
@@ -57,25 +60,29 @@ impl BrokerClient {
     where
         T: ApiCall,
     {
-        let supported_versions = self
-            .supported_versions
-            .get(&(T::get_api_key() as i16))
-            .ok_or_else(|| KafkaApiCallError::OldKafkaVersion {
-                api: T::get_api_key(),
-                version: 0,
-            })?;
-        let api_version = match api_version {
-            Some(v) => {
-                if v >= supported_versions.0 && v <= supported_versions.1 {
-                    v
-                } else {
-                    return Err(KafkaApiCallError::OldKafkaVersion {
-                        api: T::get_api_key(),
-                        version: v,
-                    });
+        let api_version = if T::get_api_key() == ApiNumbers::ApiVersions {
+            api_version.unwrap_or_default()
+        } else {
+            let supported_versions = self
+                .supported_versions
+                .get(&(T::get_api_key() as i16))
+                .ok_or_else(|| KafkaApiCallError::OldKafkaVersion {
+                    api: T::get_api_key(),
+                    version: 0,
+                })?;
+            match api_version {
+                Some(v) => {
+                    if v >= supported_versions.0 && v <= supported_versions.1 {
+                        v
+                    } else {
+                        return Err(KafkaApiCallError::OldKafkaVersion {
+                            api: T::get_api_key(),
+                            version: v,
+                        });
+                    }
                 }
+                None => supported_versions.1,
             }
-            None => supported_versions.1,
         };
 
         let mut buffer = BytesMut::with_capacity(4096); // TODO: Change size(?)

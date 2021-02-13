@@ -55,7 +55,7 @@ pub mod update_features;
 pub mod update_metadata;
 pub mod write_txn_markers;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ApiNumbers {
     Produce = 0,
     Fetch = 1,
