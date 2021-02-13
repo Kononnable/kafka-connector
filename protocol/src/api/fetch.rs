@@ -31,13 +31,7 @@ impl ApiCall for FetchRequest {
             _ => true,
         }
     }
-    fn serialize(
-        self,
-        version: i16,
-        buf: &mut BytesMut,
-        correlation_id: i32,
-        client_id: &str,
-    ) -> Result<(), Error> {
+    fn serialize(self, version: i16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
         match Self::is_flexible_version(version) {
             true => HeaderRequest2::new(
                 FetchRequest::get_api_key(),
@@ -118,7 +112,6 @@ impl ApiCall for FetchRequest {
             12 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
             _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
-        Ok(())
     }
     fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, FetchResponse) {
         let correlation = match Self::is_flexible_version(version) {

@@ -27,13 +27,7 @@ impl ApiCall for OffsetCommitRequest {
             _ => true,
         }
     }
-    fn serialize(
-        self,
-        version: i16,
-        buf: &mut BytesMut,
-        correlation_id: i32,
-        client_id: &str,
-    ) -> Result<(), Error> {
+    fn serialize(self, version: i16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
         match Self::is_flexible_version(version) {
             true => HeaderRequest2::new(
                 OffsetCommitRequest::get_api_key(),
@@ -94,7 +88,6 @@ impl ApiCall for OffsetCommitRequest {
             8 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
             _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
-        Ok(())
     }
     fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, OffsetCommitResponse) {
         let correlation = match Self::is_flexible_version(version) {

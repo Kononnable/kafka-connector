@@ -22,13 +22,7 @@ impl ApiCall for FindCoordinatorRequest {
             _ => true,
         }
     }
-    fn serialize(
-        self,
-        version: i16,
-        buf: &mut BytesMut,
-        correlation_id: i32,
-        client_id: &str,
-    ) -> Result<(), Error> {
+    fn serialize(self, version: i16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
         match Self::is_flexible_version(version) {
             true => HeaderRequest2::new(
                 FindCoordinatorRequest::get_api_key(),
@@ -64,7 +58,6 @@ impl ApiCall for FindCoordinatorRequest {
             3 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
             _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
-        Ok(())
     }
     fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, FindCoordinatorResponse) {
         let correlation = match Self::is_flexible_version(version) {

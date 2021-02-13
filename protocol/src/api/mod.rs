@@ -118,7 +118,6 @@ mod prelude {
     pub use super::super::custom_types::nullable_string::NullableString;
     pub use super::super::custom_types::tag_buffer::TagBuffer;
     pub use super::super::custom_types::*;
-    pub use super::super::error::Error;
     pub use super::super::from_bytes::FromBytes;
     pub use super::super::to_bytes::ToBytes;
     pub use super::super::ApiCall;

@@ -6,9 +6,9 @@ use tokio::{
     net::TcpStream,
 };
 
-use thiserror::Error as DeriveError;
-
 use kafka_connector_protocol::{api::api_versions::ApiVersionsRequest, ApiCall};
+
+use crate::error::{KafkaApiCallError, KafkaConnectionError};
 
 #[derive(Debug)]
 pub struct KafkaClient {
@@ -30,25 +30,6 @@ pub struct BrokerClient {
     pub client_id: String,
     pub last_correlation: i32,
     pub supported_versions: HashMap<i16, (i16, i16)>,
-}
-#[non_exhaustive]
-#[derive(Debug, DeriveError)]
-pub enum KafkaConnectionError {
-    #[error("Error connecting to broker \"{0}\"")]
-    ConnectionError(std::io::Error),
-}
-
-impl From<std::io::Error> for KafkaConnectionError {
-    fn from(error: std::io::Error) -> Self {
-        Self::ConnectionError(error)
-    }
-}
-
-#[non_exhaustive]
-#[derive(Debug, DeriveError)]
-pub enum KafkaApiCallError {
-    #[error("TODO error: {0}")]
-    TODOError(String),
 }
 
 impl BrokerClient {
@@ -76,28 +57,34 @@ impl BrokerClient {
     where
         T: ApiCall,
     {
+        let supported_versions = self
+            .supported_versions
+            .get(&(T::get_api_key() as i16))
+            .ok_or_else(|| KafkaApiCallError::OldKafkaVersion {
+                api: T::get_api_key(),
+                version: 0,
+            })?;
         let api_version = match api_version {
-            Some(v) => v,
-            None => {
-                let supported = self
-                    .supported_versions
-                    .get(&(T::get_api_key() as i16))
-                    .ok_or_else(|| {
-                        KafkaApiCallError::TODOError("supported api version not found".to_owned())
-                    })?;
-                supported.1
+            Some(v) => {
+                if v >= supported_versions.0 && v <= supported_versions.1 {
+                    v
+                } else {
+                    return Err(KafkaApiCallError::OldKafkaVersion {
+                        api: T::get_api_key(),
+                        version: v,
+                    });
+                }
             }
+            None => supported_versions.1,
         };
 
         let mut buffer = BytesMut::with_capacity(4096); // TODO: Change size(?)
-        request
-            .serialize(
-                api_version,
-                &mut buffer,
-                self.last_correlation + 1,
-                &self.client_id,
-            )
-            .unwrap();
+        request.serialize(
+            api_version,
+            &mut buffer,
+            self.last_correlation + 1,
+            &self.client_id,
+        );
         let len = buffer.len() as i32;
         self.connection.write_all(&len.to_be_bytes()).await.unwrap();
         self.connection.write_all(&buffer).await.unwrap();

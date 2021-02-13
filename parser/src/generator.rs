@@ -86,7 +86,8 @@ fn serialize_api_request(requests: &[Vec<ApiStructDefinition>]) -> String {
     let main_struct = requests.first().unwrap().first().unwrap();
     let struct_name = &main_struct.name;
     let mut fn_def =
-        "fn serialize(self,version:i16, buf: &mut BytesMut,correlation_id: i32,client_id: &str) -> Result<(),Error> {\n".to_owned();
+        "fn serialize(self,version:i16, buf: &mut BytesMut,correlation_id: i32,client_id: &str){\n"
+            .to_owned();
 
     fn_def.push_str("match Self::is_flexible_version(version) {\n");
     fn_def.push_str(&format!("true => HeaderRequest2::new({}::get_api_key(), version, correlation_id, client_id).serialize(buf, false),\n",struct_name));
@@ -111,7 +112,6 @@ fn serialize_api_request(requests: &[Vec<ApiStructDefinition>]) -> String {
         "        _ => ToBytes::serialize(&self,buf, Self::is_flexible_version(version)),\n",
     );
     fn_def.push_str("    }\n");
-    fn_def.push_str("    Ok(())\n");
     fn_def.push_str("}\n");
     fn_def
 }

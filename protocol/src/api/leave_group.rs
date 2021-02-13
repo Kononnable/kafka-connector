@@ -23,13 +23,7 @@ impl ApiCall for LeaveGroupRequest {
             _ => true,
         }
     }
-    fn serialize(
-        self,
-        version: i16,
-        buf: &mut BytesMut,
-        correlation_id: i32,
-        client_id: &str,
-    ) -> Result<(), Error> {
+    fn serialize(self, version: i16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
         match Self::is_flexible_version(version) {
             true => HeaderRequest2::new(
                 LeaveGroupRequest::get_api_key(),
@@ -70,7 +64,6 @@ impl ApiCall for LeaveGroupRequest {
             4 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
             _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
         }
-        Ok(())
     }
     fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, LeaveGroupResponse) {
         let correlation = match Self::is_flexible_version(version) {
