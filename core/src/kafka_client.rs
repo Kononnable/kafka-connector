@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use bytes::{Bytes, BytesMut};
 use tokio::{
@@ -8,10 +8,11 @@ use tokio::{
 
 use kafka_connector_protocol::{
     api::{api_versions::ApiVersionsRequest, ApiNumbers},
+    api_error::ApiError,
     ApiCall,
 };
 
-use crate::error::{KafkaApiCallError, KafkaConnectionError};
+use crate::error::KafkaApiCallError;
 
 #[derive(Debug)]
 pub struct KafkaClient {
@@ -37,10 +38,7 @@ pub struct BrokerClient {
 
 impl BrokerClient {
     // TODO: change type to  array of ToSocketAddrs
-    pub async fn new(
-        broker: &str,
-        client_id: String,
-    ) -> Result<BrokerClient, KafkaConnectionError> {
+    pub async fn new(broker: &str, client_id: String) -> Result<BrokerClient, KafkaApiCallError> {
         let connection = TcpStream::connect(broker).await?;
         let mut client = BrokerClient {
             supported_versions: HashMap::new(),
@@ -48,7 +46,7 @@ impl BrokerClient {
             last_correlation: 0,
             client_id,
         };
-        client.get_supported_api_versions().await;
+        client.get_supported_api_versions().await?;
         Ok(client)
     }
 
@@ -105,30 +103,54 @@ impl BrokerClient {
 
         let (correlation, response) = T::deserialize_response(api_version, &mut buf2);
         self.last_correlation = correlation;
+        if let Some(err) = T::get_first_error(&response) {
+            return Err(KafkaApiCallError::KafkaApiError(err));
+        }
         Ok(response)
     }
 
-    async fn get_supported_api_versions(&mut self) {
+    async fn get_supported_api_versions(&mut self) -> Result<(), KafkaApiCallError> {
         let response = self
             .run_api_call(ApiVersionsRequest::default(), Some(0))
-            .await
-            .unwrap();
+            .await?;
         if response.error_code != 0 {
-            todo!("")
+            return Err(KafkaApiCallError::KafkaApiError(ApiError::from(
+                response.error_code,
+            )));
         }
         self.supported_versions.clear();
         for api_key in response.api_keys {
             self.supported_versions
                 .insert(api_key.api_key, (api_key.min_version, api_key.max_version));
         }
+        Ok(())
+    }
+    pub async fn run_api_call_with_retry<T, C>(
+        &mut self,
+        request: T,
+        api_version: Option<i16>,
+    ) -> Result<T::Response, KafkaApiCallError>
+    where
+        T: ApiCall + Clone,
+    {
+        let req = request.clone(); // TODO: Change - cloning should not be required, changes will introduce structs containing references instead of owned data(because of conversion between api version structs)
+        let mut response = self.run_api_call(req, api_version).await;
+        for _i in 0..=3 {
+            // TODO: Extract to config value
+            if let Err(KafkaApiCallError::KafkaApiError(_)) = response {
+                tokio::time::sleep(Duration::from_millis(100)).await; // TODO: Extract to config value, gradually increase wait duration
+                let req = request.clone();
+                response = self.run_api_call(req, api_version).await;
+            } else {
+                break;
+            }
+        }
+        return response;
     }
 }
 
 impl KafkaClient {
-    pub async fn new(
-        broker_addr: &str,
-        client_id: &str,
-    ) -> Result<KafkaClient, KafkaConnectionError> {
+    pub async fn new(broker_addr: &str, client_id: &str) -> Result<KafkaClient, KafkaApiCallError> {
         let clients = vec![BrokerClient::new(broker_addr, client_id.to_owned()).await?];
         Ok(KafkaClient {
             clients,

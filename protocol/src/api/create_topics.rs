@@ -13,6 +13,9 @@ impl ApiCall for CreateTopicsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::CreateTopics
     }
+    fn get_first_error(response: &CreateTopicsResponse) -> Option<ApiError> {
+        CreateTopicsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -834,5 +837,33 @@ impl From<CreateTopicsResponseTopicsConfigs5> for CreateTopicsResponseTopicsConf
             is_sensitive: older.is_sensitive,
             tag_buffer: older.tag_buffer,
         }
+    }
+}
+
+impl CreateTopicsResponse6 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.topics.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl CreateTopicsResponseTopics6 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        if let Some(vec) = self.configs.as_ref() {
+            for item in vec {
+                if let Some(x) = item.get_first_error() {
+                    return Some(x);
+                };
+            }
+        }
+        None
+    }
+}
+impl CreateTopicsResponseTopicsConfigs6 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

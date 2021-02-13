@@ -13,6 +13,9 @@ impl ApiCall for DeleteAclsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DeleteAcls
     }
+    fn get_first_error(response: &DeleteAclsResponse) -> Option<ApiError> {
+        DeleteAclsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -334,5 +337,31 @@ impl From<DeleteAclsResponseFilterResultsMatchingAcls1>
             permission_type: older.permission_type,
             ..DeleteAclsResponseFilterResultsMatchingAcls2::default()
         }
+    }
+}
+
+impl DeleteAclsResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.filter_results.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DeleteAclsResponseFilterResults2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.matching_acls.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DeleteAclsResponseFilterResultsMatchingAcls2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

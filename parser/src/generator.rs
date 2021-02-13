@@ -13,26 +13,28 @@ pub fn generate_content(api_call: ApiEndpoint, api_name: &str) -> String {
         .requests
         .iter()
         .flatten()
-        .map(|x| genrate_struct(x, true))
+        .map(|x| generate_struct(x, true))
         .chain(
             api_call
                 .responses
                 .iter()
                 .flatten()
-                .map(|x| genrate_struct(x, false)),
+                .map(|x| generate_struct(x, false)),
         )
         .fold("".to_string(), |acc, x| format!("{}\n{}", acc, x));
-    let from_latest_impl = genetate_impl_from_latest(api_call.requests);
-    let to_latest_impl = genetate_impl_to_latest(api_call.responses);
+    let get_first_error = generate_get_first_error(api_call.responses.last().unwrap());
+    let from_latest_impl = generate_impl_from_latest(api_call.requests);
+    let to_latest_impl = generate_impl_to_latest(api_call.responses);
     format!(
-        "{}\n{}{}{}{}\n{}\n{}",
+        "{}\n{}{}{}{}\n{}\n{}\n{}",
         use_statements,
         request_type_alias,
         response_type_alias,
         api_struct,
         structs,
         from_latest_impl,
-        to_latest_impl
+        to_latest_impl,
+        get_first_error
     )
 }
 
@@ -52,6 +54,10 @@ fn generate_api_struct(api_call: &ApiEndpoint, api_name: &str) -> String {
     def.push_str(&format!(
         "fn get_api_key()->ApiNumbers{{\nApiNumbers::{}\n}}\n",
         api_name
+    ));
+    def.push_str(&format!(
+        "fn get_first_error(response: &{}Response) -> Option<ApiError>{{\n{}Response::get_first_error(response)\n}}\n",
+        api_name,api_name
     ));
     def.push_str("fn is_flexible_version(version: i16) -> bool {\n match version{\n");
     for (version, struct_definition) in api_call.responses.iter().enumerate() {
@@ -151,7 +157,7 @@ fn deserialize_api_response(responses: &[Vec<ApiStructDefinition>]) -> String {
     fn_def
 }
 
-fn genrate_struct(api_call: &ApiStructDefinition, is_request: bool) -> String {
+fn generate_struct(api_call: &ApiStructDefinition, is_request: bool) -> String {
     let struct_name = format!("{}{}", api_call.name, api_call.version);
 
     let derive_bytes = if is_request { "ToBytes" } else { "FromBytes" };
@@ -177,7 +183,7 @@ fn generate_type_alias(struc: &ApiStructDefinition) -> String {
     )
 }
 
-fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
+fn generate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
     let mut impl_def = "".to_owned();
     let (latest, older_calls) = api_calls.split_last().unwrap();
     for call in older_calls.iter().flatten() {
@@ -269,7 +275,7 @@ fn genetate_impl_from_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String
     impl_def
 }
 
-fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
+fn generate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
     let mut impl_def = "".to_owned();
     let (latest, older_calls) = api_calls.split_last().unwrap();
     for call in older_calls.iter().flatten() {
@@ -299,7 +305,7 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
                             ".into_iter().collect()"
                         } else if field.is_simple_type
                             && !field.is_vec
-                            && !latest_field.unwrap().is_easily_convertable
+                            && latest_field.unwrap().is_struct_field
                         {
                             ""
                         } else if !field.is_simple_type && field.is_vec {
@@ -335,6 +341,58 @@ fn genetate_impl_to_latest(api_calls: Vec<Vec<ApiStructDefinition>>) -> String {
                 impl_def.push_str(&"}\n\n");
             }
         }
+    }
+    impl_def
+}
+
+fn generate_get_first_error(api_structs: &[ApiStructDefinition]) -> String {
+    let mut impl_def = "".to_owned();
+    for structs in api_structs.iter() {
+        impl_def.push_str(&format!(
+            "impl {}{} {{\nfn get_first_error(&self) -> Option<ApiError>{{\n",
+            structs.name, structs.version
+        ));
+        if structs
+            .fields
+            .iter()
+            .any(|x| x.name == "error_code" && x.ty == "i16")
+        {
+            impl_def.push_str(&"    if self.error_code !=0 {\n");
+            impl_def.push_str(&"        return self.error_code;\n");
+            impl_def.push_str(&"    }\n");
+        } else if structs
+            .fields
+            .iter()
+            .any(|x| x.name == "error_code" && x.ty == "Option<i16>")
+        {
+            impl_def
+                .push_str(&"    if self.error_code.is_some() && self.error_code.unwrap() !=0 {\n");
+            impl_def.push_str(&"        return self.error_code.unwrap();\n");
+            impl_def.push_str(&"    }\n");
+        }
+        for field in structs
+            .fields
+            .iter()
+            .filter(|x| x.is_vec && x.is_struct_field)
+        {
+            if field.is_optional {
+                impl_def.push_str(&format!(
+                    "if let Some(vec) = self.{}.as_ref(){{\nfor item in vec {{\n",
+                    field.name
+                ));
+            } else {
+                impl_def.push_str(&format!("for item in self.{}.iter() {{\n", field.name));
+            }
+            impl_def.push_str(
+                &("        if let Some(x) = item.get_first_error(){\nreturn Some(x);\n};\n"),
+            );
+            if field.is_optional {
+                impl_def.push_str(&"    }\n}\n");
+            } else {
+                impl_def.push_str(&"    }\n");
+            }
+        }
+        impl_def.push_str(&"None\n}\n}");
     }
     impl_def
 }

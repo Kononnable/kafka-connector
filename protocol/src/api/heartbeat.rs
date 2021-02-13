@@ -13,6 +13,9 @@ impl ApiCall for HeartbeatRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::Heartbeat
     }
+    fn get_first_error(response: &HeartbeatResponse) -> Option<ApiError> {
+        HeartbeatResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -226,5 +229,11 @@ impl From<HeartbeatResponse3> for HeartbeatResponse4 {
             error_code: older.error_code,
             ..HeartbeatResponse4::default()
         }
+    }
+}
+
+impl HeartbeatResponse4 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

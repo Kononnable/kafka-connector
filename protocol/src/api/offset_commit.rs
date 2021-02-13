@@ -13,6 +13,9 @@ impl ApiCall for OffsetCommitRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::OffsetCommit
     }
+    fn get_first_error(response: &OffsetCommitResponse) -> Option<ApiError> {
+        OffsetCommitResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -988,5 +991,31 @@ impl From<OffsetCommitResponseTopicsPartitions7> for OffsetCommitResponseTopicsP
             error_code: older.error_code,
             ..OffsetCommitResponseTopicsPartitions8::default()
         }
+    }
+}
+
+impl OffsetCommitResponse8 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.topics.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl OffsetCommitResponseTopics8 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl OffsetCommitResponseTopicsPartitions8 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

@@ -13,6 +13,9 @@ impl ApiCall for AlterReplicaLogDirsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::AlterReplicaLogDirs
     }
+    fn get_first_error(response: &AlterReplicaLogDirsResponse) -> Option<ApiError> {
+        AlterReplicaLogDirsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -185,5 +188,31 @@ impl From<AlterReplicaLogDirsResponseResultsPartitions0>
             partition_index: older.partition_index,
             error_code: older.error_code,
         }
+    }
+}
+
+impl AlterReplicaLogDirsResponse1 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.results.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl AlterReplicaLogDirsResponseResults1 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl AlterReplicaLogDirsResponseResultsPartitions1 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

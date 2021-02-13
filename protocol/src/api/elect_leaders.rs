@@ -13,6 +13,9 @@ impl ApiCall for ElectLeadersRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ElectLeaders
     }
+    fn get_first_error(response: &ElectLeadersResponse) -> Option<ApiError> {
+        ElectLeadersResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -299,5 +302,31 @@ impl From<ElectLeadersResponseReplicaElectionResultsPartitionResult1>
             error_message: older.error_message,
             ..ElectLeadersResponseReplicaElectionResultsPartitionResult2::default()
         }
+    }
+}
+
+impl ElectLeadersResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.replica_election_results.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl ElectLeadersResponseReplicaElectionResults2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partition_result.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl ElectLeadersResponseReplicaElectionResultsPartitionResult2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

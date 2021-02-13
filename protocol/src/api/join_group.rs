@@ -13,6 +13,9 @@ impl ApiCall for JoinGroupRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::JoinGroup
     }
+    fn get_first_error(response: &JoinGroupResponse) -> Option<ApiError> {
+        JoinGroupResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -711,5 +714,21 @@ impl From<JoinGroupResponseMembers6> for JoinGroupResponseMembers7 {
             metadata: older.metadata,
             tag_buffer: older.tag_buffer,
         }
+    }
+}
+
+impl JoinGroupResponse7 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.members.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl JoinGroupResponseMembers7 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

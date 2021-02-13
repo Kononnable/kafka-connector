@@ -13,6 +13,9 @@ impl ApiCall for DescribeUserScramCredentialsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeUserScramCredentials
     }
+    fn get_first_error(response: &DescribeUserScramCredentialsResponse) -> Option<ApiError> {
+        DescribeUserScramCredentialsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => true,
@@ -97,4 +100,30 @@ pub struct DescribeUserScramCredentialsResponseResultsCredentialInfos0 {
     pub mechanism: Int8,
     pub iterations: Int32,
     pub tag_buffer: TagBuffer,
+}
+
+impl DescribeUserScramCredentialsResponse0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.results.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeUserScramCredentialsResponseResults0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.credential_infos.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeUserScramCredentialsResponseResultsCredentialInfos0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
+    }
 }

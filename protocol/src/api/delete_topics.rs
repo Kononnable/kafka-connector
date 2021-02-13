@@ -13,6 +13,9 @@ impl ApiCall for DeleteTopicsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DeleteTopics
     }
+    fn get_first_error(response: &DeleteTopicsResponse) -> Option<ApiError> {
+        DeleteTopicsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -345,5 +348,21 @@ impl From<DeleteTopicsResponseResponses4> for DeleteTopicsResponseResponses5 {
             tag_buffer: older.tag_buffer,
             ..DeleteTopicsResponseResponses5::default()
         }
+    }
+}
+
+impl DeleteTopicsResponse5 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.responses.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DeleteTopicsResponseResponses5 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

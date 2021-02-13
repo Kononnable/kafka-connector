@@ -13,6 +13,9 @@ impl ApiCall for CreateAclsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::CreateAcls
     }
+    fn get_first_error(response: &CreateAclsResponse) -> Option<ApiError> {
+        CreateAclsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -235,5 +238,21 @@ impl From<CreateAclsResponseResults1> for CreateAclsResponseResults2 {
             error_message: older.error_message,
             ..CreateAclsResponseResults2::default()
         }
+    }
+}
+
+impl CreateAclsResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.results.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl CreateAclsResponseResults2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

@@ -13,6 +13,9 @@ impl ApiCall for SaslHandshakeRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::SaslHandshake
     }
+    fn get_first_error(response: &SaslHandshakeResponse) -> Option<ApiError> {
+        SaslHandshakeResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -98,5 +101,11 @@ impl From<SaslHandshakeResponse0> for SaslHandshakeResponse1 {
             error_code: older.error_code,
             mechanisms: older.mechanisms,
         }
+    }
+}
+
+impl SaslHandshakeResponse1 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

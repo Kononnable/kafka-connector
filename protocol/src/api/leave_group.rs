@@ -13,6 +13,9 @@ impl ApiCall for LeaveGroupRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::LeaveGroup
     }
+    fn get_first_error(response: &LeaveGroupResponse) -> Option<ApiError> {
+        LeaveGroupResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -270,5 +273,23 @@ impl From<LeaveGroupResponseMembers3> for LeaveGroupResponseMembers4 {
             error_code: older.error_code,
             ..LeaveGroupResponseMembers4::default()
         }
+    }
+}
+
+impl LeaveGroupResponse4 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        if let Some(vec) = self.members.as_ref() {
+            for item in vec {
+                if let Some(x) = item.get_first_error() {
+                    return Some(x);
+                };
+            }
+        }
+        None
+    }
+}
+impl LeaveGroupResponseMembers4 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

@@ -13,6 +13,9 @@ impl ApiCall for ListGroupsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ListGroups
     }
+    fn get_first_error(response: &ListGroupsResponse) -> Option<ApiError> {
+        ListGroupsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -277,5 +280,21 @@ impl From<ListGroupsResponseGroups3> for ListGroupsResponseGroups4 {
             tag_buffer: older.tag_buffer,
             ..ListGroupsResponseGroups4::default()
         }
+    }
+}
+
+impl ListGroupsResponse4 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.groups.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl ListGroupsResponseGroups4 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

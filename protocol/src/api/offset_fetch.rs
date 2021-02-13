@@ -13,6 +13,9 @@ impl ApiCall for OffsetFetchRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::OffsetFetch
     }
+    fn get_first_error(response: &OffsetFetchResponse) -> Option<ApiError> {
+        OffsetFetchResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -735,5 +738,31 @@ impl From<OffsetFetchResponseTopicsPartitions6> for OffsetFetchResponseTopicsPar
             error_code: older.error_code,
             tag_buffer: older.tag_buffer,
         }
+    }
+}
+
+impl OffsetFetchResponse7 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.topics.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl OffsetFetchResponseTopics7 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl OffsetFetchResponseTopicsPartitions7 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

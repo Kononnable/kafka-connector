@@ -13,6 +13,9 @@ impl ApiCall for RenewDelegationTokenRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::RenewDelegationToken
     }
+    fn get_first_error(response: &RenewDelegationTokenResponse) -> Option<ApiError> {
+        RenewDelegationTokenResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -151,5 +154,11 @@ impl From<RenewDelegationTokenResponse1> for RenewDelegationTokenResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             ..RenewDelegationTokenResponse2::default()
         }
+    }
+}
+
+impl RenewDelegationTokenResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

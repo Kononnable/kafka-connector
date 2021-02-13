@@ -13,6 +13,9 @@ impl ApiCall for TxnOffsetCommitRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::TxnOffsetCommit
     }
+    fn get_first_error(response: &TxnOffsetCommitResponse) -> Option<ApiError> {
+        TxnOffsetCommitResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -452,5 +455,31 @@ impl From<TxnOffsetCommitResponseTopicsPartitions2> for TxnOffsetCommitResponseT
             error_code: older.error_code,
             ..TxnOffsetCommitResponseTopicsPartitions3::default()
         }
+    }
+}
+
+impl TxnOffsetCommitResponse3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.topics.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl TxnOffsetCommitResponseTopics3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl TxnOffsetCommitResponseTopicsPartitions3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

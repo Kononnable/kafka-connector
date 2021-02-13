@@ -206,10 +206,10 @@ pub enum ApiError {
     #[error("Unable to update finalized features due to an unexpected server error.")]
     FeatureUpdateFailed,
     #[error("Unknown error code returned from kafka {0}.")]
-    UnknownErrorCode(i32),
+    UnknownErrorCode(i16),
 }
-impl ApiError {
-    pub fn from_i32(i: i32) -> ApiError {
+impl From<i16> for ApiError {
+    fn from(i: i16) -> Self {
         match i {
             -1 => ApiError::UnknownServerError,
             1 => ApiError::OffsetOutOfRange,
@@ -312,6 +312,9 @@ impl ApiError {
             x => ApiError::UnknownErrorCode(x),
         }
     }
+}
+
+impl ApiError {
     pub fn is_retriable(value: ApiError) -> bool {
         match value {
             ApiError::CorruptMessage

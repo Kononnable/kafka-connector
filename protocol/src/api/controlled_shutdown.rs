@@ -13,6 +13,9 @@ impl ApiCall for ControlledShutdownRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ControlledShutdown
     }
+    fn get_first_error(response: &ControlledShutdownResponse) -> Option<ApiError> {
+        ControlledShutdownResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -256,5 +259,21 @@ impl From<ControlledShutdownResponseRemainingPartitions2>
             partition_index: older.partition_index,
             ..ControlledShutdownResponseRemainingPartitions3::default()
         }
+    }
+}
+
+impl ControlledShutdownResponse3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.remaining_partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl ControlledShutdownResponseRemainingPartitions3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

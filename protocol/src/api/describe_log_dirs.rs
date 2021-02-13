@@ -13,6 +13,9 @@ impl ApiCall for DescribeLogDirsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeLogDirs
     }
+    fn get_first_error(response: &DescribeLogDirsResponse) -> Option<ApiError> {
+        DescribeLogDirsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -310,5 +313,41 @@ impl From<DescribeLogDirsResponseResultsTopicsPartitions1>
             is_future_key: older.is_future_key,
             ..DescribeLogDirsResponseResultsTopicsPartitions2::default()
         }
+    }
+}
+
+impl DescribeLogDirsResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.results.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeLogDirsResponseResults2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.topics.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeLogDirsResponseResultsTopics2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeLogDirsResponseResultsTopicsPartitions2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

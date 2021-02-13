@@ -13,6 +13,9 @@ impl ApiCall for ApiVersionsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ApiVersions
     }
+    fn get_first_error(response: &ApiVersionsResponse) -> Option<ApiError> {
+        ApiVersionsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -227,5 +230,21 @@ impl From<ApiVersionsResponseApiKeys2> for ApiVersionsResponseApiKeys3 {
             max_version: older.max_version,
             ..ApiVersionsResponseApiKeys3::default()
         }
+    }
+}
+
+impl ApiVersionsResponse3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.api_keys.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl ApiVersionsResponseApiKeys3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

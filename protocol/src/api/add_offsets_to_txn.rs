@@ -13,6 +13,9 @@ impl ApiCall for AddOffsetsToTxnRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::AddOffsetsToTxn
     }
+    fn get_first_error(response: &AddOffsetsToTxnResponse) -> Option<ApiError> {
+        AddOffsetsToTxnResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -148,5 +151,11 @@ impl From<AddOffsetsToTxnResponse1> for AddOffsetsToTxnResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
         }
+    }
+}
+
+impl AddOffsetsToTxnResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

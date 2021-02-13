@@ -13,6 +13,9 @@ impl ApiCall for UpdateFeaturesRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::UpdateFeatures
     }
+    fn get_first_error(response: &UpdateFeaturesResponse) -> Option<ApiError> {
+        UpdateFeaturesResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => true,
@@ -83,4 +86,20 @@ pub struct UpdateFeaturesResponseResults0 {
     pub error_code: Int16,
     pub error_message: NullableString,
     pub tag_buffer: TagBuffer,
+}
+
+impl UpdateFeaturesResponse0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.results.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl UpdateFeaturesResponseResults0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
+    }
 }

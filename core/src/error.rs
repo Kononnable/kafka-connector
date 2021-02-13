@@ -3,14 +3,9 @@ use thiserror::Error as DeriveError;
 
 #[non_exhaustive]
 #[derive(Debug, DeriveError)]
-pub enum KafkaConnectionError {
+pub enum KafkaApiCallError {
     #[error("Error connecting to broker \"{0}\"")]
     ConnectionError(#[from] std::io::Error),
-}
-
-#[non_exhaustive]
-#[derive(Debug, DeriveError)]
-pub enum KafkaApiCallError {
     #[error("Kafka broker doesn't support requested API version. API: {api:?} version: {version}")]
     OldKafkaVersion { api: ApiNumbers, version: i16 },
     #[error("Kafka API call returned an error {0:?}")]

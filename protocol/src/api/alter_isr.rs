@@ -13,6 +13,9 @@ impl ApiCall for AlterIsrRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::AlterIsr
     }
+    fn get_first_error(response: &AlterIsrResponse) -> Option<ApiError> {
+        AlterIsrResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => true,
@@ -101,4 +104,30 @@ pub struct AlterIsrResponseTopicsPartitions0 {
     pub isr: Vec<Int32>,
     pub current_isr_version: Int32,
     pub tag_buffer: TagBuffer,
+}
+
+impl AlterIsrResponse0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.topics.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl AlterIsrResponseTopics0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl AlterIsrResponseTopicsPartitions0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
+    }
 }

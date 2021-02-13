@@ -13,6 +13,9 @@ impl ApiCall for StopReplicaRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::StopReplica
     }
+    fn get_first_error(response: &StopReplicaResponse) -> Option<ApiError> {
+        StopReplicaResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -309,5 +312,21 @@ impl From<StopReplicaResponsePartitionErrors2> for StopReplicaResponsePartitionE
             error_code: older.error_code,
             tag_buffer: older.tag_buffer,
         }
+    }
+}
+
+impl StopReplicaResponse3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partition_errors.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl StopReplicaResponsePartitionErrors3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

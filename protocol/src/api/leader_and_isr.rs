@@ -13,6 +13,9 @@ impl ApiCall for LeaderAndIsrRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::LeaderAndIsr
     }
+    fn get_first_error(response: &LeaderAndIsrResponse) -> Option<ApiError> {
+        LeaderAndIsrResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -592,5 +595,21 @@ impl From<LeaderAndIsrResponsePartitionErrors3> for LeaderAndIsrResponsePartitio
             error_code: older.error_code,
             ..LeaderAndIsrResponsePartitionErrors4::default()
         }
+    }
+}
+
+impl LeaderAndIsrResponse4 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partition_errors.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl LeaderAndIsrResponsePartitionErrors4 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

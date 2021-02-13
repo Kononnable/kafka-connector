@@ -13,6 +13,9 @@ impl ApiCall for ListOffsetsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ListOffsets
     }
+    fn get_first_error(response: &ListOffsetsResponse) -> Option<ApiError> {
+        ListOffsetsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -633,5 +636,31 @@ impl From<ListOffsetsResponseTopicsPartitions4> for ListOffsetsResponseTopicsPar
             offset: older.offset,
             leader_epoch: older.leader_epoch,
         }
+    }
+}
+
+impl ListOffsetsResponse5 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.topics.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl ListOffsetsResponseTopics5 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl ListOffsetsResponseTopicsPartitions5 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

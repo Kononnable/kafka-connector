@@ -13,6 +13,9 @@ impl ApiCall for CreatePartitionsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::CreatePartitions
     }
+    fn get_first_error(response: &CreatePartitionsResponse) -> Option<ApiError> {
+        CreatePartitionsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -380,5 +383,21 @@ impl From<CreatePartitionsResponseResults2> for CreatePartitionsResponseResults3
             error_message: older.error_message,
             tag_buffer: older.tag_buffer,
         }
+    }
+}
+
+impl CreatePartitionsResponse3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.results.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl CreatePartitionsResponseResults3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

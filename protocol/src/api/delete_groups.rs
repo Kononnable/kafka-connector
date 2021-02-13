@@ -13,6 +13,9 @@ impl ApiCall for DeleteGroupsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DeleteGroups
     }
+    fn get_first_error(response: &DeleteGroupsResponse) -> Option<ApiError> {
+        DeleteGroupsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -174,5 +177,21 @@ impl From<DeleteGroupsResponseResults1> for DeleteGroupsResponseResults2 {
             error_code: older.error_code,
             ..DeleteGroupsResponseResults2::default()
         }
+    }
+}
+
+impl DeleteGroupsResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.results.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DeleteGroupsResponseResults2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

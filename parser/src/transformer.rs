@@ -103,7 +103,7 @@ fn parse_vec(
                     ty: typ,
                     is_vec: false,
                     is_simple_type: FieldType::is_simple_type(&ty),
-                    is_easily_convertable: true,
+                    is_struct_field: false,
                     is_optional: false,
                     is_compact_field,
                 });
@@ -115,7 +115,7 @@ fn parse_vec(
                     ty: format!("Vec<{}>", typ),
                     is_vec: true,
                     is_simple_type: FieldType::is_simple_type(&ty),
-                    is_easily_convertable: true,
+                    is_struct_field: false,
                     is_optional: false,
                     is_compact_field,
                 });
@@ -136,7 +136,7 @@ fn parse_vec(
                     ty: format!("Vec<{}{}>", struct_name, api_version),
                     is_vec: true,
                     is_simple_type: false,
-                    is_easily_convertable: false,
+                    is_struct_field: true,
                     is_optional: false,
                     is_compact_field: false,
                 });
@@ -147,7 +147,7 @@ fn parse_vec(
                     ty: "TagBuffer".to_owned(),
                     is_vec: false,
                     is_simple_type: FieldType::is_simple_type(&FieldType::TagBuffer),
-                    is_easily_convertable: true,
+                    is_struct_field: false,
                     is_optional: false,
                     is_compact_field: true,
                 });
@@ -186,7 +186,7 @@ pub struct StructField<'a> {
     pub ty: String,
     pub is_vec: bool,
     pub is_simple_type: bool,
-    pub is_easily_convertable: bool,
+    pub is_struct_field: bool,
     pub is_optional: bool,
     pub is_compact_field: bool,
 }

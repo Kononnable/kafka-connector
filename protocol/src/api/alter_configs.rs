@@ -13,6 +13,9 @@ impl ApiCall for AlterConfigsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::AlterConfigs
     }
+    fn get_first_error(response: &AlterConfigsResponse) -> Option<ApiError> {
+        AlterConfigsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -171,5 +174,21 @@ impl From<AlterConfigsResponseResponses0> for AlterConfigsResponseResponses1 {
             resource_type: older.resource_type,
             resource_name: older.resource_name,
         }
+    }
+}
+
+impl AlterConfigsResponse1 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.responses.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl AlterConfigsResponseResponses1 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

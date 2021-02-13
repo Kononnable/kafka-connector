@@ -13,6 +13,9 @@ impl ApiCall for WriteTxnMarkersRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::WriteTxnMarkers
     }
+    fn get_first_error(response: &WriteTxnMarkersResponse) -> Option<ApiError> {
+        WriteTxnMarkersResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -94,4 +97,40 @@ pub struct WriteTxnMarkersResponseMarkersTopics0 {
 pub struct WriteTxnMarkersResponseMarkersTopicsPartitions0 {
     pub partition_index: Int32,
     pub error_code: Int16,
+}
+
+impl WriteTxnMarkersResponse0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.markers.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl WriteTxnMarkersResponseMarkers0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.topics.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl WriteTxnMarkersResponseMarkersTopics0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl WriteTxnMarkersResponseMarkersTopicsPartitions0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
+    }
 }

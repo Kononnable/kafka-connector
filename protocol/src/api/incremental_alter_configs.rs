@@ -13,6 +13,9 @@ impl ApiCall for IncrementalAlterConfigsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::IncrementalAlterConfigs
     }
+    fn get_first_error(response: &IncrementalAlterConfigsResponse) -> Option<ApiError> {
+        IncrementalAlterConfigsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -200,5 +203,21 @@ impl From<IncrementalAlterConfigsResponseResponses0> for IncrementalAlterConfigs
             resource_name: older.resource_name,
             ..IncrementalAlterConfigsResponseResponses1::default()
         }
+    }
+}
+
+impl IncrementalAlterConfigsResponse1 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.responses.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl IncrementalAlterConfigsResponseResponses1 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

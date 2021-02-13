@@ -13,6 +13,9 @@ impl ApiCall for OffsetForLeaderEpochRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::OffsetForLeaderEpoch
     }
+    fn get_first_error(response: &OffsetForLeaderEpochResponse) -> Option<ApiError> {
+        OffsetForLeaderEpochResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -435,5 +438,31 @@ impl From<OffsetForLeaderEpochResponseTopicsPartitions2>
             leader_epoch: older.leader_epoch,
             end_offset: older.end_offset,
         }
+    }
+}
+
+impl OffsetForLeaderEpochResponse3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.topics.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl OffsetForLeaderEpochResponseTopics3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl OffsetForLeaderEpochResponseTopicsPartitions3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

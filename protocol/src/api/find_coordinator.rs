@@ -13,6 +13,9 @@ impl ApiCall for FindCoordinatorRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::FindCoordinator
     }
+    fn get_first_error(response: &FindCoordinatorResponse) -> Option<ApiError> {
+        FindCoordinatorResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -202,5 +205,11 @@ impl From<FindCoordinatorResponse2> for FindCoordinatorResponse3 {
             port: older.port,
             ..FindCoordinatorResponse3::default()
         }
+    }
+}
+
+impl FindCoordinatorResponse3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

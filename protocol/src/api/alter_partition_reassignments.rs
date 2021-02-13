@@ -13,6 +13,9 @@ impl ApiCall for AlterPartitionReassignmentsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::AlterPartitionReassignments
     }
+    fn get_first_error(response: &AlterPartitionReassignmentsResponse) -> Option<ApiError> {
+        AlterPartitionReassignmentsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => true,
@@ -105,4 +108,30 @@ pub struct AlterPartitionReassignmentsResponseResponsesPartitions0 {
     pub error_code: Int16,
     pub error_message: NullableString,
     pub tag_buffer: TagBuffer,
+}
+
+impl AlterPartitionReassignmentsResponse0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.responses.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl AlterPartitionReassignmentsResponseResponses0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl AlterPartitionReassignmentsResponseResponsesPartitions0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
+    }
 }

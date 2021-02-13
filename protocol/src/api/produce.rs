@@ -13,6 +13,9 @@ impl ApiCall for ProduceRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::Produce
     }
+    fn get_first_error(response: &ProduceResponse) -> Option<ApiError> {
+        ProduceResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -1025,5 +1028,43 @@ impl From<ProduceResponseResponsesPartitionResponses7>
             log_start_offset: older.log_start_offset,
             ..ProduceResponseResponsesPartitionResponses8::default()
         }
+    }
+}
+
+impl ProduceResponse8 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.responses.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl ProduceResponseResponses8 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partition_responses.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl ProduceResponseResponsesPartitionResponses8 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        if let Some(vec) = self.record_errors.as_ref() {
+            for item in vec {
+                if let Some(x) = item.get_first_error() {
+                    return Some(x);
+                };
+            }
+        }
+        None
+    }
+}
+impl ProduceResponseResponsesPartitionResponsesRecordErrors8 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

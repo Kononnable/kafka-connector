@@ -13,6 +13,9 @@ impl ApiCall for ListPartitionReassignmentsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ListPartitionReassignments
     }
+    fn get_first_error(response: &ListPartitionReassignmentsResponse) -> Option<ApiError> {
+        ListPartitionReassignmentsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => true,
@@ -99,4 +102,30 @@ pub struct ListPartitionReassignmentsResponseTopicsPartitions0 {
     pub adding_replicas: Vec<Int32>,
     pub removing_replicas: Vec<Int32>,
     pub tag_buffer: TagBuffer,
+}
+
+impl ListPartitionReassignmentsResponse0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.topics.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl ListPartitionReassignmentsResponseTopics0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl ListPartitionReassignmentsResponseTopicsPartitions0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
+    }
 }

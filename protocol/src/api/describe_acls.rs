@@ -13,6 +13,9 @@ impl ApiCall for DescribeAclsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeAcls
     }
+    fn get_first_error(response: &DescribeAclsResponse) -> Option<ApiError> {
+        DescribeAclsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -272,5 +275,31 @@ impl From<DescribeAclsResponseResourcesAcls1> for DescribeAclsResponseResourcesA
             permission_type: older.permission_type,
             ..DescribeAclsResponseResourcesAcls2::default()
         }
+    }
+}
+
+impl DescribeAclsResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.resources.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeAclsResponseResources2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.acls.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeAclsResponseResourcesAcls2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

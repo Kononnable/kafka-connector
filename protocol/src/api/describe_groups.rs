@@ -13,6 +13,9 @@ impl ApiCall for DescribeGroupsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeGroups
     }
+    fn get_first_error(response: &DescribeGroupsResponse) -> Option<ApiError> {
+        DescribeGroupsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -514,5 +517,31 @@ impl From<DescribeGroupsResponseGroupsMembers4> for DescribeGroupsResponseGroups
             member_assignment: older.member_assignment,
             ..DescribeGroupsResponseGroupsMembers5::default()
         }
+    }
+}
+
+impl DescribeGroupsResponse5 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.groups.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeGroupsResponseGroups5 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.members.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeGroupsResponseGroupsMembers5 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

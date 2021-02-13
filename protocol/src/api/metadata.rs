@@ -13,6 +13,9 @@ impl ApiCall for MetadataRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::Metadata
     }
+    fn get_first_error(response: &MetadataResponse) -> Option<ApiError> {
+        MetadataResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -1184,5 +1187,41 @@ impl From<MetadataResponseTopicsPartitions8> for MetadataResponseTopicsPartition
             offline_replicas: older.offline_replicas,
             ..MetadataResponseTopicsPartitions9::default()
         }
+    }
+}
+
+impl MetadataResponse9 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.brokers.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        for item in self.topics.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl MetadataResponseBrokers9 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
+    }
+}
+impl MetadataResponseTopics9 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl MetadataResponseTopicsPartitions9 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

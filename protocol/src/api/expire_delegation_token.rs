@@ -13,6 +13,9 @@ impl ApiCall for ExpireDelegationTokenRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::ExpireDelegationToken
     }
+    fn get_first_error(response: &ExpireDelegationTokenResponse) -> Option<ApiError> {
+        ExpireDelegationTokenResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -155,5 +158,11 @@ impl From<ExpireDelegationTokenResponse1> for ExpireDelegationTokenResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             ..ExpireDelegationTokenResponse2::default()
         }
+    }
+}
+
+impl ExpireDelegationTokenResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

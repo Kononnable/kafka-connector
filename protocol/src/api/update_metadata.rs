@@ -13,6 +13,9 @@ impl ApiCall for UpdateMetadataRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::UpdateMetadata
     }
+    fn get_first_error(response: &UpdateMetadataResponse) -> Option<ApiError> {
+        UpdateMetadataResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -714,5 +717,11 @@ impl From<UpdateMetadataResponse5> for UpdateMetadataResponse6 {
             error_code: older.error_code,
             ..UpdateMetadataResponse6::default()
         }
+    }
+}
+
+impl UpdateMetadataResponse6 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

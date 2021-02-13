@@ -13,6 +13,9 @@ impl ApiCall for DescribeDelegationTokenRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeDelegationToken
     }
+    fn get_first_error(response: &DescribeDelegationTokenResponse) -> Option<ApiError> {
+        DescribeDelegationTokenResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -310,5 +313,31 @@ impl From<DescribeDelegationTokenResponseTokensRenewers1>
             principal_name: older.principal_name,
             ..DescribeDelegationTokenResponseTokensRenewers2::default()
         }
+    }
+}
+
+impl DescribeDelegationTokenResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.tokens.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeDelegationTokenResponseTokens2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.renewers.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeDelegationTokenResponseTokensRenewers2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

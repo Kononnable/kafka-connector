@@ -13,6 +13,9 @@ impl ApiCall for OffsetDeleteRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::OffsetDelete
     }
+    fn get_first_error(response: &OffsetDeleteResponse) -> Option<ApiError> {
+        OffsetDeleteResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -87,4 +90,30 @@ pub struct OffsetDeleteResponseTopics0 {
 pub struct OffsetDeleteResponseTopicsPartitions0 {
     pub partition_index: Int32,
     pub error_code: Int16,
+}
+
+impl OffsetDeleteResponse0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.topics.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl OffsetDeleteResponseTopics0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partitions.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl OffsetDeleteResponseTopicsPartitions0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
+    }
 }

@@ -13,6 +13,9 @@ impl ApiCall for SaslAuthenticateRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::SaslAuthenticate
     }
+    fn get_first_error(response: &SaslAuthenticateResponse) -> Option<ApiError> {
+        SaslAuthenticateResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -145,5 +148,11 @@ impl From<SaslAuthenticateResponse1> for SaslAuthenticateResponse2 {
             session_lifetime_ms: older.session_lifetime_ms,
             ..SaslAuthenticateResponse2::default()
         }
+    }
+}
+
+impl SaslAuthenticateResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

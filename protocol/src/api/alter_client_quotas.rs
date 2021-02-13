@@ -13,6 +13,9 @@ impl ApiCall for AlterClientQuotasRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::AlterClientQuotas
     }
+    fn get_first_error(response: &AlterClientQuotasResponse) -> Option<ApiError> {
+        AlterClientQuotasResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -95,4 +98,30 @@ pub struct AlterClientQuotasResponseEntries0 {
 pub struct AlterClientQuotasResponseEntriesEntity0 {
     pub entity_type: String,
     pub entity_name: NullableString,
+}
+
+impl AlterClientQuotasResponse0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.entries.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl AlterClientQuotasResponseEntries0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.entity.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl AlterClientQuotasResponseEntriesEntity0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
+    }
 }

@@ -13,6 +13,9 @@ impl ApiCall for AddPartitionsToTxnRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::AddPartitionsToTxn
     }
+    fn get_first_error(response: &AddPartitionsToTxnResponse) -> Option<ApiError> {
+        AddPartitionsToTxnResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -256,5 +259,31 @@ impl From<AddPartitionsToTxnResponseResultsResults1> for AddPartitionsToTxnRespo
             partition_index: older.partition_index,
             error_code: older.error_code,
         }
+    }
+}
+
+impl AddPartitionsToTxnResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.results.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl AddPartitionsToTxnResponseResults2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.results.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl AddPartitionsToTxnResponseResultsResults2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

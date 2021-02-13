@@ -13,6 +13,9 @@ impl ApiCall for CreateDelegationTokenRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::CreateDelegationToken
     }
+    fn get_first_error(response: &CreateDelegationTokenResponse) -> Option<ApiError> {
+        CreateDelegationTokenResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -226,5 +229,11 @@ impl From<CreateDelegationTokenResponse1> for CreateDelegationTokenResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             ..CreateDelegationTokenResponse2::default()
         }
+    }
+}
+
+impl CreateDelegationTokenResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

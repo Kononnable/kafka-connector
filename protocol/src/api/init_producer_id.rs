@@ -13,6 +13,9 @@ impl ApiCall for InitProducerIdRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::InitProducerId
     }
+    fn get_first_error(response: &InitProducerIdResponse) -> Option<ApiError> {
+        InitProducerIdResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -257,5 +260,11 @@ impl From<InitProducerIdResponse3> for InitProducerIdResponse4 {
             producer_epoch: older.producer_epoch,
             tag_buffer: older.tag_buffer,
         }
+    }
+}
+
+impl InitProducerIdResponse4 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

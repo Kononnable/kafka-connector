@@ -13,6 +13,9 @@ impl ApiCall for EndTxnRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::EndTxn
     }
+    fn get_first_error(response: &EndTxnResponse) -> Option<ApiError> {
+        EndTxnResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -146,5 +149,11 @@ impl From<EndTxnResponse1> for EndTxnResponse2 {
             throttle_time_ms: older.throttle_time_ms,
             error_code: older.error_code,
         }
+    }
+}
+
+impl EndTxnResponse2 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

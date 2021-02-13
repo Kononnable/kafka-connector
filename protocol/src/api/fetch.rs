@@ -13,6 +13,9 @@ impl ApiCall for FetchRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::Fetch
     }
+    fn get_first_error(response: &FetchResponse) -> Option<ApiError> {
+        FetchResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -2046,5 +2049,43 @@ impl From<FetchResponseResponsesPartitionResponsesAbortedTransactions11>
             first_offset: older.first_offset,
             ..FetchResponseResponsesPartitionResponsesAbortedTransactions12::default()
         }
+    }
+}
+
+impl FetchResponse12 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.responses.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl FetchResponseResponses12 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.partition_responses.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl FetchResponseResponsesPartitionResponses12 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        if let Some(vec) = self.aborted_transactions.as_ref() {
+            for item in vec {
+                if let Some(x) = item.get_first_error() {
+                    return Some(x);
+                };
+            }
+        }
+        None
+    }
+}
+impl FetchResponseResponsesPartitionResponsesAbortedTransactions12 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

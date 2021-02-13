@@ -13,6 +13,9 @@ impl ApiCall for DescribeConfigsRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeConfigs
     }
+    fn get_first_error(response: &DescribeConfigsResponse) -> Option<ApiError> {
+        DescribeConfigsResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -447,5 +450,43 @@ impl From<DescribeConfigsResponseResultsConfigsSynonyms2>
             value: older.value,
             source: older.source,
         }
+    }
+}
+
+impl DescribeConfigsResponse3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.results.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeConfigsResponseResults3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.configs.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeConfigsResponseResultsConfigs3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        if let Some(vec) = self.synonyms.as_ref() {
+            for item in vec {
+                if let Some(x) = item.get_first_error() {
+                    return Some(x);
+                };
+            }
+        }
+        None
+    }
+}
+impl DescribeConfigsResponseResultsConfigsSynonyms3 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

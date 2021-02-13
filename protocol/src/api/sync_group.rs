@@ -13,6 +13,9 @@ impl ApiCall for SyncGroupRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::SyncGroup
     }
+    fn get_first_error(response: &SyncGroupResponse) -> Option<ApiError> {
+        SyncGroupResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -402,5 +405,11 @@ impl From<SyncGroupResponse4> for SyncGroupResponse5 {
             tag_buffer: older.tag_buffer,
             ..SyncGroupResponse5::default()
         }
+    }
+}
+
+impl SyncGroupResponse5 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
     }
 }

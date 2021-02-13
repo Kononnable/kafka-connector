@@ -13,6 +13,9 @@ impl ApiCall for DescribeClientQuotasRequest {
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeClientQuotas
     }
+    fn get_first_error(response: &DescribeClientQuotasResponse) -> Option<ApiError> {
+        DescribeClientQuotasResponse::get_first_error(response)
+    }
     fn is_flexible_version(version: i16) -> bool {
         match version {
             0 => false,
@@ -90,4 +93,40 @@ pub struct DescribeClientQuotasResponseEntriesEntity0 {
 pub struct DescribeClientQuotasResponseEntriesValues0 {
     pub key: String,
     pub value: Float64,
+}
+
+impl DescribeClientQuotasResponse0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.entries.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeClientQuotasResponseEntries0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        for item in self.entity.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        for item in self.values.iter() {
+            if let Some(x) = item.get_first_error() {
+                return Some(x);
+            };
+        }
+        None
+    }
+}
+impl DescribeClientQuotasResponseEntriesEntity0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
+    }
+}
+impl DescribeClientQuotasResponseEntriesValues0 {
+    fn get_first_error(&self) -> Option<ApiError> {
+        None
+    }
 }
