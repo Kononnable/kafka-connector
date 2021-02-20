@@ -53,56 +53,32 @@ fn generate_api_struct(api_call: &ApiCall2) -> String {
         ));
     }
 
-    let request_version_call = serialize_api_request();
-    let response_version_call = deserialize_api_response();
-    def.push_str(&format!(
-        "{}{}}}",
-        request_version_call, response_version_call
-    ));
+    def.push_str(&format!("{}{}}}", SERIALIZATION, DESERIALIZATION));
     def
 }
-
-fn serialize_api_request() -> String {
-    let mut fn_def =
-        "fn serialize(&self,version:u16, buf: &mut BytesMut,correlation_id: i32,client_id: &str){\n"
-            .to_owned();
-
-    fn_def.push_str("match Self::is_flexible_version(version) {\n");
-    fn_def.push_str(&"true => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id).serialize(buf, false,2),\n");
-    fn_def.push_str(&"false => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id).serialize(buf, false,1),\n");
-    fn_def.push_str("}\n");
-    fn_def.push_str(
-        "        ToBytes::serialize(self,buf,Self::is_flexible_version(version),version);\n",
-    );
-
-    fn_def.push_str("}\n");
-    fn_def
-}
-
-fn deserialize_api_response() -> String {
-    let mut fn_def =
-        "fn deserialize_response(version:u16, buf: &mut Bytes) -> (i32,Self::Response) {\n"
-            .to_owned();
-
-    fn_def.push_str("let correlation = match Self::is_flexible_version(version) {\n");
-    fn_def.push_str("true => HeaderResponse::deserialize(buf, false,2).correlation,\n");
-    fn_def.push_str("false => HeaderResponse::deserialize(buf, false,1).correlation,\n");
-    fn_def.push_str("};\n");
-
-    fn_def.push_str("        let response = Self::Response::deserialize(buf, Self::is_flexible_version(version),version);\n");
-
-    fn_def.push_str("(correlation, response)\n");
-    fn_def.push_str("}\n");
-    fn_def
-}
+const SERIALIZATION: &str = r#"fn serialize(&self,version:u16, buf: &mut BytesMut,correlation_id: i32,client_id: &str){
+    match Self::is_flexible_version(version) {
+        true => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id).serialize(buf, false,2),
+        false => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id).serialize(buf, false,1),
+    }
+    ToBytes::serialize(self,buf,Self::is_flexible_version(version),version);
+}"#;
+const DESERIALIZATION: &str = r#"fn deserialize_response(version:u16, buf: &mut Bytes) -> (i32,Self::Response) {
+    let correlation = match Self::is_flexible_version(version) {
+        true => HeaderResponse::deserialize(buf, false,2).correlation,
+        false => HeaderResponse::deserialize(buf, false,1).correlation,
+    };
+    let response = Self::Response::deserialize(buf, Self::is_flexible_version(version),version);
+    (correlation, response)
+}"#;
 
 fn generate_struct(api_call: &ApiCall2) -> String {
     let mut ret_val = "".to_owned();
     for (struc, is_request) in api_call
-        .req_structs
+        .request_structs
         .iter()
         .zip(iter::repeat(true))
-        .chain(api_call.resp_structs.iter().zip(iter::repeat(false)))
+        .chain(api_call.response_structs.iter().zip(iter::repeat(false)))
     {
         let derive_bytes = if is_request { "ToBytes" } else { "FromBytes" };
         let derive = format!("#[derive(Default,Debug,Clone,{})]\n", derive_bytes);
@@ -132,7 +108,7 @@ fn generate_field(field: &ApiField2) -> String {
 
 fn generate_get_first_error(api_call: &ApiCall2) -> String {
     let mut impl_def = "".to_owned();
-    for structs in api_call.resp_structs.iter() {
+    for structs in api_call.response_structs.iter() {
         impl_def.push_str(&format!(
             "impl {}{} {{\nfn get_first_error(&self) -> Option<ApiError>{{\n",
             structs.name, api_call.api_struct_version
