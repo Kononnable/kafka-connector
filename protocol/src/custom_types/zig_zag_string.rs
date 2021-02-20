@@ -10,16 +10,16 @@ pub struct ZigZagString {
     value: String,
 }
 impl ToBytes for ZigZagString {
-    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
+    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool, version: u16) {
         let len = ZigZagVarInt32::new(self.value.len() as i32);
-        len.serialize(buf, is_flexible_version);
+        len.serialize(buf, is_flexible_version, version);
         buf.put_slice(&self.value.as_bytes())
     }
 }
 
 impl FromBytes for ZigZagString {
-    fn deserialize(buf: &mut Bytes, is_flexible_version: bool) -> Self {
-        let len = ZigZagVarInt32::deserialize(buf, is_flexible_version);
+    fn deserialize(buf: &mut Bytes, is_flexible_version: bool, version: u16) -> Self {
+        let len = ZigZagVarInt32::deserialize(buf, is_flexible_version, version);
         let slice = buf.split_to(len.value as usize).into_iter();
         let data: Vec<u8> = slice.take(len.value as usize).collect();
         let value = String::from_utf8_lossy(&data).to_string();

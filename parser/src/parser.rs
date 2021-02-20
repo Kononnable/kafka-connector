@@ -78,7 +78,7 @@ fn parse_call_type(input: &str) -> IResult<&str, CallType> {
     Ok((input, call_type))
 }
 
-fn parse_version(input: &str) -> IResult<&str, i32> {
+fn parse_version(input: &str) -> IResult<&str, i16> {
     let version_tag = tag("Version:");
     let bracket_start = char('(');
     let version_number = digit1;
@@ -90,7 +90,7 @@ fn parse_version(input: &str) -> IResult<&str, i32> {
         version_number,
         bracket_end,
     ))(input)?;
-    Ok((input, version.parse::<i32>().unwrap()))
+    Ok((input, version.parse::<i16>().unwrap()))
 }
 
 fn parse_field_list(input: &str) -> IResult<&str, Vec<FieldDef>> {

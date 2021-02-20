@@ -1,4 +1,8 @@
-use std::{collections::HashMap, time::Duration};
+use std::{
+    cmp::{max, min},
+    collections::HashMap,
+    time::Duration,
+};
 
 use bytes::{Bytes, BytesMut};
 use tokio::{
@@ -33,7 +37,7 @@ pub struct BrokerClient {
     pub connection: TcpStream,
     pub client_id: String,
     pub last_correlation: i32,
-    pub supported_versions: HashMap<i16, (i16, i16)>,
+    pub supported_versions: HashMap<u16, (u16, u16)>,
 }
 
 impl BrokerClient {
@@ -53,7 +57,7 @@ impl BrokerClient {
     pub async fn run_api_call<T>(
         &mut self,
         request: T,
-        api_version: Option<i16>,
+        api_version: Option<u16>,
     ) -> Result<T::Response, KafkaApiCallError>
     where
         T: ApiCall,
@@ -63,23 +67,37 @@ impl BrokerClient {
         } else {
             let supported_versions = self
                 .supported_versions
-                .get(&(T::get_api_key() as i16))
-                .ok_or_else(|| KafkaApiCallError::OldKafkaVersion {
+                .get(&(T::get_api_key() as u16))
+                .ok_or_else(|| KafkaApiCallError::UnsupportedKafkaApiVersion {
                     api: T::get_api_key(),
                     version: 0,
                 })?;
             match api_version {
                 Some(v) => {
-                    if v >= supported_versions.0 && v <= supported_versions.1 {
+                    if v >= supported_versions.0
+                        && v <= supported_versions.1
+                        && v >= T::get_min_supported_version()
+                        && v <= T::get_max_supported_version()
+                    {
                         v
                     } else {
-                        return Err(KafkaApiCallError::OldKafkaVersion {
+                        return Err(KafkaApiCallError::UnsupportedKafkaApiVersion {
                             api: T::get_api_key(),
                             version: v,
                         });
                     }
                 }
-                None => supported_versions.1,
+                None => {
+                    let min_supported = max(supported_versions.0, T::get_min_supported_version());
+                    let max_supported = min(supported_versions.1, T::get_max_supported_version());
+                    if max_supported < min_supported {
+                        return Err(KafkaApiCallError::UnsupportedKafkaApiVersion {
+                            api: T::get_api_key(),
+                            version: T::get_min_supported_version(),
+                        });
+                    }
+                    max_supported
+                }
             }
         };
 
@@ -120,15 +138,17 @@ impl BrokerClient {
         }
         self.supported_versions.clear();
         for api_key in response.api_keys {
-            self.supported_versions
-                .insert(api_key.api_key, (api_key.min_version, api_key.max_version));
+            self.supported_versions.insert(
+                api_key.api_key as u16,
+                (api_key.min_version as u16, api_key.max_version as u16),
+            );
         }
         Ok(())
     }
     pub async fn run_api_call_with_retry<T, C>(
         &mut self,
         request: T,
-        api_version: Option<i16>,
+        api_version: Option<u16>,
     ) -> Result<T::Response, KafkaApiCallError>
     where
         T: ApiCall + Clone,

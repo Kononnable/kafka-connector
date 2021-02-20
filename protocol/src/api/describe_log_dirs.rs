@@ -1,322 +1,103 @@
 use super::prelude::*;
-
-pub type DescribeLogDirsRequest = DescribeLogDirsRequest2;
-pub type DescribeLogDirsResponse = DescribeLogDirsResponse2;
-impl ApiCall for DescribeLogDirsRequest {
-    type Response = DescribeLogDirsResponse;
-    fn get_min_supported_version() -> i16 {
+pub type DescribeLogDirsRequest = DescribeLogDirsRequest0;
+impl ApiCall for DescribeLogDirsRequest0 {
+    type Response = DescribeLogDirsResponse0;
+    fn get_min_supported_version() -> u16 {
         0
     }
-    fn get_max_supported_version() -> i16 {
+    fn get_max_supported_version() -> u16 {
         2
     }
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeLogDirs
     }
-    fn get_first_error(response: &DescribeLogDirsResponse) -> Option<ApiError> {
-        DescribeLogDirsResponse::get_first_error(response)
-    }
-    fn is_flexible_version(version: i16) -> bool {
-        match version {
-            0 => false,
-            1 => false,
-            2 => true,
-            _ => true,
+    fn get_first_error(response: &Self::Response) -> Option<ApiError> {
+        {
+            Self::Response::get_first_error(response)
         }
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
+    fn is_flexible_version(version: u16) -> bool {
+        version >= 2
+    }
+    fn serialize(self, version: u16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
         match Self::is_flexible_version(version) {
-            true => HeaderRequest2::new(
-                DescribeLogDirsRequest::get_api_key(),
-                version,
-                correlation_id,
-                client_id,
-            )
-            .serialize(buf, false),
-            false => HeaderRequest1::new(
-                DescribeLogDirsRequest::get_api_key(),
-                version,
-                correlation_id,
-                client_id,
-            )
-            .serialize(buf, false),
+            true => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id)
+                .serialize(buf, false, 2),
+            false => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id)
+                .serialize(buf, false, 1),
         }
-        match version {
-            0 => ToBytes::serialize(
-                &DescribeLogDirsRequest0::from(self),
-                buf,
-                Self::is_flexible_version(version),
-            ),
-            1 => ToBytes::serialize(
-                &DescribeLogDirsRequest1::from(self),
-                buf,
-                Self::is_flexible_version(version),
-            ),
-            2 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
-            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
-        }
+        ToBytes::serialize(&self, buf, Self::is_flexible_version(version), version);
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, DescribeLogDirsResponse) {
+    fn deserialize_response(version: u16, buf: &mut Bytes) -> (i32, Self::Response) {
         let correlation = match Self::is_flexible_version(version) {
-            true => HeaderResponse2::deserialize(buf, false).correlation,
-            false => HeaderResponse::deserialize(buf, false).correlation,
+            true => HeaderResponse::deserialize(buf, false, 2).correlation,
+            false => HeaderResponse::deserialize(buf, false, 1).correlation,
         };
-        let response = match version {
-            0 => DescribeLogDirsResponse0::deserialize(buf, Self::is_flexible_version(version))
-                .into(),
-            1 => DescribeLogDirsResponse1::deserialize(buf, Self::is_flexible_version(version))
-                .into(),
-            2 => DescribeLogDirsResponse::deserialize(buf, Self::is_flexible_version(version)),
-            _ => DescribeLogDirsResponse::deserialize(buf, Self::is_flexible_version(version)),
-        };
+        let response =
+            Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequest0 {
+    #[min_version = 0]
     pub topics: Vec<DescribeLogDirsRequestTopics0>,
+    #[min_version = 2]
+    pub tag_buffer: TagBuffer,
 }
-
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeLogDirsRequestTopics0 {
+    #[min_version = 0]
     pub topic: String,
+    #[min_version = 0]
     pub partition_index: Vec<Int32>,
-}
-
-#[derive(Default, Debug, Clone, ToBytes)]
-pub struct DescribeLogDirsRequest1 {
-    pub topics: Vec<DescribeLogDirsRequestTopics1>,
-}
-
-#[derive(Default, Debug, Clone, ToBytes)]
-pub struct DescribeLogDirsRequestTopics1 {
-    pub topic: String,
-    pub partition_index: Vec<Int32>,
-}
-
-#[derive(Default, Debug, Clone, ToBytes)]
-pub struct DescribeLogDirsRequest2 {
-    pub topics: Vec<DescribeLogDirsRequestTopics2>,
+    #[min_version = 2]
     pub tag_buffer: TagBuffer,
 }
-
-#[derive(Default, Debug, Clone, ToBytes)]
-pub struct DescribeLogDirsRequestTopics2 {
-    pub topic: String,
-    pub partition_index: Vec<Int32>,
-    pub tag_buffer: TagBuffer,
-}
-
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponse0 {
+    #[min_version = 0]
     pub throttle_time_ms: Int32,
+    #[min_version = 0]
     pub results: Vec<DescribeLogDirsResponseResults0>,
+    #[min_version = 2]
+    pub tag_buffer: Option<TagBuffer>,
 }
-
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResults0 {
+    #[min_version = 0]
     pub error_code: Int16,
+    #[min_version = 0]
     pub log_dir: String,
+    #[min_version = 0]
     pub topics: Vec<DescribeLogDirsResponseResultsTopics0>,
+    #[min_version = 2]
+    pub tag_buffer: Option<TagBuffer>,
 }
-
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResultsTopics0 {
+    #[min_version = 0]
     pub name: String,
+    #[min_version = 0]
     pub partitions: Vec<DescribeLogDirsResponseResultsTopicsPartitions0>,
+    #[min_version = 2]
+    pub tag_buffer: Option<TagBuffer>,
 }
-
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeLogDirsResponseResultsTopicsPartitions0 {
+    #[min_version = 0]
     pub partition_index: Int32,
+    #[min_version = 0]
     pub partition_size: Int64,
+    #[min_version = 0]
     pub offset_lag: Int64,
+    #[min_version = 0]
     pub is_future_key: Boolean,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeLogDirsResponse1 {
-    pub throttle_time_ms: Int32,
-    pub results: Vec<DescribeLogDirsResponseResults1>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeLogDirsResponseResults1 {
-    pub error_code: Int16,
-    pub log_dir: String,
-    pub topics: Vec<DescribeLogDirsResponseResultsTopics1>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeLogDirsResponseResultsTopics1 {
-    pub name: String,
-    pub partitions: Vec<DescribeLogDirsResponseResultsTopicsPartitions1>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeLogDirsResponseResultsTopicsPartitions1 {
-    pub partition_index: Int32,
-    pub partition_size: Int64,
-    pub offset_lag: Int64,
-    pub is_future_key: Boolean,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeLogDirsResponse2 {
-    pub throttle_time_ms: Int32,
-    pub results: Vec<DescribeLogDirsResponseResults2>,
+    #[min_version = 2]
     pub tag_buffer: Option<TagBuffer>,
 }
 
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeLogDirsResponseResults2 {
-    pub error_code: Int16,
-    pub log_dir: String,
-    pub topics: Vec<DescribeLogDirsResponseResultsTopics2>,
-    pub tag_buffer: Option<TagBuffer>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeLogDirsResponseResultsTopics2 {
-    pub name: String,
-    pub partitions: Vec<DescribeLogDirsResponseResultsTopicsPartitions2>,
-    pub tag_buffer: Option<TagBuffer>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeLogDirsResponseResultsTopicsPartitions2 {
-    pub partition_index: Int32,
-    pub partition_size: Int64,
-    pub offset_lag: Int64,
-    pub is_future_key: Boolean,
-    pub tag_buffer: Option<TagBuffer>,
-}
-
-impl From<DescribeLogDirsRequest2> for DescribeLogDirsRequest0 {
-    fn from(latest: DescribeLogDirsRequest2) -> DescribeLogDirsRequest0 {
-        DescribeLogDirsRequest0 {
-            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
-        }
-    }
-}
-
-impl From<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics0 {
-    fn from(latest: DescribeLogDirsRequestTopics2) -> DescribeLogDirsRequestTopics0 {
-        DescribeLogDirsRequestTopics0 {
-            topic: latest.topic,
-            partition_index: latest.partition_index,
-        }
-    }
-}
-
-impl From<DescribeLogDirsRequest2> for DescribeLogDirsRequest1 {
-    fn from(latest: DescribeLogDirsRequest2) -> DescribeLogDirsRequest1 {
-        DescribeLogDirsRequest1 {
-            topics: latest.topics.into_iter().map(|ele| ele.into()).collect(),
-        }
-    }
-}
-
-impl From<DescribeLogDirsRequestTopics2> for DescribeLogDirsRequestTopics1 {
-    fn from(latest: DescribeLogDirsRequestTopics2) -> DescribeLogDirsRequestTopics1 {
-        DescribeLogDirsRequestTopics1 {
-            topic: latest.topic,
-            partition_index: latest.partition_index,
-        }
-    }
-}
-
-impl From<DescribeLogDirsResponse0> for DescribeLogDirsResponse2 {
-    fn from(older: DescribeLogDirsResponse0) -> Self {
-        DescribeLogDirsResponse2 {
-            throttle_time_ms: older.throttle_time_ms,
-            results: older.results.into_iter().map(|el| el.into()).collect(),
-            ..DescribeLogDirsResponse2::default()
-        }
-    }
-}
-
-impl From<DescribeLogDirsResponseResults0> for DescribeLogDirsResponseResults2 {
-    fn from(older: DescribeLogDirsResponseResults0) -> Self {
-        DescribeLogDirsResponseResults2 {
-            error_code: older.error_code,
-            log_dir: older.log_dir,
-            topics: older.topics.into_iter().map(|el| el.into()).collect(),
-            ..DescribeLogDirsResponseResults2::default()
-        }
-    }
-}
-
-impl From<DescribeLogDirsResponseResultsTopics0> for DescribeLogDirsResponseResultsTopics2 {
-    fn from(older: DescribeLogDirsResponseResultsTopics0) -> Self {
-        DescribeLogDirsResponseResultsTopics2 {
-            name: older.name,
-            partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
-            ..DescribeLogDirsResponseResultsTopics2::default()
-        }
-    }
-}
-
-impl From<DescribeLogDirsResponseResultsTopicsPartitions0>
-    for DescribeLogDirsResponseResultsTopicsPartitions2
-{
-    fn from(older: DescribeLogDirsResponseResultsTopicsPartitions0) -> Self {
-        DescribeLogDirsResponseResultsTopicsPartitions2 {
-            partition_index: older.partition_index,
-            partition_size: older.partition_size,
-            offset_lag: older.offset_lag,
-            is_future_key: older.is_future_key,
-            ..DescribeLogDirsResponseResultsTopicsPartitions2::default()
-        }
-    }
-}
-
-impl From<DescribeLogDirsResponse1> for DescribeLogDirsResponse2 {
-    fn from(older: DescribeLogDirsResponse1) -> Self {
-        DescribeLogDirsResponse2 {
-            throttle_time_ms: older.throttle_time_ms,
-            results: older.results.into_iter().map(|el| el.into()).collect(),
-            ..DescribeLogDirsResponse2::default()
-        }
-    }
-}
-
-impl From<DescribeLogDirsResponseResults1> for DescribeLogDirsResponseResults2 {
-    fn from(older: DescribeLogDirsResponseResults1) -> Self {
-        DescribeLogDirsResponseResults2 {
-            error_code: older.error_code,
-            log_dir: older.log_dir,
-            topics: older.topics.into_iter().map(|el| el.into()).collect(),
-            ..DescribeLogDirsResponseResults2::default()
-        }
-    }
-}
-
-impl From<DescribeLogDirsResponseResultsTopics1> for DescribeLogDirsResponseResultsTopics2 {
-    fn from(older: DescribeLogDirsResponseResultsTopics1) -> Self {
-        DescribeLogDirsResponseResultsTopics2 {
-            name: older.name,
-            partitions: older.partitions.into_iter().map(|el| el.into()).collect(),
-            ..DescribeLogDirsResponseResultsTopics2::default()
-        }
-    }
-}
-
-impl From<DescribeLogDirsResponseResultsTopicsPartitions1>
-    for DescribeLogDirsResponseResultsTopicsPartitions2
-{
-    fn from(older: DescribeLogDirsResponseResultsTopicsPartitions1) -> Self {
-        DescribeLogDirsResponseResultsTopicsPartitions2 {
-            partition_index: older.partition_index,
-            partition_size: older.partition_size,
-            offset_lag: older.offset_lag,
-            is_future_key: older.is_future_key,
-            ..DescribeLogDirsResponseResultsTopicsPartitions2::default()
-        }
-    }
-}
-
-impl DescribeLogDirsResponse2 {
+impl DescribeLogDirsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
         for item in self.results.iter() {
             if let Some(x) = item.get_first_error() {
@@ -326,7 +107,7 @@ impl DescribeLogDirsResponse2 {
         None
     }
 }
-impl DescribeLogDirsResponseResults2 {
+impl DescribeLogDirsResponseResults0 {
     fn get_first_error(&self) -> Option<ApiError> {
         for item in self.topics.iter() {
             if let Some(x) = item.get_first_error() {
@@ -336,7 +117,7 @@ impl DescribeLogDirsResponseResults2 {
         None
     }
 }
-impl DescribeLogDirsResponseResultsTopics2 {
+impl DescribeLogDirsResponseResultsTopics0 {
     fn get_first_error(&self) -> Option<ApiError> {
         for item in self.partitions.iter() {
             if let Some(x) = item.get_first_error() {
@@ -346,7 +127,7 @@ impl DescribeLogDirsResponseResultsTopics2 {
         None
     }
 }
-impl DescribeLogDirsResponseResultsTopicsPartitions2 {
+impl DescribeLogDirsResponseResultsTopicsPartitions0 {
     fn get_first_error(&self) -> Option<ApiError> {
         None
     }

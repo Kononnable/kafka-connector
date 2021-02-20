@@ -16,10 +16,12 @@ impl Default for NullableString {
     }
 }
 impl FromBytes for NullableString {
-    fn deserialize(buf: &mut Bytes, is_flexible_version: bool) -> Self {
+    fn deserialize(buf: &mut Bytes, is_flexible_version: bool, version: u16) -> Self {
         let len: i16 = match is_flexible_version {
-            true => UnsignedVarInt32::deserialize(buf, is_flexible_version).value as i16 - 1,
-            false => FromBytes::deserialize(buf, is_flexible_version),
+            true => {
+                UnsignedVarInt32::deserialize(buf, is_flexible_version, version).value as i16 - 1
+            }
+            false => FromBytes::deserialize(buf, is_flexible_version, version),
         };
         if len == -1 {
             return Self::None;
@@ -30,12 +32,12 @@ impl FromBytes for NullableString {
     }
 }
 impl ToBytes for NullableString {
-    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
+    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool, version: u16) {
         match &self {
-            Self::Some(str) => str.serialize(buf, is_flexible_version),
+            Self::Some(str) => str.serialize(buf, is_flexible_version, version),
             Self::None => match is_flexible_version {
                 true => {
-                    UnsignedVarInt32::new(0).serialize(buf, is_flexible_version);
+                    UnsignedVarInt32::new(0).serialize(buf, is_flexible_version, version);
                 }
                 false => {
                     buf.put_i16(-1_i16);

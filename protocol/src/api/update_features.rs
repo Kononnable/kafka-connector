@@ -1,90 +1,85 @@
 use super::prelude::*;
-
 pub type UpdateFeaturesRequest = UpdateFeaturesRequest0;
-pub type UpdateFeaturesResponse = UpdateFeaturesResponse0;
-impl ApiCall for UpdateFeaturesRequest {
-    type Response = UpdateFeaturesResponse;
-    fn get_min_supported_version() -> i16 {
+impl ApiCall for UpdateFeaturesRequest0 {
+    type Response = UpdateFeaturesResponse0;
+    fn get_min_supported_version() -> u16 {
         0
     }
-    fn get_max_supported_version() -> i16 {
+    fn get_max_supported_version() -> u16 {
         0
     }
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::UpdateFeatures
     }
-    fn get_first_error(response: &UpdateFeaturesResponse) -> Option<ApiError> {
-        UpdateFeaturesResponse::get_first_error(response)
-    }
-    fn is_flexible_version(version: i16) -> bool {
-        match version {
-            0 => true,
-            _ => true,
+    fn get_first_error(response: &Self::Response) -> Option<ApiError> {
+        {
+            Self::Response::get_first_error(response)
         }
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
+    fn is_flexible_version(_version: u16) -> bool {
+        true
+    }
+    fn serialize(self, version: u16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
         match Self::is_flexible_version(version) {
-            true => HeaderRequest2::new(
-                UpdateFeaturesRequest::get_api_key(),
-                version,
-                correlation_id,
-                client_id,
-            )
-            .serialize(buf, false),
-            false => HeaderRequest1::new(
-                UpdateFeaturesRequest::get_api_key(),
-                version,
-                correlation_id,
-                client_id,
-            )
-            .serialize(buf, false),
+            true => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id)
+                .serialize(buf, false, 2),
+            false => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id)
+                .serialize(buf, false, 1),
         }
-        match version {
-            0 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
-            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
-        }
+        ToBytes::serialize(&self, buf, Self::is_flexible_version(version), version);
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, UpdateFeaturesResponse) {
+    fn deserialize_response(version: u16, buf: &mut Bytes) -> (i32, Self::Response) {
         let correlation = match Self::is_flexible_version(version) {
-            true => HeaderResponse2::deserialize(buf, false).correlation,
-            false => HeaderResponse::deserialize(buf, false).correlation,
+            true => HeaderResponse::deserialize(buf, false, 2).correlation,
+            false => HeaderResponse::deserialize(buf, false, 1).correlation,
         };
-        let response = match version {
-            0 => UpdateFeaturesResponse::deserialize(buf, Self::is_flexible_version(version)),
-            _ => UpdateFeaturesResponse::deserialize(buf, Self::is_flexible_version(version)),
-        };
+        let response =
+            Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateFeaturesRequest0 {
+    #[min_version = 0]
     pub timeout_ms: Int32,
+    #[min_version = 0]
     pub feature_updates: Vec<UpdateFeaturesRequestFeatureUpdates0>,
+    #[min_version = 0]
     pub tag_buffer: TagBuffer,
 }
-
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct UpdateFeaturesRequestFeatureUpdates0 {
+    #[min_version = 0]
     pub feature: String,
+    #[min_version = 0]
     pub max_version_level: Int16,
+    #[min_version = 0]
     pub allow_downgrade: Boolean,
+    #[min_version = 0]
     pub tag_buffer: TagBuffer,
 }
-
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct UpdateFeaturesResponse0 {
+    #[min_version = 0]
     pub throttle_time_ms: Int32,
+    #[min_version = 0]
     pub error_code: Int16,
+    #[min_version = 0]
     pub error_message: NullableString,
+    #[min_version = 0]
     pub results: Vec<UpdateFeaturesResponseResults0>,
+    #[min_version = 0]
     pub tag_buffer: TagBuffer,
 }
-
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct UpdateFeaturesResponseResults0 {
+    #[min_version = 0]
     pub feature: String,
+    #[min_version = 0]
     pub error_code: Int16,
+    #[min_version = 0]
     pub error_message: NullableString,
+    #[min_version = 0]
     pub tag_buffer: TagBuffer,
 }
 

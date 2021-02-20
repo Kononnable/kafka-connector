@@ -1,158 +1,63 @@
 use super::prelude::*;
-
-pub type EndTxnRequest = EndTxnRequest2;
-pub type EndTxnResponse = EndTxnResponse2;
-impl ApiCall for EndTxnRequest {
-    type Response = EndTxnResponse;
-    fn get_min_supported_version() -> i16 {
+pub type EndTxnRequest = EndTxnRequest0;
+impl ApiCall for EndTxnRequest0 {
+    type Response = EndTxnResponse0;
+    fn get_min_supported_version() -> u16 {
         0
     }
-    fn get_max_supported_version() -> i16 {
+    fn get_max_supported_version() -> u16 {
         2
     }
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::EndTxn
     }
-    fn get_first_error(response: &EndTxnResponse) -> Option<ApiError> {
-        EndTxnResponse::get_first_error(response)
-    }
-    fn is_flexible_version(version: i16) -> bool {
-        match version {
-            0 => false,
-            1 => false,
-            2 => false,
-            _ => false,
+    fn get_first_error(response: &Self::Response) -> Option<ApiError> {
+        {
+            Self::Response::get_first_error(response)
         }
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
+    fn is_flexible_version(_version: u16) -> bool {
+        false
+    }
+    fn serialize(self, version: u16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
         match Self::is_flexible_version(version) {
-            true => HeaderRequest2::new(
-                EndTxnRequest::get_api_key(),
-                version,
-                correlation_id,
-                client_id,
-            )
-            .serialize(buf, false),
-            false => HeaderRequest1::new(
-                EndTxnRequest::get_api_key(),
-                version,
-                correlation_id,
-                client_id,
-            )
-            .serialize(buf, false),
+            true => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id)
+                .serialize(buf, false, 2),
+            false => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id)
+                .serialize(buf, false, 1),
         }
-        match version {
-            0 => ToBytes::serialize(
-                &EndTxnRequest0::from(self),
-                buf,
-                Self::is_flexible_version(version),
-            ),
-            1 => ToBytes::serialize(
-                &EndTxnRequest1::from(self),
-                buf,
-                Self::is_flexible_version(version),
-            ),
-            2 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
-            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
-        }
+        ToBytes::serialize(&self, buf, Self::is_flexible_version(version), version);
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, EndTxnResponse) {
+    fn deserialize_response(version: u16, buf: &mut Bytes) -> (i32, Self::Response) {
         let correlation = match Self::is_flexible_version(version) {
-            true => HeaderResponse2::deserialize(buf, false).correlation,
-            false => HeaderResponse::deserialize(buf, false).correlation,
+            true => HeaderResponse::deserialize(buf, false, 2).correlation,
+            false => HeaderResponse::deserialize(buf, false, 1).correlation,
         };
-        let response = match version {
-            0 => EndTxnResponse0::deserialize(buf, Self::is_flexible_version(version)).into(),
-            1 => EndTxnResponse1::deserialize(buf, Self::is_flexible_version(version)).into(),
-            2 => EndTxnResponse::deserialize(buf, Self::is_flexible_version(version)),
-            _ => EndTxnResponse::deserialize(buf, Self::is_flexible_version(version)),
-        };
+        let response =
+            Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct EndTxnRequest0 {
+    #[min_version = 0]
     pub transactional_id: String,
+    #[min_version = 0]
     pub producer_id: Int64,
+    #[min_version = 0]
     pub producer_epoch: Int16,
+    #[min_version = 0]
     pub committed: Boolean,
 }
-
-#[derive(Default, Debug, Clone, ToBytes)]
-pub struct EndTxnRequest1 {
-    pub transactional_id: String,
-    pub producer_id: Int64,
-    pub producer_epoch: Int16,
-    pub committed: Boolean,
-}
-
-#[derive(Default, Debug, Clone, ToBytes)]
-pub struct EndTxnRequest2 {
-    pub transactional_id: String,
-    pub producer_id: Int64,
-    pub producer_epoch: Int16,
-    pub committed: Boolean,
-}
-
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct EndTxnResponse0 {
+    #[min_version = 0]
     pub throttle_time_ms: Int32,
+    #[min_version = 0]
     pub error_code: Int16,
 }
 
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct EndTxnResponse1 {
-    pub throttle_time_ms: Int32,
-    pub error_code: Int16,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct EndTxnResponse2 {
-    pub throttle_time_ms: Int32,
-    pub error_code: Int16,
-}
-
-impl From<EndTxnRequest2> for EndTxnRequest0 {
-    fn from(latest: EndTxnRequest2) -> EndTxnRequest0 {
-        EndTxnRequest0 {
-            transactional_id: latest.transactional_id,
-            producer_id: latest.producer_id,
-            producer_epoch: latest.producer_epoch,
-            committed: latest.committed,
-        }
-    }
-}
-
-impl From<EndTxnRequest2> for EndTxnRequest1 {
-    fn from(latest: EndTxnRequest2) -> EndTxnRequest1 {
-        EndTxnRequest1 {
-            transactional_id: latest.transactional_id,
-            producer_id: latest.producer_id,
-            producer_epoch: latest.producer_epoch,
-            committed: latest.committed,
-        }
-    }
-}
-
-impl From<EndTxnResponse0> for EndTxnResponse2 {
-    fn from(older: EndTxnResponse0) -> Self {
-        EndTxnResponse2 {
-            throttle_time_ms: older.throttle_time_ms,
-            error_code: older.error_code,
-        }
-    }
-}
-
-impl From<EndTxnResponse1> for EndTxnResponse2 {
-    fn from(older: EndTxnResponse1) -> Self {
-        EndTxnResponse2 {
-            throttle_time_ms: older.throttle_time_ms,
-            error_code: older.error_code,
-        }
-    }
-}
-
-impl EndTxnResponse2 {
+impl EndTxnResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
         None
     }

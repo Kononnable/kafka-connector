@@ -22,10 +22,6 @@ pub fn group_api_calls(api_calls: Vec<ApiCall>) -> HashMap<&str, ApiEndpoint> {
         }
     }
 
-    for definition in endpoints.values_mut() {
-        mark_new_fields_as_optional(&mut definition.responses);
-    }
-
     endpoints
 }
 
@@ -34,35 +30,6 @@ fn change_reserved_keywords(api_calls: &mut Vec<ApiStructDefinition>) {
         for field in &mut api_call.fields {
             if let "match" = field.name {
                 field.name = "match_";
-            }
-        }
-    }
-}
-
-fn mark_new_fields_as_optional(endpoint_definitions: &mut Vec<Vec<ApiStructDefinition>>) {
-    let (historic_endpoint_definition, endpoint_definitions) =
-        endpoint_definitions.split_first_mut().unwrap();
-    assert_eq!(historic_endpoint_definition.get(0).unwrap().version, 0);
-    let mut new_structs_base = vec![]; // first versions of structs not available in base(0) api call
-    for struc in endpoint_definitions.iter_mut().flatten() {
-        let base_struct = historic_endpoint_definition
-            .iter()
-            .chain(new_structs_base.iter())
-            .find(|ac| ac.name == struc.name);
-        match base_struct {
-            None => new_structs_base.push(struc.clone()),
-            Some(base_struct) => {
-                for field in &mut struc.fields {
-                    if base_struct
-                        .fields
-                        .iter()
-                        .find(|x| x.name == field.name)
-                        .is_none()
-                    {
-                        field.ty = format!("Option<{}>", field.ty);
-                        field.is_optional = true;
-                    }
-                }
             }
         }
     }
@@ -90,7 +57,7 @@ fn parse_call(api_call: ApiCall) -> Vec<ApiStructDefinition> {
 fn parse_vec(
     fields: Vec<FieldData>,
     prefix: String,
-    api_version: i32,
+    api_version: i16,
 ) -> (Vec<StructField>, Vec<ApiStructDefinition>) {
     let mut children = Vec::new();
     let mut returned_fields = vec![];
@@ -102,7 +69,6 @@ fn parse_vec(
                     name: field.name,
                     ty: typ,
                     is_vec: false,
-                    is_simple_type: FieldType::is_simple_type(&ty),
                     is_struct_field: false,
                     is_optional: false,
                     is_compact_field,
@@ -112,9 +78,8 @@ fn parse_vec(
                 let (is_compact_field, typ) = process_flexible_version_fields(ty);
                 returned_fields.push(StructField {
                     name: field.name,
-                    ty: format!("Vec<{}>", typ),
+                    ty: typ,
                     is_vec: true,
-                    is_simple_type: FieldType::is_simple_type(&ty),
                     is_struct_field: false,
                     is_optional: false,
                     is_compact_field,
@@ -133,9 +98,8 @@ fn parse_vec(
                 children.append(&mut grandchildren);
                 returned_fields.push(StructField {
                     name: field.name,
-                    ty: format!("Vec<{}{}>", struct_name, api_version),
+                    ty: struct_name,
                     is_vec: true,
-                    is_simple_type: false,
                     is_struct_field: true,
                     is_optional: false,
                     is_compact_field: false,
@@ -146,7 +110,6 @@ fn parse_vec(
                     name: field.name,
                     ty: "TagBuffer".to_owned(),
                     is_vec: false,
-                    is_simple_type: FieldType::is_simple_type(&FieldType::TagBuffer),
                     is_struct_field: false,
                     is_optional: false,
                     is_compact_field: true,
@@ -175,7 +138,7 @@ pub struct ApiEndpoint<'a> {
 #[derive(Debug, Clone)]
 pub struct ApiStructDefinition<'a> {
     pub name: String,
-    pub version: i32,
+    pub version: i16,
     pub fields: Vec<StructField<'a>>,
     pub is_flexible_version: bool,
 }
@@ -185,7 +148,6 @@ pub struct StructField<'a> {
     pub name: &'a str,
     pub ty: String,
     pub is_vec: bool,
-    pub is_simple_type: bool,
     pub is_struct_field: bool,
     pub is_optional: bool,
     pub is_compact_field: bool,

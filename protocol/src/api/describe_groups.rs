@@ -1,526 +1,99 @@
 use super::prelude::*;
-
-pub type DescribeGroupsRequest = DescribeGroupsRequest5;
-pub type DescribeGroupsResponse = DescribeGroupsResponse5;
-impl ApiCall for DescribeGroupsRequest {
-    type Response = DescribeGroupsResponse;
-    fn get_min_supported_version() -> i16 {
+pub type DescribeGroupsRequest = DescribeGroupsRequest0;
+impl ApiCall for DescribeGroupsRequest0 {
+    type Response = DescribeGroupsResponse0;
+    fn get_min_supported_version() -> u16 {
         0
     }
-    fn get_max_supported_version() -> i16 {
+    fn get_max_supported_version() -> u16 {
         5
     }
     fn get_api_key() -> ApiNumbers {
         ApiNumbers::DescribeGroups
     }
-    fn get_first_error(response: &DescribeGroupsResponse) -> Option<ApiError> {
-        DescribeGroupsResponse::get_first_error(response)
-    }
-    fn is_flexible_version(version: i16) -> bool {
-        match version {
-            0 => false,
-            1 => false,
-            2 => false,
-            3 => false,
-            4 => false,
-            5 => true,
-            _ => true,
+    fn get_first_error(response: &Self::Response) -> Option<ApiError> {
+        {
+            Self::Response::get_first_error(response)
         }
     }
-    fn serialize(self, version: i16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
+    fn is_flexible_version(version: u16) -> bool {
+        version >= 5
+    }
+    fn serialize(self, version: u16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
         match Self::is_flexible_version(version) {
-            true => HeaderRequest2::new(
-                DescribeGroupsRequest::get_api_key(),
-                version,
-                correlation_id,
-                client_id,
-            )
-            .serialize(buf, false),
-            false => HeaderRequest1::new(
-                DescribeGroupsRequest::get_api_key(),
-                version,
-                correlation_id,
-                client_id,
-            )
-            .serialize(buf, false),
+            true => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id)
+                .serialize(buf, false, 2),
+            false => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id)
+                .serialize(buf, false, 1),
         }
-        match version {
-            0 => ToBytes::serialize(
-                &DescribeGroupsRequest0::from(self),
-                buf,
-                Self::is_flexible_version(version),
-            ),
-            1 => ToBytes::serialize(
-                &DescribeGroupsRequest1::from(self),
-                buf,
-                Self::is_flexible_version(version),
-            ),
-            2 => ToBytes::serialize(
-                &DescribeGroupsRequest2::from(self),
-                buf,
-                Self::is_flexible_version(version),
-            ),
-            3 => ToBytes::serialize(
-                &DescribeGroupsRequest3::from(self),
-                buf,
-                Self::is_flexible_version(version),
-            ),
-            4 => ToBytes::serialize(
-                &DescribeGroupsRequest4::from(self),
-                buf,
-                Self::is_flexible_version(version),
-            ),
-            5 => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
-            _ => ToBytes::serialize(&self, buf, Self::is_flexible_version(version)),
-        }
+        ToBytes::serialize(&self, buf, Self::is_flexible_version(version), version);
     }
-    fn deserialize_response(version: i16, buf: &mut Bytes) -> (i32, DescribeGroupsResponse) {
+    fn deserialize_response(version: u16, buf: &mut Bytes) -> (i32, Self::Response) {
         let correlation = match Self::is_flexible_version(version) {
-            true => HeaderResponse2::deserialize(buf, false).correlation,
-            false => HeaderResponse::deserialize(buf, false).correlation,
+            true => HeaderResponse::deserialize(buf, false, 2).correlation,
+            false => HeaderResponse::deserialize(buf, false, 1).correlation,
         };
         let response =
-            match version {
-                0 => DescribeGroupsResponse0::deserialize(buf, Self::is_flexible_version(version))
-                    .into(),
-                1 => DescribeGroupsResponse1::deserialize(buf, Self::is_flexible_version(version))
-                    .into(),
-                2 => DescribeGroupsResponse2::deserialize(buf, Self::is_flexible_version(version))
-                    .into(),
-                3 => DescribeGroupsResponse3::deserialize(buf, Self::is_flexible_version(version))
-                    .into(),
-                4 => DescribeGroupsResponse4::deserialize(buf, Self::is_flexible_version(version))
-                    .into(),
-                5 => DescribeGroupsResponse::deserialize(buf, Self::is_flexible_version(version)),
-                _ => DescribeGroupsResponse::deserialize(buf, Self::is_flexible_version(version)),
-            };
+            Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
 }
 #[derive(Default, Debug, Clone, ToBytes)]
 pub struct DescribeGroupsRequest0 {
+    #[min_version = 0]
     pub groups: Vec<String>,
-}
-
-#[derive(Default, Debug, Clone, ToBytes)]
-pub struct DescribeGroupsRequest1 {
-    pub groups: Vec<String>,
-}
-
-#[derive(Default, Debug, Clone, ToBytes)]
-pub struct DescribeGroupsRequest2 {
-    pub groups: Vec<String>,
-}
-
-#[derive(Default, Debug, Clone, ToBytes)]
-pub struct DescribeGroupsRequest3 {
-    pub groups: Vec<String>,
+    #[min_version = 3]
     pub include_authorized_operations: Boolean,
-}
-
-#[derive(Default, Debug, Clone, ToBytes)]
-pub struct DescribeGroupsRequest4 {
-    pub groups: Vec<String>,
-    pub include_authorized_operations: Boolean,
-}
-
-#[derive(Default, Debug, Clone, ToBytes)]
-pub struct DescribeGroupsRequest5 {
-    pub groups: Vec<String>,
-    pub include_authorized_operations: Boolean,
+    #[min_version = 5]
     pub tag_buffer: TagBuffer,
 }
-
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeGroupsResponse0 {
+    #[min_version = 1]
+    pub throttle_time_ms: Option<Int32>,
+    #[min_version = 0]
     pub groups: Vec<DescribeGroupsResponseGroups0>,
+    #[min_version = 5]
+    pub tag_buffer: Option<TagBuffer>,
 }
-
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeGroupsResponseGroups0 {
+    #[min_version = 0]
     pub error_code: Int16,
+    #[min_version = 0]
     pub group_id: String,
+    #[min_version = 0]
     pub group_state: String,
+    #[min_version = 0]
     pub protocol_type: String,
+    #[min_version = 0]
     pub protocol_data: String,
+    #[min_version = 0]
     pub members: Vec<DescribeGroupsResponseGroupsMembers0>,
+    #[min_version = 3]
+    pub authorized_operations: Option<Int32>,
+    #[min_version = 5]
+    pub tag_buffer: Option<TagBuffer>,
 }
-
 #[derive(Default, Debug, Clone, FromBytes)]
 pub struct DescribeGroupsResponseGroupsMembers0 {
+    #[min_version = 0]
     pub member_id: String,
-    pub client_id: String,
-    pub client_host: String,
-    pub member_metadata: KafkaBytes,
-    pub member_assignment: KafkaBytes,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponse1 {
-    pub throttle_time_ms: Option<Int32>,
-    pub groups: Vec<DescribeGroupsResponseGroups1>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponseGroups1 {
-    pub error_code: Int16,
-    pub group_id: String,
-    pub group_state: String,
-    pub protocol_type: String,
-    pub protocol_data: String,
-    pub members: Vec<DescribeGroupsResponseGroupsMembers1>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponseGroupsMembers1 {
-    pub member_id: String,
-    pub client_id: String,
-    pub client_host: String,
-    pub member_metadata: KafkaBytes,
-    pub member_assignment: KafkaBytes,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponse2 {
-    pub throttle_time_ms: Option<Int32>,
-    pub groups: Vec<DescribeGroupsResponseGroups2>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponseGroups2 {
-    pub error_code: Int16,
-    pub group_id: String,
-    pub group_state: String,
-    pub protocol_type: String,
-    pub protocol_data: String,
-    pub members: Vec<DescribeGroupsResponseGroupsMembers2>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponseGroupsMembers2 {
-    pub member_id: String,
-    pub client_id: String,
-    pub client_host: String,
-    pub member_metadata: KafkaBytes,
-    pub member_assignment: KafkaBytes,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponse3 {
-    pub throttle_time_ms: Option<Int32>,
-    pub groups: Vec<DescribeGroupsResponseGroups3>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponseGroups3 {
-    pub error_code: Int16,
-    pub group_id: String,
-    pub group_state: String,
-    pub protocol_type: String,
-    pub protocol_data: String,
-    pub members: Vec<DescribeGroupsResponseGroupsMembers3>,
-    pub authorized_operations: Option<Int32>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponseGroupsMembers3 {
-    pub member_id: String,
-    pub client_id: String,
-    pub client_host: String,
-    pub member_metadata: KafkaBytes,
-    pub member_assignment: KafkaBytes,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponse4 {
-    pub throttle_time_ms: Option<Int32>,
-    pub groups: Vec<DescribeGroupsResponseGroups4>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponseGroups4 {
-    pub error_code: Int16,
-    pub group_id: String,
-    pub group_state: String,
-    pub protocol_type: String,
-    pub protocol_data: String,
-    pub members: Vec<DescribeGroupsResponseGroupsMembers4>,
-    pub authorized_operations: Option<Int32>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponseGroupsMembers4 {
-    pub member_id: String,
+    #[min_version = 4]
     pub group_instance_id: Option<NullableString>,
+    #[min_version = 0]
     pub client_id: String,
+    #[min_version = 0]
     pub client_host: String,
+    #[min_version = 0]
     pub member_metadata: KafkaBytes,
+    #[min_version = 0]
     pub member_assignment: KafkaBytes,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponse5 {
-    pub throttle_time_ms: Option<Int32>,
-    pub groups: Vec<DescribeGroupsResponseGroups5>,
+    #[min_version = 5]
     pub tag_buffer: Option<TagBuffer>,
 }
 
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponseGroups5 {
-    pub error_code: Int16,
-    pub group_id: String,
-    pub group_state: String,
-    pub protocol_type: String,
-    pub protocol_data: String,
-    pub members: Vec<DescribeGroupsResponseGroupsMembers5>,
-    pub authorized_operations: Option<Int32>,
-    pub tag_buffer: Option<TagBuffer>,
-}
-
-#[derive(Default, Debug, Clone, FromBytes)]
-pub struct DescribeGroupsResponseGroupsMembers5 {
-    pub member_id: String,
-    pub group_instance_id: Option<NullableString>,
-    pub client_id: String,
-    pub client_host: String,
-    pub member_metadata: KafkaBytes,
-    pub member_assignment: KafkaBytes,
-    pub tag_buffer: Option<TagBuffer>,
-}
-
-impl From<DescribeGroupsRequest5> for DescribeGroupsRequest0 {
-    fn from(latest: DescribeGroupsRequest5) -> DescribeGroupsRequest0 {
-        log::debug!("Using old api format - DescribeGroupsRequest0, ignoring field include_authorized_operations");
-        DescribeGroupsRequest0 {
-            groups: latest.groups,
-        }
-    }
-}
-
-impl From<DescribeGroupsRequest5> for DescribeGroupsRequest1 {
-    fn from(latest: DescribeGroupsRequest5) -> DescribeGroupsRequest1 {
-        log::debug!("Using old api format - DescribeGroupsRequest1, ignoring field include_authorized_operations");
-        DescribeGroupsRequest1 {
-            groups: latest.groups,
-        }
-    }
-}
-
-impl From<DescribeGroupsRequest5> for DescribeGroupsRequest2 {
-    fn from(latest: DescribeGroupsRequest5) -> DescribeGroupsRequest2 {
-        log::debug!("Using old api format - DescribeGroupsRequest2, ignoring field include_authorized_operations");
-        DescribeGroupsRequest2 {
-            groups: latest.groups,
-        }
-    }
-}
-
-impl From<DescribeGroupsRequest5> for DescribeGroupsRequest3 {
-    fn from(latest: DescribeGroupsRequest5) -> DescribeGroupsRequest3 {
-        DescribeGroupsRequest3 {
-            groups: latest.groups,
-            include_authorized_operations: latest.include_authorized_operations,
-        }
-    }
-}
-
-impl From<DescribeGroupsRequest5> for DescribeGroupsRequest4 {
-    fn from(latest: DescribeGroupsRequest5) -> DescribeGroupsRequest4 {
-        DescribeGroupsRequest4 {
-            groups: latest.groups,
-            include_authorized_operations: latest.include_authorized_operations,
-        }
-    }
-}
-
-impl From<DescribeGroupsResponse0> for DescribeGroupsResponse5 {
-    fn from(older: DescribeGroupsResponse0) -> Self {
-        DescribeGroupsResponse5 {
-            groups: older.groups.into_iter().map(|el| el.into()).collect(),
-            ..DescribeGroupsResponse5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponseGroups0> for DescribeGroupsResponseGroups5 {
-    fn from(older: DescribeGroupsResponseGroups0) -> Self {
-        DescribeGroupsResponseGroups5 {
-            error_code: older.error_code,
-            group_id: older.group_id,
-            group_state: older.group_state,
-            protocol_type: older.protocol_type,
-            protocol_data: older.protocol_data,
-            members: older.members.into_iter().map(|el| el.into()).collect(),
-            ..DescribeGroupsResponseGroups5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponseGroupsMembers0> for DescribeGroupsResponseGroupsMembers5 {
-    fn from(older: DescribeGroupsResponseGroupsMembers0) -> Self {
-        DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id,
-            client_id: older.client_id,
-            client_host: older.client_host,
-            member_metadata: older.member_metadata,
-            member_assignment: older.member_assignment,
-            ..DescribeGroupsResponseGroupsMembers5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponse1> for DescribeGroupsResponse5 {
-    fn from(older: DescribeGroupsResponse1) -> Self {
-        DescribeGroupsResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
-            groups: older.groups.into_iter().map(|el| el.into()).collect(),
-            ..DescribeGroupsResponse5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponseGroups1> for DescribeGroupsResponseGroups5 {
-    fn from(older: DescribeGroupsResponseGroups1) -> Self {
-        DescribeGroupsResponseGroups5 {
-            error_code: older.error_code,
-            group_id: older.group_id,
-            group_state: older.group_state,
-            protocol_type: older.protocol_type,
-            protocol_data: older.protocol_data,
-            members: older.members.into_iter().map(|el| el.into()).collect(),
-            ..DescribeGroupsResponseGroups5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponseGroupsMembers1> for DescribeGroupsResponseGroupsMembers5 {
-    fn from(older: DescribeGroupsResponseGroupsMembers1) -> Self {
-        DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id,
-            client_id: older.client_id,
-            client_host: older.client_host,
-            member_metadata: older.member_metadata,
-            member_assignment: older.member_assignment,
-            ..DescribeGroupsResponseGroupsMembers5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponse2> for DescribeGroupsResponse5 {
-    fn from(older: DescribeGroupsResponse2) -> Self {
-        DescribeGroupsResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
-            groups: older.groups.into_iter().map(|el| el.into()).collect(),
-            ..DescribeGroupsResponse5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponseGroups2> for DescribeGroupsResponseGroups5 {
-    fn from(older: DescribeGroupsResponseGroups2) -> Self {
-        DescribeGroupsResponseGroups5 {
-            error_code: older.error_code,
-            group_id: older.group_id,
-            group_state: older.group_state,
-            protocol_type: older.protocol_type,
-            protocol_data: older.protocol_data,
-            members: older.members.into_iter().map(|el| el.into()).collect(),
-            ..DescribeGroupsResponseGroups5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponseGroupsMembers2> for DescribeGroupsResponseGroupsMembers5 {
-    fn from(older: DescribeGroupsResponseGroupsMembers2) -> Self {
-        DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id,
-            client_id: older.client_id,
-            client_host: older.client_host,
-            member_metadata: older.member_metadata,
-            member_assignment: older.member_assignment,
-            ..DescribeGroupsResponseGroupsMembers5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponse3> for DescribeGroupsResponse5 {
-    fn from(older: DescribeGroupsResponse3) -> Self {
-        DescribeGroupsResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
-            groups: older.groups.into_iter().map(|el| el.into()).collect(),
-            ..DescribeGroupsResponse5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponseGroups3> for DescribeGroupsResponseGroups5 {
-    fn from(older: DescribeGroupsResponseGroups3) -> Self {
-        DescribeGroupsResponseGroups5 {
-            error_code: older.error_code,
-            group_id: older.group_id,
-            group_state: older.group_state,
-            protocol_type: older.protocol_type,
-            protocol_data: older.protocol_data,
-            members: older.members.into_iter().map(|el| el.into()).collect(),
-            authorized_operations: older.authorized_operations,
-            ..DescribeGroupsResponseGroups5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponseGroupsMembers3> for DescribeGroupsResponseGroupsMembers5 {
-    fn from(older: DescribeGroupsResponseGroupsMembers3) -> Self {
-        DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id,
-            client_id: older.client_id,
-            client_host: older.client_host,
-            member_metadata: older.member_metadata,
-            member_assignment: older.member_assignment,
-            ..DescribeGroupsResponseGroupsMembers5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponse4> for DescribeGroupsResponse5 {
-    fn from(older: DescribeGroupsResponse4) -> Self {
-        DescribeGroupsResponse5 {
-            throttle_time_ms: older.throttle_time_ms,
-            groups: older.groups.into_iter().map(|el| el.into()).collect(),
-            ..DescribeGroupsResponse5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponseGroups4> for DescribeGroupsResponseGroups5 {
-    fn from(older: DescribeGroupsResponseGroups4) -> Self {
-        DescribeGroupsResponseGroups5 {
-            error_code: older.error_code,
-            group_id: older.group_id,
-            group_state: older.group_state,
-            protocol_type: older.protocol_type,
-            protocol_data: older.protocol_data,
-            members: older.members.into_iter().map(|el| el.into()).collect(),
-            authorized_operations: older.authorized_operations,
-            ..DescribeGroupsResponseGroups5::default()
-        }
-    }
-}
-
-impl From<DescribeGroupsResponseGroupsMembers4> for DescribeGroupsResponseGroupsMembers5 {
-    fn from(older: DescribeGroupsResponseGroupsMembers4) -> Self {
-        DescribeGroupsResponseGroupsMembers5 {
-            member_id: older.member_id,
-            group_instance_id: older.group_instance_id,
-            client_id: older.client_id,
-            client_host: older.client_host,
-            member_metadata: older.member_metadata,
-            member_assignment: older.member_assignment,
-            ..DescribeGroupsResponseGroupsMembers5::default()
-        }
-    }
-}
-
-impl DescribeGroupsResponse5 {
+impl DescribeGroupsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
         for item in self.groups.iter() {
             if let Some(x) = item.get_first_error() {
@@ -530,7 +103,7 @@ impl DescribeGroupsResponse5 {
         None
     }
 }
-impl DescribeGroupsResponseGroups5 {
+impl DescribeGroupsResponseGroups0 {
     fn get_first_error(&self) -> Option<ApiError> {
         for item in self.members.iter() {
             if let Some(x) = item.get_first_error() {
@@ -540,7 +113,7 @@ impl DescribeGroupsResponseGroups5 {
         None
     }
 }
-impl DescribeGroupsResponseGroupsMembers5 {
+impl DescribeGroupsResponseGroupsMembers0 {
     fn get_first_error(&self) -> Option<ApiError> {
         None
     }

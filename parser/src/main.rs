@@ -5,8 +5,8 @@ use std::{
 };
 
 use parser::{
-    generator::generate_content, parser::parse_api_call, transformer::group_api_calls,
-    utils::to_snake_case,
+    generator::generate_content, parser::parse_api_call, transformer_step1::group_api_calls,
+    transformer_step2::transform, utils::to_snake_case,
 };
 use regex::Regex;
 
@@ -42,7 +42,8 @@ async fn main() -> anyhow::Result<()> {
         let path = Path::new(&file_name);
         println!("{}", path.display());
 
-        let content = generate_content(grouped_call, key);
+        let transformed = transform(key, grouped_call);
+        let content = generate_content(transformed);
 
         let mut file = File::create(&path)?;
         file.write_all(content.as_bytes())?;

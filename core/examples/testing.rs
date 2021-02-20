@@ -5,9 +5,9 @@ use kafka_connector::kafka_client::BrokerClient;
 use kafka_connector::protocol;
 use protocol::{
     api::{
-        fetch::{FetchRequestTopics12, FetchRequestTopicsPartitions12},
-        metadata::MetadataRequestTopics9,
-        produce::{ProduceRequestTopicData8, ProduceRequestTopicDataData8},
+        fetch::{FetchRequestTopics0, FetchRequestTopicsPartitions0},
+        metadata::MetadataRequestTopics0,
+        produce::{ProduceRequestTopicData0, ProduceRequestTopicDataData0},
         ApiNumbers,
     },
     custom_types::{
@@ -29,7 +29,7 @@ pub async fn main() -> anyhow::Result<()> {
     let mut broker = BrokerClient::new(BROKER, "kafka-connector-test".to_owned()).await?;
 
     let metadata_request = protocol::api::metadata::MetadataRequest {
-        topics: vec![MetadataRequestTopics9 {
+        topics: vec![MetadataRequestTopics0 {
             name: "test2".to_owned(),
             tag_buffer: TagBuffer {},
         }],
@@ -40,12 +40,12 @@ pub async fn main() -> anyhow::Result<()> {
     };
     let supported_version = broker
         .supported_versions
-        .get(&(ApiNumbers::Metadata as i16));
+        .get(&(ApiNumbers::Metadata as u16));
     println!("supported_versions {:?}", supported_version);
     let metadata = broker.run_api_call(metadata_request, Some(9)).await?;
     println!("{:#?}", metadata);
 
-    let partition = FetchRequestTopicsPartitions12 {
+    let partition = FetchRequestTopicsPartitions0 {
         partition: 0,
         current_leader_epoch: 0,
         fetch_offset: 0,
@@ -64,7 +64,7 @@ pub async fn main() -> anyhow::Result<()> {
         max_bytes: 3200000,
         session_id: 0,
         session_epoch: 0,
-        topics: vec![FetchRequestTopics12 {
+        topics: vec![FetchRequestTopics0 {
             topic: "test3".to_owned(),
             tag_buffer: TagBuffer {},
             partitions: vec![partition],
@@ -74,7 +74,7 @@ pub async fn main() -> anyhow::Result<()> {
     };
     println!("{:#?}", fetch_request);
 
-    let supported_version = broker.supported_versions.get(&(ApiNumbers::Fetch as i16));
+    let supported_version = broker.supported_versions.get(&(ApiNumbers::Fetch as u16));
     println!("supported_versions {:?}", supported_version);
     let fetch = broker.run_api_call(fetch_request, Some(4)).await?;
     println!("{:#?}", fetch);
@@ -104,15 +104,15 @@ pub async fn main() -> anyhow::Result<()> {
         transactional_id: NullableString::None,
         acks: 1_i16,
         timeout: 10_000,
-        topic_data: vec![ProduceRequestTopicData8 {
+        topic_data: vec![ProduceRequestTopicData0 {
             topic: "test3".to_owned(),
-            data: vec![ProduceRequestTopicDataData8 {
+            data: vec![ProduceRequestTopicDataData0 {
                 partition: 0,
                 record_set: records,
             }],
         }],
     };
-    let supported_version = broker.supported_versions.get(&(ApiNumbers::Produce as i16));
+    let supported_version = broker.supported_versions.get(&(ApiNumbers::Produce as u16));
     println!("supported_versions {:?}", supported_version);
     let produce = broker.run_api_call(produce_request, Some(4)).await?;
     println!("{:#?}", produce);

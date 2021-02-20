@@ -4,7 +4,7 @@ use std::str::FromStr;
 pub struct ApiCall<'a> {
     pub name: &'a str,
     pub ty: CallType,
-    pub version: i32,
+    pub version: i16,
     pub fields: Vec<FieldData<'a>>,
 }
 
@@ -83,27 +83,6 @@ impl FieldType {
 
     pub fn is_common_type(ty: &str) -> bool {
         FieldType::try_from_str(ty).is_ok()
-    }
-    pub fn is_simple_type(&self) -> bool {
-        match self {
-            FieldType::Int8
-            | FieldType::Int16
-            | FieldType::Int32
-            | FieldType::Int64
-            | FieldType::Float64
-            | FieldType::String
-            | FieldType::Boolean => true,
-            // TODO:
-            FieldType::Records
-            | FieldType::NullableString
-            | FieldType::CompactRecords
-            | FieldType::TagBuffer => true,
-
-            FieldType::KafkaBytes
-            | FieldType::CompactBytes
-            | FieldType::CompactString
-            | FieldType::CompactNullableString => false,
-        }
     }
 }
 

@@ -121,7 +121,7 @@ mod prelude {
     pub use super::super::from_bytes::FromBytes;
     pub use super::super::to_bytes::ToBytes;
     pub use super::super::ApiCall;
-    pub use super::header::{HeaderRequest1, HeaderRequest2, HeaderResponse, HeaderResponse2};
+    pub use super::header::{HeaderRequest, HeaderResponse};
     pub use super::ApiNumbers;
     pub use crate::api_error::ApiError;
     pub use bytes::{Bytes, BytesMut};
