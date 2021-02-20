@@ -56,7 +56,7 @@ impl BrokerClient {
 
     pub async fn run_api_call<T>(
         &mut self,
-        request: T,
+        request: &T,
         api_version: Option<u16>,
     ) -> Result<T::Response, KafkaApiCallError>
     where
@@ -129,7 +129,7 @@ impl BrokerClient {
 
     async fn get_supported_api_versions(&mut self) -> Result<(), KafkaApiCallError> {
         let response = self
-            .run_api_call(ApiVersionsRequest::default(), Some(0))
+            .run_api_call(&ApiVersionsRequest::default(), Some(0))
             .await?;
         if response.error_code != 0 {
             return Err(KafkaApiCallError::KafkaApiError(ApiError::from(
@@ -153,14 +153,12 @@ impl BrokerClient {
     where
         T: ApiCall + Clone,
     {
-        let req = request.clone(); // TODO: Change - cloning should not be required, changes will introduce structs containing references instead of owned data(because of conversion between api version structs)
-        let mut response = self.run_api_call(req, api_version).await;
+        let mut response = self.run_api_call(&request, api_version).await;
         for _i in 0..=3 {
             // TODO: Extract to config value
             if let Err(KafkaApiCallError::KafkaApiError(_)) = response {
                 tokio::time::sleep(Duration::from_millis(100)).await; // TODO: Extract to config value, gradually increase wait duration
-                let req = request.clone();
-                response = self.run_api_call(req, api_version).await;
+                response = self.run_api_call(&request, api_version).await;
             } else {
                 break;
             }

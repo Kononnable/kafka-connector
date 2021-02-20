@@ -19,14 +19,14 @@ impl ApiCall for ElectLeadersRequest0 {
     fn is_flexible_version(version: u16) -> bool {
         version >= 2
     }
-    fn serialize(self, version: u16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
+    fn serialize(&self, version: u16, buf: &mut BytesMut, correlation_id: i32, client_id: &str) {
         match Self::is_flexible_version(version) {
             true => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id)
                 .serialize(buf, false, 2),
             false => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id)
                 .serialize(buf, false, 1),
         }
-        ToBytes::serialize(&self, buf, Self::is_flexible_version(version), version);
+        ToBytes::serialize(self, buf, Self::is_flexible_version(version), version);
     }
     fn deserialize_response(version: u16, buf: &mut Bytes) -> (i32, Self::Response) {
         let correlation = match Self::is_flexible_version(version) {

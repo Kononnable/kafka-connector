@@ -64,7 +64,7 @@ fn generate_api_struct(api_call: &ApiCall2) -> String {
 
 fn serialize_api_request() -> String {
     let mut fn_def =
-        "fn serialize(self,version:u16, buf: &mut BytesMut,correlation_id: i32,client_id: &str){\n"
+        "fn serialize(&self,version:u16, buf: &mut BytesMut,correlation_id: i32,client_id: &str){\n"
             .to_owned();
 
     fn_def.push_str("match Self::is_flexible_version(version) {\n");
@@ -72,7 +72,7 @@ fn serialize_api_request() -> String {
     fn_def.push_str(&"false => HeaderRequest::new(Self::get_api_key(), version, correlation_id, client_id).serialize(buf, false,1),\n");
     fn_def.push_str("}\n");
     fn_def.push_str(
-        "        ToBytes::serialize(&self,buf,Self::is_flexible_version(version),version);\n",
+        "        ToBytes::serialize(self,buf,Self::is_flexible_version(version),version);\n",
     );
 
     fn_def.push_str("}\n");
