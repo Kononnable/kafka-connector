@@ -1,10 +1,8 @@
-pub mod admin_options;
+pub mod admin;
 pub mod common_options;
-pub mod consumer_options;
 pub mod error;
 pub mod kafka_client;
 pub mod producer;
-pub mod producer_options;
 
 pub use kafka_connector_protocol as protocol;
 

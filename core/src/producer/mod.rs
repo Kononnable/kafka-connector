@@ -1,4 +1,8 @@
-use crate::{kafka_client::KafkaClient, producer_options::ProducerOptions};
+use crate::kafka_client::KafkaClient;
+
+use self::options::ProducerOptions;
+
+pub mod options;
 
 pub struct Producer {}
 
