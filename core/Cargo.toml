@@ -7,11 +7,13 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 anyhow = "1.0.38"
+async-stream = "0.3.0"
 bytes = "1.0.1"
-tokio = {version ="1.0.1", features=["rt-multi-thread","net","macros","io-util"]}
+futures-util = "0.3.12"
 kafka-connector-protocol = {version="0.1.0", path = "./../protocol"}
-thiserror = "1.0.23"
 log = "0.4.13"
+thiserror = "1.0.23"
+tokio = {version ="1.0.1", features=["rt-multi-thread","net","macros","io-util"]}
 
 [dev-dependencies]
 env_logger="0.8.2"

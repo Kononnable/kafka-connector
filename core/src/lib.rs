@@ -1,5 +1,6 @@
 pub mod admin;
 pub mod common_options;
+pub mod consumer;
 pub mod error;
 pub mod kafka_client;
 pub mod producer;
