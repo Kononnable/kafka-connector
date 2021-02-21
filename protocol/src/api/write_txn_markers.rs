@@ -37,13 +37,21 @@ impl ApiCall for WriteTxnMarkersRequest0 {
             Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
+    fn deserialize_request(version: u16, buf: &mut Bytes) -> (OwnedHeaderRequest, Self) {
+        let header = match Self::is_flexible_version(version) {
+            true => OwnedHeaderRequest::deserialize(buf, false, 2),
+            false => OwnedHeaderRequest::deserialize(buf, false, 1),
+        };
+        let request = Self::deserialize(buf, Self::is_flexible_version(version), version);
+        (header, request)
+    }
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct WriteTxnMarkersRequest0 {
     #[min_version = 0]
     pub markers: Vec<WriteTxnMarkersRequestMarkers0>,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct WriteTxnMarkersRequestMarkers0 {
     #[min_version = 0]
     pub producer_id: Int64,
@@ -56,7 +64,7 @@ pub struct WriteTxnMarkersRequestMarkers0 {
     #[min_version = 0]
     pub coordinator_epoch: Int32,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct WriteTxnMarkersRequestMarkersTopics0 {
     #[min_version = 0]
     pub name: String,

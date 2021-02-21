@@ -37,8 +37,16 @@ impl ApiCall for StopReplicaRequest0 {
             Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
+    fn deserialize_request(version: u16, buf: &mut Bytes) -> (OwnedHeaderRequest, Self) {
+        let header = match Self::is_flexible_version(version) {
+            true => OwnedHeaderRequest::deserialize(buf, false, 2),
+            false => OwnedHeaderRequest::deserialize(buf, false, 1),
+        };
+        let request = Self::deserialize(buf, Self::is_flexible_version(version), version);
+        (header, request)
+    }
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct StopReplicaRequest0 {
     #[min_version = 0]
     pub controller_id: Int32,
@@ -49,7 +57,7 @@ pub struct StopReplicaRequest0 {
     #[min_version = 0]
     pub ungrouped_partitions: Vec<StopReplicaRequestUngroupedPartitions0>,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct StopReplicaRequestUngroupedPartitions0 {
     #[min_version = 0]
     pub topic_name: String,
@@ -125,8 +133,16 @@ impl ApiCall for StopReplicaRequest1 {
             Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
+    fn deserialize_request(version: u16, buf: &mut Bytes) -> (OwnedHeaderRequest, Self) {
+        let header = match Self::is_flexible_version(version) {
+            true => OwnedHeaderRequest::deserialize(buf, false, 2),
+            false => OwnedHeaderRequest::deserialize(buf, false, 1),
+        };
+        let request = Self::deserialize(buf, Self::is_flexible_version(version), version);
+        (header, request)
+    }
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct StopReplicaRequest1 {
     #[min_version = 1]
     pub controller_id: Int32,
@@ -141,7 +157,7 @@ pub struct StopReplicaRequest1 {
     #[min_version = 2]
     pub tag_buffer: TagBuffer,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct StopReplicaRequestTopics1 {
     #[min_version = 1]
     pub name: String,
@@ -223,8 +239,16 @@ impl ApiCall for StopReplicaRequest2 {
             Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
+    fn deserialize_request(version: u16, buf: &mut Bytes) -> (OwnedHeaderRequest, Self) {
+        let header = match Self::is_flexible_version(version) {
+            true => OwnedHeaderRequest::deserialize(buf, false, 2),
+            false => OwnedHeaderRequest::deserialize(buf, false, 1),
+        };
+        let request = Self::deserialize(buf, Self::is_flexible_version(version), version);
+        (header, request)
+    }
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct StopReplicaRequest2 {
     #[min_version = 3]
     pub controller_id: Int32,
@@ -237,7 +261,7 @@ pub struct StopReplicaRequest2 {
     #[min_version = 3]
     pub tag_buffer: TagBuffer,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct StopReplicaRequestTopicStates2 {
     #[min_version = 3]
     pub topic_name: String,
@@ -246,7 +270,7 @@ pub struct StopReplicaRequestTopicStates2 {
     #[min_version = 3]
     pub tag_buffer: TagBuffer,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct StopReplicaRequestTopicStatesPartitionStates2 {
     #[min_version = 3]
     pub partition_index: Int32,

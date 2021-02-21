@@ -112,6 +112,67 @@ pub enum ApiNumbers {
     AlterIsr = 56,
     UpdateFeatures = 57,
 }
+impl ApiNumbers {
+    pub fn from_i16(input: i16) -> ApiNumbers {
+        match input {
+            0 => ApiNumbers::Produce,
+            1 => ApiNumbers::Fetch,
+            2 => ApiNumbers::ListOffsets,
+            3 => ApiNumbers::Metadata,
+            4 => ApiNumbers::LeaderAndIsr,
+            5 => ApiNumbers::StopReplica,
+            6 => ApiNumbers::UpdateMetadata,
+            7 => ApiNumbers::ControlledShutdown,
+            8 => ApiNumbers::OffsetCommit,
+            9 => ApiNumbers::OffsetFetch,
+            10 => ApiNumbers::FindCoordinator,
+            11 => ApiNumbers::JoinGroup,
+            12 => ApiNumbers::Heartbeat,
+            13 => ApiNumbers::LeaveGroup,
+            14 => ApiNumbers::SyncGroup,
+            15 => ApiNumbers::DescribeGroups,
+            16 => ApiNumbers::ListGroups,
+            17 => ApiNumbers::SaslHandshake,
+            18 => ApiNumbers::ApiVersions,
+            19 => ApiNumbers::CreateTopics,
+            20 => ApiNumbers::DeleteTopics,
+            21 => ApiNumbers::DeleteRecords,
+            22 => ApiNumbers::InitProducerId,
+            23 => ApiNumbers::OffsetForLeaderEpoch,
+            24 => ApiNumbers::AddPartitionsToTxn,
+            25 => ApiNumbers::AddOffsetsToTxn,
+            26 => ApiNumbers::EndTxn,
+            27 => ApiNumbers::WriteTxnMarkers,
+            28 => ApiNumbers::TxnOffsetCommit,
+            29 => ApiNumbers::DescribeAcls,
+            30 => ApiNumbers::CreateAcls,
+            31 => ApiNumbers::DeleteAcls,
+            32 => ApiNumbers::DescribeConfigs,
+            33 => ApiNumbers::AlterConfigs,
+            34 => ApiNumbers::AlterReplicaLogDirs,
+            35 => ApiNumbers::DescribeLogDirs,
+            36 => ApiNumbers::SaslAuthenticate,
+            37 => ApiNumbers::CreatePartitions,
+            38 => ApiNumbers::CreateDelegationToken,
+            39 => ApiNumbers::RenewDelegationToken,
+            40 => ApiNumbers::ExpireDelegationToken,
+            41 => ApiNumbers::DescribeDelegationToken,
+            42 => ApiNumbers::DeleteGroups,
+            43 => ApiNumbers::ElectLeaders,
+            44 => ApiNumbers::IncrementalAlterConfigs,
+            45 => ApiNumbers::AlterPartitionReassignments,
+            46 => ApiNumbers::ListPartitionReassignments,
+            47 => ApiNumbers::OffsetDelete,
+            48 => ApiNumbers::DescribeClientQuotas,
+            49 => ApiNumbers::AlterClientQuotas,
+            50 => ApiNumbers::DescribeUserScramCredentials,
+            51 => ApiNumbers::AlterUserScramCredentials,
+            56 => ApiNumbers::AlterIsr,
+            57 => ApiNumbers::UpdateFeatures,
+            _ => unreachable!("Unknown api number"),
+        }
+    }
+}
 
 mod prelude {
     pub use super::super::custom_types::nullable_str::NullableStr;
@@ -121,7 +182,7 @@ mod prelude {
     pub use super::super::from_bytes::FromBytes;
     pub use super::super::to_bytes::ToBytes;
     pub use super::super::ApiCall;
-    pub use super::header::{HeaderRequest, HeaderResponse};
+    pub use super::header::{HeaderRequest, HeaderResponse, OwnedHeaderRequest};
     pub use super::ApiNumbers;
     pub use crate::api_error::ApiError;
     pub use bytes::{Bytes, BytesMut};

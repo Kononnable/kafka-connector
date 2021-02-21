@@ -37,8 +37,16 @@ impl ApiCall for UpdateMetadataRequest0 {
             Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
+    fn deserialize_request(version: u16, buf: &mut Bytes) -> (OwnedHeaderRequest, Self) {
+        let header = match Self::is_flexible_version(version) {
+            true => OwnedHeaderRequest::deserialize(buf, false, 2),
+            false => OwnedHeaderRequest::deserialize(buf, false, 1),
+        };
+        let request = Self::deserialize(buf, Self::is_flexible_version(version), version);
+        (header, request)
+    }
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct UpdateMetadataRequest0 {
     #[min_version = 0]
     pub controller_id: Int32,
@@ -49,7 +57,7 @@ pub struct UpdateMetadataRequest0 {
     #[min_version = 0]
     pub live_brokers: Vec<UpdateMetadataRequestLiveBrokers0>,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct UpdateMetadataRequestUngroupedPartitionStates0 {
     #[min_version = 0]
     pub topic_name: String,
@@ -70,7 +78,7 @@ pub struct UpdateMetadataRequestUngroupedPartitionStates0 {
     #[min_version = 4]
     pub offline_replicas: Vec<Int32>,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers0 {
     #[min_version = 0]
     pub id: Int32,
@@ -79,7 +87,7 @@ pub struct UpdateMetadataRequestLiveBrokers0 {
     #[min_version = 2]
     pub rack: NullableString,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints0 {
     #[min_version = 1]
     pub port: Int32,
@@ -138,8 +146,16 @@ impl ApiCall for UpdateMetadataRequest1 {
             Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
+    fn deserialize_request(version: u16, buf: &mut Bytes) -> (OwnedHeaderRequest, Self) {
+        let header = match Self::is_flexible_version(version) {
+            true => OwnedHeaderRequest::deserialize(buf, false, 2),
+            false => OwnedHeaderRequest::deserialize(buf, false, 1),
+        };
+        let request = Self::deserialize(buf, Self::is_flexible_version(version), version);
+        (header, request)
+    }
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct UpdateMetadataRequest1 {
     #[min_version = 5]
     pub controller_id: Int32,
@@ -154,7 +170,7 @@ pub struct UpdateMetadataRequest1 {
     #[min_version = 6]
     pub tag_buffer: TagBuffer,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct UpdateMetadataRequestTopicStates1 {
     #[min_version = 5]
     pub topic_name: String,
@@ -163,7 +179,7 @@ pub struct UpdateMetadataRequestTopicStates1 {
     #[min_version = 6]
     pub tag_buffer: TagBuffer,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct UpdateMetadataRequestTopicStatesPartitionStates1 {
     #[min_version = 5]
     pub partition_index: Int32,
@@ -184,7 +200,7 @@ pub struct UpdateMetadataRequestTopicStatesPartitionStates1 {
     #[min_version = 6]
     pub tag_buffer: TagBuffer,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokers1 {
     #[min_version = 5]
     pub id: Int32,
@@ -195,7 +211,7 @@ pub struct UpdateMetadataRequestLiveBrokers1 {
     #[min_version = 6]
     pub tag_buffer: TagBuffer,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct UpdateMetadataRequestLiveBrokersEndpoints1 {
     #[min_version = 5]
     pub port: Int32,

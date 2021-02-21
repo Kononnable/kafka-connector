@@ -37,22 +37,30 @@ impl ApiCall for OffsetForLeaderEpochRequest0 {
             Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
+    fn deserialize_request(version: u16, buf: &mut Bytes) -> (OwnedHeaderRequest, Self) {
+        let header = match Self::is_flexible_version(version) {
+            true => OwnedHeaderRequest::deserialize(buf, false, 2),
+            false => OwnedHeaderRequest::deserialize(buf, false, 1),
+        };
+        let request = Self::deserialize(buf, Self::is_flexible_version(version), version);
+        (header, request)
+    }
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct OffsetForLeaderEpochRequest0 {
     #[min_version = 3]
     pub replica_id: Int32,
     #[min_version = 0]
     pub topics: Vec<OffsetForLeaderEpochRequestTopics0>,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct OffsetForLeaderEpochRequestTopics0 {
     #[min_version = 0]
     pub topic: String,
     #[min_version = 0]
     pub partitions: Vec<OffsetForLeaderEpochRequestTopicsPartitions0>,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct OffsetForLeaderEpochRequestTopicsPartitions0 {
     #[min_version = 0]
     pub partition: Int32,

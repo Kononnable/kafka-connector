@@ -53,7 +53,10 @@ fn generate_api_struct(api_call: &ApiCall2) -> String {
         ));
     }
 
-    def.push_str(&format!("{}{}}}", SERIALIZATION, DESERIALIZATION));
+    def.push_str(&format!(
+        "{}{}{}}}",
+        SERIALIZATION, RESPONSE_DESERIALIZATION, REQUEST_DESERIALIZATION
+    ));
     def
 }
 const SERIALIZATION: &str = r#"fn serialize(&self,version:u16, buf: &mut BytesMut,correlation_id: i32,client_id: &str){
@@ -63,13 +66,21 @@ const SERIALIZATION: &str = r#"fn serialize(&self,version:u16, buf: &mut BytesMu
     }
     ToBytes::serialize(self,buf,Self::is_flexible_version(version),version);
 }"#;
-const DESERIALIZATION: &str = r#"fn deserialize_response(version:u16, buf: &mut Bytes) -> (i32,Self::Response) {
+const RESPONSE_DESERIALIZATION: &str = r#"fn deserialize_response(version:u16, buf: &mut Bytes) -> (i32,Self::Response) {
     let correlation = match Self::is_flexible_version(version) {
         true => HeaderResponse::deserialize(buf, false,2).correlation,
         false => HeaderResponse::deserialize(buf, false,1).correlation,
     };
     let response = Self::Response::deserialize(buf, Self::is_flexible_version(version),version);
     (correlation, response)
+}"#;
+const REQUEST_DESERIALIZATION: &str = r#"fn deserialize_request(version:u16, buf: &mut Bytes) -> (OwnedHeaderRequest,Self) {
+    let header = match Self::is_flexible_version(version) {
+        true => OwnedHeaderRequest::deserialize(buf, false,2),
+        false => OwnedHeaderRequest::deserialize(buf, false,1),
+    };
+    let request = Self::deserialize(buf, Self::is_flexible_version(version),version);
+    (header, request)
 }"#;
 
 fn generate_struct(api_call: &ApiCall2) -> String {
@@ -80,8 +91,8 @@ fn generate_struct(api_call: &ApiCall2) -> String {
         .zip(iter::repeat(true))
         .chain(api_call.response_structs.iter().zip(iter::repeat(false)))
     {
-        let derive_bytes = if is_request { "ToBytes" } else { "FromBytes" };
-        let derive = format!("#[derive(Default,Debug,Clone,{})]\n", derive_bytes);
+        let derive_bytes = if is_request { ",ToBytes" } else { "" };
+        let derive = format!("#[derive(Default,Debug,Clone,FromBytes{})]\n", derive_bytes);
         let struct_name_with_version = format!(
             "pub struct {}{} {{ \n",
             struc.name, api_call.api_struct_version

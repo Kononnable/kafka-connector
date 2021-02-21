@@ -721,6 +721,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "proxy"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "env_logger",
+ "futures-util",
+ "kafka-connector-protocol",
+ "tokio",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"

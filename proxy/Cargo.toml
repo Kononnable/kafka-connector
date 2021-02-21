@@ -1,0 +1,13 @@
+[package]
+name = "proxy"
+version = "0.1.0"
+authors = ["kononnable <kononnable@gmail.com>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+bytes = "1.0.1"
+env_logger="0.8.2"
+futures-util = "0.3.12"
+kafka-connector-protocol = {version="0.1.0", path = "./../protocol"}
+tokio = {version ="1.0.1", features=["rt-multi-thread","net","macros","io-util"]}

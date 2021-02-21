@@ -3,5 +3,6 @@ members = [
     "core",
     "derive",
     "parser",
-    "protocol"
+    "protocol",
+    "proxy"
 ]

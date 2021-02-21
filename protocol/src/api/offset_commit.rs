@@ -37,8 +37,16 @@ impl ApiCall for OffsetCommitRequest0 {
             Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
+    fn deserialize_request(version: u16, buf: &mut Bytes) -> (OwnedHeaderRequest, Self) {
+        let header = match Self::is_flexible_version(version) {
+            true => OwnedHeaderRequest::deserialize(buf, false, 2),
+            false => OwnedHeaderRequest::deserialize(buf, false, 1),
+        };
+        let request = Self::deserialize(buf, Self::is_flexible_version(version), version);
+        (header, request)
+    }
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct OffsetCommitRequest0 {
     #[min_version = 0]
     pub group_id: String,
@@ -53,7 +61,7 @@ pub struct OffsetCommitRequest0 {
     #[min_version = 8]
     pub tag_buffer: TagBuffer,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct OffsetCommitRequestTopics0 {
     #[min_version = 0]
     pub name: String,
@@ -62,7 +70,7 @@ pub struct OffsetCommitRequestTopics0 {
     #[min_version = 8]
     pub tag_buffer: TagBuffer,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct OffsetCommitRequestTopicsPartitions0 {
     #[min_version = 0]
     pub partition_index: Int32,

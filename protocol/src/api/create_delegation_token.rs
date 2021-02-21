@@ -37,8 +37,16 @@ impl ApiCall for CreateDelegationTokenRequest0 {
             Self::Response::deserialize(buf, Self::is_flexible_version(version), version);
         (correlation, response)
     }
+    fn deserialize_request(version: u16, buf: &mut Bytes) -> (OwnedHeaderRequest, Self) {
+        let header = match Self::is_flexible_version(version) {
+            true => OwnedHeaderRequest::deserialize(buf, false, 2),
+            false => OwnedHeaderRequest::deserialize(buf, false, 1),
+        };
+        let request = Self::deserialize(buf, Self::is_flexible_version(version), version);
+        (header, request)
+    }
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct CreateDelegationTokenRequest0 {
     #[min_version = 0]
     pub renewers: Vec<CreateDelegationTokenRequestRenewers0>,
@@ -47,7 +55,7 @@ pub struct CreateDelegationTokenRequest0 {
     #[min_version = 2]
     pub tag_buffer: TagBuffer,
 }
-#[derive(Default, Debug, Clone, ToBytes)]
+#[derive(Default, Debug, Clone, FromBytes, ToBytes)]
 pub struct CreateDelegationTokenRequestRenewers0 {
     #[min_version = 0]
     pub principal_type: String,

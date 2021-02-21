@@ -35,3 +35,13 @@ pub struct HeaderResponse {
     #[min_version = 2]
     pub tag_buffer: TagBuffer,
 }
+
+#[derive(Debug, FromBytes)]
+pub struct OwnedHeaderRequest {
+    pub api_key: Int16,
+    pub api_version: Int16,
+    pub correlation_id: Int32,
+    pub client_id: NullableString,
+    #[min_version = 2]
+    pub tag_buffer: TagBuffer,
+}
