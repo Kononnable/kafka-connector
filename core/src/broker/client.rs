@@ -16,22 +16,8 @@ use kafka_connector_protocol::{
     ApiCall,
 };
 
-use crate::error::KafkaApiCallError;
+use super::error::KafkaApiCallError;
 
-#[derive(Debug)]
-pub struct KafkaClient {
-    pub client_id: String,
-    pub clients: Vec<BrokerClient>,
-    pub metadata: Metadata,
-}
-#[derive(Default, Debug)]
-pub struct Metadata {}
-
-impl Metadata {
-    pub fn new() -> Metadata {
-        Metadata {}
-    }
-}
 #[derive(Debug)]
 pub struct BrokerClient {
     pub connection: TcpStream,
@@ -164,16 +150,5 @@ impl BrokerClient {
             }
         }
         return response;
-    }
-}
-
-impl KafkaClient {
-    pub async fn new(broker_addr: &str, client_id: &str) -> Result<KafkaClient, KafkaApiCallError> {
-        let clients = vec![BrokerClient::new(broker_addr, client_id.to_owned()).await?];
-        Ok(KafkaClient {
-            clients,
-            metadata: Metadata::default(),
-            client_id: client_id.to_owned(),
-        })
     }
 }

@@ -1,43 +1,27 @@
-use std::{
-    collections::HashMap,
-    future::Future,
-    pin::Pin,
-    task::{Context, Poll},
+use self::{
+    error::ProducerCreateError, options::ProducerOptions, record::ProducerRecord,
+    send_result_future::SendResultFuture,
 };
-
-use crate::kafka_client::KafkaClient;
-
-use self::{error::SendError, options::ProducerOptions};
 
 pub mod error;
 pub mod options;
+pub mod record;
+pub mod send_result_future;
 
 pub struct Producer {}
 
 impl Producer {
-    pub fn new(_kafka_client: KafkaClient, _options: ProducerOptions) -> Self {
+    /// Creates kafka producer and waits for it to connect to at least one broker
+    pub async fn new(_options: ProducerOptions) -> Result<Self, ProducerCreateError> {
         todo!()
     }
-    pub fn send(&mut self, _record: Record<'_>) -> SendResultFuture {
+    pub fn send(&mut self, _record: ProducerRecord<'_>) -> SendResultFuture {
         todo!()
     }
-}
-
-// TODO: Allow some simple types to be passed here directly - like str
-pub struct Record<'a> {
-    pub topic: &'a str,
-    pub payload: &'a [u8],
-    pub partition: Option<i32>,
-    pub key: &'a [u8],
-    pub timestamp: Option<i64>,
-    pub headers: Option<&'a HashMap<String, Vec<u8>>>,
-}
-
-pub struct SendResultFuture {}
-impl Future for SendResultFuture {
-    type Output = Result<(), SendError>;
-
-    fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
+    pub fn commit_offsets() {
+        todo!()
+    }
+    pub fn store_offset() {
         todo!()
     }
 }

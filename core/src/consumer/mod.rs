@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use crate::kafka_client::KafkaClient;
-
 use self::{
     error::{AckError, MessageError, SubscribeError},
     options::ConsumerOptions,
@@ -16,7 +14,7 @@ pub mod options;
 pub struct Consumer {}
 
 impl Consumer {
-    pub fn new(_kafka_client: KafkaClient, _options: ConsumerOptions) -> Self {
+    pub fn new(_options: ConsumerOptions) -> Self {
         todo!()
     }
     pub fn stream(
@@ -34,6 +32,14 @@ impl Consumer {
                 topic: Default::default(),
             };
         })
+    }
+    /// e.g. before rebalance - store offset etc.
+    pub fn on_partition_revoked() {
+        todo!()
+    }
+    /// e.g. after rebalance - seek offset if needed etc.
+    pub fn on_partition_assigned() {
+        todo!()
     }
 }
 

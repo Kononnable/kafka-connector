@@ -1,8 +1,6 @@
 use std::vec;
 
-use kafka_connector::kafka_client::BrokerClient;
-
-use kafka_connector::protocol;
+use kafka_connector::{broker::client::BrokerClient, protocol};
 use protocol::{
     api::{
         fetch::{FetchRequestTopics0, FetchRequestTopicsPartitions0},
