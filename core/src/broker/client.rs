@@ -20,10 +20,11 @@ use super::error::KafkaApiCallError;
 
 #[derive(Debug)]
 pub struct BrokerClient {
-    pub connection: TcpStream,
-    pub client_id: String,
-    pub last_correlation: i32,
-    pub supported_versions: HashMap<u16, (u16, u16)>,
+    connection: TcpStream,
+    client_id: String,
+    last_correlation: i32,
+    pub supported_versions: HashMap<u16, (u16, u16)>, // TODO: Change later(?)
+    send_buffer: BytesMut,
 }
 
 impl BrokerClient {
@@ -35,6 +36,7 @@ impl BrokerClient {
             connection,
             last_correlation: 0,
             client_id,
+            send_buffer: BytesMut::with_capacity(4096), // TODO: Change size(?)
         };
         client.get_supported_api_versions().await?;
         Ok(client)
@@ -87,16 +89,16 @@ impl BrokerClient {
             }
         };
 
-        let mut buffer = BytesMut::with_capacity(4096); // TODO: Change size(?)
         request.serialize(
             api_version,
-            &mut buffer,
+            &mut self.send_buffer,
             self.last_correlation + 1,
             &self.client_id,
         );
-        let len = buffer.len() as i32;
+        let len = self.send_buffer.len() as i32;
         self.connection.write_all(&len.to_be_bytes()).await.unwrap();
-        self.connection.write_all(&buffer).await.unwrap();
+        self.connection.write_all(&self.send_buffer).await.unwrap();
+        self.send_buffer.clear();
         let mut size: [u8; 4] = [0, 0, 0, 0];
         self.connection.read_exact(&mut size).await.unwrap();
         let cap = i32::from_be_bytes(size);

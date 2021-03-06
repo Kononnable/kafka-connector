@@ -46,7 +46,11 @@ impl RecordBatch {
         base_offset: i64,
         version: u16,
     ) {
-        let mut buffer = BytesMut::with_capacity(4096); // TODO: Change size(?)
+        let mut buffer = buf.split_off(buf.len());
+
+        0_i32.serialize(&mut buffer, false, 0);
+        let mut length_buf = buffer.split();
+        length_buf.clear();
 
         let timestamp_delta = ZigZagVarInt64::new(record.timestamp - base_timestamp);
         let offset_delta = ZigZagVarInt64::new(record.offset - base_offset);
@@ -77,8 +81,10 @@ impl RecordBatch {
         log::trace!("Serialized headers Bytes: \n{:03?}", buffer.to_vec());
 
         let length = ZigZagVarInt64::new(buffer.len() as i64);
-        length.serialize(buf, is_flexible_version, version);
-        buf.extend(buffer);
+        length.serialize(&mut length_buf, is_flexible_version, version);
+
+        buf.unsplit(length_buf);
+        buf.unsplit(buffer);
     }
     fn deserialize_records(
         buf: &mut Bytes,
@@ -135,6 +141,10 @@ impl RecordBatch {
 impl ToBytes for RecordBatch {
     fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool, version: u16) {
         let base_offset: i64 = self.records.iter().min_by_key(|x| x.offset).unwrap().offset;
+
+        base_offset.serialize(buf, is_flexible_version, version);
+        trace!("Serialized base_offset \n{:03?}", buf.to_vec());
+
         let last_offset_delta: i32 =
             (self.records.iter().max_by_key(|x| x.offset).unwrap().offset - base_offset) as i32;
         let first_timestamp: i64 = self
@@ -150,7 +160,14 @@ impl ToBytes for RecordBatch {
             .unwrap()
             .timestamp;
 
-        let mut crc_buffer = BytesMut::with_capacity(4096); // TODO: Change size(?)
+        let mut buf_batch_length = buf.split_off(buf.len());
+        buf_batch_length.resize(4, 0);
+        let mut buf_epoch_magic_crc = buf_batch_length.split_off(buf_batch_length.len());
+        buf_batch_length.clear();
+
+        buf_epoch_magic_crc.resize(4 + 1 + 4, 0);
+        let mut crc_buffer = buf_epoch_magic_crc.split_off(buf_epoch_magic_crc.len());
+        buf_epoch_magic_crc.clear();
 
         trace!("Serializing recordbatch");
         self.attributes
@@ -195,22 +212,24 @@ impl ToBytes for RecordBatch {
             );
         }
 
-        let mut batch_buffer = BytesMut::with_capacity(4096); // TODO: Change size(?)
-        self.partition_leader_epoch
-            .serialize(&mut batch_buffer, is_flexible_version, version);
+        self.partition_leader_epoch.serialize(
+            &mut buf_epoch_magic_crc,
+            is_flexible_version,
+            version,
+        );
         let magic_byte = 2_i8;
-        magic_byte.serialize(&mut batch_buffer, is_flexible_version, version);
+        magic_byte.serialize(&mut buf_epoch_magic_crc, is_flexible_version, version);
 
         let crc = crc32c::crc32c(&crc_buffer);
-        crc.serialize(&mut batch_buffer, is_flexible_version, version);
-        batch_buffer.extend(crc_buffer);
+        crc.serialize(&mut buf_epoch_magic_crc, is_flexible_version, version);
 
-        base_offset.serialize(buf, is_flexible_version, version);
-        trace!("Serialized base_offset \n{:03?}", buf.to_vec());
-        let batch_length: i32 = batch_buffer.len() as i32;
-        batch_length.serialize(buf, is_flexible_version, version);
+        let batch_length: i32 = (buf_epoch_magic_crc.len() + crc_buffer.len()) as i32;
+        batch_length.serialize(&mut buf_batch_length, is_flexible_version, version);
         trace!("Serialized batch_length \n{:03?}", buf.to_vec());
-        buf.extend(batch_buffer);
+
+        buf.unsplit(buf_batch_length);
+        buf.unsplit(buf_epoch_magic_crc);
+        buf.unsplit(crc_buffer);
     }
 }
 

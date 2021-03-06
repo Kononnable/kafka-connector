@@ -26,12 +26,20 @@ impl FromBytes for RecordBatchWithSize {
 
 impl ToBytes for RecordBatchWithSize {
     fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool, version: u16) {
-        let mut buffer = BytesMut::with_capacity(4096); // TODO: Change size(?)
+        let mut buf_batches = buf.split_off(buf.len());
+
+        0_i32.serialize(&mut buf_batches, false, 0);
+        let mut size_buf = buf_batches.split();
+        size_buf.clear();
+
         for batch in &self.batches {
-            batch.serialize(&mut buffer, is_flexible_version, version);
+            batch.serialize(&mut buf_batches, is_flexible_version, version);
         }
-        let size: i32 = buffer.len() as i32;
-        size.serialize(buf, is_flexible_version, version);
-        buf.extend(buffer);
+
+        let size: i32 = buf_batches.len() as i32;
+        size.serialize(&mut size_buf, is_flexible_version, version);
+
+        buf.unsplit(size_buf);
+        buf.unsplit(buf_batches);
     }
 }
