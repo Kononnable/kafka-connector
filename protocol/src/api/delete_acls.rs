@@ -118,26 +118,6 @@ pub struct DeleteAclsResponseFilterResultsMatchingAcls0 {
 
 impl DeleteAclsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.filter_results.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DeleteAclsResponseFilterResults0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.matching_acls.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DeleteAclsResponseFilterResultsMatchingAcls0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

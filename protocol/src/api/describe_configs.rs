@@ -115,38 +115,6 @@ pub struct DescribeConfigsResponseResultsConfigsSynonyms0 {
 
 impl DescribeConfigsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.results.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DescribeConfigsResponseResults0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.configs.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DescribeConfigsResponseResultsConfigs0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        if let Some(vec) = self.synonyms.as_ref() {
-            for item in vec {
-                if let Some(x) = item.get_first_error() {
-                    return Some(x);
-                };
-            }
-        }
-        None
-    }
-}
-impl DescribeConfigsResponseResultsConfigsSynonyms0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

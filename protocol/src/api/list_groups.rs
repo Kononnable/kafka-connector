@@ -78,16 +78,9 @@ pub struct ListGroupsResponseGroups0 {
 
 impl ListGroupsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.groups.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
         }
-        None
-    }
-}
-impl ListGroupsResponseGroups0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

@@ -102,26 +102,9 @@ pub struct ListPartitionReassignmentsResponseTopicsPartitions0 {
 
 impl ListPartitionReassignmentsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.topics.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
         }
-        None
-    }
-}
-impl ListPartitionReassignmentsResponseTopics0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partitions.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl ListPartitionReassignmentsResponseTopicsPartitions0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

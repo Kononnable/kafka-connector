@@ -97,36 +97,9 @@ pub struct DescribeClientQuotasResponseEntriesValues0 {
 
 impl DescribeClientQuotasResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.entries.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
         }
-        None
-    }
-}
-impl DescribeClientQuotasResponseEntries0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.entity.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        for item in self.values.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DescribeClientQuotasResponseEntriesEntity0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        None
-    }
-}
-impl DescribeClientQuotasResponseEntriesValues0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

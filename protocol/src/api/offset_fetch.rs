@@ -104,26 +104,9 @@ pub struct OffsetFetchResponseTopicsPartitions0 {
 
 impl OffsetFetchResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.topics.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code.is_some() && self.error_code.unwrap() != 0 {
+            return self.error_code.map(ApiError::from);
         }
-        None
-    }
-}
-impl OffsetFetchResponseTopics0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partitions.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl OffsetFetchResponseTopicsPartitions0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

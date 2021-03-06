@@ -133,36 +133,6 @@ pub struct MetadataResponseTopicsPartitions0 {
 
 impl MetadataResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.brokers.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        for item in self.topics.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl MetadataResponseBrokers0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        None
-    }
-}
-impl MetadataResponseTopics0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partitions.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl MetadataResponseTopicsPartitions0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

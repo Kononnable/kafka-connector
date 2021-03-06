@@ -119,52 +119,29 @@ fn generate_field(field: &ApiField2) -> String {
 
 fn generate_get_first_error(api_call: &ApiCall2) -> String {
     let mut impl_def = "".to_owned();
-    for structs in api_call.response_structs.iter() {
-        impl_def.push_str(&format!(
-            "impl {}{} {{\nfn get_first_error(&self) -> Option<ApiError>{{\n",
-            structs.name, api_call.api_struct_version
-        ));
-        if structs
-            .fields
-            .iter()
-            .any(|x| x.name == "error_code" && x.ty == "i16")
-        {
-            impl_def.push_str(&"    if self.error_code !=0 {\n");
-            impl_def.push_str(&"        return self.error_code;\n");
-            impl_def.push_str(&"    }\n");
-        } else if structs
-            .fields
-            .iter()
-            .any(|x| x.name == "error_code" && x.ty == "Option<i16>")
-        {
-            impl_def
-                .push_str(&"    if self.error_code.is_some() && self.error_code.unwrap() !=0 {\n");
-            impl_def.push_str(&"        return self.error_code.unwrap();\n");
-            impl_def.push_str(&"    }\n");
-        }
-        for field in structs
-            .fields
-            .iter()
-            .filter(|x| x.is_vec && x.is_struct_field)
-        {
-            if field.is_optional {
-                impl_def.push_str(&format!(
-                    "if let Some(vec) = self.{}.as_ref(){{\nfor item in vec {{\n",
-                    field.name
-                ));
-            } else {
-                impl_def.push_str(&format!("for item in self.{}.iter() {{\n", field.name));
-            }
-            impl_def.push_str(
-                &("        if let Some(x) = item.get_first_error(){\nreturn Some(x);\n};\n"),
-            );
-            if field.is_optional {
-                impl_def.push_str(&"    }\n}\n");
-            } else {
-                impl_def.push_str(&"    }\n");
-            }
-        }
-        impl_def.push_str(&"None\n}\n}");
+    let response = api_call.response_structs.first().unwrap();
+    impl_def.push_str(&format!(
+        "impl {}{} {{\nfn get_first_error(&self) -> Option<ApiError>{{\n",
+        response.name, api_call.api_struct_version
+    ));
+    if response
+        .fields
+        .iter()
+        .any(|x| x.name == "error_code" && x.ty == "Int16")
+    {
+        impl_def.push_str(&"    if self.error_code !=0 {\n");
+        impl_def.push_str(&"        return Some(self.error_code.into());\n");
+        impl_def.push_str(&"    }\n");
+    } else if response
+        .fields
+        .iter()
+        .any(|x| x.name == "error_code" && x.ty == "Option<Int16>")
+    {
+        impl_def.push_str(&"    if self.error_code.is_some() && self.error_code.unwrap() !=0 {\n");
+        impl_def.push_str(&"        return self.error_code.map(ApiError::from);\n");
+        impl_def.push_str(&"    }\n");
     }
+    impl_def.push_str(&"None\n}\n}");
+
     impl_def
 }

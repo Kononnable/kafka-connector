@@ -74,16 +74,6 @@ pub struct DeleteGroupsResponseResults0 {
 
 impl DeleteGroupsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.results.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DeleteGroupsResponseResults0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

@@ -100,26 +100,9 @@ pub struct ElectLeadersResponseReplicaElectionResultsPartitionResult0 {
 
 impl ElectLeadersResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.replica_election_results.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code.is_some() && self.error_code.unwrap() != 0 {
+            return self.error_code.map(ApiError::from);
         }
-        None
-    }
-}
-impl ElectLeadersResponseReplicaElectionResults0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partition_result.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl ElectLeadersResponseReplicaElectionResultsPartitionResult0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

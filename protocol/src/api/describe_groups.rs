@@ -103,26 +103,6 @@ pub struct DescribeGroupsResponseGroupsMembers0 {
 
 impl DescribeGroupsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.groups.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DescribeGroupsResponseGroups0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.members.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DescribeGroupsResponseGroupsMembers0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

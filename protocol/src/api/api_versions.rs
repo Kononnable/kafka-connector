@@ -80,16 +80,9 @@ pub struct ApiVersionsResponseApiKeys0 {
 
 impl ApiVersionsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.api_keys.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
         }
-        None
-    }
-}
-impl ApiVersionsResponseApiKeys0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

@@ -105,26 +105,6 @@ pub struct DeleteRecordsResponseTopicsPartitions0 {
 
 impl DeleteRecordsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.topics.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DeleteRecordsResponseTopics0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partitions.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DeleteRecordsResponseTopicsPartitions0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

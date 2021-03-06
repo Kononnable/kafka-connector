@@ -162,38 +162,9 @@ pub struct FetchResponseResponsesPartitionResponsesAbortedTransactions0 {
 
 impl FetchResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.responses.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code.is_some() && self.error_code.unwrap() != 0 {
+            return self.error_code.map(ApiError::from);
         }
-        None
-    }
-}
-impl FetchResponseResponses0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partition_responses.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl FetchResponseResponsesPartitionResponses0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        if let Some(vec) = self.aborted_transactions.as_ref() {
-            for item in vec {
-                if let Some(x) = item.get_first_error() {
-                    return Some(x);
-                };
-            }
-        }
-        None
-    }
-}
-impl FetchResponseResponsesPartitionResponsesAbortedTransactions0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

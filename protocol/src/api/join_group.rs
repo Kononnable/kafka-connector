@@ -109,16 +109,9 @@ pub struct JoinGroupResponseMembers0 {
 
 impl JoinGroupResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.members.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
         }
-        None
-    }
-}
-impl JoinGroupResponseMembers0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

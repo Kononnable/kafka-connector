@@ -88,26 +88,6 @@ pub struct AddPartitionsToTxnResponseResultsResults0 {
 
 impl AddPartitionsToTxnResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.results.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl AddPartitionsToTxnResponseResults0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.results.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl AddPartitionsToTxnResponseResultsResults0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

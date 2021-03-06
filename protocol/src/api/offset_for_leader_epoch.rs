@@ -97,26 +97,6 @@ pub struct OffsetForLeaderEpochResponseTopicsPartitions0 {
 
 impl OffsetForLeaderEpochResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.topics.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl OffsetForLeaderEpochResponseTopics0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partitions.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl OffsetForLeaderEpochResponseTopicsPartitions0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

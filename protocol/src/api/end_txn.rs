@@ -67,6 +67,9 @@ pub struct EndTxnResponse0 {
 
 impl EndTxnResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
+        }
         None
     }
 }

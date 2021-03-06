@@ -119,26 +119,6 @@ pub struct TxnOffsetCommitResponseTopicsPartitions0 {
 
 impl TxnOffsetCommitResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.topics.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl TxnOffsetCommitResponseTopics0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partitions.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl TxnOffsetCommitResponseTopicsPartitions0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

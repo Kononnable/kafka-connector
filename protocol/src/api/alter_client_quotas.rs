@@ -102,26 +102,6 @@ pub struct AlterClientQuotasResponseEntriesEntity0 {
 
 impl AlterClientQuotasResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.entries.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl AlterClientQuotasResponseEntries0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.entity.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl AlterClientQuotasResponseEntriesEntity0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

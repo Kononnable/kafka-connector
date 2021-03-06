@@ -315,8 +315,8 @@ impl From<i16> for ApiError {
 }
 
 impl ApiError {
-    pub fn is_retriable(value: ApiError) -> bool {
-        match value {
+    pub fn is_retriable(self) -> bool {
+        match self {
             ApiError::CorruptMessage
             | ApiError::UnknownTopicOrPartition
             | ApiError::LeaderNotAvailable

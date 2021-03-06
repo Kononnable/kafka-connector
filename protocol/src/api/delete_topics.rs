@@ -78,16 +78,6 @@ pub struct DeleteTopicsResponseResponses0 {
 
 impl DeleteTopicsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.responses.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DeleteTopicsResponseResponses0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

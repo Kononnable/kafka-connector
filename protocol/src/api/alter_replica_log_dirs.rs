@@ -89,26 +89,6 @@ pub struct AlterReplicaLogDirsResponseResultsPartitions0 {
 
 impl AlterReplicaLogDirsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.results.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl AlterReplicaLogDirsResponseResults0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partitions.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl AlterReplicaLogDirsResponseResultsPartitions0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

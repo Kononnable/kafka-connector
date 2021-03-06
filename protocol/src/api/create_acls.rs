@@ -93,16 +93,6 @@ pub struct CreateAclsResponseResults0 {
 
 impl CreateAclsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.results.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl CreateAclsResponseResults0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

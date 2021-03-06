@@ -134,28 +134,6 @@ pub struct CreateTopicsResponseTopicsConfigs0 {
 
 impl CreateTopicsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.topics.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl CreateTopicsResponseTopics0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        if let Some(vec) = self.configs.as_ref() {
-            for item in vec {
-                if let Some(x) = item.get_first_error() {
-                    return Some(x);
-                };
-            }
-        }
-        None
-    }
-}
-impl CreateTopicsResponseTopicsConfigs0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

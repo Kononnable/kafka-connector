@@ -106,26 +106,9 @@ pub struct DescribeDelegationTokenResponseTokensRenewers0 {
 
 impl DescribeDelegationTokenResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.tokens.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
         }
-        None
-    }
-}
-impl DescribeDelegationTokenResponseTokens0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.renewers.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DescribeDelegationTokenResponseTokensRenewers0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

@@ -112,38 +112,6 @@ pub struct ProduceResponseResponsesPartitionResponsesRecordErrors0 {
 
 impl ProduceResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.responses.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl ProduceResponseResponses0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partition_responses.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl ProduceResponseResponsesPartitionResponses0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        if let Some(vec) = self.record_errors.as_ref() {
-            for item in vec {
-                if let Some(x) = item.get_first_error() {
-                    return Some(x);
-                };
-            }
-        }
-        None
-    }
-}
-impl ProduceResponseResponsesPartitionResponsesRecordErrors0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

@@ -83,16 +83,9 @@ pub struct StopReplicaResponsePartitionErrors0 {
 
 impl StopReplicaResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partition_errors.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
         }
-        None
-    }
-}
-impl StopReplicaResponsePartitionErrors0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }
@@ -189,16 +182,9 @@ pub struct StopReplicaResponsePartitionErrors1 {
 
 impl StopReplicaResponse1 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partition_errors.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
         }
-        None
-    }
-}
-impl StopReplicaResponsePartitionErrors1 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }
@@ -304,16 +290,9 @@ pub struct StopReplicaResponsePartitionErrors2 {
 
 impl StopReplicaResponse2 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.partition_errors.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
         }
-        None
-    }
-}
-impl StopReplicaResponsePartitionErrors2 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

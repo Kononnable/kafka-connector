@@ -16,6 +16,8 @@ use kafka_connector_protocol::{
     ApiCall,
 };
 
+use crate::utils::is_api_error_retriable;
+
 use super::error::KafkaApiCallError;
 
 #[derive(Debug)]
@@ -144,9 +146,13 @@ impl BrokerClient {
         let mut response = self.run_api_call(&request, api_version).await;
         for _i in 0..=3 {
             // TODO: Extract to config value
-            if let Err(KafkaApiCallError::KafkaApiError(_)) = response {
-                tokio::time::sleep(Duration::from_millis(100)).await; // TODO: Extract to config value, gradually increase wait duration
-                response = self.run_api_call(&request, api_version).await;
+            if let Err(KafkaApiCallError::KafkaApiError(api_error)) = response {
+                if is_api_error_retriable(api_error) {
+                    tokio::time::sleep(Duration::from_millis(100)).await; // TODO: Extract to config value, gradually increase wait duration
+                    response = self.run_api_call(&request, api_version).await;
+                } else {
+                    break;
+                }
             } else {
                 break;
             }

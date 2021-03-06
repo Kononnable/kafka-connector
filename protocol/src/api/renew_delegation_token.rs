@@ -69,6 +69,9 @@ pub struct RenewDelegationTokenResponse0 {
 
 impl RenewDelegationTokenResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
+        }
         None
     }
 }

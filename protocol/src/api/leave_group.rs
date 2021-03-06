@@ -89,18 +89,9 @@ pub struct LeaveGroupResponseMembers0 {
 
 impl LeaveGroupResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        if let Some(vec) = self.members.as_ref() {
-            for item in vec {
-                if let Some(x) = item.get_first_error() {
-                    return Some(x);
-                };
-            }
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
         }
-        None
-    }
-}
-impl LeaveGroupResponseMembers0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }

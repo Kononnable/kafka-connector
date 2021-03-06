@@ -107,26 +107,9 @@ pub struct DescribeAclsResponseResourcesAcls0 {
 
 impl DescribeAclsResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.resources.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
+        if self.error_code != 0 {
+            return Some(self.error_code.into());
         }
-        None
-    }
-}
-impl DescribeAclsResponseResources0 {
-    fn get_first_error(&self) -> Option<ApiError> {
-        for item in self.acls.iter() {
-            if let Some(x) = item.get_first_error() {
-                return Some(x);
-            };
-        }
-        None
-    }
-}
-impl DescribeAclsResponseResourcesAcls0 {
-    fn get_first_error(&self) -> Option<ApiError> {
         None
     }
 }
