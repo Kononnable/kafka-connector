@@ -6,6 +6,4 @@ pub enum SendError {}
 
 #[non_exhaustive]
 #[derive(Debug, DeriveError)]
-pub enum ProducerCreateError {
-    
-}
+pub enum ProducerCreateError {}
