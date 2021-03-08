@@ -54,7 +54,7 @@ jobs:
           restore-keys: ${{ runner.os }}-cargo-build-target-${{ steps.get-date.outputs.date }}-
 
       - name: Clippy
-        run: find . | grep "\.rs$" | grep -v "\./target/" | xargs touch ; cargo clippy --locked --all-features -- -D warnings
+        run: find . | grep "\.rs$" | grep -v "\./target/" | xargs touch ; cargo clippy --all-features -- -D warnings
 
       - name: Fmt
         uses: actions-rs/cargo@v1
