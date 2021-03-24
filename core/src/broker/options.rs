@@ -1,7 +1,8 @@
-use derive_builder::Builder;
+use typed_builder::TypedBuilder;
 
-#[derive(Clone, Builder, Default, Debug)]
+#[derive(Clone, TypedBuilder, Default, Debug)]
 pub struct KafkaClientOptions {
+    pub client_id: String,
     // client.id
     // connections.max.idle.ms
     // metadata.max.age.ms

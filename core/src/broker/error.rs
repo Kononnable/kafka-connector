@@ -10,4 +10,6 @@ pub enum KafkaApiCallError {
     UnsupportedKafkaApiVersion { api: ApiNumbers, version: u16 },
     #[error("Kafka API call returned an error {0:?}")]
     KafkaApiError(#[from] ApiError),
+    #[error("Client is currently not connected to kafka broker")]
+    BrokerNotConnected(),
 }

@@ -1,12 +1,14 @@
-use std::vec;
+use std::{net::ToSocketAddrs, sync::Arc, vec};
 
-use kafka_connector::{broker::client::BrokerClient, protocol};
+use kafka_connector::{
+    broker::{options::KafkaClientOptions, Broker},
+    protocol,
+};
 use protocol::{
     api::{
         fetch::{FetchRequestTopics0, FetchRequestTopicsPartitions0},
         metadata::MetadataRequestTopics0,
         produce::{ProduceRequestTopicData0, ProduceRequestTopicDataData0},
-        ApiNumbers,
     },
     custom_types::{
         nullable_string::NullableString,
@@ -18,13 +20,19 @@ use protocol::{
     },
 };
 
-const BROKER: &str = "127.0.0.1:9092";
-
 #[tokio::main]
 pub async fn main() -> anyhow::Result<()> {
     env_logger::init();
 
-    let mut broker = BrokerClient::new(BROKER, "kafka-connector-test".to_owned()).await?;
+    let broker = "127.0.0.1:9092".to_socket_addrs().unwrap().next().unwrap();
+    let options = Arc::new(
+        KafkaClientOptions::builder()
+            .client_id("kafka-connector-test".to_owned())
+            .build(),
+    );
+
+    let mut broker = Broker::new(broker, options);
+    broker.connect().await?;
 
     let metadata_request = protocol::api::metadata::MetadataRequest {
         topics: vec![MetadataRequestTopics0 {
@@ -36,10 +44,10 @@ pub async fn main() -> anyhow::Result<()> {
         include_topic_authorized_operations: false,
         tag_buffer: TagBuffer {},
     };
-    let supported_version = broker
-        .supported_versions
-        .get(&(ApiNumbers::Metadata as u16));
-    println!("supported_versions {:?}", supported_version);
+    // let supported_version = broker
+    //     .supported_versions
+    //     .get(&(ApiNumbers::Metadata as u16));
+    // println!("supported_versions {:?}", supported_version);
     let metadata = broker.run_api_call(&metadata_request, Some(9)).await?;
     println!("{:#?}", metadata);
 
@@ -72,8 +80,8 @@ pub async fn main() -> anyhow::Result<()> {
     };
     println!("{:#?}", fetch_request);
 
-    let supported_version = broker.supported_versions.get(&(ApiNumbers::Fetch as u16));
-    println!("supported_versions {:?}", supported_version);
+    // let supported_version = broker.supported_versions.get(&(ApiNumbers::Fetch as u16));
+    // println!("supported_versions {:?}", supported_version);
     let fetch = broker.run_api_call(&fetch_request, Some(4)).await?;
     println!("{:#?}", fetch);
 
@@ -110,8 +118,8 @@ pub async fn main() -> anyhow::Result<()> {
             }],
         }],
     };
-    let supported_version = broker.supported_versions.get(&(ApiNumbers::Produce as u16));
-    println!("supported_versions {:?}", supported_version);
+    // let supported_version = broker.supported_versions.get(&(ApiNumbers::Produce as u16));
+    // println!("supported_versions {:?}", supported_version);
     let produce = broker.run_api_call(&produce_request, Some(4)).await?;
     println!("{:#?}", produce);
 
