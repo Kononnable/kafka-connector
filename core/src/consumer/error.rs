@@ -13,4 +13,4 @@ pub enum SubscribeError {}
 
 #[non_exhaustive]
 #[derive(Debug, DeriveError)]
-pub enum AckError {}
+pub enum ConfirmError {}

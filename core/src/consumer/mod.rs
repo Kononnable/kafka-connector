@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use self::{
-    error::{AckError, MessageError, SubscribeError},
+    error::{ConfirmError, MessageError, SubscribeError},
     options::ConsumerOptions,
 };
 
@@ -54,7 +54,7 @@ pub struct Message {
     pub headers: HashMap<String, Vec<u8>>,
 }
 impl Message {
-    pub fn ack(&self) -> Result<(), AckError> {
+    pub fn confirm(&self) -> Result<(), ConfirmError> {
         todo!()
     }
 }

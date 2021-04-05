@@ -154,6 +154,8 @@ impl Broker {
         }
         Ok(())
     }
+
+    /// Run api call with automatic retry on errors on which message can just be resend
     pub async fn run_api_call_with_retry<T>(
         &mut self,
         request: T,
