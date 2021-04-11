@@ -5,14 +5,19 @@ use std::{
     cmp::{max, min},
     collections::HashMap,
     net::SocketAddr,
-    sync::Arc,
+    sync::{Arc, Mutex},
     time::Duration,
+    u8,
 };
 
 use bytes::{Bytes, BytesMut};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt},
-    net::TcpStream,
+    net::{
+        tcp::{OwnedReadHalf, OwnedWriteHalf},
+        TcpStream,
+    },
+    sync::oneshot,
 };
 
 use kafka_connector_protocol::{
@@ -20,19 +25,27 @@ use kafka_connector_protocol::{
     api_error::ApiError,
     ApiCall,
 };
+use vec_map::VecMap;
 
 use crate::utils::is_api_error_retriable;
 
 use self::{error::KafkaApiCallError, options::KafkaClientOptions};
 
 #[derive(Debug)]
+pub struct Connection {
+    active_requests: Arc<std::sync::Mutex<VecMap<oneshot::Sender<Vec<u8>>>>>,
+    socket_writer: OwnedWriteHalf,
+    connection_closed_receiver: oneshot::Receiver<()>,
+    last_correlation: i32,
+}
+
+#[derive(Debug)]
 pub struct Broker {
     addr: SocketAddr,
-    connection: Option<TcpStream>,
-    last_correlation: i32,
     supported_versions: HashMap<u16, (u16, u16)>, // TODO: Change later(?)
     send_buffer: BytesMut,
     options: Arc<KafkaClientOptions>,
+    connection: Option<Connection>,
 }
 
 impl Broker {
@@ -40,23 +53,105 @@ impl Broker {
         Broker {
             addr,
             supported_versions: HashMap::new(),
-            connection: None,
-            last_correlation: 0,
             options,
             send_buffer: BytesMut::with_capacity(4096), // TODO: Change size(?), change with capacity so it can grow
+            connection: None,
         }
     }
 
-    pub fn is_connected(&self) -> bool {
-        self.connection.is_some()
+    pub fn is_connected(&mut self) -> bool {
+        if let Some(connection) = &mut self.connection {
+            if connection.connection_closed_receiver.try_recv().is_ok() {
+                self.connection = None;
+                return false;
+            }
+            return true;
+        }
+        false
+    }
+
+    pub fn disconnect(&mut self) {
+        // TODO: is custom logic necessary? e.g. letting know group controller for consumer
+        if !self.is_connected() {
+            return;
+        }
+        self.connection.take();
     }
 
     pub async fn connect(&mut self) -> Result<(), KafkaApiCallError> {
-        self.supported_versions = HashMap::new();
         let connection = TcpStream::connect(self.addr).await?;
+        let (read_half, write_half) = connection.into_split();
+        let (connection_closed_sender, connection_closed_receiver) = oneshot::channel::<()>();
+        let active_requests = Arc::new(Mutex::new(VecMap::new()));
+        tokio::spawn(Broker::listen_loop(
+            read_half,
+            connection_closed_sender,
+            active_requests.clone(),
+        ));
+        let connection = Connection {
+            active_requests,
+            connection_closed_receiver,
+            last_correlation: 0,
+            socket_writer: write_half,
+        };
         self.connection = Some(connection);
+
         self.get_supported_api_versions().await?;
+
         Ok(())
+    }
+
+    async fn listen_loop(
+        mut read_half: OwnedReadHalf,
+        connection_closed_sender: oneshot::Sender<()>,
+        active_requests: Arc<std::sync::Mutex<VecMap<oneshot::Sender<Vec<u8>>>>>,
+    ) {
+        // TODO: Remove unwraps
+        loop {
+            let mut size: [u8; 4] = [0, 0, 0, 0];
+            if let Err(err) = read_half.read_exact(&mut size).await {
+                match err.kind() {
+                    std::io::ErrorKind::UnexpectedEof => {
+                        log::debug!("Broker connection closed");
+                        break;
+                    }
+                    _ => {
+                        log::error!(
+                            "Unknown error while communicating with kafka broker {:?}",
+                            err
+                        );
+                        break;
+                    }
+                }
+            }
+            let cap = i32::from_be_bytes(size);
+            let mut buf2 = vec![0; cap as usize];
+            if let Err(err) = read_half.read_exact(&mut buf2).await {
+                log::error!(
+                    "Unknown error while communicating with kafka broker {:?}",
+                    err
+                );
+                break;
+            }
+            log::trace!("Received bytes: {:?}", buf2);
+
+            let correlation_id = i32::from_be_bytes([buf2[0], buf2[1], buf2[2], buf2[3]]);
+            log::trace!("Correlation id: {}", correlation_id);
+            {
+                let mut guard = active_requests.lock().unwrap();
+                let entry = (*guard).remove(correlation_id as usize);
+                let channel = entry.unwrap();
+
+                channel.send(buf2).unwrap();
+            }
+        }
+        if connection_closed_sender.send(()).is_err() {
+            // No need to do anything broker.connection is already dropped
+        };
+
+        // TODO: make it as blocked somehow(so no new requests are inserted)?
+        let mut guard = active_requests.lock().unwrap();
+        guard.clear();
     }
 
     pub async fn run_api_call<T>(
@@ -67,10 +162,6 @@ impl Broker {
     where
         T: ApiCall,
     {
-        let connection = self
-            .connection
-            .as_mut()
-            .ok_or(KafkaApiCallError::BrokerNotConnected {})?;
         let api_version = if T::get_api_key() == ApiNumbers::ApiVersions {
             api_version.unwrap_or_default()
         } else {
@@ -109,31 +200,53 @@ impl Broker {
                 }
             }
         };
-
+        if !self.is_connected() {
+            return Err(KafkaApiCallError::BrokerNotConnected());
+        }
+        let correlation = {
+            let connection = self.connection.as_mut().unwrap();
+            connection.last_correlation += 1;
+            connection.last_correlation
+        };
         request.serialize(
             api_version,
             &mut self.send_buffer,
-            self.last_correlation + 1,
+            correlation,
             &self.options.client_id,
         );
-        let len = self.send_buffer.len() as i32;
-        connection.write_all(&len.to_be_bytes()).await.unwrap();
-        connection.write_all(&self.send_buffer).await.unwrap();
-        self.send_buffer.clear();
-        let mut size: [u8; 4] = [0, 0, 0, 0];
-        connection.read_exact(&mut size).await.unwrap();
-        let cap = i32::from_be_bytes(size);
-        let mut buf2 = vec![0; cap as usize];
-        connection.read_exact(&mut buf2).await.unwrap();
-        let mut buf2 = Bytes::from(buf2);
-        log::trace!("Received bytes: {:?}", buf2);
 
-        let (correlation, response) = T::deserialize_response(api_version, &mut buf2);
-        self.last_correlation = correlation;
+        let mut buf2 = self.send_request(correlation).await;
+        let (_correlation, response) = T::deserialize_response(api_version, &mut buf2);
         if let Some(err) = T::get_first_error(&response) {
             return Err(KafkaApiCallError::KafkaApiError(err));
         }
         Ok(response)
+    }
+
+    async fn send_request(&mut self, correlation: i32) -> Bytes {
+        let len = self.send_buffer.len() as i32;
+        // TODO: safely remove unwrap
+        let connection = self.connection.as_mut().unwrap();
+        connection
+            .socket_writer
+            .write_all(&len.to_be_bytes())
+            .await
+            .unwrap();
+        connection
+            .socket_writer
+            .write_all(&self.send_buffer)
+            .await
+            .unwrap();
+        self.send_buffer.clear();
+        let channel = oneshot::channel();
+        {
+            let mut guard = connection.active_requests.lock().unwrap();
+            if (*guard).insert(correlation as usize, channel.0).is_some() {
+                panic!("Sending second request with same correlation")
+            }
+        }
+        let response = channel.1.await.unwrap();
+        Bytes::from(response)
     }
 
     async fn get_supported_api_versions(&mut self) -> Result<(), KafkaApiCallError> {
