@@ -25,7 +25,6 @@ use kafka_connector_protocol::{
     api_error::ApiError,
     ApiCall,
 };
-use vec_map::VecMap;
 
 use crate::utils::is_api_error_retriable;
 
@@ -33,7 +32,7 @@ use self::{error::KafkaApiCallError, options::KafkaClientOptions};
 
 #[derive(Debug)]
 pub struct Connection {
-    active_requests: Arc<std::sync::Mutex<VecMap<oneshot::Sender<Vec<u8>>>>>,
+    active_requests: Arc<std::sync::Mutex<HashMap<i32, oneshot::Sender<Vec<u8>>>>>,
     socket_writer: OwnedWriteHalf,
     connection_closed_receiver: oneshot::Receiver<()>,
     last_correlation: i32,
@@ -82,7 +81,7 @@ impl Broker {
         let connection = TcpStream::connect(self.addr).await?;
         let (read_half, write_half) = connection.into_split();
         let (connection_closed_sender, connection_closed_receiver) = oneshot::channel::<()>();
-        let active_requests = Arc::new(Mutex::new(VecMap::new()));
+        let active_requests = Arc::new(Mutex::new(HashMap::new()));
         tokio::spawn(Broker::listen_loop(
             read_half,
             connection_closed_sender,
@@ -104,7 +103,7 @@ impl Broker {
     async fn listen_loop(
         mut read_half: OwnedReadHalf,
         connection_closed_sender: oneshot::Sender<()>,
-        active_requests: Arc<std::sync::Mutex<VecMap<oneshot::Sender<Vec<u8>>>>>,
+        active_requests: Arc<std::sync::Mutex<HashMap<i32, oneshot::Sender<Vec<u8>>>>>,
     ) {
         // TODO: Remove unwraps
         loop {
@@ -139,7 +138,7 @@ impl Broker {
             log::trace!("Correlation id: {}", correlation_id);
             {
                 let mut guard = active_requests.lock().unwrap();
-                let entry = (*guard).remove(correlation_id as usize);
+                let entry = (*guard).remove(&correlation_id);
                 let channel = entry.unwrap();
 
                 channel.send(buf2).unwrap();
@@ -241,7 +240,7 @@ impl Broker {
         let channel = oneshot::channel();
         {
             let mut guard = connection.active_requests.lock().unwrap();
-            if (*guard).insert(correlation as usize, channel.0).is_some() {
+            if (*guard).insert(correlation, channel.0).is_some() {
                 panic!("Sending second request with same correlation")
             }
         }
