@@ -20,7 +20,7 @@ use self::{
 
 #[derive(Debug)]
 pub struct Cluster {
-    metadata: RwLock<Metadata>,
+    metadata: Arc<RwLock<Metadata>>,
     options: Arc<KafkaClientOptions>,
     loop_signal_sender: UnboundedSender<ClusterLoopSignal>,
 }
@@ -45,7 +45,7 @@ impl Cluster {
 
         let futures = init_clients.iter_mut().map(|client| {
             Box::pin(async move {
-                client.connect().await?;
+                client.connect(true).await?;
                 let metadata_request = MetadataRequest {
                     ..Default::default()
                 };
@@ -71,7 +71,7 @@ impl Cluster {
             }
             future = select_all(remaining);
         };
-        let clients2 = metadata
+        let clients = metadata
             .brokers
             .iter()
             .filter_map(|broker| {
@@ -86,14 +86,9 @@ impl Cluster {
                     })
                     .ok()?
                     .next()?;
-                Some((Broker::new(addr, options.clone()), broker.node_id))
+                Some((broker.node_id, addr))
             })
-            .collect::<Vec<_>>();
-
-        let mut clients = HashMap::new();
-        for client in clients2 {
-            clients.insert(client.1, client.0);
-        }
+            .collect();
 
         let (loop_signal_sender, loop_signal_receiver) = unbounded_channel();
         let cluster = Arc::new(Cluster {

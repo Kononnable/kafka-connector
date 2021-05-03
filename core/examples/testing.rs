@@ -32,7 +32,7 @@ pub async fn main() -> anyhow::Result<()> {
     );
 
     let mut broker = Broker::new(broker, options);
-    broker.connect().await?;
+    broker.connect(true).await?;
 
     let metadata_request = protocol::api::metadata::MetadataRequest {
         topics: vec![MetadataRequestTopics0 {

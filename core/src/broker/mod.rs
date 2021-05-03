@@ -11,7 +11,10 @@ use std::{
 };
 
 use bytes::{Bytes, BytesMut};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    sync::RwLock,
+};
 use tokio::{
     net::{
         tcp::{OwnedReadHalf, OwnedWriteHalf},
@@ -21,12 +24,16 @@ use tokio::{
 };
 
 use kafka_connector_protocol::{
-    api::{api_versions::ApiVersionsRequest, ApiNumbers},
+    api::{
+        api_versions::ApiVersionsRequest,
+        metadata::{MetadataRequest0, MetadataResponse0},
+        ApiNumbers,
+    },
     api_error::ApiError,
     ApiCall,
 };
 
-use crate::utils::is_api_error_retriable;
+use crate::{cluster::metadata::Metadata, utils::is_api_error_retriable};
 
 use self::{error::KafkaApiCallError, options::KafkaClientOptions};
 
@@ -41,7 +48,7 @@ pub struct Connection {
 #[derive(Debug)]
 pub struct Broker {
     addr: SocketAddr,
-    supported_versions: HashMap<u16, (u16, u16)>, // TODO: Change later(?)
+    supported_versions: HashMap<u16, (u16, u16)>,
     send_buffer: BytesMut,
     options: Arc<KafkaClientOptions>,
     connection: Option<Connection>,
@@ -77,7 +84,28 @@ impl Broker {
         self.connection.take();
     }
 
-    pub async fn connect(&mut self) -> Result<(), KafkaApiCallError> {
+    pub async fn connect(
+        &mut self,
+        wait_for_initialization: bool,
+    ) -> Result<(), KafkaApiCallError> {
+        // TODO: Move wait_for_initialization?, connecting to one broker should not block others (or at least not always)
+        // TODO: What if future is dropped while connecting/after connection - check if handled correctly
+        // should be done in cluster loop, not here?
+        match wait_for_initialization {
+            true => {
+                self.initialize().await?;
+            }
+            false => {
+                todo!()
+                // tokio::spawn(async move {
+                //     self.initialize();
+                // });
+            }
+        }
+
+        Ok(())
+    }
+    async fn initialize(&mut self) -> Result<(), KafkaApiCallError> {
         let connection = TcpStream::connect(self.addr).await?;
         let (read_half, write_half) = connection.into_split();
         let (connection_closed_sender, connection_closed_receiver) = oneshot::channel::<()>();
@@ -96,7 +124,6 @@ impl Broker {
         self.connection = Some(connection);
 
         self.get_supported_api_versions().await?;
-
         Ok(())
     }
 
@@ -153,6 +180,9 @@ impl Broker {
         guard.clear();
     }
 
+    pub fn refresh_cluster_metadata(&self, metadata: Arc<RwLock<Metadata>>) {
+        todo!("Refresh metadata, send results to cluster loop, non-blocking")
+    }
     pub async fn run_api_call<T>(
         &mut self,
         request: &T,
@@ -304,14 +334,13 @@ mod tests {
     const BROKER: &str = "127.0.0.1:9092";
     const CLIENT_ID: &str = "kafka-connector-test";
 
-    // TODO:
     #[tokio::test]
     async fn should_fetch_api_versions_after_connect() -> Result<()> {
         let mut broker_client = Broker::new(
             BROKER.to_socket_addrs()?.next().unwrap(),
             Arc::new(get_test_client_options()),
         );
-        broker_client.connect().await?;
+        broker_client.connect(true).await?;
 
         assert!(!broker_client.supported_versions.is_empty());
         Ok(())
