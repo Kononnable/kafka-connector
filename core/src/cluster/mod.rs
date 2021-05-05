@@ -1,8 +1,8 @@
-mod cluster_loop;
+pub(crate) mod cluster_loop;
 pub mod error;
 pub mod metadata;
 
-use std::{collections::HashMap, net::ToSocketAddrs, sync::Arc};
+use std::{net::ToSocketAddrs, sync::Arc};
 
 use futures_util::future::select_all;
 use kafka_connector_protocol::api::metadata::{MetadataRequest, MetadataResponse0};
@@ -38,14 +38,11 @@ impl Cluster {
             return Err(ClusterClientCreationError::NoClusterAddressFound {});
         }
         let options = Arc::new(options);
-        let mut init_clients = addresses
-            .into_iter()
-            .map(|addr| Broker::new(addr, options.clone()))
-            .collect::<Vec<_>>();
 
-        let futures = init_clients.iter_mut().map(|client| {
+        let futures = addresses.into_iter().map(|addr| {
+            let options = options.clone();
             Box::pin(async move {
-                client.connect(true).await?;
+                let mut client = Broker::new_wait(addr, options.clone()).await?;
                 let metadata_request = MetadataRequest {
                     ..Default::default()
                 };

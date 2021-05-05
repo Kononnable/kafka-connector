@@ -13,7 +13,7 @@ use std::{
 use bytes::{Bytes, BytesMut};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
-    sync::RwLock,
+    sync::{mpsc::UnboundedSender, RwLock},
 };
 use tokio::{
     net::{
@@ -26,14 +26,21 @@ use tokio::{
 use kafka_connector_protocol::{
     api::{
         api_versions::ApiVersionsRequest,
-        metadata::{MetadataRequest0, MetadataResponse0},
+        metadata::{MetadataRequest, MetadataRequestTopics0},
         ApiNumbers,
     },
     api_error::ApiError,
+    custom_types::tag_buffer::TagBuffer,
     ApiCall,
 };
 
-use crate::{cluster::metadata::Metadata, utils::is_api_error_retriable};
+use crate::{
+    cluster::{
+        cluster_loop::ClusterLoopSignal,
+        metadata::{Metadata, PartitionMetadata, TopicMetadata},
+    },
+    utils::is_api_error_retriable,
+};
 
 use self::{error::KafkaApiCallError, options::KafkaClientOptions};
 
@@ -51,62 +58,15 @@ pub struct Broker {
     supported_versions: HashMap<u16, (u16, u16)>,
     send_buffer: BytesMut,
     options: Arc<KafkaClientOptions>,
-    connection: Option<Connection>,
+    connection: Connection,
 }
 
 impl Broker {
-    pub fn new(addr: SocketAddr, options: Arc<KafkaClientOptions>) -> Broker {
-        Broker {
-            addr,
-            supported_versions: HashMap::new(),
-            options,
-            send_buffer: BytesMut::with_capacity(4096), // TODO: Change size(?), change with capacity so it can grow
-            connection: None,
-        }
-    }
-
-    pub fn is_connected(&mut self) -> bool {
-        if let Some(connection) = &mut self.connection {
-            if connection.connection_closed_receiver.try_recv().is_ok() {
-                self.connection = None;
-                return false;
-            }
-            return true;
-        }
-        false
-    }
-
-    pub fn disconnect(&mut self) {
-        // TODO: is custom logic necessary? e.g. letting know group controller for consumer
-        if !self.is_connected() {
-            return;
-        }
-        self.connection.take();
-    }
-
-    pub async fn connect(
-        &mut self,
-        wait_for_initialization: bool,
-    ) -> Result<(), KafkaApiCallError> {
-        // TODO: Move wait_for_initialization?, connecting to one broker should not block others (or at least not always)
-        // TODO: What if future is dropped while connecting/after connection - check if handled correctly
-        // should be done in cluster loop, not here?
-        match wait_for_initialization {
-            true => {
-                self.initialize().await?;
-            }
-            false => {
-                todo!()
-                // tokio::spawn(async move {
-                //     self.initialize();
-                // });
-            }
-        }
-
-        Ok(())
-    }
-    async fn initialize(&mut self) -> Result<(), KafkaApiCallError> {
-        let connection = TcpStream::connect(self.addr).await?;
+    pub async fn new_wait(
+        addr: SocketAddr,
+        options: Arc<KafkaClientOptions>,
+    ) -> Result<Broker, KafkaApiCallError> {
+        let connection = TcpStream::connect(addr).await?;
         let (read_half, write_half) = connection.into_split();
         let (connection_closed_sender, connection_closed_receiver) = oneshot::channel::<()>();
         let active_requests = Arc::new(Mutex::new(HashMap::new()));
@@ -121,10 +81,39 @@ impl Broker {
             last_correlation: 0,
             socket_writer: write_half,
         };
-        self.connection = Some(connection);
 
-        self.get_supported_api_versions().await?;
-        Ok(())
+        let mut broker = Broker {
+            addr,
+            supported_versions: HashMap::new(),
+            options,
+            send_buffer: BytesMut::with_capacity(4096), // TODO: Change size(?), change with capacity so it can grow
+            connection,
+        };
+        broker.get_supported_api_versions().await?;
+        Ok(broker)
+    }
+    pub(crate) fn new_no_wait(
+        addr: SocketAddr,
+        options: Arc<KafkaClientOptions>,
+        sender: UnboundedSender<ClusterLoopSignal>,
+        broker_id: i32,
+    ) {
+        // TODO: What if future is dropped while connecting/after connection - check if handled correctly
+        tokio::spawn(async move {
+            let result = Broker::new_wait(addr, options).await;
+            match result {
+                Ok(broker) => {
+                    sender
+                        .send(ClusterLoopSignal::BrokerConnected(broker_id, broker))
+                        .unwrap(); // Cluster loop dropped before broker drop
+                }
+                Err(_e) => {
+                    sender
+                        .send(ClusterLoopSignal::BrokerDisconnected(broker_id))
+                        .unwrap(); // Cluster loop dropped before broker drop
+                }
+            }
+        });
     }
 
     async fn listen_loop(
@@ -180,8 +169,67 @@ impl Broker {
         guard.clear();
     }
 
-    pub fn refresh_cluster_metadata(&self, metadata: Arc<RwLock<Metadata>>) {
-        todo!("Refresh metadata, send results to cluster loop, non-blocking")
+    pub(crate) async fn refresh_cluster_metadata(
+        &mut self,
+        metadata: Arc<RwLock<Metadata>>,
+        sender: UnboundedSender<ClusterLoopSignal>,
+    ) {
+        let topics = {
+            let metadata = metadata.read().await;
+            metadata
+                .topics
+                .keys()
+                .map(|x| MetadataRequestTopics0 {
+                    name: x.clone(),
+                    tag_buffer: TagBuffer {},
+                })
+                .collect()
+        };
+        let request = MetadataRequest {
+            topics,
+            allow_auto_topic_creation: false,
+            include_cluster_authorized_operations: false,
+            include_topic_authorized_operations: false,
+            tag_buffer: TagBuffer {},
+        };
+        let response = self.run_api_call_with_retry(request, None).await.unwrap(); // TODO: remove unwrap
+        let brokers = response
+            .brokers
+            .into_iter()
+            .map(|x| (x.node_id, (x.host, x.port)))
+            .collect();
+        let topics = response
+            .topics
+            .into_iter()
+            .map(|topic| {
+                (
+                    topic.name,
+                    TopicMetadata {
+                        is_internal: topic.is_internal.unwrap_or_default(),
+                        partitions: topic
+                            .partitions
+                            .into_iter()
+                            .map(|topic_partition| {
+                                (
+                                    topic_partition.partition_index,
+                                    PartitionMetadata {
+                                        leader_id: topic_partition.leader_id,
+                                        leader_epoch: topic_partition.leader_epoch,
+                                        replica_nodes: topic_partition.replica_nodes,
+                                        isr_nodes: topic_partition.isr_nodes,
+                                        offline_replicas: topic_partition.offline_replicas,
+                                    },
+                                )
+                            })
+                            .collect(),
+                    },
+                )
+            })
+            .collect();
+        let metadata = Metadata { brokers, topics };
+        sender
+            .send(ClusterLoopSignal::RefreshMetadataResponse(metadata))
+            .unwrap(); // Cluster loop dropped before broker drop
     }
     pub async fn run_api_call<T>(
         &mut self,
@@ -229,13 +277,9 @@ impl Broker {
                 }
             }
         };
-        if !self.is_connected() {
-            return Err(KafkaApiCallError::BrokerNotConnected());
-        }
         let correlation = {
-            let connection = self.connection.as_mut().unwrap();
-            connection.last_correlation += 1;
-            connection.last_correlation
+            self.connection.last_correlation += 1;
+            self.connection.last_correlation
         };
         request.serialize(
             api_version,
@@ -255,13 +299,12 @@ impl Broker {
     async fn send_request(&mut self, correlation: i32) -> Bytes {
         let len = self.send_buffer.len() as i32;
         // TODO: safely remove unwrap
-        let connection = self.connection.as_mut().unwrap();
-        connection
+        self.connection
             .socket_writer
             .write_all(&len.to_be_bytes())
             .await
             .unwrap();
-        connection
+        self.connection
             .socket_writer
             .write_all(&self.send_buffer)
             .await
@@ -269,7 +312,7 @@ impl Broker {
         self.send_buffer.clear();
         let channel = oneshot::channel();
         {
-            let mut guard = connection.active_requests.lock().unwrap();
+            let mut guard = self.connection.active_requests.lock().unwrap();
             if (*guard).insert(correlation, channel.0).is_some() {
                 panic!("Sending second request with same correlation")
             }
@@ -336,11 +379,11 @@ mod tests {
 
     #[tokio::test]
     async fn should_fetch_api_versions_after_connect() -> Result<()> {
-        let mut broker_client = Broker::new(
+        let broker_client = Broker::new_wait(
             BROKER.to_socket_addrs()?.next().unwrap(),
             Arc::new(get_test_client_options()),
-        );
-        broker_client.connect(true).await?;
+        )
+        .await?;
 
         assert!(!broker_client.supported_versions.is_empty());
         Ok(())

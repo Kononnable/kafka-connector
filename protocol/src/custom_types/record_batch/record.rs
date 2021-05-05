@@ -2,7 +2,6 @@ use crate::custom_types::zig_zag_vec::ZigZagVec;
 
 use super::header::Header;
 
-// TODO: Change to something more user-friendly
 #[derive(Debug, Default, Clone)]
 pub struct Record {
     pub attributes: i8,
