@@ -1,4 +1,9 @@
-use std::{collections::HashMap, net::SocketAddr, sync::Arc, time::Duration};
+use std::{
+    collections::HashMap,
+    net::{SocketAddr, ToSocketAddrs},
+    sync::Arc,
+    time::Duration,
+};
 
 use crate::broker::Broker;
 use log::trace;
@@ -96,25 +101,41 @@ pub(super) async fn cluster_loop(
             ClusterLoopSignal::RefreshMetadataResponse(new_metadata) => {
                 let mut metadata = cluster.metadata.write().await;
 
+                let mut brokers_to_delete = vec![];
                 // Removed
                 for broker_id in metadata.brokers.keys() {
                     if !new_metadata.brokers.contains_key(broker_id) {
-                        todo!()
+                        brokers_to_delete.push(*broker_id);
                     }
                 }
+                for broker_id in brokers_to_delete {
+                    metadata.brokers.remove(&broker_id);
+                }
+
                 // Changed and added
                 for broker in new_metadata.brokers {
                     match metadata.brokers.get(&broker.0) {
                         Some(old) => {
                             if old != &broker.1 {
                                 // Change
-                                todo!()
+                                panic!("Broker metadata change while client is active");
                             }
                         }
                         None => {
+                            let addr = (broker.1 .0.as_str(), broker.1 .1 as u16)
+                                .to_socket_addrs()
+                                .unwrap()
+                                .next()
+                                .unwrap(); // TODO: Remove unwraps
+
                             metadata.brokers.insert(broker.0, broker.1);
-                            // Add
-                            todo!()
+                            brokers.insert(broker.0, BrokerState::Initializing { addr });
+                            Broker::new_no_wait(
+                                addr,
+                                cluster.options.clone(),
+                                cluster.loop_signal_sender.clone(),
+                                broker.0,
+                            );
                         }
                     }
                 }
