@@ -7,7 +7,7 @@ use super::zig_zag_varint32::ZigZagVarInt32;
 
 #[derive(Debug, Default, Clone)]
 pub struct ZigZagString {
-    value: String,
+    pub value: String,
 }
 impl ToBytes for ZigZagString {
     fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool, version: u16) {

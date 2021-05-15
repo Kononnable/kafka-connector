@@ -1,4 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
+
+use crate::cluster::Cluster;
 
 use self::{
     error::{ConfirmError, MessageError, SubscribeError},
@@ -14,7 +16,7 @@ pub mod options;
 pub struct Consumer {}
 
 impl Consumer {
-    pub fn new(_options: ConsumerOptions) -> Self {
+    pub fn new(_cluster: Arc<Cluster>, _options: ConsumerOptions) -> Self {
         todo!()
     }
     pub fn stream(

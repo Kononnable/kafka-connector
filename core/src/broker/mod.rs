@@ -121,6 +121,7 @@ impl Broker {
         connection_closed_sender: oneshot::Sender<()>,
         active_requests: Arc<std::sync::Mutex<HashMap<i32, oneshot::Sender<Vec<u8>>>>>,
     ) {
+        log::debug!("Broker listen_loop start");
         // TODO: Remove unwraps
         loop {
             let mut size: [u8; 4] = [0, 0, 0, 0];
@@ -167,6 +168,8 @@ impl Broker {
         // TODO: make it as blocked somehow(so no new requests are inserted)?
         let mut guard = active_requests.lock().unwrap();
         guard.clear();
+
+        log::debug!("Broker dropped");
     }
 
     pub(crate) async fn refresh_cluster_metadata(

@@ -2,7 +2,7 @@ pub(crate) mod cluster_loop;
 pub mod error;
 pub mod metadata;
 
-use std::{net::ToSocketAddrs, sync::Arc};
+use std::{collections::HashMap, net::ToSocketAddrs, sync::Arc};
 
 use futures_util::future::select_all;
 use kafka_connector_protocol::api::metadata::{MetadataRequest, MetadataResponse0};
@@ -15,21 +15,29 @@ use tokio::sync::{
 use crate::broker::{options::KafkaClientOptions, Broker};
 
 use self::{
-    cluster_loop::ClusterLoopSignal, error::ClusterClientCreationError, metadata::Metadata,
+    cluster_loop::{BrokerState, ClusterLoopSignal},
+    error::ClusterClientCreationError,
+    metadata::Metadata,
 };
 
 #[derive(Debug)]
+pub(crate) struct ClusterInner {
+    pub brokers: RwLock<HashMap<i32, BrokerState>>,
+    pub metadata: Arc<RwLock<Metadata>>,
+    pub options: Arc<KafkaClientOptions>,
+    pub loop_signal_sender: UnboundedSender<ClusterLoopSignal>,
+}
+
+#[derive(Debug)]
 pub struct Cluster {
-    metadata: Arc<RwLock<Metadata>>,
-    options: Arc<KafkaClientOptions>,
-    loop_signal_sender: UnboundedSender<ClusterLoopSignal>,
+    pub(crate) inner: Arc<ClusterInner>,
 }
 
 impl Cluster {
     pub async fn new(
         broker_addrs: impl ToSocketAddrs,
         options: KafkaClientOptions,
-    ) -> Result<Arc<Cluster>, ClusterClientCreationError> {
+    ) -> Result<Cluster, ClusterClientCreationError> {
         let addresses: Vec<_> = broker_addrs
             .to_socket_addrs()
             .map_err(ClusterClientCreationError::AddressRecognitionFailed)?
@@ -88,16 +96,19 @@ impl Cluster {
             .collect();
 
         let (loop_signal_sender, loop_signal_receiver) = unbounded_channel();
-        let cluster = Arc::new(Cluster {
-            metadata: Default::default(),
-            options,
-            loop_signal_sender,
-        });
+        let cluster = Cluster {
+            inner: Arc::new(ClusterInner {
+                metadata: Default::default(),
+                options,
+                loop_signal_sender,
+                brokers: Default::default(),
+            }),
+        };
 
         tokio::spawn(cluster_loop::cluster_loop(
             clients,
             loop_signal_receiver,
-            cluster.clone(),
+            cluster.inner.clone(),
         ));
 
         Ok(cluster)
@@ -107,7 +118,8 @@ impl Cluster {
 impl Drop for Cluster {
     fn drop(&mut self) {
         debug!("Cluster is being dropped, closing all kafka connections");
-        self.loop_signal_sender
+        self.inner
+            .loop_signal_sender
             .send(ClusterLoopSignal::Shutdown)
             .expect("Cluster loop should be alive.")
     }

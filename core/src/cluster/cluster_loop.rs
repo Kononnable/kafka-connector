@@ -10,7 +10,7 @@ use log::trace;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio_stream::{wrappers::UnboundedReceiverStream, StreamExt};
 
-use super::{metadata::Metadata, Cluster};
+use super::{metadata::Metadata, ClusterInner};
 
 #[derive(Debug)]
 pub(crate) enum ClusterLoopSignal {
@@ -27,7 +27,7 @@ pub(crate) enum ClusterLoopSignal {
 }
 
 #[derive(Debug)]
-enum BrokerState {
+pub(crate) enum BrokerState {
     Alive { broker: Broker, addr: SocketAddr },
     Initializing { addr: SocketAddr },
 }
@@ -35,22 +35,24 @@ enum BrokerState {
 pub(super) async fn cluster_loop(
     clients: HashMap<i32, SocketAddr>,
     loop_signal_receiver: UnboundedReceiver<ClusterLoopSignal>,
-    cluster: Arc<Cluster>,
+    cluster: Arc<ClusterInner>,
 ) {
-    let mut brokers: HashMap<_, _> = HashMap::new();
-    for client in clients {
-        brokers.insert(client.0, BrokerState::Initializing { addr: client.1 });
-        Broker::new_no_wait(
-            client.1,
-            cluster.options.clone(),
-            cluster.loop_signal_sender.clone(),
-            client.0,
-        );
+    {
+        let mut brokers = cluster.brokers.write().await;
+        for client in clients {
+            brokers.insert(client.0, BrokerState::Initializing { addr: client.1 });
+            Broker::new_no_wait(
+                client.1,
+                cluster.options.clone(),
+                cluster.loop_signal_sender.clone(),
+                client.0,
+            );
+        }
     }
 
     let metadata_refresh_stream =
         futures::stream::repeat_with(|| ClusterLoopSignal::RefreshMetadataRequest)
-            .throttle(Duration::from_secs(2)); // TODO: configurable?,  change value
+            .throttle(Duration::from_secs(180)); // TODO: configurable?,  change value
 
     let mut stream =
         Box::pin(metadata_refresh_stream.merge(UnboundedReceiverStream::new(loop_signal_receiver)));
@@ -58,6 +60,7 @@ pub(super) async fn cluster_loop(
     while let Some(signal) = stream.next().await {
         match signal {
             ClusterLoopSignal::BrokerConnected(broker_id, broker) => {
+                let mut brokers = cluster.brokers.write().await;
                 let old_state = brokers.remove(&broker_id).expect("Unknown broker id");
                 let new_state = if let BrokerState::Initializing { addr } = old_state {
                     BrokerState::Alive { addr, broker }
@@ -67,6 +70,7 @@ pub(super) async fn cluster_loop(
                 brokers.insert(broker_id, new_state);
             }
             ClusterLoopSignal::BrokerDisconnected(broker_id) => {
+                let mut brokers = cluster.brokers.write().await;
                 let old_state = brokers.remove(&broker_id).expect("Unknown broker id");
                 let new_state = if let BrokerState::Alive { addr, .. } = old_state {
                     Broker::new_no_wait(
@@ -85,6 +89,7 @@ pub(super) async fn cluster_loop(
                 // TODO: restart only when broker is not deleted(on metadata update)
             }
             ClusterLoopSignal::RefreshMetadataRequest => {
+                let mut brokers = cluster.brokers.write().await;
                 if let Some((_, BrokerState::Alive { broker, .. })) = brokers
                     .iter_mut()
                     .find(|broker| matches!(broker.1, BrokerState::Alive { .. }))
@@ -99,49 +104,59 @@ pub(super) async fn cluster_loop(
                 };
             }
             ClusterLoopSignal::RefreshMetadataResponse(new_metadata) => {
-                let mut metadata = cluster.metadata.write().await;
+                let mut brokers_to_start = HashMap::new();
+                {
+                    let mut metadata = cluster.metadata.write().await;
 
-                let mut brokers_to_delete = vec![];
-                // Removed
-                for broker_id in metadata.brokers.keys() {
-                    if !new_metadata.brokers.contains_key(broker_id) {
-                        brokers_to_delete.push(*broker_id);
+                    let mut brokers_to_delete = vec![];
+                    // Removed
+                    for broker_id in metadata.brokers.keys() {
+                        if !new_metadata.brokers.contains_key(broker_id) {
+                            brokers_to_delete.push(*broker_id);
+                        }
                     }
-                }
-                for broker_id in brokers_to_delete {
-                    metadata.brokers.remove(&broker_id);
-                }
+                    for broker_id in brokers_to_delete {
+                        metadata.brokers.remove(&broker_id);
+                    }
 
-                // Changed and added
-                for broker in new_metadata.brokers {
-                    match metadata.brokers.get(&broker.0) {
-                        Some(old) => {
-                            if old != &broker.1 {
-                                // Change
-                                panic!("Broker metadata change while client is active");
+                    // Changed and added
+                    for broker in new_metadata.brokers {
+                        match metadata.brokers.get(&broker.0) {
+                            Some(old) => {
+                                if old != &broker.1 {
+                                    // Change
+                                    panic!("Broker metadata change while client is active");
+                                }
+                            }
+                            None => {
+                                brokers_to_start.insert(broker.0, broker.1.clone());
+                                metadata.brokers.insert(broker.0, broker.1);
                             }
                         }
-                        None => {
-                            let addr = (broker.1 .0.as_str(), broker.1 .1 as u16)
-                                .to_socket_addrs()
-                                .unwrap()
-                                .next()
-                                .unwrap(); // TODO: Remove unwraps
+                    }
 
-                            metadata.brokers.insert(broker.0, broker.1);
-                            brokers.insert(broker.0, BrokerState::Initializing { addr });
-                            Broker::new_no_wait(
-                                addr,
-                                cluster.options.clone(),
-                                cluster.loop_signal_sender.clone(),
-                                broker.0,
-                            );
-                        }
+                    for topic in new_metadata.topics {
+                        metadata.topics.insert(topic.0, topic.1);
                     }
                 }
+                {
+                    let mut brokers = cluster.brokers.write().await;
 
-                for topic in new_metadata.topics {
-                    metadata.topics.insert(topic.0, topic.1);
+                    for broker in brokers_to_start {
+                        let addr = (broker.1 .0.as_str(), broker.1 .1 as u16)
+                            .to_socket_addrs()
+                            .unwrap()
+                            .next()
+                            .unwrap(); // TODO: Remove unwraps
+
+                        brokers.insert(broker.0, BrokerState::Initializing { addr });
+                        Broker::new_no_wait(
+                            addr,
+                            cluster.options.clone(),
+                            cluster.loop_signal_sender.clone(),
+                            broker.0,
+                        );
+                    }
                 }
             }
             ClusterLoopSignal::Shutdown => {
@@ -149,6 +164,7 @@ pub(super) async fn cluster_loop(
             }
         }
     }
-    // TODO: close broker connections
+    let mut brokers = cluster.brokers.write().await;
+    brokers.clear();
     trace!("Cluster loop close")
 }
