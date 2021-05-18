@@ -52,3 +52,30 @@ impl From<String> for NullableString {
         NullableString::Some(value)
     }
 }
+
+impl From<NullableString> for Option<String> {
+    fn from(value: NullableString) -> Option<String> {
+        match value {
+            NullableString::Some(v) => Some(v),
+            NullableString::None => None,
+        }
+    }
+}
+
+impl From<Option<NullableString>> for NullableString {
+    fn from(value: Option<NullableString>) -> NullableString {
+        match value {
+            Option::Some(v) => v,
+            Option::None => NullableString::None,
+        }
+    }
+}
+
+impl From<Option<String>> for NullableString {
+    fn from(value: Option<String>) -> NullableString {
+        match value {
+            Some(value) => NullableString::Some(value),
+            None => NullableString::None,
+        }
+    }
+}

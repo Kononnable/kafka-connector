@@ -5,14 +5,17 @@ pub mod metadata;
 use std::{collections::HashMap, net::ToSocketAddrs, sync::Arc};
 
 use futures_util::future::select_all;
-use kafka_connector_protocol::api::metadata::{MetadataRequest, MetadataResponse0};
+use kafka_connector_protocol::{
+    api::metadata::{MetadataRequest, MetadataResponse0},
+    ApiCall,
+};
 use log::{debug, warn};
 use tokio::sync::{
     mpsc::{unbounded_channel, UnboundedSender},
     RwLock,
 };
 
-use crate::broker::{options::KafkaClientOptions, Broker};
+use crate::broker::{error::KafkaApiCallError, options::KafkaClientOptions, Broker};
 
 use self::{
     cluster_loop::{BrokerState, ClusterLoopSignal},
@@ -112,6 +115,29 @@ impl Cluster {
         ));
 
         Ok(cluster)
+    }
+    pub async fn send_request_to_any_broker<T>(
+        &self,
+        request: T,
+        api_version: Option<u16>,
+    ) -> Result<T::Response, KafkaApiCallError>
+    where
+        T: ApiCall,
+    {
+        // TODO: Rename
+        // TODO: remove unwraps
+        // TODO: What if no broker connected yet
+        let mut brokers = self.inner.brokers.write().await;
+        if let BrokerState::Alive { addr, broker } = brokers
+            .iter_mut()
+            .find(|broker| matches!(broker.1, BrokerState::Alive { .. }))
+            .unwrap()
+            .1
+        {
+            broker.run_api_call_with_retry(request, api_version).await
+        } else {
+            todo!()
+        }
     }
 }
 

@@ -47,7 +47,10 @@ pub async fn main() -> anyhow::Result<()> {
     //     .supported_versions
     //     .get(&(ApiNumbers::Metadata as u16));
     // println!("supported_versions {:?}", supported_version);
-    let metadata = broker.run_api_call(&metadata_request, Some(9)).await?;
+    let metadata = broker
+        .run_api_call(&metadata_request, Some(9))
+        .await
+        .map_err(|x| x.0)?;
     println!("{:#?}", metadata);
 
     let partition = FetchRequestTopicsPartitions0 {
@@ -81,7 +84,10 @@ pub async fn main() -> anyhow::Result<()> {
 
     // let supported_version = broker.supported_versions.get(&(ApiNumbers::Fetch as u16));
     // println!("supported_versions {:?}", supported_version);
-    let fetch = broker.run_api_call(&fetch_request, Some(4)).await?;
+    let fetch = broker
+        .run_api_call(&fetch_request, Some(4))
+        .await
+        .map_err(|x| x.0)?;
     println!("{:#?}", fetch);
 
     let records = RecordBatchWithSize {
@@ -119,7 +125,10 @@ pub async fn main() -> anyhow::Result<()> {
     };
     // let supported_version = broker.supported_versions.get(&(ApiNumbers::Produce as u16));
     // println!("supported_versions {:?}", supported_version);
-    let produce = broker.run_api_call(&produce_request, Some(4)).await?;
+    let produce = broker
+        .run_api_call(&produce_request, Some(4))
+        .await
+        .map_err(|x| x.0)?;
     println!("{:#?}", produce);
 
     Ok(())

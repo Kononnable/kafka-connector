@@ -26,6 +26,7 @@ pub(crate) enum ClusterLoopSignal {
     Shutdown,
 }
 
+// TODO: Use typestate pattern?
 #[derive(Debug)]
 pub(crate) enum BrokerState {
     Alive { broker: Broker, addr: SocketAddr },
@@ -164,6 +165,7 @@ pub(super) async fn cluster_loop(
             }
         }
     }
+    // TODO: Should first try to gracefully close all producer/consumers?
     let mut brokers = cluster.brokers.write().await;
     brokers.clear();
     trace!("Cluster loop close")

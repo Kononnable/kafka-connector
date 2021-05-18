@@ -11,6 +11,7 @@ use std::{
 };
 
 use bytes::{Bytes, BytesMut};
+use futures::TryFutureExt;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     sync::{mpsc::UnboundedSender, RwLock},
@@ -149,7 +150,7 @@ impl Broker {
                 );
                 break;
             }
-            log::trace!("Received bytes: {:?}", buf2);
+            log::trace!("Received message");
 
             let correlation_id = i32::from_be_bytes([buf2[0], buf2[1], buf2[2], buf2[3]]);
             log::trace!("Correlation id: {}", correlation_id);
@@ -238,7 +239,7 @@ impl Broker {
         &mut self,
         request: &T,
         api_version: Option<u16>,
-    ) -> Result<T::Response, KafkaApiCallError>
+    ) -> Result<T::Response, (KafkaApiCallError, T::Response)>
     where
         T: ApiCall,
     {
@@ -248,9 +249,14 @@ impl Broker {
             let supported_versions = self
                 .supported_versions
                 .get(&(T::get_api_key() as u16))
-                .ok_or_else(|| KafkaApiCallError::UnsupportedKafkaApiVersion {
-                    api: T::get_api_key(),
-                    version: 0,
+                .ok_or_else(|| {
+                    (
+                        KafkaApiCallError::UnsupportedKafkaApiVersion {
+                            api: T::get_api_key(),
+                            version: 0,
+                        },
+                        T::Response::default(),
+                    )
                 })?;
             match api_version {
                 Some(v) => {
@@ -261,20 +267,26 @@ impl Broker {
                     {
                         v
                     } else {
-                        return Err(KafkaApiCallError::UnsupportedKafkaApiVersion {
-                            api: T::get_api_key(),
-                            version: v,
-                        });
+                        return Err((
+                            KafkaApiCallError::UnsupportedKafkaApiVersion {
+                                api: T::get_api_key(),
+                                version: v,
+                            },
+                            T::Response::default(),
+                        ));
                     }
                 }
                 None => {
                     let min_supported = max(supported_versions.0, T::get_min_supported_version());
                     let max_supported = min(supported_versions.1, T::get_max_supported_version());
                     if max_supported < min_supported {
-                        return Err(KafkaApiCallError::UnsupportedKafkaApiVersion {
-                            api: T::get_api_key(),
-                            version: T::get_min_supported_version(),
-                        });
+                        return Err((
+                            KafkaApiCallError::UnsupportedKafkaApiVersion {
+                                api: T::get_api_key(),
+                                version: T::get_min_supported_version(),
+                            },
+                            T::Response::default(),
+                        ));
                     }
                     max_supported
                 }
@@ -294,7 +306,7 @@ impl Broker {
         let mut buf2 = self.send_request(correlation).await;
         let (_correlation, response) = T::deserialize_response(api_version, &mut buf2);
         if let Some(err) = T::get_first_error(&response) {
-            return Err(KafkaApiCallError::KafkaApiError(err));
+            return Err((KafkaApiCallError::KafkaApiError(err), response));
         }
         Ok(response)
     }
@@ -326,13 +338,10 @@ impl Broker {
 
     async fn get_supported_api_versions(&mut self) -> Result<(), KafkaApiCallError> {
         let response = self
-            .run_api_call(&ApiVersionsRequest::default(), Some(0))
-            .await?;
-        if response.error_code != 0 {
-            return Err(KafkaApiCallError::KafkaApiError(ApiError::from(
-                response.error_code,
-            )));
-        }
+            .run_api_call(&ApiVersionsRequest::default(), Some(0)) // TODO: Change to _with_retry ?
+            .await
+            .map_err(|x| x.0)?;
+
         self.supported_versions.clear();
         for api_key in response.api_keys {
             self.supported_versions.insert(
@@ -343,19 +352,19 @@ impl Broker {
         Ok(())
     }
 
-    /// Run api call with automatic retry on errors on which message can just be resend
-    pub async fn run_api_call_with_retry<T>(
+    // TODO: Change somehow
+    pub async fn run_api_call_with_retry_raw<T>(
         &mut self,
         request: T,
         api_version: Option<u16>,
-    ) -> Result<T::Response, KafkaApiCallError>
+    ) -> Result<T::Response, (KafkaApiCallError, T::Response)>
     where
         T: ApiCall,
     {
         let mut response = self.run_api_call(&request, api_version).await;
         for _i in 0..=3 {
             // TODO: Extract to config value
-            if let Err(KafkaApiCallError::KafkaApiError(api_error)) = response {
+            if let Err((KafkaApiCallError::KafkaApiError(api_error), _)) = response {
                 if is_api_error_retriable(api_error) {
                     tokio::time::sleep(Duration::from_millis(100)).await; // TODO: Extract to config value, gradually increase wait duration, logging
                     response = self.run_api_call(&request, api_version).await;
@@ -367,6 +376,19 @@ impl Broker {
             }
         }
         return response;
+    }
+    /// Run api call with automatic retry on errors on which message can just be resend
+    pub async fn run_api_call_with_retry<T>(
+        &mut self,
+        request: T,
+        api_version: Option<u16>,
+    ) -> Result<T::Response, KafkaApiCallError>
+    where
+        T: ApiCall,
+    {
+        self.run_api_call_with_retry_raw(request, api_version)
+            .map_err(|x| x.0)
+            .await
     }
 }
 

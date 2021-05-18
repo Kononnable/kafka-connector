@@ -51,3 +51,9 @@ impl FromBytes for ZigZagVec<u8> {
         Self { value }
     }
 }
+
+impl<T> From<ZigZagVec<T>> for Vec<T> {
+    fn from(value: ZigZagVec<T>) -> Vec<T> {
+        value.value
+    }
+}

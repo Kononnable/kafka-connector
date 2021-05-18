@@ -26,3 +26,9 @@ impl FromBytes for ZigZagString {
         Self { value }
     }
 }
+
+impl From<ZigZagString> for String {
+    fn from(value: ZigZagString) -> String {
+        value.value
+    }
+}

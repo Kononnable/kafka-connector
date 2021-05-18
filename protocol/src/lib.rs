@@ -9,7 +9,7 @@ pub mod from_bytes;
 pub mod to_bytes;
 
 pub trait ApiCall: Clone {
-    type Response;
+    type Response: Default;
 
     fn get_min_supported_version() -> u16;
     fn get_max_supported_version() -> u16;
