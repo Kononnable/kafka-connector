@@ -131,7 +131,7 @@ pub(super) async fn consumer_loop(
                             topics: vec![
                                 // TODO:
                                 FetchRequestTopics0 {
-                                    topic: "producer_test".to_owned(),
+                                    topic: options.topics.first().unwrap().clone(),
                                     partitions: vec![FetchRequestTopicsPartitions0 {
                                         partition: 0,
                                         current_leader_epoch: -1,

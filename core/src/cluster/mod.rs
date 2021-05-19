@@ -153,8 +153,18 @@ impl Drop for Cluster {
 
 #[cfg(test)]
 mod tests {
+    use std::time::Duration;
+
+    use crate::{
+        consumer::{self, options::ConsumerOptions},
+        producer::{self, options::ProducerOptions, record::ProducerRecord},
+    };
+
     use super::*;
     use anyhow::Result;
+    use log::trace;
+    use tokio::{pin, time::sleep};
+    use tokio_stream::StreamExt;
 
     const BROKER: &str = "127.0.0.1:9092";
     const CLIENT_ID: &str = "kafka-connector-test";
@@ -169,6 +179,46 @@ mod tests {
     async fn should_connect_to_kafka() -> Result<()> {
         env_logger::init();
         Cluster::new(BROKER, get_test_client_options()).await?;
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn should_produce_and_consume_single_message() -> Result<()> {
+        // TODO: Change to a proper tests
+        let cluster = Arc::new(Cluster::new(BROKER, get_test_client_options()).await?);
+
+        sleep(Duration::from_secs(2)).await;
+
+        let mut producer = producer::Producer::new(cluster.clone(), ProducerOptions {}).await;
+        let consumer = consumer::Consumer::new(
+            cluster,
+            ConsumerOptions {
+                group_id: "kafka-connector-test".to_owned(),
+                topics: vec!["kafka-connector-test".to_owned()],
+            },
+        )
+        .await;
+
+        sleep(Duration::from_secs(2)).await;
+
+        producer
+            .send(
+                ProducerRecord::builder()
+                    .topic("kafka-connector-test".to_owned())
+                    .payload(b"kafka-connector-test".to_vec())
+                    .build(),
+            )
+            .await;
+
+        sleep(Duration::from_secs(3)).await;
+
+        let stream = consumer.stream().await.unwrap();
+        pin!(stream);
+
+        trace!("a");
+        stream.try_next().await.unwrap();
+        trace!("b");
+
         Ok(())
     }
 }
