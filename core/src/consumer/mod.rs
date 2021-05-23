@@ -18,7 +18,7 @@ use kafka_connector_protocol::{
         find_coordinator::FindCoordinatorRequest,
         join_group::{JoinGroupRequest, JoinGroupRequestProtocols0},
     },
-    custom_types::{nullable_string::NullableString, tag_buffer::TagBuffer},
+    custom_types::nullable_string::NullableString,
 };
 use log::{debug, trace};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
@@ -141,11 +141,7 @@ impl Consumer {
                     )
                 })
                 .fold(HashMap::new(), |mut a, b| {
-                    if a.contains_key(&b.0) {
-                        a.get_mut(&b.0).unwrap().push(b.1);
-                    } else {
-                        a.insert(b.0, vec![b.1]);
-                    }
+                    a.entry(b.0).or_insert_with(Vec::new).push(b.1);
                     a
                 }),
         };
@@ -173,7 +169,10 @@ impl Consumer {
     pub async fn stream(
         mut self,
     ) -> Result<impl Stream<Item = Result<Message, MessageError>>, SubscribeError> {
-        self.loop_signal_sender.send(ConsumerLoopSignal::Fetch);
+        // TODO: unwrap
+        self.loop_signal_sender
+            .send(ConsumerLoopSignal::Fetch)
+            .unwrap();
         Ok(try_stream! {
             while let Some(message_batch) = self.message_receiver.recv().await {
                 for message in message_batch{

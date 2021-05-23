@@ -30,7 +30,6 @@ use kafka_connector_protocol::{
         metadata::{MetadataRequest, MetadataRequestTopics0},
         ApiNumbers,
     },
-    api_error::ApiError,
     custom_types::tag_buffer::TagBuffer,
     ApiCall,
 };
