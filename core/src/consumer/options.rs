@@ -13,6 +13,7 @@ pub struct ConsumerOptions {
     // fetch.max.wait.ms
     // fetch.min.bytes
     pub group_id: String,
+    // TODO: Allow some regexp, not only topic names
     pub topics: Vec<String>,
     // group.instance.id
     // heartbeat.interval.ms

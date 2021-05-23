@@ -140,24 +140,34 @@ impl RecordBatch {
 
 impl ToBytes for RecordBatch {
     fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool, version: u16) {
-        let base_offset: i64 = self.records.iter().min_by_key(|x| x.offset).unwrap().offset;
+        let base_offset: i64 = self
+            .records
+            .iter()
+            .min_by_key(|x| x.offset)
+            .expect("Serializing empty RecordBatch")
+            .offset;
 
         base_offset.serialize(buf, is_flexible_version, version);
         trace!("Serialized base_offset \n{:03?}", buf.to_vec());
 
-        let last_offset_delta: i32 =
-            (self.records.iter().max_by_key(|x| x.offset).unwrap().offset - base_offset) as i32;
+        let last_offset_delta: i32 = (self
+            .records
+            .iter()
+            .max_by_key(|x| x.offset)
+            .expect("Serializing empty RecordBatch")
+            .offset
+            - base_offset) as i32;
         let first_timestamp: i64 = self
             .records
             .iter()
             .min_by_key(|x| x.timestamp)
-            .unwrap()
+            .expect("Serializing empty RecordBatch")
             .timestamp;
         let max_timestamp: i64 = self
             .records
             .iter()
             .max_by_key(|x| x.timestamp)
-            .unwrap()
+            .expect("Serializing empty RecordBatch")
             .timestamp;
 
         let mut buf_batch_length = buf.split_off(buf.len());

@@ -18,11 +18,9 @@ use crate::{
 
 use self::{options::ProducerOptions, record::ProducerRecord};
 
-pub mod error;
 pub mod options;
 mod producer_loop;
 pub mod record;
-pub mod send_result_future;
 
 pub struct Producer {
     loop_signal_sender: UnboundedSender<ProducerLoopSignal>,

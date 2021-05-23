@@ -4,6 +4,8 @@ pub mod options;
 use std::{
     cmp::{max, min},
     collections::HashMap,
+    convert::TryInto,
+    mem::size_of,
     net::SocketAddr,
     sync::{Arc, Mutex},
     time::Duration,
@@ -46,7 +48,7 @@ use self::{error::KafkaApiCallError, options::KafkaClientOptions};
 
 #[derive(Debug)]
 pub struct Connection {
-    active_requests: Arc<std::sync::Mutex<HashMap<i32, oneshot::Sender<Vec<u8>>>>>,
+    active_requests: Arc<std::sync::Mutex<Option<HashMap<i32, oneshot::Sender<Vec<u8>>>>>>,
     socket_writer: OwnedWriteHalf,
     connection_closed_receiver: oneshot::Receiver<()>,
     last_correlation: i32,
@@ -69,7 +71,7 @@ impl Broker {
         let connection = TcpStream::connect(addr).await?;
         let (read_half, write_half) = connection.into_split();
         let (connection_closed_sender, connection_closed_receiver) = oneshot::channel::<()>();
-        let active_requests = Arc::new(Mutex::new(HashMap::new()));
+        let active_requests = Arc::new(Mutex::new(Some(HashMap::new())));
         tokio::spawn(Broker::listen_loop(
             read_half,
             connection_closed_sender,
@@ -119,13 +121,12 @@ impl Broker {
     async fn listen_loop(
         mut read_half: OwnedReadHalf,
         connection_closed_sender: oneshot::Sender<()>,
-        active_requests: Arc<std::sync::Mutex<HashMap<i32, oneshot::Sender<Vec<u8>>>>>,
+        active_requests: Arc<std::sync::Mutex<Option<HashMap<i32, oneshot::Sender<Vec<u8>>>>>>,
     ) {
         log::debug!("Broker listen_loop start");
-        // TODO: Remove unwraps
         loop {
-            let mut size: [u8; 4] = [0, 0, 0, 0];
-            if let Err(err) = read_half.read_exact(&mut size).await {
+            let mut message_size_buffer = [0; 4];
+            if let Err(err) = read_half.read_exact(&mut message_size_buffer).await {
                 match err.kind() {
                     std::io::ErrorKind::UnexpectedEof => {
                         log::debug!("Broker connection closed");
@@ -140,9 +141,9 @@ impl Broker {
                     }
                 }
             }
-            let cap = i32::from_be_bytes(size);
-            let mut buf2 = vec![0; cap as usize];
-            if let Err(err) = read_half.read_exact(&mut buf2).await {
+            let message_size = i32::from_be_bytes(message_size_buffer);
+            let mut message_buffer = vec![0; message_size as usize];
+            if let Err(err) = read_half.read_exact(&mut message_buffer).await {
                 log::error!(
                     "Unknown error while communicating with kafka broker {:?}",
                     err
@@ -151,27 +152,42 @@ impl Broker {
             }
             log::trace!("Received message");
 
-            let correlation_id = i32::from_be_bytes([buf2[0], buf2[1], buf2[2], buf2[3]]);
+            let correlation_id = i32::from_be_bytes(
+                message_buffer
+                    .split_at(size_of::<i32>())
+                    .0
+                    .try_into()
+                    .expect("Failed to read correlation_id"),
+            );
             log::trace!("Correlation id: {}", correlation_id);
-            {
-                let mut guard = active_requests.lock().unwrap();
-                let entry = (*guard).remove(&correlation_id);
-                let channel = entry.unwrap();
-
-                channel.send(buf2).unwrap();
+            if let Ok(mut guard) = active_requests.lock() {
+                let entry = guard
+                    .as_mut()
+                    .expect("Broker is in closed state")
+                    .remove(&correlation_id);
+                let channel = entry.expect("Unknown request for received response");
+                if channel.send(message_buffer).is_err() {
+                    log::debug!("Dropping response, no active listener");
+                }
+            } else {
+                log::error!("Encountered mutex poisoning, killing broker connection");
+                break;
             }
         }
         if connection_closed_sender.send(()).is_err() {
             // No need to do anything broker.connection is already dropped
         };
 
-        // TODO: make it as blocked somehow(so no new requests are inserted)?
-        let mut guard = active_requests.lock().unwrap();
-        guard.clear();
+        if let Ok(mut guard) = active_requests.lock() {
+            *guard = None;
+        } else {
+            log::error!("Encountered mutex poisoning, killing broker connection");
+        }
 
-        log::debug!("Broker dropped");
+        log::debug!("Broker listen_loop end");
     }
 
+    // TODO: move to cluster loop
     pub(crate) async fn refresh_cluster_metadata(
         &mut self,
         metadata: Arc<RwLock<Metadata>>,
@@ -182,8 +198,8 @@ impl Broker {
             metadata
                 .topics
                 .keys()
-                .map(|x| MetadataRequestTopics0 {
-                    name: x.clone(),
+                .map(|topic_name| MetadataRequestTopics0 {
+                    name: topic_name.clone(),
                     tag_buffer: TagBuffer {},
                 })
                 .collect()
@@ -195,11 +211,23 @@ impl Broker {
             include_topic_authorized_operations: false,
             tag_buffer: TagBuffer {},
         };
-        let response = self.run_api_call_with_retry(request, None).await.unwrap(); // TODO: remove unwrap
+        let response = self.run_api_call_with_retry(request, None).await;
+        let response = if let Ok(response) = response {
+            response
+        } else {
+            if sender
+                .send(ClusterLoopSignal::RefreshMetadataResponse(None))
+                .is_err()
+            {
+                log::debug!("Cannot refresh metadata - cluster loop already dropped")
+            };
+            return;
+        };
+
         let brokers = response
             .brokers
             .into_iter()
-            .map(|x| (x.node_id, (x.host, x.port)))
+            .map(|broker| (broker.node_id, (broker.host, broker.port)))
             .collect();
         let topics = response
             .topics
@@ -230,9 +258,12 @@ impl Broker {
             })
             .collect();
         let metadata = Metadata { brokers, topics };
-        sender
-            .send(ClusterLoopSignal::RefreshMetadataResponse(metadata))
-            .unwrap(); // Cluster loop dropped before broker drop
+        if sender
+            .send(ClusterLoopSignal::RefreshMetadataResponse(Some(metadata)))
+            .is_err()
+        {
+            log::debug!("Cannot refresh metadata - cluster loop already dropped")
+        };
     }
     pub async fn run_api_call<T>(
         &mut self,
@@ -302,8 +333,8 @@ impl Broker {
             &self.options.client_id,
         );
 
-        let mut buf2 = self.send_request(correlation).await;
-        let (_correlation, response) = T::deserialize_response(api_version, &mut buf2);
+        let mut response_buffer = self.send_request(correlation).await;
+        let (_correlation, response) = T::deserialize_response(api_version, &mut response_buffer);
         if let Some(err) = T::get_first_error(&response) {
             return Err((KafkaApiCallError::KafkaApiError(err), response));
         }
@@ -327,8 +358,10 @@ impl Broker {
         let channel = oneshot::channel();
         {
             let mut guard = self.connection.active_requests.lock().unwrap();
-            if (*guard).insert(correlation, channel.0).is_some() {
-                panic!("Sending second request with same correlation")
+            if let Some(active_requests) = guard.as_mut() {
+                if active_requests.insert(correlation, channel.0).is_some() {
+                    panic!("Sending second request with same correlation")
+                }
             }
         }
         let response = channel.1.await.unwrap();
@@ -337,9 +370,8 @@ impl Broker {
 
     async fn get_supported_api_versions(&mut self) -> Result<(), KafkaApiCallError> {
         let response = self
-            .run_api_call(&ApiVersionsRequest::default(), Some(0)) // TODO: Change to _with_retry ?
-            .await
-            .map_err(|x| x.0)?;
+            .run_api_call_with_retry(ApiVersionsRequest::default(), Some(0))
+            .await?;
 
         self.supported_versions.clear();
         for api_key in response.api_keys {

@@ -11,6 +11,6 @@ pub struct KafkaClientOptions {
     // request.timeout.ms
     // retry.backoff.ms
     // socket.connection.setup.timeout.max.ms
-    #[builder(default = {10_000})]
-    pub socket_connection_setup_timeout_ms: u32,
+    // #[builder(default = {10_000})]
+    // pub socket_connection_setup_timeout_ms: u32,
 }

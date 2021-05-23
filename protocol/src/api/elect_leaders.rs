@@ -100,7 +100,7 @@ pub struct ElectLeadersResponseReplicaElectionResultsPartitionResult0 {
 
 impl ElectLeadersResponse0 {
     fn get_first_error(&self) -> Option<ApiError> {
-        if self.error_code.is_some() && self.error_code.unwrap() != 0 {
+        if self.error_code.is_some() && self.error_code.unwrap_or_default() != 0 {
             return self.error_code.map(ApiError::from);
         }
         None

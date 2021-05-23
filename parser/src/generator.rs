@@ -137,7 +137,9 @@ fn generate_get_first_error(api_call: &ApiCall2) -> String {
         .iter()
         .any(|x| x.name == "error_code" && x.ty == "Option<Int16>")
     {
-        impl_def.push_str(&"    if self.error_code.is_some() && self.error_code.unwrap() !=0 {\n");
+        impl_def.push_str(
+            &"    if self.error_code.is_some() && self.error_code.unwrap_or_default() !=0 {\n",
+        );
         impl_def.push_str(&"        return self.error_code.map(ApiError::from);\n");
         impl_def.push_str(&"    }\n");
     }

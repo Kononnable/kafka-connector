@@ -54,9 +54,7 @@ impl Cluster {
             let options = options.clone();
             Box::pin(async move {
                 let mut client = Broker::new_wait(addr, options.clone()).await?;
-                let metadata_request = MetadataRequest {
-                    ..Default::default()
-                };
+                let metadata_request = MetadataRequest::default();
                 let metadata = client
                     .run_api_call_with_retry(metadata_request, None)
                     .await?;
@@ -215,9 +213,7 @@ mod tests {
         let stream = consumer.stream().await.unwrap();
         pin!(stream);
 
-        trace!("a");
         stream.try_next().await.unwrap();
-        trace!("b");
 
         Ok(())
     }

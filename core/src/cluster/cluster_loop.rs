@@ -21,7 +21,7 @@ pub(crate) enum ClusterLoopSignal {
     /// Timed event to refresh metadata from time to time
     RefreshMetadataRequest,
     /// Up to date metadata
-    RefreshMetadataResponse(Metadata),
+    RefreshMetadataResponse(Option<Metadata>),
     /// Disconnect from kafka brokers, clean up
     Shutdown,
 }
@@ -105,6 +105,11 @@ pub(super) async fn cluster_loop(
                 };
             }
             ClusterLoopSignal::RefreshMetadataResponse(new_metadata) => {
+                let new_metadata = if let Some(new_metadata) = new_metadata {
+                    new_metadata
+                } else {
+                    todo!("should retry when broker gets close")
+                };
                 let mut brokers_to_start = HashMap::new();
                 {
                     let mut metadata = cluster.metadata.write().await;

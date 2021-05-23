@@ -8,14 +8,12 @@ use kafka_connector_protocol::{
         heartbeat::HeartbeatRequest,
         leave_group::LeaveGroupRequest,
         list_offsets::{
-            ListOffsetsRequest, ListOffsetsRequest0, ListOffsetsRequestTopics0,
-            ListOffsetsRequestTopicsPartitions0,
+            ListOffsetsRequest, ListOffsetsRequestTopics0, ListOffsetsRequestTopicsPartitions0,
         },
         sync_group::{SyncGroupRequest, SyncGroupRequestAssignments0},
     },
     custom_types::tag_buffer::TagBuffer,
 };
-use log::trace;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio_stream::{wrappers::UnboundedReceiverStream, StreamExt};
 
@@ -60,15 +58,15 @@ pub(super) async fn consumer_loop(
     message_sender: UnboundedSender<Vec<Message>>,
 ) {
     if initial_metadata.is_leader() {
-        for m in initial_metadata.group_instances.iter() {
+        for group_instance in initial_metadata.group_instances.iter() {
             let request = SyncGroupRequest {
                 group_id: options.group_id.clone(),
                 generation_id: initial_metadata.generation_id,
                 member_id: initial_metadata.member_id.clone(),
-                group_instance_id: m.0.clone().into(),
+                group_instance_id: group_instance.0.clone().into(),
                 protocol_type: initial_metadata.protocol_type.clone().into(),
                 protocol_name: initial_metadata.protocol_name.clone().into(),
-                assignments: m
+                assignments: group_instance
                     .1
                     .iter()
                     .map(|x| {
@@ -167,7 +165,7 @@ pub(super) async fn consumer_loop(
                 } else {
                     todo!()
                 };
-                trace!("Sending fetch request");
+                log::trace!("Sending fetch request");
                 let fetch_response = broker
                     .run_api_call_with_retry(
                         FetchRequest {
@@ -219,7 +217,7 @@ pub(super) async fn consumer_loop(
                     )
                     .await
                     .unwrap();
-                trace!("Fetch response {:?}", fetch_response);
+                log::trace!("Fetch response {:?}", fetch_response);
                 let responses: Vec<Message> = fetch_response
                     .responses
                     .into_iter()
@@ -272,7 +270,7 @@ pub(super) async fn consumer_loop(
                         v
                     })
                     .collect();
-                trace!("Sending kafka messages to consumer {:?}", responses);
+                log::trace!("Sending kafka messages to consumer {:?}", responses);
                 message_sender.send(responses).unwrap();
                 // TODO: If no messages schedule another fetch
             }
@@ -335,5 +333,5 @@ pub(super) async fn consumer_loop(
         }
     }
     // TODO: Leave group gracefully if broker connection alive
-    trace!("Consumer loop close")
+    log::trace!("Consumer loop close")
 }

@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use std::{convert::TryInto, fmt::Debug, mem::size_of};
 
 use bytes::Bytes;
 
@@ -59,76 +59,66 @@ impl FromBytes for String {
 
 impl FromBytes for i8 {
     fn deserialize(buf: &mut Bytes, _is_flexible_version: bool, _version: u16) -> Self {
-        let data: [u8; 1] = [buf.split_to(1).into_iter().next().unwrap()];
+        let data = buf
+            .split_to(size_of::<i8>())
+            .as_ref()
+            .try_into()
+            .expect("Data deserialization error");
         i8::from_be_bytes(data)
     }
 }
 impl FromBytes for bool {
-    fn deserialize(buf: &mut Bytes, _is_flexible_version: bool, _version: u16) -> Self {
-        let data: [u8; 1] = [buf.split_to(1).into_iter().next().unwrap()];
-        i8::from_be_bytes(data) == 0
+    fn deserialize(buf: &mut Bytes, is_flexible_version: bool, version: u16) -> Self {
+        i8::deserialize(buf, is_flexible_version, version) == 0
     }
 }
 impl FromBytes for i16 {
     fn deserialize(buf: &mut Bytes, _is_flexible_version: bool, _version: u16) -> Self {
-        let mut slice = buf.split_to(2).into_iter();
-        let data: [u8; 2] = [slice.next().unwrap(), slice.next().unwrap()];
+        let data = buf
+            .split_to(size_of::<i16>())
+            .as_ref()
+            .try_into()
+            .expect("Data deserialization error");
         i16::from_be_bytes(data)
     }
 }
 impl FromBytes for i32 {
     fn deserialize(buf: &mut Bytes, _is_flexible_version: bool, _version: u16) -> Self {
-        let mut slice = buf.split_to(4).into_iter();
-        let data: [u8; 4] = [
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-        ];
+        let data = buf
+            .split_to(size_of::<i32>())
+            .as_ref()
+            .try_into()
+            .expect("Data deserialization error");
         i32::from_be_bytes(data)
     }
 }
 impl FromBytes for u32 {
     fn deserialize(buf: &mut Bytes, _is_flexible_version: bool, _version: u16) -> Self {
-        let mut slice = buf.split_to(4).into_iter();
-        let data: [u8; 4] = [
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-        ];
+        let data = buf
+            .split_to(size_of::<u32>())
+            .as_ref()
+            .try_into()
+            .expect("Data deserialization error");
         u32::from_be_bytes(data)
     }
 }
 impl FromBytes for i64 {
     fn deserialize(buf: &mut Bytes, _is_flexible_version: bool, _version: u16) -> Self {
-        let mut slice = buf.split_to(8).into_iter();
-        let data: [u8; 8] = [
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-        ];
+        let data = buf
+            .split_to(size_of::<i64>())
+            .as_ref()
+            .try_into()
+            .expect("Data deserialization error");
         i64::from_be_bytes(data)
     }
 }
 impl FromBytes for f64 {
     fn deserialize(buf: &mut Bytes, _is_flexible_version: bool, _version: u16) -> Self {
-        let mut slice = buf.split_to(8).into_iter();
-        let data: [u8; 8] = [
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-            slice.next().unwrap(),
-        ];
+        let data = buf
+            .split_to(size_of::<f64>())
+            .as_ref()
+            .try_into()
+            .expect("Data deserialization error");
         f64::from_be_bytes(data)
     }
 }
