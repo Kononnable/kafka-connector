@@ -11,8 +11,6 @@ pub struct ProducerOptions {
 // linger.ms
 // max.in.flight.requests.per.connection
 // max.request.size
-// metadata.max.idle.ms
-// retries
 
 // transactions:
 // max.block.ms

@@ -8,15 +8,15 @@ use std::{
     mem::size_of,
     net::SocketAddr,
     sync::{Arc, Mutex},
-    time::Duration,
     u8,
 };
 
 use bytes::{Bytes, BytesMut};
 use futures::TryFutureExt;
+use log::trace;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
-    sync::{mpsc::UnboundedSender, RwLock},
+    sync::mpsc::UnboundedSender,
 };
 use tokio::{
     net::{
@@ -27,22 +27,11 @@ use tokio::{
 };
 
 use kafka_connector_protocol::{
-    api::{
-        api_versions::ApiVersionsRequest,
-        metadata::{MetadataRequest, MetadataRequestTopics0},
-        ApiNumbers,
-    },
-    custom_types::tag_buffer::TagBuffer,
+    api::{api_versions::ApiVersionsRequest, ApiNumbers},
     ApiCall,
 };
 
-use crate::{
-    cluster::{
-        cluster_loop::ClusterLoopSignal,
-        metadata::{Metadata, PartitionMetadata, TopicMetadata},
-    },
-    utils::is_api_error_retriable,
-};
+use crate::{cluster::cluster_loop::ClusterLoopSignal, utils::is_api_error_retriable};
 
 use self::{error::KafkaApiCallError, options::KafkaClientOptions};
 
@@ -84,11 +73,12 @@ impl Broker {
             socket_writer: write_half,
         };
 
+        let send_buffer = BytesMut::with_capacity(options.buffer_size);
         let mut broker = Broker {
             addr,
             supported_versions: HashMap::new(),
             options,
-            send_buffer: BytesMut::with_capacity(4096), // TODO: Change size(?), change with capacity so it can grow
+            send_buffer,
             connection,
         };
         broker.get_supported_api_versions().await?;
@@ -187,84 +177,6 @@ impl Broker {
         log::debug!("Broker listen_loop end");
     }
 
-    // TODO: move to cluster loop
-    pub(crate) async fn refresh_cluster_metadata(
-        &mut self,
-        metadata: Arc<RwLock<Metadata>>,
-        sender: UnboundedSender<ClusterLoopSignal>,
-    ) {
-        let topics = {
-            let metadata = metadata.read().await;
-            metadata
-                .topics
-                .keys()
-                .map(|topic_name| MetadataRequestTopics0 {
-                    name: topic_name.clone(),
-                    tag_buffer: TagBuffer {},
-                })
-                .collect()
-        };
-        let request = MetadataRequest {
-            topics,
-            allow_auto_topic_creation: false,
-            include_cluster_authorized_operations: false,
-            include_topic_authorized_operations: false,
-            tag_buffer: TagBuffer {},
-        };
-        let response = self.run_api_call_with_retry(request, None).await;
-        let response = if let Ok(response) = response {
-            response
-        } else {
-            if sender
-                .send(ClusterLoopSignal::RefreshMetadataResponse(None))
-                .is_err()
-            {
-                log::debug!("Cannot refresh metadata - cluster loop already dropped")
-            };
-            return;
-        };
-
-        let brokers = response
-            .brokers
-            .into_iter()
-            .map(|broker| (broker.node_id, (broker.host, broker.port)))
-            .collect();
-        let topics = response
-            .topics
-            .into_iter()
-            .map(|topic| {
-                (
-                    topic.name,
-                    TopicMetadata {
-                        is_internal: topic.is_internal.unwrap_or_default(),
-                        partitions: topic
-                            .partitions
-                            .into_iter()
-                            .map(|topic_partition| {
-                                (
-                                    topic_partition.partition_index,
-                                    PartitionMetadata {
-                                        leader_id: topic_partition.leader_id,
-                                        leader_epoch: topic_partition.leader_epoch,
-                                        replica_nodes: topic_partition.replica_nodes,
-                                        isr_nodes: topic_partition.isr_nodes,
-                                        offline_replicas: topic_partition.offline_replicas,
-                                    },
-                                )
-                            })
-                            .collect(),
-                    },
-                )
-            })
-            .collect();
-        let metadata = Metadata { brokers, topics };
-        if sender
-            .send(ClusterLoopSignal::RefreshMetadataResponse(Some(metadata)))
-            .is_err()
-        {
-            log::debug!("Cannot refresh metadata - cluster loop already dropped")
-        };
-    }
     pub async fn run_api_call<T>(
         &mut self,
         request: &T,
@@ -393,11 +305,14 @@ impl Broker {
         T: ApiCall,
     {
         let mut response = self.run_api_call(&request, api_version).await;
-        for _i in 0..=3 {
-            // TODO: Extract to config value
+        for _i in 0..=self.options.retries {
             if let Err((KafkaApiCallError::KafkaApiError(api_error), _)) = response {
                 if is_api_error_retriable(api_error) {
-                    tokio::time::sleep(Duration::from_millis(100)).await; // TODO: Extract to config value, gradually increase wait duration, logging
+                    trace!(
+                        "Api call failed, retrying in {:?}",
+                        self.options.retry_backoff_ms
+                    );
+                    tokio::time::sleep(self.options.retry_backoff_ms).await;
                     response = self.run_api_call(&request, api_version).await;
                 } else {
                     break;

@@ -6,11 +6,21 @@ use std::{
 };
 
 use crate::broker::Broker;
+use kafka_connector_protocol::{
+    api::metadata::{MetadataRequest, MetadataRequestTopics0},
+    custom_types::tag_buffer::TagBuffer,
+};
 use log::trace;
-use tokio::sync::mpsc::UnboundedReceiver;
+use tokio::sync::{
+    mpsc::{UnboundedReceiver, UnboundedSender},
+    RwLock,
+};
 use tokio_stream::{wrappers::UnboundedReceiverStream, StreamExt};
 
-use super::{metadata::Metadata, ClusterInner};
+use super::{
+    metadata::{Metadata, PartitionMetadata, TopicMetadata},
+    ClusterInner,
+};
 
 #[derive(Debug)]
 pub(crate) enum ClusterLoopSignal {
@@ -53,7 +63,7 @@ pub(super) async fn cluster_loop(
 
     let metadata_refresh_stream =
         futures::stream::repeat_with(|| ClusterLoopSignal::RefreshMetadataRequest)
-            .throttle(Duration::from_secs(180)); // TODO: configurable?,  change value
+            .throttle(cluster.options.metadata_refresh_timeout);
 
     let mut stream =
         Box::pin(metadata_refresh_stream.merge(UnboundedReceiverStream::new(loop_signal_receiver)));
@@ -96,12 +106,12 @@ pub(super) async fn cluster_loop(
                     .find(|broker| matches!(broker.1, BrokerState::Alive { .. }))
                 {
                     // TODO: Change to non-blocking
-                    broker
-                        .refresh_cluster_metadata(
-                            cluster.metadata.clone(),
-                            cluster.loop_signal_sender.clone(),
-                        )
-                        .await;
+                    refresh_cluster_metadata(
+                        broker,
+                        cluster.metadata.clone(),
+                        cluster.loop_signal_sender.clone(),
+                    )
+                    .await;
                 };
             }
             ClusterLoopSignal::RefreshMetadataResponse(new_metadata) => {
@@ -174,4 +184,82 @@ pub(super) async fn cluster_loop(
     let mut brokers = cluster.brokers.write().await;
     brokers.clear();
     trace!("Cluster loop close")
+}
+
+pub(crate) async fn refresh_cluster_metadata(
+    broker: &mut Broker,
+    metadata: Arc<RwLock<Metadata>>,
+    sender: UnboundedSender<ClusterLoopSignal>,
+) {
+    let topics = {
+        let metadata = metadata.read().await;
+        metadata
+            .topics
+            .keys()
+            .map(|topic_name| MetadataRequestTopics0 {
+                name: topic_name.clone(),
+                tag_buffer: TagBuffer {},
+            })
+            .collect()
+    };
+    let request = MetadataRequest {
+        topics,
+        allow_auto_topic_creation: false,
+        include_cluster_authorized_operations: false,
+        include_topic_authorized_operations: false,
+        tag_buffer: TagBuffer {},
+    };
+    let response = broker.run_api_call_with_retry(request, None).await;
+    let response = if let Ok(response) = response {
+        response
+    } else {
+        if sender
+            .send(ClusterLoopSignal::RefreshMetadataResponse(None))
+            .is_err()
+        {
+            log::debug!("Cannot refresh metadata - cluster loop already dropped")
+        };
+        return;
+    };
+
+    let brokers = response
+        .brokers
+        .into_iter()
+        .map(|broker| (broker.node_id, (broker.host, broker.port)))
+        .collect();
+    let topics = response
+        .topics
+        .into_iter()
+        .map(|topic| {
+            (
+                topic.name,
+                TopicMetadata {
+                    is_internal: topic.is_internal.unwrap_or_default(),
+                    partitions: topic
+                        .partitions
+                        .into_iter()
+                        .map(|topic_partition| {
+                            (
+                                topic_partition.partition_index,
+                                PartitionMetadata {
+                                    leader_id: topic_partition.leader_id,
+                                    leader_epoch: topic_partition.leader_epoch,
+                                    replica_nodes: topic_partition.replica_nodes,
+                                    isr_nodes: topic_partition.isr_nodes,
+                                    offline_replicas: topic_partition.offline_replicas,
+                                },
+                            )
+                        })
+                        .collect(),
+                },
+            )
+        })
+        .collect();
+    let metadata = Metadata { brokers, topics };
+    if sender
+        .send(ClusterLoopSignal::RefreshMetadataResponse(Some(metadata)))
+        .is_err()
+    {
+        log::debug!("Cannot refresh metadata - cluster loop already dropped")
+    };
 }
