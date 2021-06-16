@@ -53,7 +53,8 @@ impl Cluster {
         let futures = addresses.into_iter().map(|addr| {
             let options = options.clone();
             Box::pin(async move {
-                let mut client = Broker::new_wait(addr, options.clone()).await?;
+                let broker = Broker::new(addr, options.clone());
+                let mut client = broker.new_wait().await?;
                 let metadata_request = MetadataRequest::default();
                 let metadata = client
                     .run_api_call_with_retry(metadata_request, None)
@@ -126,7 +127,7 @@ impl Cluster {
         // TODO: remove unwraps
         // TODO: What if no broker connected yet
         let mut brokers = self.inner.brokers.write().await;
-        if let BrokerState::Alive { addr, broker } = brokers
+        if let BrokerState::Alive(broker) = brokers
             .iter_mut()
             .find(|broker| matches!(broker.1, BrokerState::Alive { .. }))
             .unwrap()

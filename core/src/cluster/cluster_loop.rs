@@ -2,10 +2,9 @@ use std::{
     collections::HashMap,
     net::{SocketAddr, ToSocketAddrs},
     sync::Arc,
-    time::Duration,
 };
 
-use crate::broker::Broker;
+use crate::broker::{Alive, Broker, Initializing};
 use kafka_connector_protocol::{
     api::metadata::{MetadataRequest, MetadataRequestTopics0},
     custom_types::tag_buffer::TagBuffer,
@@ -25,7 +24,7 @@ use super::{
 #[derive(Debug)]
 pub(crate) enum ClusterLoopSignal {
     /// On broker successfully connecting
-    BrokerConnected(i32, Broker),
+    BrokerConnected(i32, Broker<Alive>),
     /// On broker failing to connect/disconnected
     BrokerDisconnected(i32),
     /// Timed event to refresh metadata from time to time
@@ -36,11 +35,10 @@ pub(crate) enum ClusterLoopSignal {
     Shutdown,
 }
 
-// TODO: Use typestate pattern?
 #[derive(Debug)]
 pub(crate) enum BrokerState {
-    Alive { broker: Broker, addr: SocketAddr },
-    Initializing { addr: SocketAddr },
+    Alive(Broker<Alive>),
+    Initializing(Broker<Initializing>),
 }
 
 pub(super) async fn cluster_loop(
@@ -51,13 +49,9 @@ pub(super) async fn cluster_loop(
     {
         let mut brokers = cluster.brokers.write().await;
         for client in clients {
-            brokers.insert(client.0, BrokerState::Initializing { addr: client.1 });
-            Broker::new_no_wait(
-                client.1,
-                cluster.options.clone(),
-                cluster.loop_signal_sender.clone(),
-                client.0,
-            );
+            let broker = Broker::new(client.1, cluster.options.clone());
+            broker.new_no_wait(cluster.loop_signal_sender.clone(), client.0);
+            brokers.insert(client.0, BrokerState::Initializing(broker));
         }
     }
 
@@ -73,8 +67,8 @@ pub(super) async fn cluster_loop(
             ClusterLoopSignal::BrokerConnected(broker_id, broker) => {
                 let mut brokers = cluster.brokers.write().await;
                 let old_state = brokers.remove(&broker_id).expect("Unknown broker id");
-                let new_state = if let BrokerState::Initializing { addr } = old_state {
-                    BrokerState::Alive { addr, broker }
+                let new_state = if let BrokerState::Initializing(_addr) = old_state {
+                    BrokerState::Alive(broker)
                 } else {
                     panic!("Wrong broker state")
                 };
@@ -83,14 +77,10 @@ pub(super) async fn cluster_loop(
             ClusterLoopSignal::BrokerDisconnected(broker_id) => {
                 let mut brokers = cluster.brokers.write().await;
                 let old_state = brokers.remove(&broker_id).expect("Unknown broker id");
-                let new_state = if let BrokerState::Alive { addr, .. } = old_state {
-                    Broker::new_no_wait(
-                        addr,
-                        cluster.options.clone(),
-                        cluster.loop_signal_sender.clone(),
-                        broker_id,
-                    );
-                    BrokerState::Initializing { addr }
+                let new_state = if let BrokerState::Alive(old_broker) = old_state {
+                    let broker = Broker::new(old_broker.addr, old_broker.options);
+                    broker.new_no_wait(cluster.loop_signal_sender.clone(), broker_id);
+                    BrokerState::Initializing(broker)
                 } else {
                     panic!("Wrong broker state")
                 };
@@ -101,7 +91,7 @@ pub(super) async fn cluster_loop(
             }
             ClusterLoopSignal::RefreshMetadataRequest => {
                 let mut brokers = cluster.brokers.write().await;
-                if let Some((_, BrokerState::Alive { broker, .. })) = brokers
+                if let Some((_, BrokerState::Alive(broker))) = brokers
                     .iter_mut()
                     .find(|broker| matches!(broker.1, BrokerState::Alive { .. }))
                 {
@@ -158,20 +148,16 @@ pub(super) async fn cluster_loop(
                 {
                     let mut brokers = cluster.brokers.write().await;
 
-                    for broker in brokers_to_start {
-                        let addr = (broker.1 .0.as_str(), broker.1 .1 as u16)
+                    for broker_data in brokers_to_start {
+                        let addr = (broker_data.1 .0.as_str(), broker_data.1 .1 as u16)
                             .to_socket_addrs()
                             .unwrap()
                             .next()
                             .unwrap(); // TODO: Remove unwraps
 
-                        brokers.insert(broker.0, BrokerState::Initializing { addr });
-                        Broker::new_no_wait(
-                            addr,
-                            cluster.options.clone(),
-                            cluster.loop_signal_sender.clone(),
-                            broker.0,
-                        );
+                        let broker = Broker::new(addr, cluster.options.clone());
+                        broker.new_no_wait(cluster.loop_signal_sender.clone(), broker_data.0);
+                        brokers.insert(broker_data.0, BrokerState::Initializing(broker));
                     }
                 }
             }
@@ -187,7 +173,7 @@ pub(super) async fn cluster_loop(
 }
 
 pub(crate) async fn refresh_cluster_metadata(
-    broker: &mut Broker,
+    broker: &mut Broker<Alive>,
     metadata: Arc<RwLock<Metadata>>,
     sender: UnboundedSender<ClusterLoopSignal>,
 ) {

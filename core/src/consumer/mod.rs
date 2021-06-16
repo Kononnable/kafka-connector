@@ -28,7 +28,6 @@ pub mod error;
 pub mod options;
 
 pub struct Consumer {
-    cluster: Arc<Cluster>,
     options: ConsumerOptions,
     loop_signal_sender: UnboundedSender<ConsumerLoopSignal>,
     message_receiver: UnboundedReceiver<Vec<Message>>,
@@ -52,7 +51,7 @@ impl Consumer {
         let mut brokers = cluster.inner.brokers.write().await;
         let coordinator_id = coordinator_response.node_id;
         let coordinator_broker = brokers.get_mut(&coordinator_response.node_id).unwrap();
-        let broker = if let BrokerState::Alive { addr, broker } = coordinator_broker {
+        let broker = if let BrokerState::Alive(broker) = coordinator_broker {
             broker
         } else {
             todo!()
@@ -160,7 +159,6 @@ impl Consumer {
 
         drop(brokers);
         Consumer {
-            cluster,
             options,
             loop_signal_sender,
             message_receiver,

@@ -31,7 +31,7 @@ pub async fn main() -> anyhow::Result<()> {
             .build(),
     );
 
-    let mut broker = Broker::new_wait(broker, options).await?;
+    let mut broker = Broker::new(broker, options).new_wait().await?;
 
     let metadata_request = protocol::api::metadata::MetadataRequest {
         topics: vec![MetadataRequestTopics0 {

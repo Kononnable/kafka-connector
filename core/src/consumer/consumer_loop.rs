@@ -86,7 +86,7 @@ pub(super) async fn consumer_loop(
 
             let mut brokers = cluster.brokers.write().await;
             let coordinator = brokers.get_mut(&coordinator_id).unwrap();
-            let broker = if let BrokerState::Alive { addr, broker } = coordinator {
+            let broker = if let BrokerState::Alive(broker) = coordinator {
                 broker
             } else {
                 todo!()
@@ -103,7 +103,7 @@ pub(super) async fn consumer_loop(
         // TODO:
         let mut brokers = cluster.brokers.write().await;
         let coordinator = brokers.get_mut(&coordinator_id).unwrap();
-        let broker = if let BrokerState::Alive { addr, broker } = coordinator {
+        let broker = if let BrokerState::Alive(broker) = coordinator {
             broker
         } else {
             todo!()
@@ -129,7 +129,7 @@ pub(super) async fn consumer_loop(
         let errored = offsets
             .topics
             .iter()
-            .find(|x| x.partitions.iter().find(|y| y.error_code != 0).is_some());
+            .find(|x| x.partitions.iter().any(|y| y.error_code != 0));
         if let Some(x) = errored {
             panic!("Error fetching offset data {:?}", x)
         }
@@ -160,7 +160,7 @@ pub(super) async fn consumer_loop(
             ConsumerLoopSignal::Fetch => {
                 let mut brokers = cluster.brokers.write().await;
                 let coordinator = brokers.get_mut(&coordinator_id).unwrap();
-                let broker = if let BrokerState::Alive { addr, broker } = coordinator {
+                let broker = if let BrokerState::Alive(broker) = coordinator {
                     broker
                 } else {
                     todo!()
@@ -277,7 +277,7 @@ pub(super) async fn consumer_loop(
             ConsumerLoopSignal::Heartbeat => {
                 let mut brokers = cluster.brokers.write().await;
                 let coordinator = brokers.get_mut(&coordinator_id).unwrap();
-                let broker = if let BrokerState::Alive { addr, broker } = coordinator {
+                let broker = if let BrokerState::Alive(broker) = coordinator {
                     broker
                 } else {
                     todo!()
@@ -310,7 +310,7 @@ pub(super) async fn consumer_loop(
             ConsumerLoopSignal::Shutdown => {
                 let mut brokers = cluster.brokers.write().await;
                 let broker = brokers.iter_mut().next().unwrap().1;
-                let broker = if let BrokerState::Alive { addr, broker } = broker {
+                let broker = if let BrokerState::Alive(broker) = broker {
                     broker
                 } else {
                     todo!()

@@ -57,7 +57,7 @@ impl Producer {
         {
             trace!("Fetching topic metadata start");
             let mut brokers = self.cluster.inner.brokers.write().await;
-            if let Some((_, BrokerState::Alive { broker, .. })) = brokers
+            if let Some((_, BrokerState::Alive(broker))) = brokers
                 .iter_mut()
                 .find(|broker| matches!(broker.1, BrokerState::Alive { .. }))
             {

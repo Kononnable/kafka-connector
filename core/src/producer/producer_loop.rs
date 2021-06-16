@@ -104,10 +104,10 @@ pub(super) async fn producer_loop(
                         topic_data,
                     };
                     match broker {
-                        BrokerState::Alive { broker, addr } => {
+                        BrokerState::Alive(broker) => {
                             broker.run_api_call_with_retry(request, None).await.unwrap();
                         }
-                        BrokerState::Initializing { addr } => {
+                        BrokerState::Initializing(_broker) => {
                             todo!()
                         }
                     }
