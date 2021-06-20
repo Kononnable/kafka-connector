@@ -9,7 +9,7 @@ use kafka_connector_protocol::{
     api::metadata::{MetadataRequest, MetadataResponse0},
     ApiCall,
 };
-use log::{debug, warn};
+use log::{debug, error, warn};
 use tokio::sync::{
     mpsc::{unbounded_channel, UnboundedSender},
     RwLock,
@@ -143,10 +143,14 @@ impl Cluster {
 impl Drop for Cluster {
     fn drop(&mut self) {
         debug!("Cluster is being dropped, closing all kafka connections");
-        self.inner
+        let result = self
+            .inner
             .loop_signal_sender
-            .send(ClusterLoopSignal::Shutdown)
-            .expect("Cluster loop should be alive.")
+            .send(ClusterLoopSignal::Shutdown);
+
+        if result.is_err() {
+            error!("Cluster dropped when loop is already dead");
+        }
     }
 }
 
@@ -156,12 +160,11 @@ mod tests {
 
     use crate::{
         consumer::{self, options::ConsumerOptions},
-        producer::{self, options::ProducerOptions, record::ProducerRecord},
+        producer::{self, record::ProducerRecord},
     };
 
     use super::*;
     use anyhow::Result;
-    use log::trace;
     use tokio::{pin, time::sleep};
     use tokio_stream::StreamExt;
 
@@ -188,7 +191,7 @@ mod tests {
 
         sleep(Duration::from_secs(2)).await;
 
-        let mut producer = producer::Producer::new(cluster.clone(), ProducerOptions {}).await;
+        let mut producer = producer::Producer::new(cluster.clone(), Default::default()).await;
         let consumer = consumer::Consumer::new(
             cluster,
             ConsumerOptions {

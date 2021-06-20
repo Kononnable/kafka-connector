@@ -20,7 +20,7 @@ use kafka_connector_protocol::{
     },
     custom_types::nullable_string::NullableString,
 };
-use log::{debug, trace};
+use log::{debug, error, trace};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 
 mod consumer_loop;
@@ -194,9 +194,11 @@ impl Consumer {
 impl Drop for Consumer {
     fn drop(&mut self) {
         debug!("Consumer is being dropped");
-        self.loop_signal_sender
-            .send(ConsumerLoopSignal::Shutdown)
-            .expect("Consumer loop should be alive.")
+        let result = self.loop_signal_sender.send(ConsumerLoopSignal::Shutdown);
+
+        if result.is_err() {
+            error!("Consumer dropped when loop is already dead");
+        }
     }
 }
 
