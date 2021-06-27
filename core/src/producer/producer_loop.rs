@@ -1,4 +1,8 @@
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::Arc,
+    time::Duration,
+};
 
 use crate::cluster::{cluster_loop::BrokerState, metadata::Metadata, ClusterInner};
 use kafka_connector_protocol::{
@@ -52,15 +56,30 @@ pub(super) async fn producer_loop(
                     trace!("No messages on producer queue to send");
                     continue;
                 };
+
+                let topics_without_metadata = {
+                    let topics = message_queue
+                        .iter()
+                        .map(|record| record.0.topic.as_str())
+                        .collect::<HashSet<_>>();
+                    let metadata = cluster.metadata.read().await;
+                    topics
+                        .into_iter()
+                        .filter(|key| !metadata.topics.contains_key(*key))
+                        .map(|x| x.to_owned())
+                        .collect::<Vec<_>>()
+                };
+                if !topics_without_metadata.is_empty() {
+                    cluster.fetch_topic_metadata(topics_without_metadata).await;
+                }
+
                 let broker_map = {
                     let metadata = cluster.metadata.read().await;
-                    let x = message_queue
-                        .into_iter()
+                    message_queue
+                        .drain(..)
                         .map(|x| (generate_partition_number(x.0), x.1))
                         .map(|x| (get_broker_id_for_partition_id(&x.0, &*metadata), x))
-                        .fold(HashMap::new(), group_by_first_element);
-                    message_queue = Vec::new();
-                    x
+                        .fold(HashMap::new(), group_by_first_element)
                 };
                 for broker_records in broker_map {
                     let mut brokers = cluster.brokers.write().await;

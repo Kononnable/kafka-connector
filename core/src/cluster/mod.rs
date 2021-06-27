@@ -6,7 +6,7 @@ use std::{collections::HashMap, net::ToSocketAddrs, sync::Arc};
 
 use futures_util::future::select_all;
 use kafka_connector_protocol::{
-    api::metadata::{MetadataRequest, MetadataResponse0},
+    api::metadata::{MetadataRequest, MetadataRequestTopics0, MetadataResponse0},
     ApiCall,
 };
 use log::{debug, error, warn};
@@ -15,7 +15,10 @@ use tokio::sync::{
     RwLock,
 };
 
-use crate::broker::{error::KafkaApiCallError, options::KafkaClientOptions, Broker};
+use crate::{
+    broker::{error::KafkaApiCallError, options::KafkaClientOptions, Broker},
+    cluster::metadata::{PartitionMetadata, TopicMetadata},
+};
 
 use self::{
     cluster_loop::{BrokerState, ClusterLoopSignal},
@@ -27,7 +30,7 @@ use self::{
 pub(crate) struct ClusterInner {
     pub brokers: RwLock<HashMap<i32, BrokerState>>,
     pub metadata: Arc<RwLock<Metadata>>,
-    pub options: Arc<KafkaClientOptions>,
+    pub client_options: Arc<KafkaClientOptions>,
     pub loop_signal_sender: UnboundedSender<ClusterLoopSignal>,
 }
 
@@ -51,9 +54,8 @@ impl Cluster {
         let options = Arc::new(options);
 
         let futures = addresses.into_iter().map(|addr| {
-            let options = options.clone();
+            let broker = Broker::new(addr, options.clone());
             Box::pin(async move {
-                let broker = Broker::new(addr, options.clone());
                 let mut client = broker.new_wait().await?;
                 let metadata_request = MetadataRequest::default();
                 let metadata = client
@@ -101,7 +103,7 @@ impl Cluster {
         let cluster = Cluster {
             inner: Arc::new(ClusterInner {
                 metadata: Default::default(),
-                options,
+                client_options: options,
                 loop_signal_sender,
                 brokers: Default::default(),
             }),
@@ -115,6 +117,8 @@ impl Cluster {
 
         Ok(cluster)
     }
+}
+impl ClusterInner {
     pub async fn send_request_to_any_broker<T>(
         &self,
         request: T,
@@ -126,7 +130,7 @@ impl Cluster {
         // TODO: Rename
         // TODO: remove unwraps
         // TODO: What if no broker connected yet
-        let mut brokers = self.inner.brokers.write().await;
+        let mut brokers = self.brokers.write().await;
         if let BrokerState::Alive(broker) = brokers
             .iter_mut()
             .find(|broker| matches!(broker.1, BrokerState::Alive { .. }))
@@ -137,6 +141,53 @@ impl Cluster {
         } else {
             todo!()
         }
+    }
+
+    pub async fn fetch_topic_metadata(&self, topics: Vec<String>) {
+        // TODO: Unwraps
+        let response = self
+            .send_request_to_any_broker(
+                MetadataRequest {
+                    allow_auto_topic_creation: self.client_options.allow_auto_topic_creation,
+                    topics: topics
+                        .into_iter()
+                        .map(|topic_name| MetadataRequestTopics0 {
+                            name: topic_name,
+                            ..Default::default()
+                        })
+                        .collect(),
+                    ..Default::default()
+                },
+                None,
+            )
+            .await
+            .unwrap();
+
+        let mut metadata = self.metadata.write().await;
+        response.topics.into_iter().for_each(|topic| {
+            metadata.topics.insert(
+                topic.name,
+                TopicMetadata {
+                    is_internal: topic.is_internal.unwrap_or_default(),
+                    partitions: topic
+                        .partitions
+                        .into_iter()
+                        .map(|x| {
+                            (
+                                x.partition_index,
+                                PartitionMetadata {
+                                    isr_nodes: x.isr_nodes,
+                                    leader_epoch: x.leader_epoch,
+                                    leader_id: x.leader_id,
+                                    offline_replicas: x.offline_replicas,
+                                    replica_nodes: x.replica_nodes,
+                                },
+                            )
+                        })
+                        .collect(),
+                },
+            );
+        });
     }
 }
 

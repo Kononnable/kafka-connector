@@ -37,6 +37,7 @@ impl Consumer {
     pub async fn new(cluster: Arc<Cluster>, options: ConsumerOptions) -> Self {
         // TODO: remove unwraps
         let coordinator_response = cluster
+            .inner
             .send_request_to_any_broker(
                 FindCoordinatorRequest {
                     key: options.group_id.clone(),

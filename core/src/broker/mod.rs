@@ -36,13 +36,6 @@ use crate::{cluster::cluster_loop::ClusterLoopSignal, utils::is_api_error_retria
 use self::{error::KafkaApiCallError, options::KafkaClientOptions};
 
 pub type ActiveRequestList = Arc<std::sync::Mutex<Option<HashMap<i32, oneshot::Sender<Vec<u8>>>>>>;
-#[derive(Debug)]
-pub struct Connection {
-    active_requests: ActiveRequestList,
-    socket_writer: OwnedWriteHalf,
-    connection_closed_receiver: oneshot::Receiver<()>,
-    last_correlation: i32,
-}
 
 #[derive(Debug)]
 pub struct Broker<S: BrokerState> {
@@ -53,16 +46,20 @@ pub struct Broker<S: BrokerState> {
 }
 
 #[derive(Debug)]
-pub struct Alive {
-    supported_versions: HashMap<u16, (u16, u16)>,
-    connection: Connection,
-}
-#[derive(Debug)]
 pub struct Initializing {}
 
+#[derive(Debug)]
+pub struct Alive {
+    supported_versions: HashMap<u16, (u16, u16)>,
+    active_requests: ActiveRequestList,
+    socket_writer: OwnedWriteHalf,
+    connection_closed_receiver: oneshot::Receiver<()>,
+    last_correlation: i32,
+}
+
 pub trait BrokerState {}
-impl BrokerState for Alive {}
 impl BrokerState for Initializing {}
+impl BrokerState for Alive {}
 
 impl Broker<Initializing> {
     pub fn new(addr: SocketAddr, options: Arc<KafkaClientOptions>) -> Broker<Initializing> {
@@ -86,19 +83,16 @@ impl Broker<Initializing> {
             connection_closed_sender,
             active_requests.clone(),
         ));
-        let connection = Connection {
-            active_requests,
-            connection_closed_receiver,
-            last_correlation: 0,
-            socket_writer: write_half,
-        };
 
         let mut broker = Broker {
             addr: self.addr,
             options: self.options,
             send_buffer: self.send_buffer,
             state: Alive {
-                connection,
+                active_requests,
+                connection_closed_receiver,
+                last_correlation: 0,
+                socket_writer: write_half,
                 supported_versions: Default::default(),
             },
         };
@@ -126,6 +120,7 @@ impl Broker<Initializing> {
         });
     }
 }
+
 impl Broker<Alive> {
     pub async fn run_api_call<T>(
         &mut self,
@@ -186,8 +181,8 @@ impl Broker<Alive> {
             }
         };
         let correlation = {
-            self.state.connection.last_correlation += 1;
-            self.state.connection.last_correlation
+            self.state.last_correlation += 1;
+            self.state.last_correlation
         };
         request.serialize(
             api_version,
@@ -208,13 +203,11 @@ impl Broker<Alive> {
         let len = self.send_buffer.len() as i32;
         // TODO: safely remove unwrap
         self.state
-            .connection
             .socket_writer
             .write_all(&len.to_be_bytes())
             .await
             .unwrap();
         self.state
-            .connection
             .socket_writer
             .write_all(&self.send_buffer)
             .await
@@ -222,7 +215,7 @@ impl Broker<Alive> {
         self.send_buffer.clear();
         let channel = oneshot::channel();
         {
-            let mut guard = self.state.connection.active_requests.lock().unwrap();
+            let mut guard = self.state.active_requests.lock().unwrap();
             if let Some(active_requests) = guard.as_mut() {
                 if active_requests.insert(correlation, channel.0).is_some() {
                     panic!("Sending second request with same correlation")
@@ -302,8 +295,8 @@ where
     ) {
         log::debug!("Broker listen_loop start");
         loop {
-            let mut message_size_buffer = [0; 4];
-            if let Err(err) = read_half.read_exact(&mut message_size_buffer).await {
+            let mut buffer_size = [0; 4];
+            if let Err(err) = read_half.read_exact(&mut buffer_size).await {
                 match err.kind() {
                     std::io::ErrorKind::UnexpectedEof => {
                         log::debug!("Broker connection closed");
@@ -318,7 +311,7 @@ where
                     }
                 }
             }
-            let message_size = i32::from_be_bytes(message_size_buffer);
+            let message_size = i32::from_be_bytes(buffer_size);
             let mut message_buffer = vec![0; message_size as usize];
             if let Err(err) = read_half.read_exact(&mut message_buffer).await {
                 log::error!(

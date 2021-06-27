@@ -49,7 +49,7 @@ pub(super) async fn cluster_loop(
     {
         let mut brokers = cluster.brokers.write().await;
         for client in clients {
-            let broker = Broker::new(client.1, cluster.options.clone());
+            let broker = Broker::new(client.1, cluster.client_options.clone());
             broker.new_no_wait(cluster.loop_signal_sender.clone(), client.0);
             brokers.insert(client.0, BrokerState::Initializing(broker));
         }
@@ -57,7 +57,7 @@ pub(super) async fn cluster_loop(
 
     let metadata_refresh_stream =
         futures::stream::repeat_with(|| ClusterLoopSignal::RefreshMetadataRequest)
-            .throttle(cluster.options.metadata_refresh_timeout);
+            .throttle(cluster.client_options.metadata_refresh_timeout);
 
     let mut stream =
         Box::pin(metadata_refresh_stream.merge(UnboundedReceiverStream::new(loop_signal_receiver)));
@@ -67,7 +67,7 @@ pub(super) async fn cluster_loop(
             ClusterLoopSignal::BrokerConnected(broker_id, broker) => {
                 let mut brokers = cluster.brokers.write().await;
                 let old_state = brokers.remove(&broker_id).expect("Unknown broker id");
-                let new_state = if let BrokerState::Initializing(_addr) = old_state {
+                let new_state = if let BrokerState::Initializing(..) = old_state {
                     BrokerState::Alive(broker)
                 } else {
                     panic!("Wrong broker state")
@@ -155,7 +155,7 @@ pub(super) async fn cluster_loop(
                             .next()
                             .unwrap(); // TODO: Remove unwraps
 
-                        let broker = Broker::new(addr, cluster.options.clone());
+                        let broker = Broker::new(addr, cluster.client_options.clone());
                         broker.new_no_wait(cluster.loop_signal_sender.clone(), broker_data.0);
                         brokers.insert(broker_data.0, BrokerState::Initializing(broker));
                     }

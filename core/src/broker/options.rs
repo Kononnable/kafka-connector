@@ -7,6 +7,8 @@ pub struct KafkaClientOptions {
     #[builder(default = {Duration::from_secs(300)})]
     pub metadata_refresh_timeout: Duration,
 
+    #[builder(default = {false})]
+    pub allow_auto_topic_creation: bool,
     #[builder(default = {4096})]
     pub buffer_size: usize,
     pub client_id: String,
