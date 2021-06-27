@@ -1,7 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
     sync::Arc,
-    time::Duration,
 };
 
 use crate::cluster::{cluster_loop::BrokerState, metadata::Metadata, ClusterInner};
@@ -39,11 +38,7 @@ pub(super) async fn producer_loop(
 ) {
     let mut message_queue: Vec<(ProducerRecord, oneshot::Sender<()>)> = Vec::new();
 
-    let send_batch_timeout = futures::stream::repeat_with(|| ProducerLoopSignal::SendBatch)
-        .throttle(Duration::from_secs(2)); // TODO: configurable,  change value
-
-    let mut stream =
-        Box::pin(send_batch_timeout.merge(UnboundedReceiverStream::new(loop_signal_receiver)));
+    let mut stream = UnboundedReceiverStream::new(loop_signal_receiver);
 
     while let Some(signal) = stream.next().await {
         match signal {

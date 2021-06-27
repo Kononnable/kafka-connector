@@ -42,6 +42,11 @@ impl Producer {
         self.loop_signal_sender
             .send(ProducerLoopSignal::SendMessage(record, sender))
             .expect("Producer loop dead");
+
+        self.loop_signal_sender
+            .send(ProducerLoopSignal::SendBatch)
+            .expect("Producer loop dead");
+
         receiver
     }
 }
