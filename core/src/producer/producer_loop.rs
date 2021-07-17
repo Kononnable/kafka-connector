@@ -16,130 +16,166 @@ use kafka_connector_protocol::{
         zig_zag_vec::ZigZagVec,
     },
 };
-use log::trace;
+use log::{trace, warn};
 use tokio::sync::{mpsc::UnboundedReceiver, oneshot};
 use tokio_stream::{wrappers::UnboundedReceiverStream, StreamExt};
 
-use super::record::ProducerRecord;
+use super::{error::MessageSendError, options::ProducerOptions, record::ProducerRecord};
+
+pub type RecordStatusReporter = oneshot::Sender<Result<(), (MessageSendError, ProducerRecord)>>;
 
 #[derive(Debug)]
 pub(super) enum ProducerLoopSignal {
     /// Queue message for sending
-    SendMessage(ProducerRecord, oneshot::Sender<()>),
+    SendMessage(ProducerRecord, RecordStatusReporter),
     /// Send messages waiting in a queue
     SendBatch,
     /// Disconnect from kafka brokers, clean up
     Shutdown,
 }
 
-pub(super) async fn producer_loop(
-    loop_signal_receiver: UnboundedReceiver<ProducerLoopSignal>,
-    cluster: Arc<ClusterInner>,
-) {
-    let mut message_queue: Vec<(ProducerRecord, oneshot::Sender<()>)> = Vec::new();
+pub(super) struct ProducerLoop {
+    pub cluster: Arc<ClusterInner>,
+    pub options: Arc<ProducerOptions>,
+}
+impl ProducerLoop {
+    pub async fn producer_loop(self, loop_signal_receiver: UnboundedReceiver<ProducerLoopSignal>) {
+        let mut message_queue = Vec::new();
 
-    let mut stream = UnboundedReceiverStream::new(loop_signal_receiver);
+        let mut stream = UnboundedReceiverStream::new(loop_signal_receiver);
 
-    while let Some(signal) = stream.next().await {
-        match signal {
-            ProducerLoopSignal::SendMessage(message, ack_result) => {
-                message_queue.push((message, ack_result));
-            }
-            ProducerLoopSignal::SendBatch => {
-                // TODO: Unwraps
-                if message_queue.is_empty() {
-                    trace!("No messages on producer queue to send");
-                    continue;
-                };
-
-                let topics_without_metadata = {
-                    let topics = message_queue
-                        .iter()
-                        .map(|record| record.0.topic.as_str())
-                        .collect::<HashSet<_>>();
-                    let metadata = cluster.metadata.read().await;
-                    topics
-                        .into_iter()
-                        .filter(|key| !metadata.topics.contains_key(*key))
-                        .map(|x| x.to_owned())
-                        .collect::<Vec<_>>()
-                };
-                if !topics_without_metadata.is_empty() {
-                    cluster.fetch_topic_metadata(topics_without_metadata).await;
+        while let Some(signal) = stream.next().await {
+            match signal {
+                ProducerLoopSignal::SendMessage(message, ack_result) => {
+                    message_queue.push((message, ack_result));
                 }
-
-                let broker_map = {
-                    let metadata = cluster.metadata.read().await;
-                    message_queue
-                        .drain(..)
-                        .map(|x| (generate_partition_number(x.0), x.1))
-                        .map(|x| (get_broker_id_for_partition_id(&x.0, &*metadata), x))
-                        .fold(HashMap::new(), group_by_first_element)
-                };
-                for broker_records in broker_map {
-                    let mut brokers = cluster.brokers.write().await;
-                    let broker = brokers.get_mut(&broker_records.0).unwrap();
-                    let topic_grouped = broker_records.1.into_iter().fold(
-                        HashMap::new(),
-                        |mut a: HashMap<String, Vec<_>>, b| {
-                            if let Some(x) = a.get_mut(&b.0.topic) {
-                                x.push(b);
-                            } else {
-                                a.insert(b.0.topic.clone(), vec![b]);
-                            };
-                            a
-                        },
-                    );
-                    let topic_data = topic_grouped
-                        .into_iter()
-                        .map(|data| ProduceRequestTopicData0 {
-                            topic: data.0,
-                            data: data
-                                .1
-                                .into_iter()
-                                .map(|x| (x.0.partition.unwrap(), x))
-                                .fold(HashMap::new(), group_by_first_element)
-                                .into_iter()
-                                .map(|x| ProduceRequestTopicDataData0 {
-                                    partition: x.0,
-                                    record_set: RecordBatchWithSize {
-                                        batches: vec![convert_partition_records_to_record_batch(
-                                            x.1,
-                                        )],
-                                    },
-                                })
-                                .collect::<Vec<ProduceRequestTopicDataData0>>(),
-                        })
-                        .collect::<Vec<_>>();
-                    let request = ProduceRequest {
-                        transactional_id: NullableString::None,
-                        acks: 1, // TODO: Acks config
-                        timeout: 30_000,
-                        topic_data,
+                ProducerLoopSignal::SendBatch => {
+                    if message_queue.is_empty() {
+                        trace!("No messages on producer queue to send");
+                        continue;
                     };
-                    match broker {
-                        BrokerState::Alive(broker) => {
-                            broker.run_api_call_with_retry(request, None).await.unwrap();
-                        }
-                        BrokerState::Initializing(_broker) => {
-                            todo!()
-                        }
-                    }
+
+                    self.send_batch(&mut message_queue).await;
                 }
-                // TODO: Acks
+                ProducerLoopSignal::Shutdown => {
+                    break;
+                }
             }
-            ProducerLoopSignal::Shutdown => {
-                break;
+        }
+        for message in message_queue {
+            if message
+                .1
+                .send(Err((MessageSendError::ProducerClosed, message.0)))
+                .is_err()
+            {
+                warn!("Message not received without client knowledge");
+            }
+        }
+        trace!("Producer loop close")
+    }
+    async fn send_batch(&self, message_queue: &mut Vec<(ProducerRecord, RecordStatusReporter)>) {
+        self.fetch_topic_metadata(message_queue).await;
+        let broker_map = self.group_records_by_brokers(message_queue).await;
+
+        for broker_records in broker_map {
+            self.send_records_to_broker(broker_records).await;
+        }
+    }
+
+    async fn send_records_to_broker(
+        &self,
+        broker_records: (i32, Vec<(ProducerRecord, RecordStatusReporter)>),
+    ) {
+        // TODO: Unwraps
+        let mut brokers = self.cluster.brokers.write().await;
+        let broker = brokers.get_mut(&broker_records.0).unwrap();
+        let topic_grouped = broker_records.1.into_iter().fold(
+            HashMap::new(),
+            |mut a: HashMap<String, Vec<_>>, b| {
+                if let Some(x) = a.get_mut(&b.0.topic) {
+                    x.push(b);
+                } else {
+                    a.insert(b.0.topic.clone(), vec![b]);
+                };
+                a
+            },
+        );
+        let topic_data = topic_grouped
+            .into_iter()
+            .map(|data| ProduceRequestTopicData0 {
+                topic: data.0,
+                data: data
+                    .1
+                    .into_iter()
+                    .map(|x| (x.0.partition(), x))
+                    .fold(HashMap::new(), group_by_first_element)
+                    .into_iter()
+                    .map(|x| ProduceRequestTopicDataData0 {
+                        partition: x.0,
+                        record_set: RecordBatchWithSize {
+                            batches: vec![convert_partition_records_to_record_batch(
+                                x.1.into_iter().map(|x| x.0),
+                            )],
+                        },
+                    })
+                    .collect::<Vec<ProduceRequestTopicDataData0>>(),
+            })
+            .collect::<Vec<_>>();
+        let request = ProduceRequest {
+            transactional_id: NullableString::None,
+            acks: 1, // TODO: Acks config
+            timeout: 30_000,
+            topic_data,
+        };
+        match broker {
+            BrokerState::Alive(broker) => {
+                broker.run_api_call_with_retry(request, None).await.unwrap();
+            }
+            BrokerState::Initializing(_broker) => {
+                todo!()
             }
         }
     }
-    // TODO: Return error to all messages in message_queue, messages already sent, but without ack
-    trace!("Producer loop close")
+
+    async fn group_records_by_brokers(
+        &self,
+        message_queue: &mut Vec<(ProducerRecord, RecordStatusReporter)>,
+    ) -> HashMap<i32, Vec<(ProducerRecord, RecordStatusReporter)>> {
+        let metadata = self.cluster.metadata.read().await;
+        message_queue
+            .drain(..)
+            .map(|x| (get_broker_id_for_partition_id(&x.0, &*metadata), x))
+            .fold(HashMap::new(), group_by_first_element)
+    }
+
+    async fn fetch_topic_metadata(
+        &self,
+        message_queue: &mut Vec<(ProducerRecord, RecordStatusReporter)>,
+    ) {
+        let topics_lacking_metadata = {
+            let topics = message_queue
+                .iter()
+                .map(|record| record.0.topic.as_str())
+                .collect::<HashSet<_>>();
+            let metadata = self.cluster.metadata.read().await;
+            topics
+                .into_iter()
+                .filter(|key| !metadata.topics.contains_key(*key))
+                .map(str::to_owned)
+                .collect::<Vec<_>>()
+        };
+        if !topics_lacking_metadata.is_empty() {
+            self.cluster
+                .fetch_topic_metadata(topics_lacking_metadata)
+                .await;
+        }
+    }
 }
 
-fn convert_partition_records_to_record_batch(
-    records: Vec<(ProducerRecord, oneshot::Sender<()>)>,
-) -> RecordBatch {
+fn convert_partition_records_to_record_batch<I>(records: I) -> RecordBatch
+where
+    I: IntoIterator<Item = ProducerRecord>,
+{
     // TODO: Proper fields values
     RecordBatch {
         attributes: 0,
@@ -151,13 +187,12 @@ fn convert_partition_records_to_record_batch(
             .into_iter()
             .map(|x| Record {
                 attributes: 0,
-                timestamp: x.0.timestamp.unwrap_or_default(),
+                timestamp: x.timestamp.unwrap_or_default(),
                 offset: 0,
-                key: ZigZagVec { value: x.0.key },
-                value: ZigZagVec { value: x.0.payload },
+                key: ZigZagVec { value: x.key },
+                value: ZigZagVec { value: x.payload },
                 headers: ZigZagVec {
                     value: x
-                        .0
                         .headers
                         .unwrap_or_default()
                         .into_iter()
@@ -172,28 +207,24 @@ fn convert_partition_records_to_record_batch(
     }
 }
 
-fn group_by_first_element<T>(mut a: HashMap<i32, Vec<T>>, b: (i32, T)) -> HashMap<i32, Vec<T>> {
-    if let Some(x) = a.get_mut(&b.0) {
-        x.push(b.1);
+fn group_by_first_element<T>(
+    mut map: HashMap<i32, Vec<T>>,
+    item: (i32, T),
+) -> HashMap<i32, Vec<T>> {
+    if let Some(x) = map.get_mut(&item.0) {
+        x.push(item.1);
     } else {
-        a.insert(b.0, vec![b.1]);
+        map.insert(item.0, vec![item.1]);
     };
-    a
+    map
 }
 
 fn get_broker_id_for_partition_id(record: &ProducerRecord, metadata: &Metadata) -> i32 {
     // TODO: Remove unwraps
     let topic_metadata = metadata.topics.get(&record.topic).unwrap();
-    trace!("{:?}", record);
-    trace!("{:?}", topic_metadata);
     topic_metadata
         .partitions
-        .get(&record.partition.unwrap())
+        .get(&record.partition())
         .unwrap()
         .leader_id
-}
-fn generate_partition_number(mut record: ProducerRecord) -> ProducerRecord {
-    record.partition.get_or_insert_with(Default::default);
-    record
-    // TODO: Partitioner
 }

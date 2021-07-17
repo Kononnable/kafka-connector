@@ -8,8 +8,12 @@ use tokio::sync::{
 
 use crate::{cluster::Cluster, producer::producer_loop::ProducerLoopSignal};
 
-use self::{options::ProducerOptions, record::ProducerRecord};
+use self::{
+    error::MessageSendError, options::ProducerOptions, producer_loop::ProducerLoop,
+    record::ProducerRecord,
+};
 
+pub mod error;
 pub mod options;
 mod producer_loop;
 pub mod record;
@@ -17,18 +21,20 @@ pub mod record;
 pub struct Producer {
     loop_signal_sender: UnboundedSender<ProducerLoopSignal>,
     cluster: Arc<Cluster>,
-    options: ProducerOptions,
+    options: Arc<ProducerOptions>,
 }
 
 impl Producer {
     /// Creates kafka producer and waits for it to connect to at least one broker
     pub async fn new(cluster: Arc<Cluster>, options: ProducerOptions) -> Self {
+        let options = Arc::new(options);
         let (loop_signal_sender, loop_signal_receiver) = unbounded_channel();
 
-        tokio::spawn(producer_loop::producer_loop(
-            loop_signal_receiver,
-            cluster.inner.clone(),
-        ));
+        let producer_loop = ProducerLoop {
+            cluster: cluster.inner.clone(),
+            options: options.clone(),
+        };
+        tokio::spawn(producer_loop.producer_loop(loop_signal_receiver));
         Producer {
             cluster,
             options,
@@ -51,7 +57,9 @@ impl Producer {
     }
 }
 
-type SendFuture = Receiver<()>;
+/// Completes when message is received and acknowledged by kafka broker.
+/// This behavior depends on `acks` producer setting.
+type SendFuture = Receiver<Result<(), (MessageSendError, ProducerRecord)>>;
 
 impl Drop for Producer {
     fn drop(&mut self) {

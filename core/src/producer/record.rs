@@ -8,11 +8,18 @@ pub struct ProducerRecord {
     pub topic: String,
     pub payload: Vec<u8>,
     #[builder(default)]
-    pub partition: Option<i32>,
+    partition: Option<i32>,
     #[builder(default)]
     pub key: Vec<u8>,
     #[builder(default)]
     pub timestamp: Option<i64>,
     #[builder(default)]
     pub headers: Option<HashMap<String, Vec<u8>>>,
+}
+
+impl ProducerRecord {
+    pub fn partition(&self) -> i32 {
+        // TODO: Partitioner
+        self.partition.unwrap_or_default()
+    }
 }
