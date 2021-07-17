@@ -122,7 +122,7 @@ impl Broker<Initializing> {
 }
 
 impl Broker<Alive> {
-    pub async fn run_api_call<T>(
+    async fn run_api_call_inner<T>(
         &mut self,
         request: &T,
         api_version: Option<u16>,
@@ -228,7 +228,7 @@ impl Broker<Alive> {
 
     async fn get_supported_api_versions(&mut self) -> Result<(), KafkaApiCallError> {
         let response = self
-            .run_api_call_with_retry(ApiVersionsRequest::default(), Some(0))
+            .run_api_call(ApiVersionsRequest::default(), Some(0))
             .await?;
 
         self.state.supported_versions.clear();
@@ -242,7 +242,7 @@ impl Broker<Alive> {
     }
 
     // TODO: Change somehow
-    pub async fn run_api_call_with_retry_raw<T>(
+    pub async fn run_api_call_raw<T>(
         &mut self,
         request: T,
         api_version: Option<u16>,
@@ -250,7 +250,7 @@ impl Broker<Alive> {
     where
         T: ApiCall,
     {
-        let mut response = self.run_api_call(&request, api_version).await;
+        let mut response = self.run_api_call_inner(&request, api_version).await;
         for _i in 0..=self.options.retries {
             if let Err((KafkaApiCallError::KafkaApiError(api_error), _)) = response {
                 if is_api_error_retriable(api_error) {
@@ -259,7 +259,7 @@ impl Broker<Alive> {
                         self.options.retry_backoff_ms
                     );
                     tokio::time::sleep(self.options.retry_backoff_ms).await;
-                    response = self.run_api_call(&request, api_version).await;
+                    response = self.run_api_call_inner(&request, api_version).await;
                 } else {
                     break;
                 }
@@ -270,7 +270,7 @@ impl Broker<Alive> {
         return response;
     }
     /// Run api call with automatic retry on errors on which message can just be resend
-    pub async fn run_api_call_with_retry<T>(
+    pub async fn run_api_call<T>(
         &mut self,
         request: T,
         api_version: Option<u16>,
@@ -278,7 +278,7 @@ impl Broker<Alive> {
     where
         T: ApiCall,
     {
-        self.run_api_call_with_retry_raw(request, api_version)
+        self.run_api_call_raw(request, api_version)
             .map_err(|x| x.0)
             .await
     }

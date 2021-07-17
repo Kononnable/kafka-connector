@@ -2,7 +2,7 @@ pub(crate) mod cluster_loop;
 pub mod error;
 pub mod metadata;
 
-use std::{collections::HashMap, net::ToSocketAddrs, sync::Arc};
+use std::{collections::HashMap, net::ToSocketAddrs, sync::Arc, time::Duration};
 
 use futures_util::future::select_all;
 use kafka_connector_protocol::{
@@ -10,9 +10,12 @@ use kafka_connector_protocol::{
     ApiCall,
 };
 use log::{debug, error, warn};
-use tokio::sync::{
-    mpsc::{unbounded_channel, UnboundedSender},
-    RwLock,
+use tokio::{
+    sync::{
+        mpsc::{unbounded_channel, UnboundedSender},
+        RwLock,
+    },
+    time::sleep,
 };
 
 use crate::{
@@ -58,9 +61,7 @@ impl Cluster {
             Box::pin(async move {
                 let mut client = broker.new_wait().await?;
                 let metadata_request = MetadataRequest::default();
-                let metadata = client
-                    .run_api_call_with_retry(metadata_request, None)
-                    .await?;
+                let metadata = client.run_api_call(metadata_request, None).await?;
                 Ok(metadata)
             })
         });
@@ -119,34 +120,9 @@ impl Cluster {
     }
 }
 impl ClusterInner {
-    pub async fn send_request_to_any_broker<T>(
-        &self,
-        request: T,
-        api_version: Option<u16>,
-    ) -> Result<T::Response, KafkaApiCallError>
-    where
-        T: ApiCall,
-    {
-        // TODO: Rename
-        // TODO: remove unwraps
-        // TODO: What if no broker connected yet
-        let mut brokers = self.brokers.write().await;
-        if let BrokerState::Alive(broker) = brokers
-            .iter_mut()
-            .find(|broker| matches!(broker.1, BrokerState::Alive { .. }))
-            .unwrap()
-            .1
-        {
-            broker.run_api_call_with_retry(request, api_version).await
-        } else {
-            todo!()
-        }
-    }
-
-    pub async fn fetch_topic_metadata(&self, topics: Vec<String>) {
-        // TODO: Unwraps
+    pub async fn fetch_topic_metadata(&self, topics: Vec<String>) -> Result<(), KafkaApiCallError> {
         let response = self
-            .send_request_to_any_broker(
+            .run_api_call_on_any_broker(
                 MetadataRequest {
                     allow_auto_topic_creation: self.client_options.allow_auto_topic_creation,
                     topics: topics
@@ -160,8 +136,7 @@ impl ClusterInner {
                 },
                 None,
             )
-            .await
-            .unwrap();
+            .await?;
 
         let mut metadata = self.metadata.write().await;
         response.topics.into_iter().for_each(|topic| {
@@ -188,6 +163,57 @@ impl ClusterInner {
                 },
             );
         });
+        // TODO: Handle partial errors(topics, partitions)
+
+        Ok(())
+    }
+
+    pub async fn run_api_call_on_specific_broker<T>(
+        &self,
+        broker_id: i32,
+        request: T,
+        api_version: Option<u16>,
+    ) -> Result<T::Response, KafkaApiCallError>
+    where
+        T: ApiCall,
+    {
+        let mut brokers = self.brokers.write().await;
+        let broker = loop {
+            if let Some(BrokerState::Alive(broker)) = brokers.get_mut(&broker_id) {
+                break broker;
+            };
+
+            drop(brokers);
+            debug!("Broker id {} not active", broker_id);
+            sleep(Duration::from_millis(100)).await;
+            brokers = self.brokers.write().await;
+        };
+
+        broker.run_api_call(request, api_version).await
+    }
+    pub async fn run_api_call_on_any_broker<T>(
+        &self,
+        request: T,
+        api_version: Option<u16>,
+    ) -> Result<T::Response, KafkaApiCallError>
+    where
+        T: ApiCall,
+    {
+        let mut brokers = self.brokers.write().await;
+        let broker = loop {
+            if let Some(broker) = brokers.iter_mut().find_map(|x| match x.1 {
+                BrokerState::Alive(broker) => Some(broker),
+                _ => None,
+            }) {
+                break broker;
+            }
+            drop(brokers);
+            debug!("No active kafka broker found");
+            sleep(Duration::from_millis(100)).await;
+            brokers = self.brokers.write().await;
+        };
+
+        broker.run_api_call(request, api_version).await
     }
 }
 

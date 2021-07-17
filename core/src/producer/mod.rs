@@ -20,8 +20,7 @@ pub mod record;
 
 pub struct Producer {
     loop_signal_sender: UnboundedSender<ProducerLoopSignal>,
-    cluster: Arc<Cluster>,
-    options: Arc<ProducerOptions>,
+    _cluster: Arc<Cluster>, // to keep cluster alive
 }
 
 impl Producer {
@@ -32,12 +31,11 @@ impl Producer {
 
         let producer_loop = ProducerLoop {
             cluster: cluster.inner.clone(),
-            options: options.clone(),
+            options,
         };
         tokio::spawn(producer_loop.producer_loop(loop_signal_receiver));
         Producer {
-            cluster,
-            options,
+            _cluster: cluster,
             loop_signal_sender,
         }
     }

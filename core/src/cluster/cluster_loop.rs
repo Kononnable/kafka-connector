@@ -10,10 +10,7 @@ use kafka_connector_protocol::{
     custom_types::tag_buffer::TagBuffer,
 };
 use log::trace;
-use tokio::sync::{
-    mpsc::{UnboundedReceiver, UnboundedSender},
-    RwLock,
-};
+use tokio::sync::mpsc::UnboundedReceiver;
 use tokio_stream::{wrappers::UnboundedReceiverStream, StreamExt};
 
 use super::{
@@ -90,25 +87,13 @@ pub(super) async fn cluster_loop(
                 // TODO: restart only when broker is not deleted(on metadata update)
             }
             ClusterLoopSignal::RefreshMetadataRequest => {
-                let mut brokers = cluster.brokers.write().await;
-                if let Some((_, BrokerState::Alive(broker))) = brokers
-                    .iter_mut()
-                    .find(|broker| matches!(broker.1, BrokerState::Alive { .. }))
-                {
-                    // TODO: Change to non-blocking
-                    refresh_cluster_metadata(
-                        broker,
-                        cluster.metadata.clone(),
-                        cluster.loop_signal_sender.clone(),
-                    )
-                    .await;
-                };
+                tokio::spawn(refresh_cluster_metadata(cluster.clone()));
             }
             ClusterLoopSignal::RefreshMetadataResponse(new_metadata) => {
                 let new_metadata = if let Some(new_metadata) = new_metadata {
                     new_metadata
                 } else {
-                    todo!("should retry when broker gets close")
+                    todo!("should retry when broker gets closed")
                 };
                 let mut brokers_to_start = HashMap::new();
                 {
@@ -151,9 +136,9 @@ pub(super) async fn cluster_loop(
                     for broker_data in brokers_to_start {
                         let addr = (broker_data.1 .0.as_str(), broker_data.1 .1 as u16)
                             .to_socket_addrs()
-                            .unwrap()
+                            .expect("Metadata broker address parsing failed")
                             .next()
-                            .unwrap(); // TODO: Remove unwraps
+                            .expect("Metadata broker address not found");
 
                         let broker = Broker::new(addr, cluster.client_options.clone());
                         broker.new_no_wait(cluster.loop_signal_sender.clone(), broker_data.0);
@@ -172,13 +157,9 @@ pub(super) async fn cluster_loop(
     trace!("Cluster loop close")
 }
 
-pub(crate) async fn refresh_cluster_metadata(
-    broker: &mut Broker<Alive>,
-    metadata: Arc<RwLock<Metadata>>,
-    sender: UnboundedSender<ClusterLoopSignal>,
-) {
+pub(crate) async fn refresh_cluster_metadata(cluster: Arc<ClusterInner>) {
     let topics = {
-        let metadata = metadata.read().await;
+        let metadata = cluster.metadata.read().await;
         metadata
             .topics
             .keys()
@@ -195,11 +176,12 @@ pub(crate) async fn refresh_cluster_metadata(
         include_topic_authorized_operations: false,
         tag_buffer: TagBuffer {},
     };
-    let response = broker.run_api_call_with_retry(request, None).await;
+    let response = cluster.run_api_call_on_any_broker(request, None).await;
     let response = if let Ok(response) = response {
         response
     } else {
-        if sender
+        if cluster
+            .loop_signal_sender
             .send(ClusterLoopSignal::RefreshMetadataResponse(None))
             .is_err()
         {
@@ -242,7 +224,8 @@ pub(crate) async fn refresh_cluster_metadata(
         })
         .collect();
     let metadata = Metadata { brokers, topics };
-    if sender
+    if cluster
+        .loop_signal_sender
         .send(ClusterLoopSignal::RefreshMetadataResponse(Some(metadata)))
         .is_err()
     {

@@ -3,7 +3,7 @@ use std::{
     sync::Arc,
 };
 
-use crate::cluster::{cluster_loop::BrokerState, metadata::Metadata, ClusterInner};
+use crate::cluster::{metadata::Metadata, ClusterInner};
 use kafka_connector_protocol::{
     api::produce::{ProduceRequest, ProduceRequestTopicData0, ProduceRequestTopicDataData0},
     custom_types::{
@@ -86,9 +86,6 @@ impl ProducerLoop {
         &self,
         broker_records: (i32, Vec<(ProducerRecord, RecordStatusReporter)>),
     ) {
-        // TODO: Unwraps
-        let mut brokers = self.cluster.brokers.write().await;
-        let broker = brokers.get_mut(&broker_records.0).unwrap();
         let topic_grouped = broker_records.1.into_iter().fold(
             HashMap::new(),
             |mut a: HashMap<String, Vec<_>>, b| {
@@ -127,14 +124,14 @@ impl ProducerLoop {
             timeout: 30_000,
             topic_data,
         };
-        match broker {
-            BrokerState::Alive(broker) => {
-                broker.run_api_call_with_retry(request, None).await.unwrap();
-            }
-            BrokerState::Initializing(_broker) => {
-                todo!()
-            }
-        }
+
+        // TODO: Unwrap
+        // TODO: Check for errors on specific messages
+        // TODO: Send acks to producers
+        self.cluster
+            .run_api_call_on_specific_broker(broker_records.0, request, None)
+            .await
+            .unwrap();
     }
 
     async fn group_records_by_brokers(
@@ -165,9 +162,11 @@ impl ProducerLoop {
                 .collect::<Vec<_>>()
         };
         if !topics_lacking_metadata.is_empty() {
+            // TODO: Handle errors
             self.cluster
                 .fetch_topic_metadata(topics_lacking_metadata)
-                .await;
+                .await
+                .unwrap();
         }
     }
 }

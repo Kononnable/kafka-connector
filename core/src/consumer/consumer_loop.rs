@@ -91,10 +91,7 @@ pub(super) async fn consumer_loop(
             } else {
                 todo!()
             };
-            broker
-                .run_api_call_with_retry_raw(request, None)
-                .await
-                .unwrap();
+            broker.run_api_call_raw(request, None).await.unwrap();
         }
     } else {
         todo!()
@@ -109,7 +106,7 @@ pub(super) async fn consumer_loop(
             todo!()
         };
         let offsets = broker
-            .run_api_call_with_retry(
+            .run_api_call(
                 ListOffsetsRequest {
                     replica_id: -1,
                     isolation_level: 0,
@@ -167,7 +164,7 @@ pub(super) async fn consumer_loop(
                 };
                 log::trace!("Sending fetch request");
                 let fetch_response = broker
-                    .run_api_call_with_retry(
+                    .run_api_call(
                         FetchRequest {
                             replica_id: -1,
                             max_wait_ms: 500,
@@ -293,7 +290,7 @@ pub(super) async fn consumer_loop(
                     .collect::<Vec<_>>();
                 for group_instance_id in x {
                     broker
-                        .run_api_call_with_retry(
+                        .run_api_call(
                             HeartbeatRequest {
                                 group_id: options.group_id.clone(),
                                 generation_id: initial_metadata.generation_id,
@@ -317,7 +314,7 @@ pub(super) async fn consumer_loop(
                 };
 
                 broker
-                    .run_api_call_with_retry(
+                    .run_api_call(
                         LeaveGroupRequest {
                             group_id: options.group_id.clone(),
                             members: vec![],

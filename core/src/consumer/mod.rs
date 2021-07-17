@@ -28,7 +28,6 @@ pub mod error;
 pub mod options;
 
 pub struct Consumer {
-    options: ConsumerOptions,
     loop_signal_sender: UnboundedSender<ConsumerLoopSignal>,
     message_receiver: UnboundedReceiver<Vec<Message>>,
 }
@@ -38,7 +37,7 @@ impl Consumer {
         // TODO: remove unwraps
         let coordinator_response = cluster
             .inner
-            .send_request_to_any_broker(
+            .run_api_call_on_any_broker(
                 FindCoordinatorRequest {
                     key: options.group_id.clone(),
                     key_type: 0, // TODO: enum value?
@@ -62,7 +61,7 @@ impl Consumer {
             0, 0, 0, 0, 0, 0, 0, 0,
         ]; // TODO:
         let join_group_response = broker
-            .run_api_call_with_retry_raw(
+            .run_api_call_raw(
                 // TODO: Proper values
                 JoinGroupRequest {
                     group_id: options.group_id.clone(),
@@ -93,7 +92,7 @@ impl Consumer {
         trace!("join_group_response :{:#?}", join_group_response);
 
         let join_group_response2 = broker
-            .run_api_call_with_retry_raw(
+            .run_api_call_raw(
                 // TODO: Proper values
                 JoinGroupRequest {
                     group_id: options.group_id.clone(),
@@ -153,14 +152,13 @@ impl Consumer {
             loop_signal_receiver,
             cluster.inner.clone(),
             consumer_group_metadata,
-            options.clone(),
+            options,
             coordinator_id,
             message_sender,
         ));
 
         drop(brokers);
         Consumer {
-            options,
             loop_signal_sender,
             message_receiver,
         }
