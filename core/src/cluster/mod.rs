@@ -177,6 +177,7 @@ impl ClusterInner {
     where
         T: ApiCall,
     {
+        // TODO: Timeout or retry count
         let mut brokers = self.brokers.write().await;
         let broker = loop {
             if let Some(BrokerState::Alive(broker)) = brokers.get_mut(&broker_id) {
@@ -199,6 +200,7 @@ impl ClusterInner {
     where
         T: ApiCall,
     {
+        // TODO: Timeout or retry count
         let mut brokers = self.brokers.write().await;
         let broker = loop {
             if let Some(broker) = brokers.iter_mut().find_map(|x| match x.1 {

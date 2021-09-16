@@ -12,7 +12,6 @@ pub struct KafkaClientOptions {
     #[builder(default = {4096})]
     pub buffer_size: usize,
     pub client_id: String,
-    // client.id
     // connections.max.idle.ms
     // metadata.max.age.ms
     // reconnect.backoff.max.ms

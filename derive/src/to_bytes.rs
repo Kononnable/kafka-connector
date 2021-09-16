@@ -16,7 +16,7 @@ pub fn generate_to_bytes(input: DeriveInput) -> TokenStream {
             fn serialize(&self, buf:&mut bytes::BytesMut, is_flexible_version: bool, version:u16) {
                 log::trace!("Serializing {:#?}", self);
                 #serialization
-                log::trace!("Serialization finished {:#?}", self);
+                log::debug!("Serialization finished {:#?}", self);
             }
         }
     };

@@ -86,17 +86,20 @@ impl ProducerLoop {
         &self,
         broker_records: (i32, Vec<(ProducerRecord, RecordStatusReporter)>),
     ) {
-        let topic_grouped = broker_records.1.into_iter().fold(
-            HashMap::new(),
-            |mut a: HashMap<String, Vec<_>>, b| {
+        let group_by_topic =
+            |mut a: HashMap<String, Vec<_>>, b: (ProducerRecord, RecordStatusReporter)| {
                 if let Some(x) = a.get_mut(&b.0.topic) {
                     x.push(b);
                 } else {
                     a.insert(b.0.topic.clone(), vec![b]);
                 };
                 a
-            },
-        );
+            };
+
+        let topic_grouped = broker_records
+            .1
+            .into_iter()
+            .fold(HashMap::new(), group_by_topic);
         let topic_data = topic_grouped
             .into_iter()
             .map(|data| ProduceRequestTopicData0 {
@@ -118,10 +121,11 @@ impl ProducerLoop {
                     .collect::<Vec<ProduceRequestTopicDataData0>>(),
             })
             .collect::<Vec<_>>();
+
         let request = ProduceRequest {
             transactional_id: NullableString::None,
-            acks: 1, // TODO: Acks config
-            timeout: 30_000,
+            acks: self.options.acks,
+            timeout: self.options.delivery_timeout_ms,
             topic_data,
         };
 

@@ -93,7 +93,14 @@ pub(super) async fn cluster_loop(
                 let new_metadata = if let Some(new_metadata) = new_metadata {
                     new_metadata
                 } else {
-                    todo!("should retry when broker gets closed")
+                    if cluster
+                        .loop_signal_sender
+                        .send(ClusterLoopSignal::RefreshMetadataRequest)
+                        .is_err()
+                    {
+                        log::debug!("Cannot refresh metadata - cluster loop already dropped");
+                    }
+                    continue;
                 };
                 let mut brokers_to_start = HashMap::new();
                 {
@@ -151,7 +158,6 @@ pub(super) async fn cluster_loop(
             }
         }
     }
-    // TODO: Should first try to gracefully close all producer/consumers?
     let mut brokers = cluster.brokers.write().await;
     brokers.clear();
     trace!("Cluster loop close")

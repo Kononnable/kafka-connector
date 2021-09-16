@@ -19,7 +19,7 @@ pub fn generate_from_bytes(input: DeriveInput) -> TokenStream {
                 let ret_val = #name {
                     #deserialization
                 };
-                log::trace!("Deserialization finished \n{:#?}", ret_val);
+                log::debug!("Deserialization finished \n{:#?}", ret_val);
                 ret_val
             }
         }
