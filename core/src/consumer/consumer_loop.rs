@@ -147,7 +147,7 @@ pub(super) async fn consumer_loop(
     };
 
     let send_heartbeat = futures::stream::repeat_with(|| ConsumerLoopSignal::Heartbeat)
-        .throttle(Duration::from_secs(2)); // TODO: configurable,  change value
+        .throttle(Duration::from_millis(options.heartbeat_interval_ms));
 
     let mut stream =
         Box::pin(send_heartbeat.merge(UnboundedReceiverStream::new(loop_signal_receiver)));
@@ -167,9 +167,9 @@ pub(super) async fn consumer_loop(
                     .run_api_call(
                         FetchRequest {
                             replica_id: -1,
-                            max_wait_ms: 500,
-                            min_bytes: 1,
-                            max_bytes: 52428800,
+                            max_wait_ms: options.fetch_max_wait_ms,
+                            min_bytes: options.fetch_min_bytes,
+                            max_bytes: options.fetch_max_bytes,
                             isolation_level: 1,
                             session_id: 0,
                             session_epoch: -1,
@@ -200,14 +200,14 @@ pub(super) async fn consumer_loop(
                                             .unwrap_or_default(),
                                         last_fetched_epoch: 0,
                                         log_start_offset: -1,
-                                        partition_max_bytes: 1048576,
+                                        partition_max_bytes: options.max_partition_fetch_bytes,
                                         tag_buffer: TagBuffer::default(),
                                     }],
                                     tag_buffer: TagBuffer::default(),
                                 },
                             ],
                             forgotten_topics_data: vec![],
-                            rack_id: "".to_owned(),
+                            rack_id: options.client_rack.clone(),
                             tag_buffer: TagBuffer::default(),
                         },
                         None,
