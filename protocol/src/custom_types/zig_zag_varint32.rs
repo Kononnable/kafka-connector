@@ -12,7 +12,7 @@ pub fn encode_zig_zag_32(n: i32) -> u32 {
     ((n << 1) ^ (n >> 31)) as u32
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct ZigZagVarInt32 {
     pub value: i32,
 }
@@ -34,11 +34,6 @@ impl ToBytes for ZigZagVarInt32 {
         let zigzag = encode_zig_zag_32(self.value);
         let varint = UnsignedVarInt32::new(zigzag);
         varint.serialize(buf, is_flexible_version, version);
-    }
-}
-impl Default for ZigZagVarInt32 {
-    fn default() -> Self {
-        ZigZagVarInt32 { value: 0 }
     }
 }
 

@@ -267,7 +267,7 @@ impl Broker<Alive> {
                 break;
             }
         }
-        return response;
+        response
     }
     /// Run api call with automatic retry on errors on which message can just be resend
     pub async fn run_api_call<T>(

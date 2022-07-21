@@ -13,7 +13,7 @@ impl ToBytes for ZigZagString {
     fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool, version: u16) {
         let len = ZigZagVarInt32::new(self.value.len() as i32);
         len.serialize(buf, is_flexible_version, version);
-        buf.put_slice(&self.value.as_bytes())
+        buf.put_slice(self.value.as_bytes())
     }
 }
 

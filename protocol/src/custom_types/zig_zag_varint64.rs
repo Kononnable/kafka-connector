@@ -12,7 +12,7 @@ pub fn encode_zig_zag_64(n: i64) -> u64 {
     ((n << 1) ^ (n >> 63)) as u64
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct ZigZagVarInt64 {
     pub value: i64,
 }
@@ -34,11 +34,6 @@ impl ToBytes for ZigZagVarInt64 {
         let zigzag = encode_zig_zag_64(self.value);
         let varint = UnsignedVarInt64::new(zigzag);
         varint.serialize(buf, is_flexible_version, version);
-    }
-}
-impl Default for ZigZagVarInt64 {
-    fn default() -> Self {
-        ZigZagVarInt64 { value: 0 }
     }
 }
 

@@ -220,30 +220,28 @@ pub(super) async fn consumer_loop(
                     .into_iter()
                     .flat_map(|topic| {
                         let topic_name = topic.topic.clone();
-                        let v: Vec<_> = topic
-                            .partition_responses
-                            .into_iter()
-                            .flat_map(move |partition| {
-                                let partition_no = partition.partition;
-                                if partition.error_code != 0 {
-                                    panic!(
-                                        "Error fetching partition data - error code:  {}",
-                                        partition.error_code
-                                    )
-                                }
-                                let topic_name = topic_name.clone();
-                                let v: Vec<_> = partition
-                                    .record_set
-                                    .batches
-                                    .into_iter()
-                                    .flat_map(move |batch| {
-                                        let v: Vec<_> = batch
-                                            .records
-                                            .into_iter()
-                                            .map(|record| {
+                        let v: Vec<_> =
+                            topic
+                                .partition_responses
+                                .into_iter()
+                                .flat_map(move |partition| {
+                                    let partition_no = partition.partition;
+                                    if partition.error_code != 0 {
+                                        panic!(
+                                            "Error fetching partition data - error code:  {}",
+                                            partition.error_code
+                                        )
+                                    }
+                                    let topic_name = topic_name.clone();
+
+                                    partition.record_set.batches.into_iter().flat_map(
+                                        move |batch| {
+                                            let topic_name = topic_name.clone();
+                                            batch.records.into_iter().map(move |record| {
                                                 let headers: Vec<_> = record.headers.into();
+                                                let topic_name = topic_name.clone();
                                                 Message {
-                                                    topic: topic_name.clone(),
+                                                    topic: topic_name,
                                                     key: record.key.into(),
                                                     payload: record.value.into(),
                                                     partition: partition_no,
@@ -257,13 +255,10 @@ pub(super) async fn consumer_loop(
                                                         .collect(),
                                                 }
                                             })
-                                            .collect();
-                                        v.into_iter()
-                                    })
-                                    .collect();
-                                v.into_iter()
-                            })
-                            .collect();
+                                        },
+                                    )
+                                })
+                                .collect();
                         v
                     })
                     .collect();

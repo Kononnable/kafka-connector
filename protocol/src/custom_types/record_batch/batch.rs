@@ -213,7 +213,7 @@ impl ToBytes for RecordBatch {
         }
         for record in self.records.iter() {
             RecordBatch::serialize_record(
-                &record,
+                record,
                 &mut crc_buffer,
                 is_flexible_version,
                 first_timestamp,

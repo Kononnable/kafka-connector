@@ -1,21 +1,23 @@
+use std::fmt::Write as _;
 use std::iter;
 
 use crate::transformer_step2::{ApiCall2, ApiField2, File};
 
 pub fn generate_content(file: File) -> String {
     let mut ret_val = "use super::prelude::*;\n".to_owned();
-    ret_val.push_str(&format!(
-        "pub type {}Request = {}Request{};\n",
+    let _ = writeln!(
+        ret_val,
+        "pub type {}Request = {}Request{};",
         file.file_name,
         file.file_name,
         file.api_calls.last().unwrap().api_struct_version
-    ));
+    );
 
     for api_call in file.api_calls {
         let api_struct = generate_api_struct(&api_call);
         let structs = generate_struct(&api_call);
         let get_first_error = generate_get_first_error(&api_call);
-        ret_val.push_str(&format!("{}\n{}\n{}", api_struct, structs, get_first_error));
+        let _ = write!(ret_val, "{}\n{}\n{}", api_struct, structs, get_first_error);
     }
     ret_val
 }
@@ -25,38 +27,44 @@ fn generate_api_struct(api_call: &ApiCall2) -> String {
         "impl ApiCall for {}Request{} {{\n",
         api_call.api_name, api_call.api_struct_version
     );
-    def.push_str(&format!(
-        "type Response = {}Response{};\n",
+    let _ = writeln!(
+        def,
+        "type Response = {}Response{};",
         api_call.api_name, api_call.api_struct_version
-    ));
-    def.push_str(&format!(
-        "fn get_min_supported_version()->u16{{\n{}\n}}\n",
+    );
+    let _ = writeln!(
+        def,
+        "fn get_min_supported_version()->u16{{\n{}\n}}",
         api_call.min_supported_version
-    ));
-    def.push_str(&format!(
-        "fn get_max_supported_version()->u16{{\n{}\n}}\n",
+    );
+    let _ = writeln!(
+        def,
+        "fn get_max_supported_version()->u16{{\n{}\n}}",
         api_call.max_supported_version
-    ));
-    def.push_str(&format!(
-        "fn get_api_key()->ApiNumbers{{\nApiNumbers::{}\n}}\n",
+    );
+    let _ = writeln!(
+        def,
+        "fn get_api_key()->ApiNumbers{{\nApiNumbers::{}\n}}",
         api_call.api_name
-    ));
+    );
     def.push_str("fn get_first_error(response: &Self::Response) -> Option<ApiError>{{\nSelf::Response::get_first_error(response)\n}}\n");
     if api_call.min_flexible_versions.is_none() {
         def.push_str("fn is_flexible_version(_version: u16) -> bool {\n false \n}");
     } else if api_call.min_supported_version == api_call.min_flexible_versions.unwrap() {
         def.push_str("fn is_flexible_version(_version: u16) -> bool {\n true \n}");
     } else {
-        def.push_str(&format!(
+        let _ = write!(
+            def,
             "fn is_flexible_version(version: u16) -> bool {{\n version >= {} }}",
             api_call.min_flexible_versions.unwrap()
-        ));
+        );
     }
 
-    def.push_str(&format!(
+    let _ = write!(
+        def,
         "{}{}{}}}",
         SERIALIZATION, RESPONSE_DESERIALIZATION, REQUEST_DESERIALIZATION
-    ));
+    );
     def
 }
 const SERIALIZATION: &str = r#"fn serialize(&self,version:u16, buf: &mut BytesMut,correlation_id: i32,client_id: &str){
@@ -102,10 +110,11 @@ fn generate_struct(api_call: &ApiCall2) -> String {
             .iter()
             .map(generate_field)
             .fold("".to_string(), |acc, x| format!("{}{}", acc, x));
-        ret_val.push_str(&format!(
-            "{}{}{}{}",
-            derive, struct_name_with_version, fields, "}\n"
-        ));
+        let _ = writeln!(
+            ret_val,
+            "{}{}{}}}",
+            derive, struct_name_with_version, fields
+        );
     }
     ret_val
 }
@@ -120,30 +129,31 @@ fn generate_field(field: &ApiField2) -> String {
 fn generate_get_first_error(api_call: &ApiCall2) -> String {
     let mut impl_def = "".to_owned();
     let response = api_call.response_structs.first().unwrap();
-    impl_def.push_str(&format!(
-        "impl {}{} {{\nfn get_first_error(&self) -> Option<ApiError>{{\n",
+    let _ = writeln!(
+        impl_def,
+        "impl {}{} {{\nfn get_first_error(&self) -> Option<ApiError>{{",
         response.name, api_call.api_struct_version
-    ));
+    );
     if response
         .fields
         .iter()
         .any(|x| x.name == "error_code" && x.ty == "Int16")
     {
-        impl_def.push_str(&"    if self.error_code !=0 {\n");
-        impl_def.push_str(&"        return Some(self.error_code.into());\n");
-        impl_def.push_str(&"    }\n");
+        impl_def.push_str("    if self.error_code !=0 {\n");
+        impl_def.push_str("        return Some(self.error_code.into());\n");
+        impl_def.push_str("    }\n");
     } else if response
         .fields
         .iter()
         .any(|x| x.name == "error_code" && x.ty == "Option<Int16>")
     {
         impl_def.push_str(
-            &"    if self.error_code.is_some() && self.error_code.unwrap_or_default() !=0 {\n",
+            "    if self.error_code.is_some() && self.error_code.unwrap_or_default() !=0 {\n",
         );
-        impl_def.push_str(&"        return self.error_code.map(ApiError::from);\n");
-        impl_def.push_str(&"    }\n");
+        impl_def.push_str("        return self.error_code.map(ApiError::from);\n");
+        impl_def.push_str("    }\n");
     }
-    impl_def.push_str(&"None\n}\n}");
+    impl_def.push_str("None\n}\n}");
 
     impl_def
 }

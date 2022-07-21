@@ -42,8 +42,8 @@ pub async fn main() -> anyhow::Result<()> {
 
     let x = message_stream.try_next().await.unwrap();
     println!("{:?}", x);
-    drop(message_stream);
-    println!("Sleep 2 sec");
-    sleep(Duration::from_secs(2));
+    // std::mem::drop(message_stream);
+    // println!("Sleep 2 sec");
+    // sleep(Duration::from_secs(2));
     Ok(())
 }

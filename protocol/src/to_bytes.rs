@@ -60,7 +60,7 @@ impl ToBytes for str {
                 buf.put_i16(self.len() as i16);
             }
         }
-        buf.put_slice(&self.as_bytes());
+        buf.put_slice(self.as_bytes());
     }
 }
 impl ToBytes for String {

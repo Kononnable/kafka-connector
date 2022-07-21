@@ -28,7 +28,7 @@ async fn main() -> anyhow::Result<()> {
 
     let parsed_definitions: Vec<_> = api_definitions
         .iter()
-        .map(|definition| parse_api_call(&definition).unwrap().1)
+        .map(|definition| parse_api_call(definition).unwrap().1)
         .collect();
 
     let transformed_definitions = group_api_calls(parsed_definitions);

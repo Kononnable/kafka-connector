@@ -151,7 +151,7 @@ impl ProducerLoop {
 
     async fn fetch_topic_metadata(
         &self,
-        message_queue: &mut Vec<(ProducerRecord, RecordStatusReporter)>,
+        message_queue: &mut [(ProducerRecord, RecordStatusReporter)],
     ) {
         let topics_lacking_metadata = {
             let topics = message_queue

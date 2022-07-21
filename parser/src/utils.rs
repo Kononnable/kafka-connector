@@ -1,3 +1,5 @@
+use std::fmt::Write as _;
+
 pub fn to_upper_case(input: &str) -> String {
     let mut transformed = String::new();
     let mut uppercase_next = true;
@@ -23,7 +25,7 @@ pub fn to_snake_case(input: &str) -> String {
                 start = false;
                 transformed.push_str(&ch.to_lowercase().to_string());
             } else {
-                transformed.push_str(&format!("_{}", &ch.to_lowercase()));
+                let _ = write!(transformed, "_{}", &ch.to_lowercase());
             }
         } else {
             transformed.push(ch);

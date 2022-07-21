@@ -24,7 +24,7 @@ pub fn serialize_unsigned_varint_32(value: u32, buf: &mut BytesMut) {
     buf.put_slice(len);
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct UnsignedVarInt32 {
     pub value: u32,
 }
@@ -43,11 +43,6 @@ impl FromBytes for UnsignedVarInt32 {
 impl ToBytes for UnsignedVarInt32 {
     fn serialize(&self, buf: &mut BytesMut, _is_flexible_version: bool, _version: u16) {
         serialize_unsigned_varint_32(self.value, buf);
-    }
-}
-impl Default for UnsignedVarInt32 {
-    fn default() -> Self {
-        UnsignedVarInt32 { value: 0 }
     }
 }
 

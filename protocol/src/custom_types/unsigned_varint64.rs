@@ -23,7 +23,7 @@ pub fn serialize_unsigned_varint_64(value: u64, buf: &mut BytesMut) {
     buf.put_slice(len);
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct UnsignedVarInt64 {
     pub value: u64,
 }
@@ -42,11 +42,6 @@ impl FromBytes for UnsignedVarInt64 {
 impl ToBytes for UnsignedVarInt64 {
     fn serialize(&self, buf: &mut BytesMut, _is_flexible_version: bool, _version: u16) {
         serialize_unsigned_varint_64(self.value, buf);
-    }
-}
-impl Default for UnsignedVarInt64 {
-    fn default() -> Self {
-        UnsignedVarInt64 { value: 0 }
     }
 }
 
