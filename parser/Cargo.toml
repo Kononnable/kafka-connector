@@ -1,16 +1,15 @@
 [package]
-name = "parser"
-version = "0.1.0"
 authors = ["kononnable <kononnable@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
+name = "parser"
 publish = false
+version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-nom="7.1.1"
-tokio={ version = "1.0.2", features = ["rt", "macros","rt-multi-thread"]}
-reqwest="0.11.0"
-anyhow="1.0.38"
-regex="1.4.3"
+anyhow = "1.0.38"
+nom = "7.1.1"
+regex = "1.4.3"
+tokio = {version = "1.0.2", features = ["rt", "macros", "rt-multi-thread"]}
