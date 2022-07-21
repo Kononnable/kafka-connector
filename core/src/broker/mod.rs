@@ -53,7 +53,7 @@ pub struct Alive {
     supported_versions: HashMap<u16, (u16, u16)>,
     active_requests: ActiveRequestList,
     socket_writer: OwnedWriteHalf,
-    connection_closed_receiver: oneshot::Receiver<()>,
+    _connection_closed_receiver: oneshot::Receiver<()>,
     last_correlation: i32,
 }
 
@@ -90,7 +90,7 @@ impl Broker<Initializing> {
             send_buffer: self.send_buffer,
             state: Alive {
                 active_requests,
-                connection_closed_receiver,
+                _connection_closed_receiver: connection_closed_receiver,
                 last_correlation: 0,
                 socket_writer: write_half,
                 supported_versions: Default::default(),
