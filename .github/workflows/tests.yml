@@ -31,7 +31,7 @@ jobs:
           profile: minimal
           override: true
           components: clippy, rustfmt
-          
+
       - name: Get Date
         id: get-date
         run: |
@@ -62,16 +62,16 @@ jobs:
           command: fmt
           args: -- --check
 
-      - name: Deny invalid licenses
-        uses: EmbarkStudios/cargo-deny-action@v1
-        with:
-          command: check license
-
       - name: Test
         uses: actions-rs/cargo@v1
         with:
           command: test
           args: --workspace
+
+      - name: Deny invalid licenses
+        uses: EmbarkStudios/cargo-deny-action@v1
+        with:
+          command: check license
 
       - name: Clear bloat
         run: find . -path "./target/debug/deps*" -type f ! -name "*.*" | xargs rm
