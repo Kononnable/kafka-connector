@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "master"
+      - "third-approach"
   pull_request:
 
 env:
