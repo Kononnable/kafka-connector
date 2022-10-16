@@ -9,6 +9,7 @@ use convert_case::{Case, Casing};
 use crate::api_numbers::ApiNumbers;
 
 mod api_versions;
+mod metadata;
 
 #[derive(Debug)]
 struct ApiStruct {
@@ -30,13 +31,14 @@ struct Field {
 
 #[derive(Debug)]
 enum FieldType {
-    // Boolean,
+    Boolean,
     // Bytes,
     // Int8,
     Int16,
     Int32,
     // Int64,
     // Float64,
+    NullableString,
     String,
     TagBuffer,
     SubObject(Vec<Field>),
@@ -56,8 +58,8 @@ impl Field {
 impl FieldType {
     pub fn is_copyable(&self) -> bool {
         match self {
-            FieldType::Int16 | FieldType::Int32 | FieldType::TagBuffer => true,
-            FieldType::String | FieldType::SubObject(_) => false,
+            FieldType::Int16 | FieldType::Int32 | FieldType::Boolean | FieldType::TagBuffer => true,
+            FieldType::String | FieldType::NullableString | FieldType::SubObject(_) => false,
         }
     }
 }
@@ -78,9 +80,24 @@ fn generate_code(api_call: &ApiStruct) -> String {
         api_call.name
     ));
     for field in &api_call.request_fields {
+        let mut field_type = match &field.type_ {
+            FieldType::SubObject(_sub) => {
+                format!(
+                    "{}Request{}<V>",
+                    api_call.name,
+                    field.name.to_case(Case::UpperCamel)
+                )
+            }
+            _ => {
+                format!("{:?}", &field.type_)
+            }
+        };
+        if field.is_array {
+            field_type = format!("Vec<{}>", field_type);
+        }
         generated.push_str(&format!(
-            "    pub fn with_{}(&mut self, {}:{:?}){{\n",
-            field.name, field.name, field.type_
+            "    pub fn with_{}(&mut self, {}:{}){{\n",
+            field.name, field.name, field_type
         ));
         if field.min_version > 0 {
             generated.push_str(&format!(
@@ -137,7 +154,7 @@ fn generate_code(api_call: &ApiStruct) -> String {
             }
             _ => {
                 generated.push_str(&format!(
-                    "self.{}.serialize(bytes,is_flexible);\n",
+                    "self.{}.serialize(bytes,is_flexible,version);\n",
                     field.name
                 ));
             }
@@ -148,7 +165,41 @@ fn generate_code(api_call: &ApiStruct) -> String {
     }
     generated.push_str("    }\n");
     generated.push_str("}\n\n");
-    // TODO: Subobjects
+
+    while let Some((name, fields)) = sub_objects.pop() {
+        generated.push_str(&format!(
+            "impl<const V: u8> ToBytes for {}Request{}<V>{{\n",
+            api_call.name, name
+        ));
+        generated.push_str(
+            "    fn serialize(&self, bytes: &mut BytesMut, is_flexible: bool, version: u16) {\n",
+        );
+        for field in fields {
+            if field.min_version > 0 {
+                generated.push_str(&format!("if version >= {} {{\n", field.min_version));
+            }
+            match &field.type_ {
+                FieldType::SubObject(sub) => {
+                    sub_objects.push((field.name.to_case(Case::UpperCamel), sub));
+                    generated.push_str(&format!(
+                        "self.{}.serialize(bytes,is_flexible,version);\n",
+                        field.name
+                    ));
+                }
+                _ => {
+                    generated.push_str(&format!(
+                        "self.{}.serialize(bytes,is_flexible,version);\n",
+                        field.name
+                    ));
+                }
+            }
+            if field.min_version > 0 {
+                generated.push_str("}\n");
+            }
+        }
+        generated.push_str("}\n\n");
+        generated.push_str("}\n\n");
+    }
 
     generate_struct(&mut generated, api_call, StructType::Response);
 
@@ -217,16 +268,27 @@ fn generate_code(api_call: &ApiStruct) -> String {
         match &field.type_ {
             FieldType::SubObject(sub) => {
                 sub_objects.push((field.name.to_case(Case::UpperCamel), sub));
-                generated.push_str(&format!(
-                    "Vec::<{}Response{}<V>>::deserialize(bytes,is_flexible,version)\n",
+                let mut field_type = format!(
+                    "{}Response{}<V>",
                     api_call.name,
                     field.name.to_case(Case::UpperCamel)
+                );
+                if field.is_array {
+                    field_type = format!("Vec::<{}>", field_type);
+                }
+                generated.push_str(&format!(
+                    "{}::deserialize(bytes,is_flexible,version)\n",
+                    field_type
                 ));
             }
             _ => {
+                let mut field_type = format!("{:?}", field.type_);
+                if field.is_array {
+                    field_type = format!("Vec<{}>", field_type);
+                }
                 generated.push_str(&format!(
-                    "{:?}::deserialize(bytes,is_flexible,version)\n",
-                    field.type_
+                    "{}::deserialize(bytes,is_flexible,version)\n",
+                    field_type
                 ));
             }
         }
@@ -243,10 +305,18 @@ fn generate_code(api_call: &ApiStruct) -> String {
 
     generated.push_str("    }\n\n");
     generated.push_str("    fn get_general_error(&self) -> Option<ApiError> {\n");
-    generated.push_str("        match self.error_code {\n");
-    generated.push_str("            0 => None,\n");
-    generated.push_str("            error_code => Some(ApiError::from(error_code)),\n");
-    generated.push_str("        }\n");
+    if api_call
+        .response_fields
+        .iter()
+        .any(|x| x.name == "error_code")
+    {
+        generated.push_str("        match self.error_code {\n");
+        generated.push_str("            0 => None,\n");
+        generated.push_str("            error_code => Some(ApiError::from(error_code)),\n");
+        generated.push_str("        }\n");
+    } else {
+        generated.push_str("        None\n");
+    }
     generated.push_str("    }\n");
     generated.push_str("}\n\n");
 
@@ -303,16 +373,27 @@ fn generate_code(api_call: &ApiStruct) -> String {
             match &field.type_ {
                 FieldType::SubObject(sub) => {
                     sub_objects.push((field.name.to_case(Case::UpperCamel), sub));
-                    generated.push_str(&format!(
-                        "Vec::<{}Response{}<V>>::deserialize(bytes,is_flexible,version)\n",
+                    let mut field_type = format!(
+                        "{}Response{}<V>",
                         api_call.name,
                         field.name.to_case(Case::UpperCamel)
+                    );
+                    if field.is_array {
+                        field_type = format!("Vec::<{}>", field_type);
+                    }
+                    generated.push_str(&format!(
+                        "{}::deserialize(bytes,is_flexible,version)\n",
+                        field_type
                     ));
                 }
                 _ => {
+                    let mut field_type = format!("{:?}", field.type_);
+                    if field.is_array {
+                        field_type = format!("Vec::<{}>", field_type);
+                    }
                     generated.push_str(&format!(
-                        "{:?}::deserialize(bytes,is_flexible, version)\n",
-                        field.type_
+                        "{}::deserialize(bytes,is_flexible,version)\n",
+                        field_type
                     ));
                 }
             }
@@ -371,7 +452,7 @@ fn generate_struct(generated: &mut String, api_call: &ApiStruct, struct_type: St
             let mut field_type = if let FieldType::SubObject(sub) = &field.type_ {
                 let field_name = field.name.to_case(Case::UpperCamel);
                 sub_objects.push((field_name.clone(), sub));
-                format!("{}{:?}{}", api_call.name, struct_type, field_name)
+                format!("{}{:?}{}<V>", api_call.name, struct_type, field_name)
             } else {
                 format!("{:?}", field.type_)
             };
@@ -384,9 +465,9 @@ fn generate_struct(generated: &mut String, api_call: &ApiStruct, struct_type: St
     }
 }
 
-fn generate_mod_file(api_calls: Vec<ApiStruct>) -> String {
+fn generate_mod_file(api_calls: &[ApiStruct]) -> String {
     let mut generated = String::new();
-    for api_call in &api_calls {
+    for api_call in api_calls {
         generated.push_str(&format!(
             "pub mod {};\n",
             api_call.name.to_case(Case::Snake)
@@ -417,10 +498,11 @@ fn api_codegen() {
     const GENERATE_FILES: bool = true;
     const FILE_PATH_PREFIX: &str = "/src/api/generated/";
 
-    let api_calls = vec![api_versions::get_api_call()];
+    let api_calls = [api_versions::get_api_call(), metadata::get_api_call()];
 
     for api_struct in &api_calls {
         let generated = generate_code(api_struct);
+
         let generated = format_code(generated);
 
         let file_name = api_struct.name.to_case(convert_case::Case::Snake);
@@ -444,7 +526,7 @@ fn api_codegen() {
         }
     }
 
-    let generated_mod = generate_mod_file(api_calls);
+    let generated_mod = generate_mod_file(&api_calls);
     let generated_mod = format_code(generated_mod);
     let mod_file_path = format!(
         "{}{}mod.rs",

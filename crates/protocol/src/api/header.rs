@@ -28,12 +28,12 @@ impl<'a> HeaderRequest<'a> {
         }
     }
     pub fn serialize(&self, bytes: &mut BytesMut, is_flexible: bool, version: u16) {
-        self.api_key.serialize(bytes, is_flexible);
-        self.api_version.serialize(bytes, is_flexible);
-        self.correlation_id.serialize(bytes, is_flexible);
-        self.client_id.serialize(bytes, is_flexible);
+        self.api_key.serialize(bytes, is_flexible, version);
+        self.api_version.serialize(bytes, is_flexible, version);
+        self.correlation_id.serialize(bytes, is_flexible, version);
+        self.client_id.serialize(bytes, is_flexible, version);
         if version >= 2 {
-            self.tag_buffer.serialize(bytes, is_flexible);
+            self.tag_buffer.serialize(bytes, is_flexible, version);
         }
     }
 }

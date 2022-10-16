@@ -6,7 +6,7 @@ use super::{from_bytes::FromBytes, to_bytes::ToBytes, unsigned_varint32::Unsigne
 pub struct TagBuffer {}
 
 impl ToBytes for TagBuffer {
-    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool) {
+    fn serialize(&self, buf: &mut BytesMut, is_flexible_version: bool, _version: u16) {
         UnsignedVarInt32::new(0).serialize(buf, is_flexible_version);
     }
 }

@@ -48,13 +48,15 @@ impl<const V: u8> ApiRequest for ApiVersionsRequest<V> {
             }
         };
         if version >= 3 {
-            self.client_software_name.serialize(bytes, is_flexible);
+            self.client_software_name
+                .serialize(bytes, is_flexible, version);
         }
         if version >= 3 {
-            self.client_software_version.serialize(bytes, is_flexible);
+            self.client_software_version
+                .serialize(bytes, is_flexible, version);
         }
         if version >= 3 {
-            self.tag_buffer.serialize(bytes, is_flexible);
+            self.tag_buffer.serialize(bytes, is_flexible, version);
         }
     }
 }
