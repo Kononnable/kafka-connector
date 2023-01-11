@@ -1,36 +1,34 @@
 use std::{
-    env, fs,
+    env,
     io::Write,
     process::{Command, Stdio},
 };
 
 use convert_case::{Case, Casing};
+use expect_test::expect_file;
 
 use crate::api_numbers::ApiNumbers;
 
-mod api_versions;
-mod metadata;
-
 #[derive(Debug)]
-struct ApiStruct {
-    name: &'static str,
-    key: ApiNumbers,
-    min_flexible_version: u8,
-    max_version: u8,
-    request_fields: Vec<Field>,
-    response_fields: Vec<Field>,
+pub struct ApiStruct {
+    pub name: &'static str,
+    pub key: ApiNumbers,
+    pub min_flexible_version: u8,
+    pub max_version: u8,
+    pub request_fields: Vec<Field>,
+    pub response_fields: Vec<Field>,
 }
 
 #[derive(Debug)]
-struct Field {
-    name: &'static str,
-    type_: FieldType,
-    is_array: bool,
-    min_version: u8,
+pub struct Field {
+    pub name: &'static str,
+    pub type_: FieldType,
+    pub is_array: bool,
+    pub min_version: u8,
 }
 
 #[derive(Debug)]
-enum FieldType {
+pub enum FieldType {
     Boolean,
     // Bytes,
     // Int8,
@@ -64,12 +62,12 @@ impl FieldType {
     }
 }
 #[derive(Debug)]
-enum StructType {
+pub enum StructType {
     Request,
     Response,
 }
 
-fn generate_code(api_call: &ApiStruct) -> String {
+pub fn generate_code(api_call: &ApiStruct) -> String {
     let mut generated = String::new();
     generated.push_str("use super::super::prelude::*;\n\n");
 
@@ -493,14 +491,10 @@ fn format_code(generated: String) -> String {
     formated
 }
 
-#[test]
-fn api_codegen() {
-    const GENERATE_FILES: bool = true;
+pub fn api_codegen(api_definitions: &[ApiStruct]) {
     const FILE_PATH_PREFIX: &str = "/src/api/generated/";
 
-    let api_calls = [api_versions::get_api_call(), metadata::get_api_call()];
-
-    for api_struct in &api_calls {
+    for api_struct in api_definitions {
         let generated = generate_code(api_struct);
 
         let generated = format_code(generated);
@@ -514,19 +508,11 @@ fn api_codegen() {
             file_name
         );
 
-        if GENERATE_FILES {
-            fs::write(file_name, generated).unwrap();
-        } else {
-            let actual = fs::read_to_string(&file_name).unwrap();
-            assert_eq!(
-                generated, actual,
-                "Difference in generated file found {}",
-                file_name
-            );
-        }
+        let expected = expect_file![file_name];
+        expected.assert_eq(&generated);
     }
 
-    let generated_mod = generate_mod_file(&api_calls);
+    let generated_mod = generate_mod_file(api_definitions);
     let generated_mod = format_code(generated_mod);
     let mod_file_path = format!(
         "{}{}mod.rs",
@@ -534,13 +520,6 @@ fn api_codegen() {
         FILE_PATH_PREFIX
     );
 
-    if GENERATE_FILES {
-        fs::write(mod_file_path, generated_mod).unwrap();
-    } else {
-        let actual_mod_file = fs::read_to_string(&mod_file_path).unwrap();
-        assert_eq!(
-            generated_mod, actual_mod_file,
-            "Difference in generated file found mod.rs",
-        );
-    }
+    let expected = expect_file![mod_file_path];
+    expected.assert_eq(&generated_mod);
 }

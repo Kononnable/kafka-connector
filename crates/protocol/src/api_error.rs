@@ -225,6 +225,10 @@ pub enum ApiError {
     TransactionalIdNotFound,
     #[error("The fetch session encountered inconsistent topic ID usage.")]
     FetchSessionTopicIdError,
+    #[error("The new ISR contains at least one ineligible replica.")]
+    IneligibleReplica,
+    #[error("The AlterPartition request successfully updated the partition state but the leader has changed.")]
+    NewLeaderElected,
     #[error("Unknown error code returned from kafka {0}.")]
     UnknownErrorCode(i16),
 }
@@ -338,6 +342,8 @@ impl From<i16> for ApiError {
             104 => ApiError::InconsistentClusterId,
             105 => ApiError::TransactionalIdNotFound,
             106 => ApiError::FetchSessionTopicIdError,
+            107 => ApiError::IneligibleReplica,
+            108 => ApiError::NewLeaderElected,
             0 => panic!("Kafka error code 0 is not an error"),
             x => ApiError::UnknownErrorCode(x),
         }
@@ -454,6 +460,8 @@ impl ApiError {
             | ApiError::BrokerIdNotRegistered
             | ApiError::InconsistentClusterId
             | ApiError::TransactionalIdNotFound
+            | ApiError::IneligibleReplica
+            | ApiError::NewLeaderElected
             | ApiError::UnknownErrorCode(_) => false,
         }
     }

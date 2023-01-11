@@ -17,3 +17,4 @@ unsigned-varint = "0.7.1"
 
 [dev-dependencies]
 convert_case = "0.6.0"
+expect-test = "1.4.0"

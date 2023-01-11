@@ -1,8 +1,10 @@
 #[cfg(test)]
-mod codegen;
+mod definitions;
 mod generated;
-mod header;
+#[cfg(test)]
+mod generator;
 
+pub mod header;
 pub use generated::*;
 
 mod prelude {
