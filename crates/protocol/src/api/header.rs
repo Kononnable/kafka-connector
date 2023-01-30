@@ -1,5 +1,7 @@
 use std::fmt::Debug;
 
+use crate::types::tag_buffer;
+
 use super::prelude::*;
 
 #[derive(Debug)]
@@ -24,7 +26,7 @@ impl<'a> HeaderRequest<'a> {
             api_version: api_version as Int16,
             correlation_id,
             client_id: NullableStr::Some(client_id),
-            tag_buffer: TagBuffer {},
+            tag_buffer: TagBuffer::default(),
         }
     }
     pub fn serialize(&self, bytes: &mut BytesMut, is_flexible: bool, version: u16) {
@@ -41,18 +43,19 @@ impl<'a> HeaderRequest<'a> {
 #[derive(Debug)]
 pub struct HeaderResponse {
     pub correlation: Int32,
-    // #[min_version = 2]
+    // #[min_version = 1]
     pub tag_buffer: TagBuffer,
 }
 
 impl HeaderResponse {
     pub fn deserialize(buf: &mut Bytes, is_flexible_version: bool, version: u16) -> Self {
         let correlation = Int32::deserialize(buf, is_flexible_version, version);
-        let tag_buffer = if version >= 2 {
+        let tag_buffer = if version >= 1 {
             TagBuffer::deserialize(buf, is_flexible_version, version)
         } else {
             TagBuffer::default()
         };
+        // let tag_buffer = Default::default();
         HeaderResponse {
             correlation,
             tag_buffer,

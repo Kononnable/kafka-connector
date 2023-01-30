@@ -99,7 +99,7 @@ pub fn generate_code(api_call: &ApiStruct) -> String {
         ));
         if field.min_version > 0 {
             generated.push_str(&format!(
-                "        debug_assert!(V < {}, \"Field not supported in this version of request\");\n",
+                "        debug_assert!(V <= {}, \"Field not supported in this version of request\");\n",
                 field.min_version
             ));
         }
@@ -229,7 +229,7 @@ pub fn generate_code(api_call: &ApiStruct) -> String {
         ));
         if field.min_version > 0 {
             generated.push_str(&format!(
-                "        debug_assert!(V < {}, \"Field not supported in this version of response\");\n",
+                "        debug_assert!(V <= {}, \"Field not supported in this version of response\");\n",
                 field.min_version
             ));
         }
@@ -249,10 +249,10 @@ pub fn generate_code(api_call: &ApiStruct) -> String {
     ));
     generated.push_str("        let correlation = match is_flexible {\n");
     generated.push_str(
-        "            true=> HeaderResponse::deserialize(bytes, false, 2).correlation, \n",
+        "            true=> HeaderResponse::deserialize(bytes, false, 1).correlation, \n",
     );
     generated.push_str(
-        "            false=> HeaderResponse::deserialize(bytes, false, 1).correlation, \n",
+        "            false=> HeaderResponse::deserialize(bytes, false, 0).correlation, \n",
     );
     generated.push_str("        };\n");
 
@@ -347,7 +347,7 @@ pub fn generate_code(api_call: &ApiStruct) -> String {
             ));
             if field.min_version > 0 {
                 generated.push_str(&format!(
-                    "        debug_assert!(V < {}, \"Field not supported in this version of response\");\n",
+                    "        debug_assert!(V <= {}, \"Field not supported in this version of response\");\n",
                     field.min_version
                 ));
             }

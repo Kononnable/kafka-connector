@@ -21,7 +21,7 @@ impl<const V: u8> MetadataRequest<V> {
     }
 
     pub fn with_allow_auto_topic_creation(&mut self, allow_auto_topic_creation: Boolean) {
-        debug_assert!(V < 4, "Field not supported in this version of request");
+        debug_assert!(V <= 4, "Field not supported in this version of request");
         self.allow_auto_topic_creation = allow_auto_topic_creation;
     }
 
@@ -29,7 +29,7 @@ impl<const V: u8> MetadataRequest<V> {
         &mut self,
         include_cluster_authorized_operations: Boolean,
     ) {
-        debug_assert!(V < 8, "Field not supported in this version of request");
+        debug_assert!(V <= 8, "Field not supported in this version of request");
         self.include_cluster_authorized_operations = include_cluster_authorized_operations;
     }
 
@@ -37,12 +37,12 @@ impl<const V: u8> MetadataRequest<V> {
         &mut self,
         include_topic_authorized_operations: Boolean,
     ) {
-        debug_assert!(V < 8, "Field not supported in this version of request");
+        debug_assert!(V <= 8, "Field not supported in this version of request");
         self.include_topic_authorized_operations = include_topic_authorized_operations;
     }
 
     pub fn with_tag_buffer(&mut self, tag_buffer: TagBuffer) {
-        debug_assert!(V < 9, "Field not supported in this version of request");
+        debug_assert!(V <= 9, "Field not supported in this version of request");
         self.tag_buffer = tag_buffer;
     }
 }
@@ -142,7 +142,7 @@ pub struct MetadataResponseBrokers<const V: u8> {
 
 impl<const V: u8> MetadataResponse<V> {
     pub fn throttle_time_ms(&self) -> Int32 {
-        debug_assert!(V < 3, "Field not supported in this version of response");
+        debug_assert!(V <= 3, "Field not supported in this version of response");
         self.throttle_time_ms
     }
 
@@ -151,12 +151,12 @@ impl<const V: u8> MetadataResponse<V> {
     }
 
     pub fn cluster_id(&self) -> &NullableString {
-        debug_assert!(V < 2, "Field not supported in this version of response");
+        debug_assert!(V <= 2, "Field not supported in this version of response");
         &self.cluster_id
     }
 
     pub fn controller_id(&self) -> Int32 {
-        debug_assert!(V < 1, "Field not supported in this version of response");
+        debug_assert!(V <= 1, "Field not supported in this version of response");
         self.controller_id
     }
 
@@ -165,13 +165,13 @@ impl<const V: u8> MetadataResponse<V> {
     }
 
     pub fn cluster_authorized_operations(&self) -> Int32 {
-        debug_assert!(V < 8, "Field not supported in this version of response");
+        debug_assert!(V <= 8, "Field not supported in this version of response");
         self.cluster_authorized_operations
     }
 
-    pub fn tag_buffer(&self) -> TagBuffer {
-        debug_assert!(V < 9, "Field not supported in this version of response");
-        self.tag_buffer
+    pub fn tag_buffer(&self) -> &TagBuffer {
+        debug_assert!(V <= 9, "Field not supported in this version of response");
+        &self.tag_buffer
     }
 }
 
@@ -238,7 +238,7 @@ impl<const V: u8> MetadataResponseTopics<V> {
     }
 
     pub fn is_internal(&self) -> Boolean {
-        debug_assert!(V < 1, "Field not supported in this version of response");
+        debug_assert!(V <= 1, "Field not supported in this version of response");
         self.is_internal
     }
 
@@ -247,13 +247,13 @@ impl<const V: u8> MetadataResponseTopics<V> {
     }
 
     pub fn topic_authorized_operations(&self) -> Int32 {
-        debug_assert!(V < 8, "Field not supported in this version of response");
+        debug_assert!(V <= 8, "Field not supported in this version of response");
         self.topic_authorized_operations
     }
 
-    pub fn tag_buffer(&self) -> TagBuffer {
-        debug_assert!(V < 9, "Field not supported in this version of response");
-        self.tag_buffer
+    pub fn tag_buffer(&self) -> &TagBuffer {
+        debug_assert!(V <= 9, "Field not supported in this version of response");
+        &self.tag_buffer
     }
 }
 
@@ -303,7 +303,7 @@ impl<const V: u8> MetadataResponsePartitions<V> {
     }
 
     pub fn leader_epoch(&self) -> Int32 {
-        debug_assert!(V < 7, "Field not supported in this version of response");
+        debug_assert!(V <= 7, "Field not supported in this version of response");
         self.leader_epoch
     }
 
@@ -316,13 +316,13 @@ impl<const V: u8> MetadataResponsePartitions<V> {
     }
 
     pub fn offline_replicas(&self) -> &Vec<Int32> {
-        debug_assert!(V < 5, "Field not supported in this version of response");
+        debug_assert!(V <= 5, "Field not supported in this version of response");
         &self.offline_replicas
     }
 
-    pub fn tag_buffer(&self) -> TagBuffer {
-        debug_assert!(V < 9, "Field not supported in this version of response");
-        self.tag_buffer
+    pub fn tag_buffer(&self) -> &TagBuffer {
+        debug_assert!(V <= 9, "Field not supported in this version of response");
+        &self.tag_buffer
     }
 }
 
@@ -375,13 +375,13 @@ impl<const V: u8> MetadataResponseBrokers<V> {
     }
 
     pub fn rack(&self) -> &NullableString {
-        debug_assert!(V < 1, "Field not supported in this version of response");
+        debug_assert!(V <= 1, "Field not supported in this version of response");
         &self.rack
     }
 
-    pub fn tag_buffer(&self) -> TagBuffer {
-        debug_assert!(V < 9, "Field not supported in this version of response");
-        self.tag_buffer
+    pub fn tag_buffer(&self) -> &TagBuffer {
+        debug_assert!(V <= 9, "Field not supported in this version of response");
+        &self.tag_buffer
     }
 }
 

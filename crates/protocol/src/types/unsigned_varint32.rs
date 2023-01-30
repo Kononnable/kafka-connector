@@ -22,7 +22,7 @@ pub fn serialize_unsigned_varint_32(value: u32, buf: &mut BytesMut) {
     buf.put_slice(len);
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct UnsignedVarInt32 {
     pub value: u32,
 }

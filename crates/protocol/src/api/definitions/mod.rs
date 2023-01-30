@@ -1,4 +1,3 @@
-mod api_versions;
 mod metadata;
 
 mod prelude {
@@ -8,6 +7,6 @@ mod prelude {
 }
 #[test]
 fn generate_api_structures() {
-    let api_definitions = [api_versions::get_api_call(), metadata::get_api_call()];
+    let api_definitions = [metadata::get_api_call()];
     super::generator::api_codegen(&api_definitions);
 }

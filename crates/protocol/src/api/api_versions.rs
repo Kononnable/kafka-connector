@@ -1,4 +1,4 @@
-use super::super::prelude::*;
+use super::prelude::*;
 
 #[derive(Debug, Default, Clone)]
 pub struct ApiVersionsRequest<const V: u8> {
@@ -9,17 +9,17 @@ pub struct ApiVersionsRequest<const V: u8> {
 
 impl<const V: u8> ApiVersionsRequest<V> {
     pub fn with_client_software_name(&mut self, client_software_name: String) {
-        debug_assert!(V < 3, "Field not supported in this version of request");
+        debug_assert!(V <= 3, "Field not supported in this version of request");
         self.client_software_name = client_software_name;
     }
 
     pub fn with_client_software_version(&mut self, client_software_version: String) {
-        debug_assert!(V < 3, "Field not supported in this version of request");
+        debug_assert!(V <= 3, "Field not supported in this version of request");
         self.client_software_version = client_software_version;
     }
 
     pub fn with_tag_buffer(&mut self, tag_buffer: TagBuffer) {
-        debug_assert!(V < 3, "Field not supported in this version of request");
+        debug_assert!(V <= 3, "Field not supported in this version of request");
         self.tag_buffer = tag_buffer;
     }
 }
@@ -87,13 +87,13 @@ impl<const V: u8> ApiVersionsResponse<V> {
     }
 
     pub fn throttle_time_ms(&self) -> Int32 {
-        debug_assert!(V < 1, "Field not supported in this version of response");
+        debug_assert!(V <= 1, "Field not supported in this version of response");
         self.throttle_time_ms
     }
 
-    pub fn tag_buffer(&self) -> TagBuffer {
-        debug_assert!(V < 3, "Field not supported in this version of response");
-        self.tag_buffer
+    pub fn tag_buffer(&self) -> &TagBuffer {
+        debug_assert!(V <= 3, "Field not supported in this version of response");
+        &self.tag_buffer
     }
 }
 
@@ -101,9 +101,10 @@ impl<const V: u8> ApiResponse for ApiVersionsResponse<V> {
     fn deserialize(version: u16, bytes: &mut Bytes) -> (i32, Self) {
         let is_flexible = 3 >= version;
         let correlation = match is_flexible {
-            true => HeaderResponse::deserialize(bytes, false, 2).correlation,
-            false => HeaderResponse::deserialize(bytes, false, 1).correlation,
+            true => HeaderResponse::deserialize(bytes, true, 0).correlation,
+            false => HeaderResponse::deserialize(bytes, false, 0).correlation,
         };
+        dbg!(correlation);
         let error_code = Int16::deserialize(bytes, is_flexible, version);
         let api_keys =
             Vec::<ApiVersionsResponseApiKeys<V>>::deserialize(bytes, is_flexible, version);
@@ -149,9 +150,9 @@ impl<const V: u8> ApiVersionsResponseApiKeys<V> {
         self.max_version
     }
 
-    pub fn tag_buffer(&self) -> TagBuffer {
-        debug_assert!(V < 3, "Field not supported in this version of response");
-        self.tag_buffer
+    pub fn tag_buffer(&self) -> &TagBuffer {
+        debug_assert!(V <= 3, "Field not supported in this version of response");
+        &self.tag_buffer
     }
 }
 

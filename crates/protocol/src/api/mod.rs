@@ -4,6 +4,7 @@ mod generated;
 #[cfg(test)]
 mod generator;
 
+pub mod api_versions;
 pub mod header;
 pub use generated::*;
 
