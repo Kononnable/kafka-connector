@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 use bytes::{BufMut, Bytes, BytesMut};
 
@@ -26,7 +26,6 @@ impl FromBytes for TagBuffer {
     fn deserialize(buf: &mut Bytes, _is_flexible_version: bool, _version: u16) -> Self {
         let field_count = UnsignedVarInt32::deserialize(buf, true);
         let mut fields = BTreeMap::new();
-        dbg!(field_count);
         for _ in 0..field_count.value {
             let key = UnsignedVarInt32::deserialize(buf, true).value;
             let len: i32 = UnsignedVarInt32::deserialize(buf, true).value as i32;
@@ -35,8 +34,6 @@ impl FromBytes for TagBuffer {
             } else {
                 buf.split_to(len as usize).into_iter().collect()
             };
-            dbg!(key);
-            log::trace!("{:#02x}", Bytes::from(value.clone()));
 
             fields.insert(key, value);
         }

@@ -15,7 +15,6 @@ where
     R: FromBytes + Debug,
 {
     fn deserialize(buf: &mut Bytes, is_flexible_version: bool, version: u16) -> Self {
-        log::trace!("{buf:#02x}");
         let cap: i32 = match is_flexible_version {
             true => UnsignedVarInt32::deserialize(buf, is_flexible_version).value as i32 - 1,
             false => FromBytes::deserialize(buf, is_flexible_version, version),

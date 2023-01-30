@@ -104,7 +104,6 @@ impl<const V: u8> ApiResponse for ApiVersionsResponse<V> {
             true => HeaderResponse::deserialize(bytes, true, 0).correlation,
             false => HeaderResponse::deserialize(bytes, false, 0).correlation,
         };
-        dbg!(correlation);
         let error_code = Int16::deserialize(bytes, is_flexible, version);
         let api_keys =
             Vec::<ApiVersionsResponseApiKeys<V>>::deserialize(bytes, is_flexible, version);

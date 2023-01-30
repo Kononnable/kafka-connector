@@ -6,8 +6,6 @@ use thiserror::Error as DeriveError;
 #[non_exhaustive]
 #[derive(Debug, DeriveError)]
 pub enum ConnectionError {
-    #[error("Broker address was not specified.")]
-    NoAddressSpecified,
     #[error("Broker is already connected.")]
     AlreadyConnected,
     #[error("Error connecting to the broker: {0:?}")]

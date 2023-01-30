@@ -4,10 +4,9 @@ use std::{
     mem::size_of,
     net::SocketAddr,
     sync::{
-        mpsc::{self, channel, Receiver, Sender, TryRecvError},
+        mpsc::{channel, Receiver, Sender, TryRecvError},
         Arc, Mutex,
     },
-    time::Duration,
 };
 
 use bytes::{Bytes, BytesMut};
@@ -23,29 +22,37 @@ use tokio::{
     },
     sync::oneshot,
 };
+use uuid::Uuid;
 
 use self::errors::ConnectionError;
 
 pub mod errors;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Clone)]
 pub struct BrokerOptions {
-    address: Option<SocketAddr>, // TODO: Mandatory?
+    address: SocketAddr,
+    /// should be unique; for log usage
+    broker_id: u32,
     client_software_version: String,
     client_version_name: String,
     client_id: String,
 }
 impl BrokerOptions {
-    pub fn with_address(&mut self, address: SocketAddr) -> &mut Self {
-        self.address = Some(address);
-        self
+    pub fn new(address: SocketAddr, broker_id: u32) -> Self {
+        Self {
+            address,
+            broker_id,
+            client_software_version: env!("CARGO_PKG_VERSION").to_owned(),
+            client_version_name: env!("CARGO_PKG_NAME").to_owned(),
+            client_id: format!("kafka-connector-{}", Uuid::new_v4()),
+        }
     }
 }
 
 pub type ActiveRequestList = Arc<Mutex<HashMap<i32, oneshot::Sender<Vec<u8>>>>>;
 
 pub struct Broker {
-    options: BrokerOptions,
+    options: Arc<BrokerOptions>,
     disconnected_receiver: Option<Receiver<()>>,
     write_stream: Option<OwnedWriteHalf>,
     active_requests: ActiveRequestList,
@@ -55,14 +62,13 @@ pub struct Broker {
 }
 
 impl Broker {
-    // TODO: BrokerOptions as optional Arc?
     pub fn new(options: BrokerOptions) -> Broker {
         Broker {
-            options,
+            options: Arc::new(options),
             disconnected_receiver: None,
             write_stream: None,
             active_requests: Default::default(),
-            last_correlation: 1,
+            last_correlation: 0,
             supported_api_versions: Default::default(),
             buffer: BytesMut::with_capacity(1024), // TODO: Proper size
         }
@@ -82,29 +88,38 @@ impl Broker {
         if self.is_connected() {
             return Err(ConnectionError::AlreadyConnected);
         }
-        let address = self
-            .options
-            .address
-            .ok_or(ConnectionError::NoAddressSpecified)?;
-        log::info!("Connecting to kafka broker {address:?}");
+        let address = self.options.address;
+        log::debug!(
+            "Broker-{broker_id}: Connecting to kafka broker {address:?}",
+            broker_id = self.options.broker_id
+        );
 
         let connection = TcpStream::connect(address).await?;
 
         let (connection_read_half, connection_write_half) = connection.into_split();
         let (connection_closed_sender, connection_closed_receiver) = channel::<()>();
+
         debug_assert!(self.disconnected_receiver.is_none());
         self.disconnected_receiver = Some(connection_closed_receiver);
+
         debug_assert!(self.write_stream.is_none());
         self.write_stream = Some(connection_write_half);
-        debug_assert!(self.active_requests.lock().expect("msg").is_empty());
-        self.last_correlation = 1;
+
+        debug_assert!(self.active_requests.lock().expect("TODO:").is_empty());
+        self.last_correlation = 0;
 
         tokio::spawn(Broker::listen_loop(
             connection_read_half,
             connection_closed_sender,
             self.active_requests.clone(),
+            self.options.clone(),
         ));
         self.get_supported_api_versions().await?;
+
+        log::debug!(
+            "Broker-{broker_id}: Connected to kafka broker {address:?}",
+            broker_id = self.options.broker_id
+        );
 
         Ok(())
     }
@@ -168,13 +183,9 @@ impl Broker {
         let (_correlation, response) = if R::get_api_key() == ApiNumbers::ApiVersions {
             let copy = response.clone();
             let ret = R::Response::deserialize(request_version, &mut response);
-            log::trace!("Rest1 {:?}", ret.1);
-            log::trace!("Rest1 {:#02x}", Bytes::from(response.clone()));
             if !response.is_empty() {
                 response = copy;
                 let ret = R::Response::deserialize(0, &mut response);
-                log::trace!("Rest1 {:?}", ret.1);
-                log::trace!("Rest2 {:#02x}", Bytes::from(response.clone()));
                 debug_assert!(response.is_empty());
                 ret
             } else {
@@ -203,16 +214,14 @@ impl Broker {
 
         self.supported_api_versions.clear();
         let mut request = ApiVersionsRequest::<3>::default();
-        // TODO: Request version as generic?
         // TODO: mutable builder
         request.with_client_software_name(self.options.client_version_name.clone());
-        request.with_client_software_version(self.options.client_version_name.clone());
+        request.with_client_software_version(self.options.client_software_version.clone());
 
         let resp = self.send_api_request_internal(request).await;
 
         match resp {
             Ok(response) => {
-                dbg!(&response);
                 self.supported_api_versions = response
                     .api_keys()
                     .iter()
@@ -256,23 +265,28 @@ impl Broker {
         mut read_half: OwnedReadHalf,
         connection_closed_sender: Sender<()>,
         active_requests: ActiveRequestList,
+        options: Arc<BrokerOptions>,
     ) {
+        let broker_id = options.broker_id;
         loop {
             let mut response_buf = [0; 4];
             match read_half.read_exact(&mut response_buf).await {
                 Ok(_) => (),
                 Err(err) if err.kind() == io::ErrorKind::UnexpectedEof => {
                     let _ = connection_closed_sender.send(());
+                    log::debug!("Broker-{broker_id}: Disconnected",);
                     break;
                 }
                 Err(err) => {
-                    log::error!("Unknown error while communicating with kafka {err:?}");
+                    log::error!(
+                        "Broker-{broker_id}: Unknown error while communicating with kafka {err:?}"
+                    );
                     let _ = connection_closed_sender.send(());
                     break;
                 }
             }
             let response_length = i32::from_be_bytes(response_buf);
-            log::trace!("Received message length {response_length}");
+            log::trace!("Broker-{broker_id}: Received message length {response_length}");
 
             let mut message_buf = vec![0; response_length as usize];
             match read_half.read_exact(&mut message_buf).await {
@@ -282,13 +296,13 @@ impl Broker {
                     break;
                 }
                 Err(err) => {
-                    log::error!("Unknown error while communicating with kafka {err:?}");
+                    log::error!(
+                        "Broker-{broker_id}: Unknown error while communicating with kafka {err:?}"
+                    );
                     let _ = connection_closed_sender.send(());
                     break;
                 }
             }
-
-            log::trace!("{:#02x}", Bytes::from(message_buf.clone()));
 
             let correlation_id = i32::from_be_bytes(
                 message_buf
@@ -297,7 +311,11 @@ impl Broker {
                     .try_into()
                     .expect("Failed to read correlation_id"),
             );
-            log::trace!("{:#02x}", Bytes::from(message_buf.clone()));
+
+            log::trace!(
+                "Broker-{broker_id}: Received message: {:#02x}",
+                Bytes::from(message_buf.clone())
+            );
 
             if active_requests
                 .lock()
@@ -307,32 +325,46 @@ impl Broker {
                 .send(message_buf)
                 .is_err()
             {
-                log::debug!("Dropping response, no active listener");
+                log::debug!("Broker-{broker_id}: Dropping response, no active listener");
             }
         }
+        log::trace!("Broker-{broker_id}: Listen loop exiting");
     }
 }
 
 #[cfg(test)]
 mod tests {
+
     use crate::test_utils::BROKER_1;
+    use crate::test_utils::BROKER_2;
+    use crate::test_utils::BROKER_3;
 
     use super::*;
 
-    #[tokio::test]
-    async fn connects_to_a_broker() {
-        env_logger::init();
-
-        let options = BrokerOptions {
-            address: Some(BROKER_1.parse().unwrap()),
-            client_software_version: "test-version".to_owned(),
-            client_version_name: "kafka-connector".to_owned(),
-            client_id: "client-id".to_owned(),
-        };
-        let mut broker = Broker::new(options);
-        broker.connect().await.unwrap();
-        dbg!(broker.supported_api_versions);
-        // TODO:
+    fn init() {
+        let _ = env_logger::builder().try_init();
     }
+
+    /// Check if client can connect to kafka correctly
+    ///
+    /// Additionally checks if all three brokers used in other tests are up and running
+    #[tokio::test]
+    async fn connects_to_kafka_brokers() {
+        init();
+
+        let options = BrokerOptions::new(BROKER_1.parse().unwrap(), 1);
+        let mut broker_1 = Broker::new(options.clone());
+        broker_1.connect().await.unwrap();
+        drop(broker_1);
+
+        let options = BrokerOptions::new(BROKER_2.parse().unwrap(), 2);
+        let mut broker_2 = Broker::new(options.clone());
+        broker_2.connect().await.unwrap();
+
+        let options = BrokerOptions::new(BROKER_3.parse().unwrap(), 3);
+        let mut broker_3 = Broker::new(options);
+        broker_3.connect().await.unwrap();
+    }
+
     // TODO: test errors
 }

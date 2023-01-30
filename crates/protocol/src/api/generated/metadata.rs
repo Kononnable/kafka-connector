@@ -179,8 +179,8 @@ impl<const V: u8> ApiResponse for MetadataResponse<V> {
     fn deserialize(version: u16, bytes: &mut Bytes) -> (i32, Self) {
         let is_flexible = 9 >= version;
         let correlation = match is_flexible {
-            true => HeaderResponse::deserialize(bytes, false, 2).correlation,
-            false => HeaderResponse::deserialize(bytes, false, 1).correlation,
+            true => HeaderResponse::deserialize(bytes, false, 1).correlation,
+            false => HeaderResponse::deserialize(bytes, false, 0).correlation,
         };
         let throttle_time_ms = if version >= 3 {
             Int32::deserialize(bytes, is_flexible, version)

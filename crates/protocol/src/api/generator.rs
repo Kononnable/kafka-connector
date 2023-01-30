@@ -56,8 +56,11 @@ impl Field {
 impl FieldType {
     pub fn is_copyable(&self) -> bool {
         match self {
-            FieldType::Int16 | FieldType::Int32 | FieldType::Boolean | FieldType::TagBuffer => true,
-            FieldType::String | FieldType::NullableString | FieldType::SubObject(_) => false,
+            FieldType::Int16 | FieldType::Int32 | FieldType::Boolean => true,
+            FieldType::String
+            | FieldType::NullableString
+            | FieldType::SubObject(_)
+            | FieldType::TagBuffer => false,
         }
     }
 }
