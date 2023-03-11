@@ -14,5 +14,5 @@ pub trait ApiRequest: Clone + Debug {
 
 pub trait ApiResponse: Debug {
     fn get_general_error(&self) -> Option<ApiError>;
-    fn deserialize(version: u16, bytes: &mut Bytes) -> (i32, Self);
+    fn deserialize(version: u16, bytes: &mut Bytes) -> Self;
 }

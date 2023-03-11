@@ -98,12 +98,9 @@ impl<const V: u8> ApiVersionsResponse<V> {
 }
 
 impl<const V: u8> ApiResponse for ApiVersionsResponse<V> {
-    fn deserialize(version: u16, bytes: &mut Bytes) -> (i32, Self) {
+    fn deserialize(version: u16, bytes: &mut Bytes) -> Self {
         let is_flexible = 3 >= version;
-        let correlation = match is_flexible {
-            true => HeaderResponse::deserialize(bytes, true, 0).correlation,
-            false => HeaderResponse::deserialize(bytes, false, 0).correlation,
-        };
+        let _ = HeaderResponse::deserialize(bytes, is_flexible, 0);
         let error_code = Int16::deserialize(bytes, is_flexible, version);
         let api_keys =
             Vec::<ApiVersionsResponseApiKeys<V>>::deserialize(bytes, is_flexible, version);
@@ -117,15 +114,12 @@ impl<const V: u8> ApiResponse for ApiVersionsResponse<V> {
         } else {
             Default::default()
         };
-        (
-            correlation,
-            Self {
-                error_code,
-                api_keys,
-                throttle_time_ms,
-                tag_buffer,
-            },
-        )
+        Self {
+            error_code,
+            api_keys,
+            throttle_time_ms,
+            tag_buffer,
+        }
     }
 
     fn get_general_error(&self) -> Option<ApiError> {

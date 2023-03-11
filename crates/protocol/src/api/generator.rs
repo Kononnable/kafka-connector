@@ -245,18 +245,14 @@ pub fn generate_code(api_call: &ApiStruct) -> String {
         "impl<const V: u8> ApiResponse for {}Response<V>{{\n",
         api_call.name
     ));
-    generated.push_str("    fn deserialize(version: u16, bytes: &mut Bytes) -> (i32, Self) {\n");
+    generated.push_str("    fn deserialize(version: u16, bytes: &mut Bytes) -> Self {\n");
     generated.push_str(&format!(
         "        let is_flexible = {} >= version;\n",
         api_call.min_flexible_version
     ));
-    generated.push_str("        let correlation = match is_flexible {\n");
-    generated.push_str(
-        "            true=> HeaderResponse::deserialize(bytes, false, 1).correlation, \n",
-    );
-    generated.push_str(
-        "            false=> HeaderResponse::deserialize(bytes, false, 0).correlation, \n",
-    );
+    generated.push_str("        let _ = match is_flexible {\n");
+    generated.push_str("            true=> HeaderResponse::deserialize(bytes, true, 1), \n");
+    generated.push_str("            false=> HeaderResponse::deserialize(bytes, false, 0), \n");
     generated.push_str("        };\n");
 
     let mut sub_objects = vec![];
@@ -298,11 +294,11 @@ pub fn generate_code(api_call: &ApiStruct) -> String {
         }
         generated.push_str(";\n");
     }
-    generated.push_str("(correlation,Self{\n");
+    generated.push_str("Self{\n");
     for field in &api_call.response_fields {
         generated.push_str(&format!("{},\n", field.name));
     }
-    generated.push_str("})\n");
+    generated.push_str("}\n");
 
     generated.push_str("    }\n\n");
     generated.push_str("    fn get_general_error(&self) -> Option<ApiError> {\n");

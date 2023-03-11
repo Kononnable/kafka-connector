@@ -176,11 +176,11 @@ impl<const V: u8> MetadataResponse<V> {
 }
 
 impl<const V: u8> ApiResponse for MetadataResponse<V> {
-    fn deserialize(version: u16, bytes: &mut Bytes) -> (i32, Self) {
+    fn deserialize(version: u16, bytes: &mut Bytes) -> Self {
         let is_flexible = 9 >= version;
-        let correlation = match is_flexible {
-            true => HeaderResponse::deserialize(bytes, false, 1).correlation,
-            false => HeaderResponse::deserialize(bytes, false, 0).correlation,
+        let _ = match is_flexible {
+            true => HeaderResponse::deserialize(bytes, true, 1),
+            false => HeaderResponse::deserialize(bytes, false, 0),
         };
         let throttle_time_ms = if version >= 3 {
             Int32::deserialize(bytes, is_flexible, version)
@@ -209,18 +209,15 @@ impl<const V: u8> ApiResponse for MetadataResponse<V> {
         } else {
             Default::default()
         };
-        (
-            correlation,
-            Self {
-                throttle_time_ms,
-                brokers,
-                cluster_id,
-                controller_id,
-                topics,
-                cluster_authorized_operations,
-                tag_buffer,
-            },
-        )
+        Self {
+            throttle_time_ms,
+            brokers,
+            cluster_id,
+            controller_id,
+            topics,
+            cluster_authorized_operations,
+            tag_buffer,
+        }
     }
 
     fn get_general_error(&self) -> Option<ApiError> {

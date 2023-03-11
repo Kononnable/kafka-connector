@@ -31,7 +31,6 @@ pub mod errors;
 #[derive(Debug, Clone)]
 pub struct BrokerOptions {
     address: SocketAddr,
-    /// should be unique; for log usage
     broker_id: u32,
     client_software_version: String,
     client_version_name: String,
@@ -88,13 +87,13 @@ impl Broker {
         if self.is_connected() {
             return Err(ConnectionError::AlreadyConnected);
         }
-        let address = self.options.address;
         log::debug!(
             "Broker-{broker_id}: Connecting to kafka broker {address:?}",
-            broker_id = self.options.broker_id
+            broker_id = self.options.broker_id,
+            address = self.options.address,
         );
 
-        let connection = TcpStream::connect(address).await?;
+        let connection = TcpStream::connect(self.options.address).await?;
 
         let (connection_read_half, connection_write_half) = connection.into_split();
         let (connection_closed_sender, connection_closed_receiver) = channel::<()>();
@@ -105,7 +104,11 @@ impl Broker {
         debug_assert!(self.write_stream.is_none());
         self.write_stream = Some(connection_write_half);
 
-        debug_assert!(self.active_requests.lock().expect("TODO:").is_empty());
+        debug_assert!(self
+            .active_requests
+            .lock()
+            .expect("Poisoned mutex")
+            .is_empty());
         self.last_correlation = 0;
 
         tokio::spawn(Broker::listen_loop(
@@ -118,34 +121,17 @@ impl Broker {
 
         log::debug!(
             "Broker-{broker_id}: Connected to kafka broker {address:?}",
-            broker_id = self.options.broker_id
+            broker_id = self.options.broker_id,
+            address = self.options.address,
         );
 
         Ok(())
     }
 
     /// Sends api requests returning the broker response
-    /// Should handle retryable errors
-    async fn send_api_request_internal<R: ApiRequest>(
-        &mut self,
-        request: R,
-    ) -> Result<R::Response, ApiError> {
+    async fn make_api_call<R: ApiRequest>(&mut self, request: R) -> Result<R::Response, ApiError> {
         // TODO: retry?
-        let request_version = if R::get_api_key() == ApiNumbers::ApiVersions
-            && self.supported_api_versions.is_empty()
-        {
-            R::get_max_supported_version()
-        } else {
-            let broker_supported_versions = self
-                .supported_api_versions
-                .get(&(R::get_api_key() as u16))
-                .ok_or(ApiError::UnsupportedVersion)?;
-            if R::get_max_supported_version() <= broker_supported_versions.1 {
-                R::get_max_supported_version()
-            } else {
-                broker_supported_versions.1
-            }
-        };
+        let request_version = self.get_request_version::<R>()?;
 
         let correlation = {
             self.last_correlation += 1;
@@ -171,31 +157,29 @@ impl Broker {
 
         let channel = oneshot::channel();
         {
-            let mut guard = self.active_requests.lock().expect("TODO:");
+            let mut guard = self.active_requests.lock().expect("Poisoned mutex"); // TODO: Mutex poisoning should kill just the broker object
             if (*guard).insert(correlation, channel.0).is_some() {
                 panic!("Sending second request with same correlation")
             }
         }
 
-        let response = channel.1.await.expect("TODO:");
+        let mut response_buffer = channel.1.await.map(Bytes::from).expect("TODO:");
 
-        let mut response = Bytes::from(response);
-        let (_correlation, response) = if R::get_api_key() == ApiNumbers::ApiVersions {
-            let copy = response.clone();
-            let ret = R::Response::deserialize(request_version, &mut response);
-            if !response.is_empty() {
-                response = copy;
-                let ret = R::Response::deserialize(0, &mut response);
-                debug_assert!(response.is_empty());
-                ret
-            } else {
-                ret
-            }
+        let response = if R::get_api_key() != ApiNumbers::ApiVersions {
+            R::Response::deserialize(request_version, &mut response_buffer)
         } else {
-            let ret = R::Response::deserialize(request_version, &mut response);
-            debug_assert!(response.is_empty());
-            ret
+            // Fallback to version 0 for ApiVersions response. If a client sends an ApiVersionsRequest
+            // using a version higher than that supported by the broker, a version 0 response is sent
+            // to the client indicating UNSUPPORTED_VERSION.
+
+            let mut buffer_cpy = response_buffer.clone();
+            let mut response = R::Response::deserialize(request_version, &mut response_buffer);
+            if !response_buffer.is_empty() {
+                response = R::Response::deserialize(0, &mut buffer_cpy)
+            }
+            response
         };
+        debug_assert!(response_buffer.is_empty());
 
         // TODO: Error handling?
 
@@ -205,20 +189,32 @@ impl Broker {
         Ok(response)
     }
 
-    async fn get_supported_api_versions(&mut self) -> Result<(), ConnectionError> {
-        // Fallback to version 0 for ApiVersions response. If a client sends an ApiVersionsRequest
-        // using a version higher than that supported by the broker, a version 0 response is sent
-        // to the client indicating UNSUPPORTED_VERSION. When the client receives the response, it
-        // falls back while parsing it into a Struct which means that the version received by this
-        // method is not necessary the real one. It may be version 0 as well.
+    /// Gets highest api version used in api call that is supported by client and the broker
+    fn get_request_version<R: ApiRequest>(&mut self) -> Result<u16, ApiError> {
+        let request_version = if self.supported_api_versions.is_empty() {
+            R::get_max_supported_version()
+        } else {
+            let broker_supported_versions = self
+                .supported_api_versions
+                .get(&(R::get_api_key() as u16))
+                .ok_or(ApiError::UnsupportedVersion)?;
+            if R::get_max_supported_version() <= broker_supported_versions.1 {
+                R::get_max_supported_version()
+            } else {
+                broker_supported_versions.1
+            }
+        };
+        Ok(request_version)
+    }
 
+    async fn get_supported_api_versions(&mut self) -> Result<(), ConnectionError> {
         self.supported_api_versions.clear();
         let mut request = ApiVersionsRequest::<3>::default();
         // TODO: mutable builder
         request.with_client_software_name(self.options.client_version_name.clone());
         request.with_client_software_version(self.options.client_software_version.clone());
 
-        let resp = self.send_api_request_internal(request).await;
+        let resp = self.make_api_call(request).await;
 
         match resp {
             Ok(response) => {
@@ -235,7 +231,7 @@ impl Broker {
             }
             Err(ApiError::UnsupportedVersion) => {
                 let request = ApiVersionsRequest::<0>::default();
-                let resp = self.send_api_request_internal(request).await;
+                let resp = self.make_api_call(request).await;
                 match resp {
                     Ok(response) => {
                         self.supported_api_versions = response
