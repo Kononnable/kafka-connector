@@ -1,10 +1,17 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct SaslAuthenticateResponse {
+    /// The error code, or 0 if there was no error.
     pub error_code: i16,
+
+    /// The error message, or null if there was no error.
     pub error_message: String,
+
+    /// The SASL authentication bytes from the server, as defined by the SASL mechanism.
     pub auth_bytes: Vec<u8>,
+
+    /// The SASL authentication bytes from the server, as defined by the SASL mechanism.
     pub session_lifetime_ms: i64,
 }
 
@@ -40,5 +47,16 @@ impl ApiResponse for SaslAuthenticateResponse {
                 session_lifetime_ms,
             },
         )
+    }
+}
+
+impl Default for SaslAuthenticateResponse {
+    fn default() -> Self {
+        Self {
+            error_code: Default::default(),
+            error_message: Default::default(),
+            auth_bytes: Default::default(),
+            session_lifetime_ms: 0,
+        }
     }
 }

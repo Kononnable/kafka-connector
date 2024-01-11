@@ -1,7 +1,8 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct ResponseHeader {
+    /// The correlation ID of this response.
     pub correlation_id: i32,
 }
 
@@ -13,5 +14,13 @@ impl ResponseHeader {
             Default::default()
         };
         ResponseHeader { correlation_id }
+    }
+}
+
+impl Default for ResponseHeader {
+    fn default() -> Self {
+        Self {
+            correlation_id: Default::default(),
+        }
     }
 }

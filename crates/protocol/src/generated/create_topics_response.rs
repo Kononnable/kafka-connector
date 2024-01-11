@@ -1,15 +1,23 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct CreateTopicsResponse {
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
+
+    /// Results for each topic we tried to create.
     pub topics: Vec<CreatableTopicResult>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct CreatableTopicResult {
+    /// The topic name.
     pub name: String,
+
+    /// The error code, or 0 if there was no error.
     pub error_code: i16,
+
+    /// The error message, or null if there was no error.
     pub error_message: String,
 }
 
@@ -36,6 +44,15 @@ impl ApiResponse for CreateTopicsResponse {
     }
 }
 
+impl Default for CreateTopicsResponse {
+    fn default() -> Self {
+        Self {
+            throttle_time_ms: Default::default(),
+            topics: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for CreatableTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -57,6 +74,16 @@ impl FromBytes for CreatableTopicResult {
             name,
             error_code,
             error_message,
+        }
+    }
+}
+
+impl Default for CreatableTopicResult {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            error_code: Default::default(),
+            error_message: Default::default(),
         }
     }
 }

@@ -1,16 +1,26 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct ApiVersionsResponse {
+    /// The top-level error code.
     pub error_code: i16,
+
+    /// The APIs supported by the broker.
     pub api_keys: Vec<ApiVersionsResponseKey>,
+
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct ApiVersionsResponseKey {
+    /// The API index.
     pub index: i16,
+
+    /// The minimum supported version, inclusive.
     pub min_version: i16,
+
+    /// The maximum supported version, inclusive.
     pub max_version: i16,
 }
 
@@ -43,6 +53,16 @@ impl ApiResponse for ApiVersionsResponse {
     }
 }
 
+impl Default for ApiVersionsResponse {
+    fn default() -> Self {
+        Self {
+            error_code: Default::default(),
+            api_keys: Default::default(),
+            throttle_time_ms: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for ApiVersionsResponseKey {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let index = if version >= 0 {
@@ -64,6 +84,16 @@ impl FromBytes for ApiVersionsResponseKey {
             index,
             min_version,
             max_version,
+        }
+    }
+}
+
+impl Default for ApiVersionsResponseKey {
+    fn default() -> Self {
+        Self {
+            index: Default::default(),
+            min_version: Default::default(),
+            max_version: Default::default(),
         }
     }
 }

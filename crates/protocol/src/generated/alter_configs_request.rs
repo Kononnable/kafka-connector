@@ -1,21 +1,32 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct AlterConfigsRequest {
+    /// The updates for each resource.
     pub resources: Vec<AlterConfigsResource>,
+
+    /// True if we should validate the request, but not change the configurations.
     pub validate_only: bool,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct AlterConfigsResource {
+    /// The resource type.
     pub resource_type: i8,
+
+    /// The resource name.
     pub resource_name: String,
+
+    /// The configurations.
     pub configs: Vec<AlterableConfig>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct AlterableConfig {
+    /// The configuration key name.
     pub name: String,
+
+    /// The value to set for the configuration key.
     pub value: String,
 }
 
@@ -49,6 +60,15 @@ impl ApiRequest for AlterConfigsRequest {
     }
 }
 
+impl Default for AlterConfigsRequest {
+    fn default() -> Self {
+        Self {
+            resources: Default::default(),
+            validate_only: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for AlterConfigsResource {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -63,6 +83,16 @@ impl ToBytes for AlterConfigsResource {
     }
 }
 
+impl Default for AlterConfigsResource {
+    fn default() -> Self {
+        Self {
+            resource_type: Default::default(),
+            resource_name: Default::default(),
+            configs: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for AlterableConfig {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -70,6 +100,15 @@ impl ToBytes for AlterableConfig {
         }
         if version >= 0 {
             self.value.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for AlterableConfig {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            value: Default::default(),
         }
     }
 }

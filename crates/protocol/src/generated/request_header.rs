@@ -1,10 +1,17 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct RequestHeader {
+    /// The API key of this request.
     pub request_api_key: i16,
+
+    /// The API version of this request.
     pub request_api_version: i16,
+
+    /// The correlation ID of this request.
     pub correlation_id: i32,
+
+    /// The client ID string.
     pub client_id: String,
 }
 
@@ -31,6 +38,17 @@ impl RequestHeader {
         }
         if version >= 0 {
             self.client_id.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for RequestHeader {
+    fn default() -> Self {
+        Self {
+            request_api_key: Default::default(),
+            request_api_version: Default::default(),
+            correlation_id: Default::default(),
+            client_id: Default::default(),
         }
     }
 }

@@ -1,7 +1,8 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct UpdateMetadataResponse {
+    /// The error code, or 0 if there was no error.
     pub error_code: i16,
 }
 
@@ -14,5 +15,13 @@ impl ApiResponse for UpdateMetadataResponse {
             Default::default()
         };
         (header, UpdateMetadataResponse { error_code })
+    }
+}
+
+impl Default for UpdateMetadataResponse {
+    fn default() -> Self {
+        Self {
+            error_code: Default::default(),
+        }
     }
 }

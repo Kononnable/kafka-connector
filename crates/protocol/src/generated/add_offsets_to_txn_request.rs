@@ -1,10 +1,17 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct AddOffsetsToTxnRequest {
+    /// The transactional id corresponding to the transaction.
     pub transactional_id: String,
+
+    /// Current producer id in use by the transactional id.
     pub producer_id: i64,
+
+    /// Current epoch associated with the producer id.
     pub producer_epoch: i16,
+
+    /// The unique group identifier.
     pub group_id: String,
 }
 
@@ -40,6 +47,17 @@ impl ApiRequest for AddOffsetsToTxnRequest {
         }
         if version >= 0 {
             self.group_id.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for AddOffsetsToTxnRequest {
+    fn default() -> Self {
+        Self {
+            transactional_id: Default::default(),
+            producer_id: Default::default(),
+            producer_epoch: Default::default(),
+            group_id: Default::default(),
         }
     }
 }

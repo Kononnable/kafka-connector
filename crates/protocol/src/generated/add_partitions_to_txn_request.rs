@@ -1,16 +1,26 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct AddPartitionsToTxnRequest {
+    /// The transactional id corresponding to the transaction.
     pub transactional_id: String,
+
+    /// Current producer id in use by the transactional id.
     pub producer_id: i64,
+
+    /// Current epoch associated with the producer id.
     pub producer_epoch: i16,
+
+    /// The partitions to add to the transation.
     pub topics: Vec<AddPartitionsToTxnTopic>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct AddPartitionsToTxnTopic {
+    /// The name of the topic.
     pub name: String,
+
+    /// The partition indexes to add to the transaction
     pub partitions: Vec<i32>,
 }
 
@@ -50,6 +60,17 @@ impl ApiRequest for AddPartitionsToTxnRequest {
     }
 }
 
+impl Default for AddPartitionsToTxnRequest {
+    fn default() -> Self {
+        Self {
+            transactional_id: Default::default(),
+            producer_id: Default::default(),
+            producer_epoch: Default::default(),
+            topics: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for AddPartitionsToTxnTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -57,6 +78,15 @@ impl ToBytes for AddPartitionsToTxnTopic {
         }
         if version >= 0 {
             self.partitions.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for AddPartitionsToTxnTopic {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            partitions: Default::default(),
         }
     }
 }

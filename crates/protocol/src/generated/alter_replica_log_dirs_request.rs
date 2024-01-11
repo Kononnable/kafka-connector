@@ -1,19 +1,26 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct AlterReplicaLogDirsRequest {
+    /// The alterations to make for each directory.
     pub dirs: Vec<AlterReplicaLogDir>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct AlterReplicaLogDir {
+    /// The absolute directory path.
     pub path: String,
+
+    /// The topics to add to the directory.
     pub topics: Vec<AlterReplicaLogDirTopic>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct AlterReplicaLogDirTopic {
+    /// The topic name.
     pub name: String,
+
+    /// The partition indexes.
     pub partitions: Vec<i32>,
 }
 
@@ -44,6 +51,14 @@ impl ApiRequest for AlterReplicaLogDirsRequest {
     }
 }
 
+impl Default for AlterReplicaLogDirsRequest {
+    fn default() -> Self {
+        Self {
+            dirs: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for AlterReplicaLogDir {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -55,6 +70,15 @@ impl ToBytes for AlterReplicaLogDir {
     }
 }
 
+impl Default for AlterReplicaLogDir {
+    fn default() -> Self {
+        Self {
+            path: Default::default(),
+            topics: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for AlterReplicaLogDirTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -62,6 +86,15 @@ impl ToBytes for AlterReplicaLogDirTopic {
         }
         if version >= 0 {
             self.partitions.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for AlterReplicaLogDirTopic {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            partitions: Default::default(),
         }
     }
 }

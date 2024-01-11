@@ -1,30 +1,50 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct CreateTopicsRequest {
+    /// The topics to create.
     pub topics: Vec<CreatableTopic>,
+
+    /// How long to wait in milliseconds before timing out the request.
     pub timeout_ms: i32,
+
+    /// If true, check that the topics can be created as specified, but don't create anything.
     pub validate_only: bool,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct CreatableTopic {
+    /// The topic name.
     pub name: String,
+
+    /// The number of partitions to create in the topic, or -1 if we are specifying a manual partition assignment.
     pub num_partitions: i32,
+
+    /// The number of replicas to create for each partition in the topic, or -1 if we are specifying a manual partition assignment.
     pub replication_factor: i16,
+
+    /// The manual partition assignment, or the empty array if we are using automatic assignment.
     pub assignments: Vec<CreatableReplicaAssignment>,
+
+    /// The custom topic configurations to set.
     pub configs: Vec<CreateableTopicConfig>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct CreatableReplicaAssignment {
+    /// The partition index.
     pub partition_index: i32,
+
+    /// The brokers to place the partition on.
     pub broker_ids: Vec<i32>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct CreateableTopicConfig {
+    /// The configuration name.
     pub name: String,
+
+    /// The configuration value.
     pub value: String,
 }
 
@@ -61,6 +81,16 @@ impl ApiRequest for CreateTopicsRequest {
     }
 }
 
+impl Default for CreateTopicsRequest {
+    fn default() -> Self {
+        Self {
+            topics: Default::default(),
+            timeout_ms: Default::default(),
+            validate_only: false,
+        }
+    }
+}
+
 impl ToBytes for CreatableTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -81,6 +111,18 @@ impl ToBytes for CreatableTopic {
     }
 }
 
+impl Default for CreatableTopic {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            num_partitions: Default::default(),
+            replication_factor: Default::default(),
+            assignments: Default::default(),
+            configs: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for CreatableReplicaAssignment {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -92,6 +134,15 @@ impl ToBytes for CreatableReplicaAssignment {
     }
 }
 
+impl Default for CreatableReplicaAssignment {
+    fn default() -> Self {
+        Self {
+            partition_index: Default::default(),
+            broker_ids: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for CreateableTopicConfig {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -99,6 +150,15 @@ impl ToBytes for CreateableTopicConfig {
         }
         if version >= 0 {
             self.value.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for CreateableTopicConfig {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            value: Default::default(),
         }
     }
 }

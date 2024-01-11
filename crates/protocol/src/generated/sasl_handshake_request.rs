@@ -1,7 +1,8 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct SaslHandshakeRequest {
+    /// The SASL mechanism chosen by the client.
     pub mechanism: String,
 }
 
@@ -28,6 +29,14 @@ impl ApiRequest for SaslHandshakeRequest {
         header.serialize(0, bytes);
         if version >= 0 {
             self.mechanism.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for SaslHandshakeRequest {
+    fn default() -> Self {
+        Self {
+            mechanism: Default::default(),
         }
     }
 }

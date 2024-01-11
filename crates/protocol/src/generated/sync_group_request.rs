@@ -1,16 +1,26 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct SyncGroupRequest {
+    /// The unique group identifier.
     pub group_id: String,
+
+    /// The generation of the group.
     pub generation_id: i32,
+
+    /// The member ID assigned by the group.
     pub member_id: String,
+
+    /// Each assignment.
     pub assignments: Vec<SyncGroupRequestAssignment>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct SyncGroupRequestAssignment {
+    /// The ID of the member to assign.
     pub member_id: String,
+
+    /// The member assignment.
     pub assignment: Vec<u8>,
 }
 
@@ -50,6 +60,17 @@ impl ApiRequest for SyncGroupRequest {
     }
 }
 
+impl Default for SyncGroupRequest {
+    fn default() -> Self {
+        Self {
+            group_id: Default::default(),
+            generation_id: Default::default(),
+            member_id: Default::default(),
+            assignments: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for SyncGroupRequestAssignment {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -57,6 +78,15 @@ impl ToBytes for SyncGroupRequestAssignment {
         }
         if version >= 0 {
             self.assignment.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for SyncGroupRequestAssignment {
+    fn default() -> Self {
+        Self {
+            member_id: Default::default(),
+            assignment: Default::default(),
         }
     }
 }

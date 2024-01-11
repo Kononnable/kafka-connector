@@ -1,22 +1,35 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct OffsetForLeaderEpochResponse {
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
+
+    /// Each topic we fetched offsets for.
     pub topics: Vec<OffsetForLeaderTopicResult>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct OffsetForLeaderTopicResult {
+    /// The topic name.
     pub name: String,
+
+    /// Each partition in the topic we fetched offsets for.
     pub partitions: Vec<OffsetForLeaderPartitionResult>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct OffsetForLeaderPartitionResult {
+    /// The error code 0, or if there was no error.
     pub error_code: i16,
+
+    /// The partition index.
     pub partition_index: i32,
+
+    /// The leader epoch of the partition.
     pub leader_epoch: i32,
+
+    /// The end offset of the epoch.
     pub end_offset: i64,
 }
 
@@ -43,6 +56,15 @@ impl ApiResponse for OffsetForLeaderEpochResponse {
     }
 }
 
+impl Default for OffsetForLeaderEpochResponse {
+    fn default() -> Self {
+        Self {
+            throttle_time_ms: Default::default(),
+            topics: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for OffsetForLeaderTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -56,6 +78,15 @@ impl FromBytes for OffsetForLeaderTopicResult {
             Default::default()
         };
         OffsetForLeaderTopicResult { name, partitions }
+    }
+}
+
+impl Default for OffsetForLeaderTopicResult {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            partitions: Default::default(),
+        }
     }
 }
 
@@ -86,6 +117,17 @@ impl FromBytes for OffsetForLeaderPartitionResult {
             partition_index,
             leader_epoch,
             end_offset,
+        }
+    }
+}
+
+impl Default for OffsetForLeaderPartitionResult {
+    fn default() -> Self {
+        Self {
+            error_code: Default::default(),
+            partition_index: Default::default(),
+            leader_epoch: -1,
+            end_offset: Default::default(),
         }
     }
 }

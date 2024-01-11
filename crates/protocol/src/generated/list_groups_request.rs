@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct ListGroupsRequest {}
 
 impl ApiRequest for ListGroupsRequest {
@@ -24,5 +24,11 @@ impl ApiRequest for ListGroupsRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         header.serialize(0, bytes);
+    }
+}
+
+impl Default for ListGroupsRequest {
+    fn default() -> Self {
+        Self {}
     }
 }

@@ -1,13 +1,17 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct DescribeDelegationTokenRequest {
+    /// Each owner that we want to describe delegation tokens for, or null to describe all tokens.
     pub owners: Vec<DescribeDelegationTokenOwner>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DescribeDelegationTokenOwner {
+    /// The owner principal type.
     pub principal_type: String,
+
+    /// The owner principal name.
     pub principal_name: String,
 }
 
@@ -38,6 +42,14 @@ impl ApiRequest for DescribeDelegationTokenRequest {
     }
 }
 
+impl Default for DescribeDelegationTokenRequest {
+    fn default() -> Self {
+        Self {
+            owners: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for DescribeDelegationTokenOwner {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -45,6 +57,15 @@ impl ToBytes for DescribeDelegationTokenOwner {
         }
         if version >= 0 {
             self.principal_name.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for DescribeDelegationTokenOwner {
+    fn default() -> Self {
+        Self {
+            principal_type: Default::default(),
+            principal_name: Default::default(),
         }
     }
 }

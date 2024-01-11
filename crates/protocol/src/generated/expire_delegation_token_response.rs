@@ -1,9 +1,14 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct ExpireDelegationTokenResponse {
+    /// The error code, or 0 if there was no error.
     pub error_code: i16,
+
+    /// The timestamp in milliseconds at which this token expires.
     pub expiry_timestamp_ms: i64,
+
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
 }
 
@@ -33,5 +38,15 @@ impl ApiResponse for ExpireDelegationTokenResponse {
                 throttle_time_ms,
             },
         )
+    }
+}
+
+impl Default for ExpireDelegationTokenResponse {
+    fn default() -> Self {
+        Self {
+            error_code: Default::default(),
+            expiry_timestamp_ms: Default::default(),
+            throttle_time_ms: Default::default(),
+        }
     }
 }

@@ -1,20 +1,29 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct DeleteRecordsRequest {
+    /// Each topic that we want to delete records from.
     pub topics: Vec<DeleteRecordsTopic>,
+
+    /// How long to wait for the deletion to complete, in milliseconds.
     pub timeout_ms: i32,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DeleteRecordsTopic {
+    /// The topic name.
     pub name: String,
+
+    /// Each partition that we want to delete records from.
     pub partitions: Vec<DeleteRecordsPartition>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DeleteRecordsPartition {
+    /// The partition index.
     pub partition_index: i32,
+
+    /// The deletion offset.
     pub offset: i64,
 }
 
@@ -48,6 +57,15 @@ impl ApiRequest for DeleteRecordsRequest {
     }
 }
 
+impl Default for DeleteRecordsRequest {
+    fn default() -> Self {
+        Self {
+            topics: Default::default(),
+            timeout_ms: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for DeleteRecordsTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -59,6 +77,15 @@ impl ToBytes for DeleteRecordsTopic {
     }
 }
 
+impl Default for DeleteRecordsTopic {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            partitions: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for DeleteRecordsPartition {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -66,6 +93,15 @@ impl ToBytes for DeleteRecordsPartition {
         }
         if version >= 0 {
             self.offset.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for DeleteRecordsPartition {
+    fn default() -> Self {
+        Self {
+            partition_index: Default::default(),
+            offset: Default::default(),
         }
     }
 }

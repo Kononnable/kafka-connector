@@ -1,8 +1,11 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct RenewDelegationTokenRequest {
+    /// The HMAC of the delegation token to be renewed.
     pub hmac: Vec<u8>,
+
+    /// The renewal time period in milliseconds.
     pub renew_period_ms: i64,
 }
 
@@ -32,6 +35,15 @@ impl ApiRequest for RenewDelegationTokenRequest {
         }
         if version >= 0 {
             self.renew_period_ms.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for RenewDelegationTokenRequest {
+    fn default() -> Self {
+        Self {
+            hmac: Default::default(),
+            renew_period_ms: Default::default(),
         }
     }
 }

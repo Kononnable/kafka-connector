@@ -1,8 +1,11 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct AddOffsetsToTxnResponse {
+    /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
+
+    /// The response error code, or 0 if there was no error.
     pub error_code: i16,
 }
 
@@ -26,5 +29,14 @@ impl ApiResponse for AddOffsetsToTxnResponse {
                 error_code,
             },
         )
+    }
+}
+
+impl Default for AddOffsetsToTxnResponse {
+    fn default() -> Self {
+        Self {
+            throttle_time_ms: Default::default(),
+            error_code: Default::default(),
+        }
     }
 }

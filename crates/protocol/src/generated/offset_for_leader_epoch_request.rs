@@ -1,20 +1,29 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct OffsetForLeaderEpochRequest {
+    /// Each topic to get offsets for.
     pub topics: Vec<OffsetForLeaderTopic>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct OffsetForLeaderTopic {
+    /// The topic name.
     pub name: String,
+
+    /// Each partition to get offsets for.
     pub partitions: Vec<OffsetForLeaderPartition>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct OffsetForLeaderPartition {
+    /// The partition index.
     pub partition_index: i32,
+
+    /// An epoch used to fence consumers/replicas with old metadata.  If the epoch provided by the client is larger than the current epoch known to the broker, then the UNKNOWN_LEADER_EPOCH error code will be returned. If the provided epoch is smaller, then the FENCED_LEADER_EPOCH error code will be returned.
     pub current_leader_epoch: i32,
+
+    /// The epoch to look up an offset for.
     pub leader_epoch: i32,
 }
 
@@ -45,6 +54,14 @@ impl ApiRequest for OffsetForLeaderEpochRequest {
     }
 }
 
+impl Default for OffsetForLeaderEpochRequest {
+    fn default() -> Self {
+        Self {
+            topics: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for OffsetForLeaderTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -52,6 +69,15 @@ impl ToBytes for OffsetForLeaderTopic {
         }
         if version >= 0 {
             self.partitions.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for OffsetForLeaderTopic {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            partitions: Default::default(),
         }
     }
 }
@@ -66,6 +92,16 @@ impl ToBytes for OffsetForLeaderPartition {
         }
         if version >= 0 {
             self.leader_epoch.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for OffsetForLeaderPartition {
+    fn default() -> Self {
+        Self {
+            partition_index: Default::default(),
+            current_leader_epoch: -1,
+            leader_epoch: Default::default(),
         }
     }
 }

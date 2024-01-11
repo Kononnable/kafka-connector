@@ -1,25 +1,44 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct TxnOffsetCommitRequest {
+    /// The ID of the transaction.
     pub transactional_id: String,
+
+    /// The ID of the group.
     pub group_id: String,
+
+    /// The current producer ID in use by the transactional ID.
     pub producer_id: i64,
+
+    /// The current epoch associated with the producer ID.
     pub producer_epoch: i16,
+
+    /// Each topic that we want to committ offsets for.
     pub topics: Vec<TxnOffsetCommitRequestTopic>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct TxnOffsetCommitRequestTopic {
+    /// The topic name.
     pub name: String,
+
+    /// The partitions inside the topic that we want to committ offsets for.
     pub partitions: Vec<TxnOffsetCommitRequestPartition>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct TxnOffsetCommitRequestPartition {
+    /// The index of the partition within the topic.
     pub partition_index: i32,
+
+    /// The message offset to be committed.
     pub committed_offset: i64,
+
+    /// The leader epoch of the last consumed record.
     pub committed_leader_epoch: i32,
+
+    /// Any associated metadata the client wants to keep.
     pub committed_metadata: String,
 }
 
@@ -62,6 +81,18 @@ impl ApiRequest for TxnOffsetCommitRequest {
     }
 }
 
+impl Default for TxnOffsetCommitRequest {
+    fn default() -> Self {
+        Self {
+            transactional_id: Default::default(),
+            group_id: Default::default(),
+            producer_id: Default::default(),
+            producer_epoch: Default::default(),
+            topics: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for TxnOffsetCommitRequestTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -69,6 +100,15 @@ impl ToBytes for TxnOffsetCommitRequestTopic {
         }
         if version >= 0 {
             self.partitions.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for TxnOffsetCommitRequestTopic {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            partitions: Default::default(),
         }
     }
 }
@@ -86,6 +126,17 @@ impl ToBytes for TxnOffsetCommitRequestPartition {
         }
         if version >= 0 {
             self.committed_metadata.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for TxnOffsetCommitRequestPartition {
+    fn default() -> Self {
+        Self {
+            partition_index: Default::default(),
+            committed_offset: Default::default(),
+            committed_leader_epoch: -1,
+            committed_metadata: Default::default(),
         }
     }
 }

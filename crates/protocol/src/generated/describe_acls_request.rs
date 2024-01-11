@@ -1,13 +1,26 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct DescribeAclsRequest {
+    /// The resource type.
     pub resource_type: i8,
+
+    /// The resource name, or null to match any resource name.
     pub resource_name_filter: String,
+
+    /// The resource pattern to match.
     pub resource_pattern_type: i8,
+
+    /// The principal to match, or null to match any principal.
     pub principal_filter: String,
+
+    /// The host to match, or null to match any host.
     pub host_filter: String,
+
+    /// The operation to match.
     pub operation: i8,
+
+    /// The permission type to match.
     pub permission_type: i8,
 }
 
@@ -52,6 +65,20 @@ impl ApiRequest for DescribeAclsRequest {
         }
         if version >= 0 {
             self.permission_type.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for DescribeAclsRequest {
+    fn default() -> Self {
+        Self {
+            resource_type: Default::default(),
+            resource_name_filter: Default::default(),
+            resource_pattern_type: 3,
+            principal_filter: Default::default(),
+            host_filter: Default::default(),
+            operation: Default::default(),
+            permission_type: Default::default(),
         }
     }
 }

@@ -1,13 +1,17 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct MetadataRequest {
+    /// The topics to fetch metadata for.
     pub topics: Vec<MetadataRequestTopic>,
+
+    /// If this is true, the broker may auto-create topics that we requested which do not already exist, if it is configured to do so.
     pub allow_auto_topic_creation: bool,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct MetadataRequestTopic {
+    /// The topic name.
     pub name: String,
 }
 
@@ -41,10 +45,27 @@ impl ApiRequest for MetadataRequest {
     }
 }
 
+impl Default for MetadataRequest {
+    fn default() -> Self {
+        Self {
+            topics: Default::default(),
+            allow_auto_topic_creation: true,
+        }
+    }
+}
+
 impl ToBytes for MetadataRequestTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
             self.name.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for MetadataRequestTopic {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
         }
     }
 }

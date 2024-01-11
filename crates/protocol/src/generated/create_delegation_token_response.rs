@@ -1,15 +1,32 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct CreateDelegationTokenResponse {
+    /// The top-level error, or zero if there was no error.
     pub error_code: i16,
+
+    /// The principal type of the token owner.
     pub principal_type: String,
+
+    /// The name of the token owner.
     pub principal_name: String,
+
+    /// When this token was generated.
     pub issue_timestamp_ms: i64,
+
+    /// When this token expires.
     pub expiry_timestamp_ms: i64,
+
+    /// The maximum lifetime of this token.
     pub max_timestamp_ms: i64,
+
+    /// The token UUID.
     pub token_id: String,
+
+    /// HMAC of the delegation token.
     pub hmac: Vec<u8>,
+
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
 }
 
@@ -75,5 +92,21 @@ impl ApiResponse for CreateDelegationTokenResponse {
                 throttle_time_ms,
             },
         )
+    }
+}
+
+impl Default for CreateDelegationTokenResponse {
+    fn default() -> Self {
+        Self {
+            error_code: Default::default(),
+            principal_type: Default::default(),
+            principal_name: Default::default(),
+            issue_timestamp_ms: Default::default(),
+            expiry_timestamp_ms: Default::default(),
+            max_timestamp_ms: Default::default(),
+            token_id: Default::default(),
+            hmac: Default::default(),
+            throttle_time_ms: Default::default(),
+        }
     }
 }

@@ -1,15 +1,23 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct DescribeConfigsRequest {
+    /// The resources whose configurations we want to describe.
     pub resources: Vec<DescribeConfigsResource>,
+
+    /// True if we should include all synonyms.
     pub include_synoyms: bool,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DescribeConfigsResource {
+    /// The resource type.
     pub resource_type: i8,
+
+    /// The resource name.
     pub resource_name: String,
+
+    /// The configuration keys to list, or null to list all configuration keys.
     pub configuration_keys: Vec<String>,
 }
 
@@ -43,6 +51,15 @@ impl ApiRequest for DescribeConfigsRequest {
     }
 }
 
+impl Default for DescribeConfigsRequest {
+    fn default() -> Self {
+        Self {
+            resources: Default::default(),
+            include_synoyms: false,
+        }
+    }
+}
+
 impl ToBytes for DescribeConfigsResource {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -53,6 +70,16 @@ impl ToBytes for DescribeConfigsResource {
         }
         if version >= 0 {
             self.configuration_keys.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for DescribeConfigsResource {
+    fn default() -> Self {
+        Self {
+            resource_type: Default::default(),
+            resource_name: Default::default(),
+            configuration_keys: Default::default(),
         }
     }
 }

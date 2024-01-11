@@ -1,18 +1,32 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct DeleteAclsRequest {
+    /// The filters to use when deleting ACLs.
     pub filters: Vec<DeleteAclsFilter>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DeleteAclsFilter {
+    /// The resource type.
     pub resource_type_filter: i8,
+
+    /// The resource name.
     pub resource_name_filter: String,
+
+    /// The pattern type.
     pub pattern_type_filter: i8,
+
+    /// The principal filter, or null to accept all principals.
     pub principal_filter: String,
+
+    /// The host filter, or null to accept all hosts.
     pub host_filter: String,
+
+    /// The ACL operation.
     pub operation: i8,
+
+    /// The permission type.
     pub permission_type: i8,
 }
 
@@ -43,6 +57,14 @@ impl ApiRequest for DeleteAclsRequest {
     }
 }
 
+impl Default for DeleteAclsRequest {
+    fn default() -> Self {
+        Self {
+            filters: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for DeleteAclsFilter {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -65,6 +87,20 @@ impl ToBytes for DeleteAclsFilter {
         }
         if version >= 0 {
             self.permission_type.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for DeleteAclsFilter {
+    fn default() -> Self {
+        Self {
+            resource_type_filter: Default::default(),
+            resource_name_filter: Default::default(),
+            pattern_type_filter: 3,
+            principal_filter: Default::default(),
+            host_filter: Default::default(),
+            operation: Default::default(),
+            permission_type: Default::default(),
         }
     }
 }

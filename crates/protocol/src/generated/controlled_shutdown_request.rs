@@ -1,8 +1,11 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct ControlledShutdownRequest {
+    /// The id of the broker for which controlled shutdown has been requested.
     pub broker_id: i32,
+
+    /// The broker epoch.
     pub broker_epoch: i64,
 }
 
@@ -32,6 +35,15 @@ impl ApiRequest for ControlledShutdownRequest {
         }
         if version >= 2 {
             self.broker_epoch.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for ControlledShutdownRequest {
+    fn default() -> Self {
+        Self {
+            broker_id: Default::default(),
+            broker_epoch: -1,
         }
     }
 }

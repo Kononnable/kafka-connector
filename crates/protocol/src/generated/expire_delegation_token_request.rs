@@ -1,8 +1,11 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct ExpireDelegationTokenRequest {
+    /// The HMAC of the delegation token to be expired.
     pub hmac: Vec<u8>,
+
+    /// The expiry time period in milliseconds.
     pub expiry_time_period_ms: i64,
 }
 
@@ -32,6 +35,15 @@ impl ApiRequest for ExpireDelegationTokenRequest {
         }
         if version >= 0 {
             self.expiry_time_period_ms.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for ExpireDelegationTokenRequest {
+    fn default() -> Self {
+        Self {
+            hmac: Default::default(),
+            expiry_time_period_ms: Default::default(),
         }
     }
 }

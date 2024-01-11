@@ -6,7 +6,7 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
     let mut content = "use super::super::prelude::*;\n\n".to_owned();
     let mut sub_structs_partial = VecDeque::new();
     let mut sub_structs = Vec::new();
-    content.push_str("#[derive(Clone, Debug, Default)]\n");
+    content.push_str("#[derive(Clone, Debug)]\n");
     content.push_str(&format!("pub struct {} {{\n", spec.name));
     for field in &spec.fields {
         content.push_str(&get_field_definition(field, &mut sub_structs_partial));
@@ -14,7 +14,7 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
     content.push_str("}\n\n");
 
     while let Some((s_name, s_fields)) = sub_structs_partial.pop_front() {
-        content.push_str("#[derive(Debug, Default, Clone)]\n");
+        content.push_str("#[derive(Debug, Clone)]\n");
         content.push_str(&format!("pub struct {} {{\n", s_name));
         for field in &s_fields {
             content.push_str(&get_field_definition(field, &mut sub_structs_partial));
@@ -49,6 +49,7 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
             }
             content.push_str("    }\n\n");
             content.push_str("}\n\n");
+            content.push_str(&impl_default_trait(&spec.name, &spec.fields));
 
             for (name, fields) in sub_structs {
                 content.push_str(&format!("impl ToBytes for {name}{{\n"));
@@ -58,6 +59,7 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
                 }
                 content.push_str("    }\n\n");
                 content.push_str("}\n\n");
+                content.push_str(&impl_default_trait(&name, &fields));
             }
         }
         ApiSpecType::Response => {
@@ -79,6 +81,7 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
             content.push_str("        })\n\n");
             content.push_str("    }\n\n");
             content.push_str("}\n\n");
+            content.push_str(&impl_default_trait(&spec.name, &spec.fields));
 
             for (name, fields) in sub_structs {
                 content.push_str(&format!("impl  FromBytes for {name}{{\n"));
@@ -96,6 +99,7 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
                 content.push_str("        }\n\n");
                 content.push_str("    }\n\n");
                 content.push_str("}\n\n");
+                content.push_str(&impl_default_trait(&name, &fields));
             }
         }
         ApiSpecType::Header => {
@@ -138,6 +142,7 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
                 _ => panic!("Unknown header type"),
             }
             content.push_str("}\n\n");
+            content.push_str(&impl_default_trait(&spec.name, &spec.fields));
         }
     }
 
@@ -168,6 +173,27 @@ fn get_min_max_supported_version(spec: &ApiSpec) -> String {
     content
 }
 
+fn impl_default_trait(name: &str, fields: &Vec<ApiSpecField>) -> String {
+    let mut content = format!("impl Default for {name} {{\n",);
+    content.push_str("fn default() -> Self {\n");
+    content.push_str("    Self {\n");
+    for field in fields {
+        let default = field
+            .default
+            .clone()
+            .unwrap_or("Default::default()".to_owned());
+        content.push_str(&format!(
+            "        {}: {},\n",
+            field.name.to_case(Case::Snake),
+            default
+        ));
+    }
+    content.push_str("        }\n\n");
+    content.push_str("    }\n\n");
+    content.push_str("}\n\n");
+
+    content
+}
 fn serialize_field(field: &ApiSpecField) -> String {
     let mut content = "".to_owned();
 
@@ -225,6 +251,7 @@ fn get_field_definition(
     field: &ApiSpecField,
     sub_structs: &mut VecDeque<(String, Vec<ApiSpecField>)>,
 ) -> String {
+    let mut content = "".to_owned();
     let ApiSpecFieldType { type_, is_array } = &field.type_;
     let mut field_type = get_field_base_type(type_);
     if *is_array {
@@ -233,10 +260,14 @@ fn get_field_definition(
     if !field.fields.is_empty() {
         sub_structs.push_back((get_field_base_type(type_), field.fields.clone()));
     }
-    format!(
-        "    pub {}: {field_type}, \n",
+    if let Some(about) = &field.about {
+        content.push_str(&format!("    /// {about}\n",));
+    }
+    content.push_str(&format!(
+        "    pub {}: {field_type}, \n\n",
         field.name.to_case(Case::Snake)
-    )
+    ));
+    content
 }
 
 fn get_field_base_type(type_: &ApiSpecFieldSubtype) -> String {

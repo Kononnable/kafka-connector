@@ -1,21 +1,32 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct DeleteRecordsResponse {
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
+
+    /// Each topic that we wanted to delete records from.
     pub topics: Vec<DeleteRecordsTopicResult>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DeleteRecordsTopicResult {
+    /// The topic name.
     pub name: String,
+
+    /// Each partition that we wanted to delete records from.
     pub partitions: Vec<DeleteRecordsPartitionResult>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DeleteRecordsPartitionResult {
+    /// The partition index.
     pub partition_index: i32,
+
+    /// The partition low water mark.
     pub low_watermark: i64,
+
+    /// The deletion error code, or 0 if the deletion succeeded.
     pub error_code: i16,
 }
 
@@ -42,6 +53,15 @@ impl ApiResponse for DeleteRecordsResponse {
     }
 }
 
+impl Default for DeleteRecordsResponse {
+    fn default() -> Self {
+        Self {
+            throttle_time_ms: Default::default(),
+            topics: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for DeleteRecordsTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -55,6 +75,15 @@ impl FromBytes for DeleteRecordsTopicResult {
             Default::default()
         };
         DeleteRecordsTopicResult { name, partitions }
+    }
+}
+
+impl Default for DeleteRecordsTopicResult {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            partitions: Default::default(),
+        }
     }
 }
 
@@ -79,6 +108,16 @@ impl FromBytes for DeleteRecordsPartitionResult {
             partition_index,
             low_watermark,
             error_code,
+        }
+    }
+}
+
+impl Default for DeleteRecordsPartitionResult {
+    fn default() -> Self {
+        Self {
+            partition_index: Default::default(),
+            low_watermark: Default::default(),
+            error_code: Default::default(),
         }
     }
 }

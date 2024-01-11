@@ -1,26 +1,47 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct DescribeAclsResponse {
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
+
+    /// The error code, or 0 if there was no error.
     pub error_code: i16,
+
+    /// The error message, or null if there was no error.
     pub error_message: String,
+
+    /// Each Resource that is referenced in an ACL.
     pub resources: Vec<DescribeAclsResource>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DescribeAclsResource {
+    /// The resource type.
     pub r#type: i8,
+
+    /// The resource name.
     pub name: String,
+
+    /// The resource pattern type.
     pub pattern_type: i8,
+
+    /// The ACLs.
     pub acls: Vec<AclDescription>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct AclDescription {
+    /// The ACL principal.
     pub principal: String,
+
+    /// The ACL host.
     pub host: String,
+
+    /// The ACL operation.
     pub operation: i8,
+
+    /// The ACL permission type.
     pub permission_type: i8,
 }
 
@@ -59,6 +80,17 @@ impl ApiResponse for DescribeAclsResponse {
     }
 }
 
+impl Default for DescribeAclsResponse {
+    fn default() -> Self {
+        Self {
+            throttle_time_ms: Default::default(),
+            error_code: Default::default(),
+            error_message: Default::default(),
+            resources: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for DescribeAclsResource {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let r#type = if version >= 0 {
@@ -90,6 +122,17 @@ impl FromBytes for DescribeAclsResource {
     }
 }
 
+impl Default for DescribeAclsResource {
+    fn default() -> Self {
+        Self {
+            r#type: Default::default(),
+            name: Default::default(),
+            pattern_type: 3,
+            acls: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for AclDescription {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let principal = if version >= 0 {
@@ -117,6 +160,17 @@ impl FromBytes for AclDescription {
             host,
             operation,
             permission_type,
+        }
+    }
+}
+
+impl Default for AclDescription {
+    fn default() -> Self {
+        Self {
+            principal: Default::default(),
+            host: Default::default(),
+            operation: Default::default(),
+            permission_type: Default::default(),
         }
     }
 }

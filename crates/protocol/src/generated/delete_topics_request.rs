@@ -1,8 +1,11 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct DeleteTopicsRequest {
+    /// The names of the topics to delete
     pub topic_names: Vec<String>,
+
+    /// The length of time in milliseconds to wait for the deletions to complete.
     pub timeout_ms: i32,
 }
 
@@ -32,6 +35,15 @@ impl ApiRequest for DeleteTopicsRequest {
         }
         if version >= 0 {
             self.timeout_ms.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for DeleteTopicsRequest {
+    fn default() -> Self {
+        Self {
+            topic_names: Default::default(),
+            timeout_ms: Default::default(),
         }
     }
 }

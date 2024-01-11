@@ -1,14 +1,20 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct ControlledShutdownResponse {
+    /// The top-level error code.
     pub error_code: i16,
+
+    /// The partitions that the broker still leads.
     pub remaining_partitions: Vec<RemainingPartition>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct RemainingPartition {
+    /// The name of the topic.
     pub topic_name: String,
+
+    /// The index of the partition.
     pub partition_index: i32,
 }
 
@@ -35,6 +41,15 @@ impl ApiResponse for ControlledShutdownResponse {
     }
 }
 
+impl Default for ControlledShutdownResponse {
+    fn default() -> Self {
+        Self {
+            error_code: Default::default(),
+            remaining_partitions: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for RemainingPartition {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let topic_name = if version >= 0 {
@@ -50,6 +65,15 @@ impl FromBytes for RemainingPartition {
         RemainingPartition {
             topic_name,
             partition_index,
+        }
+    }
+}
+
+impl Default for RemainingPartition {
+    fn default() -> Self {
+        Self {
+            topic_name: Default::default(),
+            partition_index: Default::default(),
         }
     }
 }

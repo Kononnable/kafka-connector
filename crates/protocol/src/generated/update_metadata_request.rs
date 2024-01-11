@@ -1,60 +1,120 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct UpdateMetadataRequest {
+    /// The controller id.
     pub controller_id: i32,
+
+    /// The controller epoch.
     pub controller_epoch: i32,
+
+    /// The broker epoch.
     pub broker_epoch: i64,
+
+    /// Each topic that we would like to update.
     pub topic_states: Vec<UpdateMetadataRequestTopicState>,
+
+    /// Each partition that we would like to update.
     pub partition_states_v_0: Vec<UpdateMetadataRequestPartitionStateV0>,
+
     pub brokers: Vec<UpdateMetadataRequestBroker>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct UpdateMetadataRequestTopicState {
+    /// The topic name.
     pub topic_name: String,
+
+    /// The partition that we would like to update.
     pub partition_states: Vec<UpdateMetadataPartitionState>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct UpdateMetadataRequestPartitionStateV0 {
+    /// The topic name.
     pub topic_name: String,
+
+    /// The partition index.
     pub partition_index: i32,
+
+    /// The controller epoch.
     pub controller_epoch: i32,
+
+    /// The ID of the broker which is the current partition leader.
     pub leader: i32,
+
+    /// The leader epoch of this partition.
     pub leader_epoch: i32,
+
+    /// The brokers which are in the ISR for this partition.
     pub isr: Vec<i32>,
+
+    /// The Zookeeper version.
     pub zk_version: i32,
+
+    /// All the replicas of this partition.
     pub replicas: Vec<i32>,
+
+    /// The replicas of this partition which are offline.
     pub offline_replicas: Vec<i32>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct UpdateMetadataRequestBroker {
     pub id: i32,
+
+    /// The broker hostname.
     pub v_0_host: String,
+
+    /// The broker port.
     pub v_0_port: i32,
+
+    /// The broker endpoints.
     pub endpoints: Vec<UpdateMetadataRequestEndpoint>,
+
+    /// The rack which this broker belongs to.
     pub rack: String,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct UpdateMetadataPartitionState {
+    /// The partition index.
     pub partition_index: i32,
+
+    /// The controller epoch.
     pub controller_epoch: i32,
+
+    /// The ID of the broker which is the current partition leader.
     pub leader: i32,
+
+    /// The leader epoch of this partition.
     pub leader_epoch: i32,
+
+    /// The brokers which are in the ISR for this partition.
     pub isr: Vec<i32>,
+
+    /// The Zookeeper version.
     pub zk_version: i32,
+
+    /// All the replicas of this partition.
     pub replicas: Vec<i32>,
+
+    /// The replicas of this partition which are offline.
     pub offline_replicas: Vec<i32>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct UpdateMetadataRequestEndpoint {
+    /// The port of this endpoint
     pub port: i32,
+
+    /// The hostname of this endpoint
     pub host: String,
+
+    /// The listener name.
     pub listener: String,
+
+    /// The security protocol type.
     pub security_protocol: i16,
 }
 
@@ -100,6 +160,19 @@ impl ApiRequest for UpdateMetadataRequest {
     }
 }
 
+impl Default for UpdateMetadataRequest {
+    fn default() -> Self {
+        Self {
+            controller_id: Default::default(),
+            controller_epoch: Default::default(),
+            broker_epoch: -1,
+            topic_states: Default::default(),
+            partition_states_v_0: Default::default(),
+            brokers: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for UpdateMetadataRequestTopicState {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -107,6 +180,15 @@ impl ToBytes for UpdateMetadataRequestTopicState {
         }
         if version >= 5 {
             self.partition_states.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for UpdateMetadataRequestTopicState {
+    fn default() -> Self {
+        Self {
+            topic_name: Default::default(),
+            partition_states: Default::default(),
         }
     }
 }
@@ -143,6 +225,22 @@ impl ToBytes for UpdateMetadataRequestPartitionStateV0 {
     }
 }
 
+impl Default for UpdateMetadataRequestPartitionStateV0 {
+    fn default() -> Self {
+        Self {
+            topic_name: Default::default(),
+            partition_index: Default::default(),
+            controller_epoch: Default::default(),
+            leader: Default::default(),
+            leader_epoch: Default::default(),
+            isr: Default::default(),
+            zk_version: Default::default(),
+            replicas: Default::default(),
+            offline_replicas: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for UpdateMetadataRequestBroker {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -159,6 +257,18 @@ impl ToBytes for UpdateMetadataRequestBroker {
         }
         if version >= 2 {
             self.rack.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for UpdateMetadataRequestBroker {
+    fn default() -> Self {
+        Self {
+            id: Default::default(),
+            v_0_host: Default::default(),
+            v_0_port: Default::default(),
+            endpoints: Default::default(),
+            rack: Default::default(),
         }
     }
 }
@@ -192,6 +302,21 @@ impl ToBytes for UpdateMetadataPartitionState {
     }
 }
 
+impl Default for UpdateMetadataPartitionState {
+    fn default() -> Self {
+        Self {
+            partition_index: Default::default(),
+            controller_epoch: Default::default(),
+            leader: Default::default(),
+            leader_epoch: Default::default(),
+            isr: Default::default(),
+            zk_version: Default::default(),
+            replicas: Default::default(),
+            offline_replicas: Default::default(),
+        }
+    }
+}
+
 impl ToBytes for UpdateMetadataRequestEndpoint {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 1 {
@@ -205,6 +330,17 @@ impl ToBytes for UpdateMetadataRequestEndpoint {
         }
         if version >= 1 {
             self.security_protocol.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for UpdateMetadataRequestEndpoint {
+    fn default() -> Self {
+        Self {
+            port: Default::default(),
+            host: Default::default(),
+            listener: Default::default(),
+            security_protocol: Default::default(),
         }
     }
 }

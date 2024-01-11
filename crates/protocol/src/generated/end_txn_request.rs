@@ -1,10 +1,17 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct EndTxnRequest {
+    /// The ID of the transaction to end.
     pub transactional_id: String,
+
+    /// The producer ID.
     pub producer_id: i64,
+
+    /// The current epoch associated with the producer.
     pub producer_epoch: i16,
+
+    /// True if the transaction was committed, false if it was aborted.
     pub committed: bool,
 }
 
@@ -40,6 +47,17 @@ impl ApiRequest for EndTxnRequest {
         }
         if version >= 0 {
             self.committed.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for EndTxnRequest {
+    fn default() -> Self {
+        Self {
+            transactional_id: Default::default(),
+            producer_id: Default::default(),
+            producer_epoch: Default::default(),
+            committed: Default::default(),
         }
     }
 }

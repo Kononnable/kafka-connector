@@ -1,38 +1,74 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct MetadataResponse {
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
+
+    /// Each broker in the response.
     pub brokers: Vec<MetadataResponseBroker>,
+
+    /// The cluster ID that responding broker belongs to.
     pub cluster_id: String,
+
+    /// The ID of the controller broker.
     pub controller_id: i32,
+
+    /// Each topic in the response.
     pub topics: Vec<MetadataResponseTopic>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct MetadataResponseBroker {
+    /// The broker ID.
     pub node_id: i32,
+
+    /// The broker hostname.
     pub host: String,
+
+    /// The broker port.
     pub port: i32,
+
+    /// The rack of the broker, or null if it has not been assigned to a rack.
     pub rack: String,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct MetadataResponseTopic {
+    /// The topic error, or 0 if there was no error.
     pub error_code: i16,
+
+    /// The topic name.
     pub name: String,
+
+    /// True if the topic is internal.
     pub is_internal: bool,
+
+    /// Each partition in the topic.
     pub partitions: Vec<MetadataResponsePartition>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct MetadataResponsePartition {
+    /// The partition error, or 0 if there was no error.
     pub error_code: i16,
+
+    /// The partition index.
     pub partition_index: i32,
+
+    /// The ID of the leader broker.
     pub leader_id: i32,
+
+    /// The leader epoch of this partition.
     pub leader_epoch: i32,
+
+    /// The set of all nodes that host this partition.
     pub replica_nodes: Vec<i32>,
+
+    /// The set of nodes that are in sync with the leader for this partition.
     pub isr_nodes: Vec<i32>,
+
+    /// The set of offline replicas of this partition.
     pub offline_replicas: Vec<i32>,
 }
 
@@ -77,6 +113,18 @@ impl ApiResponse for MetadataResponse {
     }
 }
 
+impl Default for MetadataResponse {
+    fn default() -> Self {
+        Self {
+            throttle_time_ms: Default::default(),
+            brokers: Default::default(),
+            cluster_id: Default::default(),
+            controller_id: -1,
+            topics: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for MetadataResponseBroker {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let node_id = if version >= 0 {
@@ -108,6 +156,17 @@ impl FromBytes for MetadataResponseBroker {
     }
 }
 
+impl Default for MetadataResponseBroker {
+    fn default() -> Self {
+        Self {
+            node_id: Default::default(),
+            host: Default::default(),
+            port: Default::default(),
+            rack: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for MetadataResponseTopic {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let error_code = if version >= 0 {
@@ -135,6 +194,17 @@ impl FromBytes for MetadataResponseTopic {
             name,
             is_internal,
             partitions,
+        }
+    }
+}
+
+impl Default for MetadataResponseTopic {
+    fn default() -> Self {
+        Self {
+            error_code: Default::default(),
+            name: Default::default(),
+            is_internal: false,
+            partitions: Default::default(),
         }
     }
 }
@@ -184,6 +254,20 @@ impl FromBytes for MetadataResponsePartition {
             replica_nodes,
             isr_nodes,
             offline_replicas,
+        }
+    }
+}
+
+impl Default for MetadataResponsePartition {
+    fn default() -> Self {
+        Self {
+            error_code: Default::default(),
+            partition_index: Default::default(),
+            leader_id: Default::default(),
+            leader_epoch: -1,
+            replica_nodes: Default::default(),
+            isr_nodes: Default::default(),
+            offline_replicas: Default::default(),
         }
     }
 }

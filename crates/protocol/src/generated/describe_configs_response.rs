@@ -1,35 +1,65 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct DescribeConfigsResponse {
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
+
+    /// The results for each resource.
     pub results: Vec<DescribeConfigsResult>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DescribeConfigsResult {
+    /// The error code, or 0 if we were able to successfully describe the configurations.
     pub error_code: i16,
+
+    /// The error message, or null if we were able to successfully describe the configurations.
     pub error_message: String,
+
+    /// The resource type.
     pub resource_type: i8,
+
+    /// The resource name.
     pub resource_name: String,
+
+    /// Each listed configuration.
     pub configs: Vec<DescribeConfigsResourceResult>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DescribeConfigsResourceResult {
+    /// The configuration name.
     pub name: String,
+
+    /// The configuration value.
     pub value: String,
+
+    /// True if the configuration is read-only.
     pub read_only: bool,
+
+    /// True if the configuration is not set.
     pub is_default: bool,
+
+    /// The configuration source.
     pub config_source: i8,
+
+    /// True if this configuration is sensitive.
     pub is_sensitive: bool,
+
+    /// The synonyms for this configuration key.
     pub synonyms: Vec<DescribeConfigsSynonym>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DescribeConfigsSynonym {
+    /// The synonym name.
     pub name: String,
+
+    /// The synonym value.
     pub value: String,
+
+    /// The synonym source.
     pub source: i8,
 }
 
@@ -53,6 +83,15 @@ impl ApiResponse for DescribeConfigsResponse {
                 results,
             },
         )
+    }
+}
+
+impl Default for DescribeConfigsResponse {
+    fn default() -> Self {
+        Self {
+            throttle_time_ms: Default::default(),
+            results: Default::default(),
+        }
     }
 }
 
@@ -89,6 +128,18 @@ impl FromBytes for DescribeConfigsResult {
             resource_type,
             resource_name,
             configs,
+        }
+    }
+}
+
+impl Default for DescribeConfigsResult {
+    fn default() -> Self {
+        Self {
+            error_code: Default::default(),
+            error_message: Default::default(),
+            resource_type: Default::default(),
+            resource_name: Default::default(),
+            configs: Default::default(),
         }
     }
 }
@@ -142,6 +193,20 @@ impl FromBytes for DescribeConfigsResourceResult {
     }
 }
 
+impl Default for DescribeConfigsResourceResult {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            value: Default::default(),
+            read_only: Default::default(),
+            is_default: Default::default(),
+            config_source: -1,
+            is_sensitive: Default::default(),
+            synonyms: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for DescribeConfigsSynonym {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 1 {
@@ -163,6 +228,16 @@ impl FromBytes for DescribeConfigsSynonym {
             name,
             value,
             source,
+        }
+    }
+}
+
+impl Default for DescribeConfigsSynonym {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            value: Default::default(),
+            source: Default::default(),
         }
     }
 }

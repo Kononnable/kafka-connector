@@ -1,33 +1,59 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct FetchResponse {
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
+
+    /// The top level response error code.
     pub error_code: i16,
+
+    /// The fetch session ID, or 0 if this is not part of a fetch session.
     pub session_id: i32,
+
+    /// The response topics.
     pub topics: Vec<FetchableTopicResponse>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct FetchableTopicResponse {
+    /// The topic name.
     pub name: String,
+
+    /// The topic partitions.
     pub partitions: Vec<FetchablePartitionResponse>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct FetchablePartitionResponse {
+    /// The partiiton index.
     pub partition_index: i32,
+
+    /// The error code, or 0 if there was no fetch error.
     pub error_code: i16,
+
+    /// The current high water mark.
     pub high_watermark: i64,
+
+    /// The last stable offset (or LSO) of the partition. This is the last offset such that the state of all transactional records prior to this offset have been decided (ABORTED or COMMITTED)
     pub last_stable_offset: i64,
+
+    /// The current log start offset.
     pub log_start_offset: i64,
+
+    /// The aborted transactions.
     pub aborted: Vec<AbortedTransaction>,
+
+    /// The record data.
     pub records: Vec<u8>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct AbortedTransaction {
+    /// The producer id associated with the aborted transaction.
     pub producer_id: i64,
+
+    /// The first offset in the aborted transaction.
     pub first_offset: i64,
 }
 
@@ -66,6 +92,17 @@ impl ApiResponse for FetchResponse {
     }
 }
 
+impl Default for FetchResponse {
+    fn default() -> Self {
+        Self {
+            throttle_time_ms: Default::default(),
+            error_code: Default::default(),
+            session_id: 0,
+            topics: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for FetchableTopicResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -79,6 +116,15 @@ impl FromBytes for FetchableTopicResponse {
             Default::default()
         };
         FetchableTopicResponse { name, partitions }
+    }
+}
+
+impl Default for FetchableTopicResponse {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            partitions: Default::default(),
+        }
     }
 }
 
@@ -131,6 +177,20 @@ impl FromBytes for FetchablePartitionResponse {
     }
 }
 
+impl Default for FetchablePartitionResponse {
+    fn default() -> Self {
+        Self {
+            partition_index: Default::default(),
+            error_code: Default::default(),
+            high_watermark: Default::default(),
+            last_stable_offset: -1,
+            log_start_offset: -1,
+            aborted: Default::default(),
+            records: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for AbortedTransaction {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let producer_id = if version >= 4 {
@@ -146,6 +206,15 @@ impl FromBytes for AbortedTransaction {
         AbortedTransaction {
             producer_id,
             first_offset,
+        }
+    }
+}
+
+impl Default for AbortedTransaction {
+    fn default() -> Self {
+        Self {
+            producer_id: Default::default(),
+            first_offset: Default::default(),
         }
     }
 }

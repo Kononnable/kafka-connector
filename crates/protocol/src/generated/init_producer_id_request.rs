@@ -1,8 +1,11 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct InitProducerIdRequest {
+    /// The transactional id, or null if the producer is not transactional.
     pub transactional_id: String,
+
+    /// The time in ms to wait for before aborting idle transactions sent by this producer.
     pub transaction_timeout_ms: i32,
 }
 
@@ -32,6 +35,15 @@ impl ApiRequest for InitProducerIdRequest {
         }
         if version >= 0 {
             self.transaction_timeout_ms.serialize(version, bytes);
+        }
+    }
+}
+
+impl Default for InitProducerIdRequest {
+    fn default() -> Self {
+        Self {
+            transactional_id: Default::default(),
+            transaction_timeout_ms: Default::default(),
         }
     }
 }

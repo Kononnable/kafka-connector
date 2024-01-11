@@ -1,27 +1,50 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct DescribeDelegationTokenResponse {
+    /// The error code, or 0 if there was no error.
     pub error_code: i16,
+
+    /// The tokens.
     pub tokens: Vec<DescribedDelegationToken>,
+
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DescribedDelegationToken {
+    /// The token principal type.
     pub principal_type: String,
+
+    /// The token principal name.
     pub principal_name: String,
+
+    /// The token issue timestamp in milliseconds.
     pub issue_timestamp: i64,
+
+    /// The token expiry timestamp in milliseconds.
     pub expiry_timestamp: i64,
+
+    /// The token maximum timestamp length in milliseconds.
     pub max_timestamp: i64,
+
+    /// The token ID.
     pub token_id: String,
+
+    /// The token HMAC.
     pub hmac: Vec<u8>,
+
+    /// Those who are able to renew this token before it expires.
     pub renewers: Vec<DescribedDelegationTokenRenewer>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DescribedDelegationTokenRenewer {
+    /// The renewer principal type
     pub principal_type: String,
+
+    /// The renewer principal name
     pub principal_name: String,
 }
 
@@ -51,6 +74,16 @@ impl ApiResponse for DescribeDelegationTokenResponse {
                 throttle_time_ms,
             },
         )
+    }
+}
+
+impl Default for DescribeDelegationTokenResponse {
+    fn default() -> Self {
+        Self {
+            error_code: Default::default(),
+            tokens: Default::default(),
+            throttle_time_ms: Default::default(),
+        }
     }
 }
 
@@ -109,6 +142,21 @@ impl FromBytes for DescribedDelegationToken {
     }
 }
 
+impl Default for DescribedDelegationToken {
+    fn default() -> Self {
+        Self {
+            principal_type: Default::default(),
+            principal_name: Default::default(),
+            issue_timestamp: Default::default(),
+            expiry_timestamp: Default::default(),
+            max_timestamp: Default::default(),
+            token_id: Default::default(),
+            hmac: Default::default(),
+            renewers: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for DescribedDelegationTokenRenewer {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let principal_type = if version >= 0 {
@@ -124,6 +172,15 @@ impl FromBytes for DescribedDelegationTokenRenewer {
         DescribedDelegationTokenRenewer {
             principal_type,
             principal_name,
+        }
+    }
+}
+
+impl Default for DescribedDelegationTokenRenewer {
+    fn default() -> Self {
+        Self {
+            principal_type: Default::default(),
+            principal_name: Default::default(),
         }
     }
 }

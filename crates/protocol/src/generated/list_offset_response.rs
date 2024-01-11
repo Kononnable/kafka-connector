@@ -1,24 +1,40 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct ListOffsetResponse {
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
+
+    /// Each topic in the response.
     pub topics: Vec<ListOffsetTopicResponse>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct ListOffsetTopicResponse {
+    /// The topic name
     pub name: String,
+
+    /// Each partition in the response.
     pub partitions: Vec<ListOffsetPartitionResponse>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct ListOffsetPartitionResponse {
+    /// The partition index.
     pub partition_index: i32,
+
+    /// The partition error code, or 0 if there was no error.
     pub error_code: i16,
+
+    /// The result offsets.
     pub old_style_offsets: Vec<i64>,
+
+    /// The timestamp associated with the returned offset.
     pub timestamp: i64,
+
+    /// The returned offset.
     pub offset: i64,
+
     pub leader_epoch: i32,
 }
 
@@ -45,6 +61,15 @@ impl ApiResponse for ListOffsetResponse {
     }
 }
 
+impl Default for ListOffsetResponse {
+    fn default() -> Self {
+        Self {
+            throttle_time_ms: Default::default(),
+            topics: Default::default(),
+        }
+    }
+}
+
 impl FromBytes for ListOffsetTopicResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -58,6 +83,15 @@ impl FromBytes for ListOffsetTopicResponse {
             Default::default()
         };
         ListOffsetTopicResponse { name, partitions }
+    }
+}
+
+impl Default for ListOffsetTopicResponse {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            partitions: Default::default(),
+        }
     }
 }
 
@@ -100,6 +134,19 @@ impl FromBytes for ListOffsetPartitionResponse {
             timestamp,
             offset,
             leader_epoch,
+        }
+    }
+}
+
+impl Default for ListOffsetPartitionResponse {
+    fn default() -> Self {
+        Self {
+            partition_index: Default::default(),
+            error_code: Default::default(),
+            old_style_offsets: Default::default(),
+            timestamp: -1,
+            offset: -1,
+            leader_epoch: Default::default(),
         }
     }
 }
