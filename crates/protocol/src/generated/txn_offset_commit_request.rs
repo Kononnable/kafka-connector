@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct TxnOffsetCommitRequest {
     /// The ID of the transaction.
     pub transactional_id: String,
@@ -18,7 +18,7 @@ pub struct TxnOffsetCommitRequest {
     pub topics: Vec<TxnOffsetCommitRequestTopic>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct TxnOffsetCommitRequestTopic {
     /// The topic name.
     pub name: String,
@@ -27,7 +27,7 @@ pub struct TxnOffsetCommitRequestTopic {
     pub partitions: Vec<TxnOffsetCommitRequestPartition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct TxnOffsetCommitRequestPartition {
     /// The index of the partition within the topic.
     pub partition_index: i32,
@@ -81,18 +81,6 @@ impl ApiRequest for TxnOffsetCommitRequest {
     }
 }
 
-impl Default for TxnOffsetCommitRequest {
-    fn default() -> Self {
-        Self {
-            transactional_id: Default::default(),
-            group_id: Default::default(),
-            producer_id: Default::default(),
-            producer_epoch: Default::default(),
-            topics: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for TxnOffsetCommitRequestTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -100,15 +88,6 @@ impl ToBytes for TxnOffsetCommitRequestTopic {
         }
         if version >= 0 {
             self.partitions.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for TxnOffsetCommitRequestTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
         }
     }
 }

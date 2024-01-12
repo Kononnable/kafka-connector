@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct AlterConfigsResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct AlterConfigsResponse {
     pub resources: Vec<AlterConfigsResourceResponse>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct AlterConfigsResourceResponse {
     /// The resource error code.
     pub error_code: i16,
@@ -47,15 +47,6 @@ impl ApiResponse for AlterConfigsResponse {
     }
 }
 
-impl Default for AlterConfigsResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            resources: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for AlterConfigsResourceResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let error_code = if version >= 0 {
@@ -83,17 +74,6 @@ impl FromBytes for AlterConfigsResourceResponse {
             error_message,
             resource_type,
             resource_name,
-        }
-    }
-}
-
-impl Default for AlterConfigsResourceResponse {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            error_message: Default::default(),
-            resource_type: Default::default(),
-            resource_name: Default::default(),
         }
     }
 }

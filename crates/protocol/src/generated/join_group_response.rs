@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct JoinGroupResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -23,7 +23,7 @@ pub struct JoinGroupResponse {
     pub members: Vec<JoinGroupResponseMember>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct JoinGroupResponseMember {
     /// The group member ID.
     pub member_id: String,
@@ -85,20 +85,6 @@ impl ApiResponse for JoinGroupResponse {
     }
 }
 
-impl Default for JoinGroupResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            error_code: Default::default(),
-            generation_id: Default::default(),
-            protocol_name: Default::default(),
-            leader: Default::default(),
-            member_id: Default::default(),
-            members: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for JoinGroupResponseMember {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let member_id = if version >= 0 {
@@ -114,15 +100,6 @@ impl FromBytes for JoinGroupResponseMember {
         JoinGroupResponseMember {
             member_id,
             metadata,
-        }
-    }
-}
-
-impl Default for JoinGroupResponseMember {
-    fn default() -> Self {
-        Self {
-            member_id: Default::default(),
-            metadata: Default::default(),
         }
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeConfigsRequest {
     /// The resources whose configurations we want to describe.
     pub resources: Vec<DescribeConfigsResource>,
@@ -9,7 +9,7 @@ pub struct DescribeConfigsRequest {
     pub include_synoyms: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeConfigsResource {
     /// The resource type.
     pub resource_type: i8,
@@ -51,15 +51,6 @@ impl ApiRequest for DescribeConfigsRequest {
     }
 }
 
-impl Default for DescribeConfigsRequest {
-    fn default() -> Self {
-        Self {
-            resources: Default::default(),
-            include_synoyms: false,
-        }
-    }
-}
-
 impl ToBytes for DescribeConfigsResource {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -70,16 +61,6 @@ impl ToBytes for DescribeConfigsResource {
         }
         if version >= 0 {
             self.configuration_keys.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for DescribeConfigsResource {
-    fn default() -> Self {
-        Self {
-            resource_type: Default::default(),
-            resource_name: Default::default(),
-            configuration_keys: Default::default(),
         }
     }
 }

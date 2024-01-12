@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct CreateDelegationTokenRequest {
     /// A list of those who are allowed to renew this token before it expires.
     pub renewers: Vec<CreatableRenewers>,
@@ -9,7 +9,7 @@ pub struct CreateDelegationTokenRequest {
     pub max_lifetime_ms: i64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct CreatableRenewers {
     /// The type of the Kafka principal.
     pub principal_type: String,
@@ -48,15 +48,6 @@ impl ApiRequest for CreateDelegationTokenRequest {
     }
 }
 
-impl Default for CreateDelegationTokenRequest {
-    fn default() -> Self {
-        Self {
-            renewers: Default::default(),
-            max_lifetime_ms: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for CreatableRenewers {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -64,15 +55,6 @@ impl ToBytes for CreatableRenewers {
         }
         if version >= 0 {
             self.principal_name.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for CreatableRenewers {
-    fn default() -> Self {
-        Self {
-            principal_type: Default::default(),
-            principal_name: Default::default(),
         }
     }
 }

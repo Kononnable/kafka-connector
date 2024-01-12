@@ -21,7 +21,7 @@ pub struct LeaderAndIsrRequest {
     pub live_leaders: Vec<LeaderAndIsrLiveLeader>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct LeaderAndIsrRequestTopicState {
     /// The topic name.
     pub name: String,
@@ -30,7 +30,7 @@ pub struct LeaderAndIsrRequestTopicState {
     pub partition_states: Vec<LeaderAndIsrRequestPartitionState>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct LeaderAndIsrRequestPartitionStateV0 {
     /// The topic name.
     pub topic_name: String,
@@ -60,7 +60,7 @@ pub struct LeaderAndIsrRequestPartitionStateV0 {
     pub is_new: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct LeaderAndIsrLiveLeader {
     /// The leader's broker ID.
     pub broker_id: i32,
@@ -72,7 +72,7 @@ pub struct LeaderAndIsrLiveLeader {
     pub port: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct LeaderAndIsrRequestPartitionState {
     /// The partition index.
     pub partition_index: i32,
@@ -132,7 +132,7 @@ impl ApiRequest for LeaderAndIsrRequest {
         if version >= 2 {
             self.topic_states.serialize(version, bytes);
         }
-        if version >= 0 && version <= 1 {
+        if (0..=1).contains(&version) {
             self.partition_states_v_0.serialize(version, bytes);
         }
         if version >= 0 {
@@ -165,59 +165,34 @@ impl ToBytes for LeaderAndIsrRequestTopicState {
     }
 }
 
-impl Default for LeaderAndIsrRequestTopicState {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partition_states: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for LeaderAndIsrRequestPartitionStateV0 {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
-        if version >= 0 && version <= 1 {
+        if (0..=1).contains(&version) {
             self.topic_name.serialize(version, bytes);
         }
-        if version >= 0 && version <= 1 {
+        if (0..=1).contains(&version) {
             self.partition_index.serialize(version, bytes);
         }
-        if version >= 0 && version <= 1 {
+        if (0..=1).contains(&version) {
             self.controller_epoch.serialize(version, bytes);
         }
-        if version >= 0 && version <= 1 {
+        if (0..=1).contains(&version) {
             self.leader_key.serialize(version, bytes);
         }
-        if version >= 0 && version <= 1 {
+        if (0..=1).contains(&version) {
             self.leader_epoch.serialize(version, bytes);
         }
-        if version >= 0 && version <= 1 {
+        if (0..=1).contains(&version) {
             self.isr_replicas.serialize(version, bytes);
         }
-        if version >= 0 && version <= 1 {
+        if (0..=1).contains(&version) {
             self.zk_version.serialize(version, bytes);
         }
-        if version >= 0 && version <= 1 {
+        if (0..=1).contains(&version) {
             self.replicas.serialize(version, bytes);
         }
         if version >= 1 {
             self.is_new.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for LeaderAndIsrRequestPartitionStateV0 {
-    fn default() -> Self {
-        Self {
-            topic_name: Default::default(),
-            partition_index: Default::default(),
-            controller_epoch: Default::default(),
-            leader_key: Default::default(),
-            leader_epoch: Default::default(),
-            isr_replicas: Default::default(),
-            zk_version: Default::default(),
-            replicas: Default::default(),
-            is_new: false,
         }
     }
 }
@@ -232,16 +207,6 @@ impl ToBytes for LeaderAndIsrLiveLeader {
         }
         if version >= 0 {
             self.port.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for LeaderAndIsrLiveLeader {
-    fn default() -> Self {
-        Self {
-            broker_id: Default::default(),
-            host_name: Default::default(),
-            port: Default::default(),
         }
     }
 }
@@ -271,21 +236,6 @@ impl ToBytes for LeaderAndIsrRequestPartitionState {
         }
         if version >= 1 {
             self.is_new.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for LeaderAndIsrRequestPartitionState {
-    fn default() -> Self {
-        Self {
-            partition_index: Default::default(),
-            controller_epoch: Default::default(),
-            leader_key: Default::default(),
-            leader_epoch: Default::default(),
-            isr_replicas: Default::default(),
-            zk_version: Default::default(),
-            replicas: Default::default(),
-            is_new: false,
         }
     }
 }

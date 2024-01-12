@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct StopReplicaResponse {
     /// The top-level error code, or 0 if there was no top-level error.
     pub error_code: i16,
@@ -9,7 +9,7 @@ pub struct StopReplicaResponse {
     pub partitions: Vec<StopReplicaResponsePartition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct StopReplicaResponsePartition {
     /// The topic name.
     pub topic_name: String,
@@ -44,15 +44,6 @@ impl ApiResponse for StopReplicaResponse {
     }
 }
 
-impl Default for StopReplicaResponse {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            partitions: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for StopReplicaResponsePartition {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let topic_name = if version >= 0 {
@@ -74,16 +65,6 @@ impl FromBytes for StopReplicaResponsePartition {
             topic_name,
             partition_index,
             error_code,
-        }
-    }
-}
-
-impl Default for StopReplicaResponsePartition {
-    fn default() -> Self {
-        Self {
-            topic_name: Default::default(),
-            partition_index: Default::default(),
-            error_code: Default::default(),
         }
     }
 }

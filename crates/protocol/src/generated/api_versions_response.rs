@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ApiVersionsResponse {
     /// The top-level error code.
     pub error_code: i16,
@@ -12,7 +12,7 @@ pub struct ApiVersionsResponse {
     pub throttle_time_ms: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct ApiVersionsResponseKey {
     /// The API index.
     pub index: i16,
@@ -53,16 +53,6 @@ impl ApiResponse for ApiVersionsResponse {
     }
 }
 
-impl Default for ApiVersionsResponse {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            api_keys: Default::default(),
-            throttle_time_ms: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for ApiVersionsResponseKey {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let index = if version >= 0 {
@@ -84,16 +74,6 @@ impl FromBytes for ApiVersionsResponseKey {
             index,
             min_version,
             max_version,
-        }
-    }
-}
-
-impl Default for ApiVersionsResponseKey {
-    fn default() -> Self {
-        Self {
-            index: Default::default(),
-            min_version: Default::default(),
-            max_version: Default::default(),
         }
     }
 }

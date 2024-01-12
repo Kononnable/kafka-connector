@@ -21,7 +21,7 @@ pub struct JoinGroupRequest {
     pub protocols: Vec<JoinGroupRequestProtocol>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct JoinGroupRequestProtocol {
     /// The protocol name.
     pub name: String,
@@ -92,15 +92,6 @@ impl ToBytes for JoinGroupRequestProtocol {
         }
         if version >= 0 {
             self.metadata.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for JoinGroupRequestProtocol {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            metadata: Default::default(),
         }
     }
 }

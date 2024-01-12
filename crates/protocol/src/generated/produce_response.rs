@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ProduceResponse {
     /// Each produce response
     pub responses: Vec<TopicProduceResponse>,
@@ -9,7 +9,7 @@ pub struct ProduceResponse {
     pub throttle_time_ms: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct TopicProduceResponse {
     /// The topic name
     pub name: String,
@@ -18,7 +18,7 @@ pub struct TopicProduceResponse {
     pub partitions: Vec<PartitionProduceResponse>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct PartitionProduceResponse {
     /// The partition index.
     pub partition_index: i32,
@@ -59,15 +59,6 @@ impl ApiResponse for ProduceResponse {
     }
 }
 
-impl Default for ProduceResponse {
-    fn default() -> Self {
-        Self {
-            responses: Default::default(),
-            throttle_time_ms: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for TopicProduceResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -81,15 +72,6 @@ impl FromBytes for TopicProduceResponse {
             Default::default()
         };
         TopicProduceResponse { name, partitions }
-    }
-}
-
-impl Default for TopicProduceResponse {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
-        }
     }
 }
 

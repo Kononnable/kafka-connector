@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeLogDirsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct DescribeLogDirsResponse {
     pub results: Vec<DescribeLogDirsResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeLogDirsResult {
     /// The error code, or 0 if there was no error.
     pub error_code: i16,
@@ -21,7 +21,7 @@ pub struct DescribeLogDirsResult {
     pub topics: Vec<DescribeLogDirsTopic>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeLogDirsTopic {
     /// The topic name.
     pub name: String,
@@ -29,7 +29,7 @@ pub struct DescribeLogDirsTopic {
     pub partitions: Vec<DescribeLogDirsPartition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeLogDirsPartition {
     /// The partition index.
     pub partition_index: i32,
@@ -67,15 +67,6 @@ impl ApiResponse for DescribeLogDirsResponse {
     }
 }
 
-impl Default for DescribeLogDirsResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            results: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for DescribeLogDirsResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let error_code = if version >= 0 {
@@ -101,16 +92,6 @@ impl FromBytes for DescribeLogDirsResult {
     }
 }
 
-impl Default for DescribeLogDirsResult {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            log_dir: Default::default(),
-            topics: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for DescribeLogDirsTopic {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -124,15 +105,6 @@ impl FromBytes for DescribeLogDirsTopic {
             Default::default()
         };
         DescribeLogDirsTopic { name, partitions }
-    }
-}
-
-impl Default for DescribeLogDirsTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
-        }
     }
 }
 
@@ -163,17 +135,6 @@ impl FromBytes for DescribeLogDirsPartition {
             partition_size,
             offset_lag,
             is_future_key,
-        }
-    }
-}
-
-impl Default for DescribeLogDirsPartition {
-    fn default() -> Self {
-        Self {
-            partition_index: Default::default(),
-            partition_size: Default::default(),
-            offset_lag: Default::default(),
-            is_future_key: Default::default(),
         }
     }
 }

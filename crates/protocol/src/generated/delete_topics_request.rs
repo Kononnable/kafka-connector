@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DeleteTopicsRequest {
     /// The names of the topics to delete
     pub topic_names: Vec<String>,
@@ -35,15 +35,6 @@ impl ApiRequest for DeleteTopicsRequest {
         }
         if version >= 0 {
             self.timeout_ms.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for DeleteTopicsRequest {
-    fn default() -> Self {
-        Self {
-            topic_names: Default::default(),
-            timeout_ms: Default::default(),
         }
     }
 }

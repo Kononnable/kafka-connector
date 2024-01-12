@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DeleteGroupsRequest {
     /// The group names to delete.
     pub groups_names: Vec<String>,
@@ -29,14 +29,6 @@ impl ApiRequest for DeleteGroupsRequest {
         header.serialize(0, bytes);
         if version >= 0 {
             self.groups_names.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for DeleteGroupsRequest {
-    fn default() -> Self {
-        Self {
-            groups_names: Default::default(),
         }
     }
 }

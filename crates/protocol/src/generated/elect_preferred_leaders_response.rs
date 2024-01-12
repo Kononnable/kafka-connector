@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ElectPreferredLeadersResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct ElectPreferredLeadersResponse {
     pub replica_election_results: Vec<ReplicaElectionResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct ReplicaElectionResult {
     /// The topic name
     pub topic: String,
@@ -18,7 +18,7 @@ pub struct ReplicaElectionResult {
     pub partition_result: Vec<PartitionResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct PartitionResult {
     /// The partition id
     pub partition_id: i32,
@@ -53,15 +53,6 @@ impl ApiResponse for ElectPreferredLeadersResponse {
     }
 }
 
-impl Default for ElectPreferredLeadersResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            replica_election_results: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for ReplicaElectionResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let topic = if version >= 0 {
@@ -77,15 +68,6 @@ impl FromBytes for ReplicaElectionResult {
         ReplicaElectionResult {
             topic,
             partition_result,
-        }
-    }
-}
-
-impl Default for ReplicaElectionResult {
-    fn default() -> Self {
-        Self {
-            topic: Default::default(),
-            partition_result: Default::default(),
         }
     }
 }
@@ -111,16 +93,6 @@ impl FromBytes for PartitionResult {
             partition_id,
             error_code,
             error_message,
-        }
-    }
-}
-
-impl Default for PartitionResult {
-    fn default() -> Self {
-        Self {
-            partition_id: Default::default(),
-            error_code: Default::default(),
-            error_message: Default::default(),
         }
     }
 }

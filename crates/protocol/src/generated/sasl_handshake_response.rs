@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct SaslHandshakeResponse {
     /// The error code, or 0 if there was no error.
     pub error_code: i16,
@@ -29,14 +29,5 @@ impl ApiResponse for SaslHandshakeResponse {
                 mechanisms,
             },
         )
-    }
-}
-
-impl Default for SaslHandshakeResponse {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            mechanisms: Default::default(),
-        }
     }
 }

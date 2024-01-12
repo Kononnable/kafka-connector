@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct CreatePartitionsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct CreatePartitionsResponse {
     pub results: Vec<CreatePartitionsTopicResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct CreatePartitionsTopicResult {
     /// The topic name.
     pub name: String,
@@ -44,15 +44,6 @@ impl ApiResponse for CreatePartitionsResponse {
     }
 }
 
-impl Default for CreatePartitionsResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            results: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for CreatePartitionsTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -74,16 +65,6 @@ impl FromBytes for CreatePartitionsTopicResult {
             name,
             error_code,
             error_message,
-        }
-    }
-}
-
-impl Default for CreatePartitionsTopicResult {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            error_code: Default::default(),
-            error_message: Default::default(),
         }
     }
 }

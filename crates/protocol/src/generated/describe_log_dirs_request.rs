@@ -1,12 +1,12 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeLogDirsRequest {
     /// Each topic that we want to describe log directories for, or null for all topics.
     pub topics: Vec<DescribableLogDirTopic>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribableLogDirTopic {
     /// The topic name
     pub topic: String,
@@ -42,14 +42,6 @@ impl ApiRequest for DescribeLogDirsRequest {
     }
 }
 
-impl Default for DescribeLogDirsRequest {
-    fn default() -> Self {
-        Self {
-            topics: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for DescribableLogDirTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -57,15 +49,6 @@ impl ToBytes for DescribableLogDirTopic {
         }
         if version >= 0 {
             self.partition_index.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for DescribableLogDirTopic {
-    fn default() -> Self {
-        Self {
-            topic: Default::default(),
-            partition_index: Default::default(),
         }
     }
 }

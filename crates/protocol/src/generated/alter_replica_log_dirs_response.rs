@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct AlterReplicaLogDirsResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct AlterReplicaLogDirsResponse {
     pub results: Vec<AlterReplicaLogDirTopicResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct AlterReplicaLogDirTopicResult {
     /// The name of the topic.
     pub topic_name: String,
@@ -18,7 +18,7 @@ pub struct AlterReplicaLogDirTopicResult {
     pub partitions: Vec<AlterReplicaLogDirPartitionResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct AlterReplicaLogDirPartitionResult {
     /// The partition index.
     pub partition_index: i32,
@@ -50,15 +50,6 @@ impl ApiResponse for AlterReplicaLogDirsResponse {
     }
 }
 
-impl Default for AlterReplicaLogDirsResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            results: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for AlterReplicaLogDirTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let topic_name = if version >= 0 {
@@ -78,15 +69,6 @@ impl FromBytes for AlterReplicaLogDirTopicResult {
     }
 }
 
-impl Default for AlterReplicaLogDirTopicResult {
-    fn default() -> Self {
-        Self {
-            topic_name: Default::default(),
-            partitions: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for AlterReplicaLogDirPartitionResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let partition_index = if version >= 0 {
@@ -102,15 +84,6 @@ impl FromBytes for AlterReplicaLogDirPartitionResult {
         AlterReplicaLogDirPartitionResult {
             partition_index,
             error_code,
-        }
-    }
-}
-
-impl Default for AlterReplicaLogDirPartitionResult {
-    fn default() -> Self {
-        Self {
-            partition_index: Default::default(),
-            error_code: Default::default(),
         }
     }
 }

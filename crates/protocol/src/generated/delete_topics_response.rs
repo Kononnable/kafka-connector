@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DeleteTopicsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct DeleteTopicsResponse {
     pub responses: Vec<DeletableTopicResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DeletableTopicResult {
     /// The topic name
     pub name: String,
@@ -41,15 +41,6 @@ impl ApiResponse for DeleteTopicsResponse {
     }
 }
 
-impl Default for DeleteTopicsResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            responses: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for DeletableTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -63,14 +54,5 @@ impl FromBytes for DeletableTopicResult {
             Default::default()
         };
         DeletableTopicResult { name, error_code }
-    }
-}
-
-impl Default for DeletableTopicResult {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            error_code: Default::default(),
-        }
     }
 }

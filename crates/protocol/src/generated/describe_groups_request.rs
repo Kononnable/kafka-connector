@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeGroupsRequest {
     /// The names of the groups to describe
     pub groups: Vec<String>,
@@ -29,14 +29,6 @@ impl ApiRequest for DescribeGroupsRequest {
         header.serialize(0, bytes);
         if version >= 0 {
             self.groups.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for DescribeGroupsRequest {
-    fn default() -> Self {
-        Self {
-            groups: Default::default(),
         }
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeDelegationTokenResponse {
     /// The error code, or 0 if there was no error.
     pub error_code: i16,
@@ -12,7 +12,7 @@ pub struct DescribeDelegationTokenResponse {
     pub throttle_time_ms: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribedDelegationToken {
     /// The token principal type.
     pub principal_type: String,
@@ -39,7 +39,7 @@ pub struct DescribedDelegationToken {
     pub renewers: Vec<DescribedDelegationTokenRenewer>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribedDelegationTokenRenewer {
     /// The renewer principal type
     pub principal_type: String,
@@ -74,16 +74,6 @@ impl ApiResponse for DescribeDelegationTokenResponse {
                 throttle_time_ms,
             },
         )
-    }
-}
-
-impl Default for DescribeDelegationTokenResponse {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            tokens: Default::default(),
-            throttle_time_ms: Default::default(),
-        }
     }
 }
 
@@ -142,21 +132,6 @@ impl FromBytes for DescribedDelegationToken {
     }
 }
 
-impl Default for DescribedDelegationToken {
-    fn default() -> Self {
-        Self {
-            principal_type: Default::default(),
-            principal_name: Default::default(),
-            issue_timestamp: Default::default(),
-            expiry_timestamp: Default::default(),
-            max_timestamp: Default::default(),
-            token_id: Default::default(),
-            hmac: Default::default(),
-            renewers: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for DescribedDelegationTokenRenewer {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let principal_type = if version >= 0 {
@@ -172,15 +147,6 @@ impl FromBytes for DescribedDelegationTokenRenewer {
         DescribedDelegationTokenRenewer {
             principal_type,
             principal_name,
-        }
-    }
-}
-
-impl Default for DescribedDelegationTokenRenewer {
-    fn default() -> Self {
-        Self {
-            principal_type: Default::default(),
-            principal_name: Default::default(),
         }
     }
 }

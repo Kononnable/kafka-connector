@@ -1,12 +1,12 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct WriteTxnMarkersResponse {
     /// The results for writing makers.
     pub markers: Vec<WritableTxnMarkerResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct WritableTxnMarkerResult {
     /// The current producer ID in use by the transactional ID.
     pub producer_id: i64,
@@ -15,7 +15,7 @@ pub struct WritableTxnMarkerResult {
     pub topics: Vec<WritableTxnMarkerTopicResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct WritableTxnMarkerTopicResult {
     /// The topic name.
     pub name: String,
@@ -24,7 +24,7 @@ pub struct WritableTxnMarkerTopicResult {
     pub partitions: Vec<WritableTxnMarkerPartitionResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct WritableTxnMarkerPartitionResult {
     /// The partition index.
     pub partition_index: i32,
@@ -42,14 +42,6 @@ impl ApiResponse for WriteTxnMarkersResponse {
             Default::default()
         };
         (header, WriteTxnMarkersResponse { markers })
-    }
-}
-
-impl Default for WriteTxnMarkersResponse {
-    fn default() -> Self {
-        Self {
-            markers: Default::default(),
-        }
     }
 }
 
@@ -72,15 +64,6 @@ impl FromBytes for WritableTxnMarkerResult {
     }
 }
 
-impl Default for WritableTxnMarkerResult {
-    fn default() -> Self {
-        Self {
-            producer_id: Default::default(),
-            topics: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for WritableTxnMarkerTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -94,15 +77,6 @@ impl FromBytes for WritableTxnMarkerTopicResult {
             Default::default()
         };
         WritableTxnMarkerTopicResult { name, partitions }
-    }
-}
-
-impl Default for WritableTxnMarkerTopicResult {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
-        }
     }
 }
 
@@ -121,15 +95,6 @@ impl FromBytes for WritableTxnMarkerPartitionResult {
         WritableTxnMarkerPartitionResult {
             partition_index,
             error_code,
-        }
-    }
-}
-
-impl Default for WritableTxnMarkerPartitionResult {
-    fn default() -> Self {
-        Self {
-            partition_index: Default::default(),
-            error_code: Default::default(),
         }
     }
 }

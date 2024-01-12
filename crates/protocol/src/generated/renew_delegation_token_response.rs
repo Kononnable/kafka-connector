@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct RenewDelegationTokenResponse {
     /// The error code, or 0 if there was no error.
     pub error_code: i16,
@@ -38,15 +38,5 @@ impl ApiResponse for RenewDelegationTokenResponse {
                 throttle_time_ms,
             },
         )
-    }
-}
-
-impl Default for RenewDelegationTokenResponse {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            expiry_timestamp_ms: Default::default(),
-            throttle_time_ms: Default::default(),
-        }
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct FetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -15,7 +15,7 @@ pub struct FetchResponse {
     pub topics: Vec<FetchableTopicResponse>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct FetchableTopicResponse {
     /// The topic name.
     pub name: String,
@@ -24,7 +24,7 @@ pub struct FetchableTopicResponse {
     pub partitions: Vec<FetchablePartitionResponse>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct FetchablePartitionResponse {
     /// The partiiton index.
     pub partition_index: i32,
@@ -48,7 +48,7 @@ pub struct FetchablePartitionResponse {
     pub records: Vec<u8>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct AbortedTransaction {
     /// The producer id associated with the aborted transaction.
     pub producer_id: i64,
@@ -92,17 +92,6 @@ impl ApiResponse for FetchResponse {
     }
 }
 
-impl Default for FetchResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            error_code: Default::default(),
-            session_id: 0,
-            topics: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for FetchableTopicResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -116,15 +105,6 @@ impl FromBytes for FetchableTopicResponse {
             Default::default()
         };
         FetchableTopicResponse { name, partitions }
-    }
-}
-
-impl Default for FetchableTopicResponse {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
-        }
     }
 }
 
@@ -206,15 +186,6 @@ impl FromBytes for AbortedTransaction {
         AbortedTransaction {
             producer_id,
             first_offset,
-        }
-    }
-}
-
-impl Default for AbortedTransaction {
-    fn default() -> Self {
-        Self {
-            producer_id: Default::default(),
-            first_offset: Default::default(),
         }
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ListOffsetResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct ListOffsetResponse {
     pub topics: Vec<ListOffsetTopicResponse>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct ListOffsetTopicResponse {
     /// The topic name
     pub name: String,
@@ -18,7 +18,7 @@ pub struct ListOffsetTopicResponse {
     pub partitions: Vec<ListOffsetPartitionResponse>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct ListOffsetPartitionResponse {
     /// The partition index.
     pub partition_index: i32,
@@ -61,15 +61,6 @@ impl ApiResponse for ListOffsetResponse {
     }
 }
 
-impl Default for ListOffsetResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            topics: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for ListOffsetTopicResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -83,15 +74,6 @@ impl FromBytes for ListOffsetTopicResponse {
             Default::default()
         };
         ListOffsetTopicResponse { name, partitions }
-    }
-}
-
-impl Default for ListOffsetTopicResponse {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
-        }
     }
 }
 

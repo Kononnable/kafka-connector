@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct SyncGroupResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -38,15 +38,5 @@ impl ApiResponse for SyncGroupResponse {
                 assignment,
             },
         )
-    }
-}
-
-impl Default for SyncGroupResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            error_code: Default::default(),
-            assignment: Default::default(),
-        }
     }
 }

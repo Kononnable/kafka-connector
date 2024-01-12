@@ -1,12 +1,12 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DeleteAclsRequest {
     /// The filters to use when deleting ACLs.
     pub filters: Vec<DeleteAclsFilter>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct DeleteAclsFilter {
     /// The resource type.
     pub resource_type_filter: i8,
@@ -53,14 +53,6 @@ impl ApiRequest for DeleteAclsRequest {
         header.serialize(0, bytes);
         if version >= 0 {
             self.filters.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for DeleteAclsRequest {
-    fn default() -> Self {
-        Self {
-            filters: Default::default(),
         }
     }
 }

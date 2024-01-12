@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct AddPartitionsToTxnResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct AddPartitionsToTxnResponse {
     pub results: Vec<AddPartitionsToTxnTopicResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct AddPartitionsToTxnTopicResult {
     /// The topic name.
     pub name: String,
@@ -18,7 +18,7 @@ pub struct AddPartitionsToTxnTopicResult {
     pub results: Vec<AddPartitionsToTxnPartitionResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct AddPartitionsToTxnPartitionResult {
     /// The partition indexes.
     pub partition_index: i32,
@@ -50,15 +50,6 @@ impl ApiResponse for AddPartitionsToTxnResponse {
     }
 }
 
-impl Default for AddPartitionsToTxnResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            results: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for AddPartitionsToTxnTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -72,15 +63,6 @@ impl FromBytes for AddPartitionsToTxnTopicResult {
             Default::default()
         };
         AddPartitionsToTxnTopicResult { name, results }
-    }
-}
-
-impl Default for AddPartitionsToTxnTopicResult {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            results: Default::default(),
-        }
     }
 }
 
@@ -99,15 +81,6 @@ impl FromBytes for AddPartitionsToTxnPartitionResult {
         AddPartitionsToTxnPartitionResult {
             partition_index,
             error_code,
-        }
-    }
-}
-
-impl Default for AddPartitionsToTxnPartitionResult {
-    fn default() -> Self {
-        Self {
-            partition_index: Default::default(),
-            error_code: Default::default(),
         }
     }
 }

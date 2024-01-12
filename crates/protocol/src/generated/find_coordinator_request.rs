@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct FindCoordinatorRequest {
     /// The coordinator key.
     pub key: String,
@@ -35,15 +35,6 @@ impl ApiRequest for FindCoordinatorRequest {
         }
         if version >= 1 {
             self.key_type.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for FindCoordinatorRequest {
-    fn default() -> Self {
-        Self {
-            key: Default::default(),
-            key_type: 0,
         }
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct SaslAuthenticateResponse {
     /// The error code, or 0 if there was no error.
     pub error_code: i16,
@@ -47,16 +47,5 @@ impl ApiResponse for SaslAuthenticateResponse {
                 session_lifetime_ms,
             },
         )
-    }
-}
-
-impl Default for SaslAuthenticateResponse {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            error_message: Default::default(),
-            auth_bytes: Default::default(),
-            session_lifetime_ms: 0,
-        }
     }
 }

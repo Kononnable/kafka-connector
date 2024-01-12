@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetFetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -12,7 +12,7 @@ pub struct OffsetFetchResponse {
     pub error_code: i16,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetFetchResponseTopic {
     /// The topic name.
     pub name: String,
@@ -21,7 +21,7 @@ pub struct OffsetFetchResponseTopic {
     pub partitions: Vec<OffsetFetchResponsePartition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetFetchResponsePartition {
     /// The partition index.
     pub partition_index: i32,
@@ -68,16 +68,6 @@ impl ApiResponse for OffsetFetchResponse {
     }
 }
 
-impl Default for OffsetFetchResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            topics: Default::default(),
-            error_code: 0,
-        }
-    }
-}
-
 impl FromBytes for OffsetFetchResponseTopic {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -91,15 +81,6 @@ impl FromBytes for OffsetFetchResponseTopic {
             Default::default()
         };
         OffsetFetchResponseTopic { name, partitions }
-    }
-}
-
-impl Default for OffsetFetchResponseTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
-        }
     }
 }
 
@@ -136,18 +117,6 @@ impl FromBytes for OffsetFetchResponsePartition {
             committed_leader_epoch,
             metadata,
             error_code,
-        }
-    }
-}
-
-impl Default for OffsetFetchResponsePartition {
-    fn default() -> Self {
-        Self {
-            partition_index: Default::default(),
-            committed_offset: Default::default(),
-            committed_leader_epoch: Default::default(),
-            metadata: Default::default(),
-            error_code: Default::default(),
         }
     }
 }

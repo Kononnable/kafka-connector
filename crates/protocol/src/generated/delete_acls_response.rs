@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DeleteAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct DeleteAclsResponse {
     pub filter_results: Vec<DeleteAclsFilterResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DeleteAclsFilterResult {
     /// The error code, or 0 if the filter succeeded.
     pub error_code: i16,
@@ -21,7 +21,7 @@ pub struct DeleteAclsFilterResult {
     pub matching_acls: Vec<DeleteAclsMatchingAcl>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct DeleteAclsMatchingAcl {
     /// The deletion error code, or 0 if the deletion succeeded.
     pub error_code: i16,
@@ -74,15 +74,6 @@ impl ApiResponse for DeleteAclsResponse {
     }
 }
 
-impl Default for DeleteAclsResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            filter_results: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for DeleteAclsFilterResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let error_code = if version >= 0 {
@@ -104,16 +95,6 @@ impl FromBytes for DeleteAclsFilterResult {
             error_code,
             error_message,
             matching_acls,
-        }
-    }
-}
-
-impl Default for DeleteAclsFilterResult {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            error_message: Default::default(),
-            matching_acls: Default::default(),
         }
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct LeaveGroupResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -29,14 +29,5 @@ impl ApiResponse for LeaveGroupResponse {
                 error_code,
             },
         )
-    }
-}
-
-impl Default for LeaveGroupResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            error_code: Default::default(),
-        }
     }
 }

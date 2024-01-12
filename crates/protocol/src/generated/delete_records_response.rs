@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DeleteRecordsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct DeleteRecordsResponse {
     pub topics: Vec<DeleteRecordsTopicResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DeleteRecordsTopicResult {
     /// The topic name.
     pub name: String,
@@ -18,7 +18,7 @@ pub struct DeleteRecordsTopicResult {
     pub partitions: Vec<DeleteRecordsPartitionResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DeleteRecordsPartitionResult {
     /// The partition index.
     pub partition_index: i32,
@@ -53,15 +53,6 @@ impl ApiResponse for DeleteRecordsResponse {
     }
 }
 
-impl Default for DeleteRecordsResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            topics: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for DeleteRecordsTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -75,15 +66,6 @@ impl FromBytes for DeleteRecordsTopicResult {
             Default::default()
         };
         DeleteRecordsTopicResult { name, partitions }
-    }
-}
-
-impl Default for DeleteRecordsTopicResult {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
-        }
     }
 }
 
@@ -108,16 +90,6 @@ impl FromBytes for DeleteRecordsPartitionResult {
             partition_index,
             low_watermark,
             error_code,
-        }
-    }
-}
-
-impl Default for DeleteRecordsPartitionResult {
-    fn default() -> Self {
-        Self {
-            partition_index: Default::default(),
-            low_watermark: Default::default(),
-            error_code: Default::default(),
         }
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetCommitResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct OffsetCommitResponse {
     pub topics: Vec<OffsetCommitResponseTopic>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetCommitResponseTopic {
     /// The topic name.
     pub name: String,
@@ -18,7 +18,7 @@ pub struct OffsetCommitResponseTopic {
     pub partitions: Vec<OffsetCommitResponsePartition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetCommitResponsePartition {
     /// The partition index.
     pub partition_index: i32,
@@ -50,15 +50,6 @@ impl ApiResponse for OffsetCommitResponse {
     }
 }
 
-impl Default for OffsetCommitResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            topics: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for OffsetCommitResponseTopic {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -72,15 +63,6 @@ impl FromBytes for OffsetCommitResponseTopic {
             Default::default()
         };
         OffsetCommitResponseTopic { name, partitions }
-    }
-}
-
-impl Default for OffsetCommitResponseTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
-        }
     }
 }
 
@@ -99,15 +81,6 @@ impl FromBytes for OffsetCommitResponsePartition {
         OffsetCommitResponsePartition {
             partition_index,
             error_code,
-        }
-    }
-}
-
-impl Default for OffsetCommitResponsePartition {
-    fn default() -> Self {
-        Self {
-            partition_index: Default::default(),
-            error_code: Default::default(),
         }
     }
 }

@@ -21,7 +21,7 @@ pub struct StopReplicaRequest {
     pub topics: Vec<StopReplicaRequestTopic>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct StopReplicaRequestPartitionV0 {
     /// The topic name.
     pub topic_name: String,
@@ -30,7 +30,7 @@ pub struct StopReplicaRequestPartitionV0 {
     pub partition_index: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct StopReplicaRequestTopic {
     /// The topic name.
     pub name: String,
@@ -105,15 +105,6 @@ impl ToBytes for StopReplicaRequestPartitionV0 {
     }
 }
 
-impl Default for StopReplicaRequestPartitionV0 {
-    fn default() -> Self {
-        Self {
-            topic_name: Default::default(),
-            partition_index: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for StopReplicaRequestTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 1 {
@@ -121,15 +112,6 @@ impl ToBytes for StopReplicaRequestTopic {
         }
         if version >= 1 {
             self.partition_indexes.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for StopReplicaRequestTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partition_indexes: Default::default(),
         }
     }
 }

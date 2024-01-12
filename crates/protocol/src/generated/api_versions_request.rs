@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ApiVersionsRequest {}
 
 impl ApiRequest for ApiVersionsRequest {
@@ -24,11 +24,5 @@ impl ApiRequest for ApiVersionsRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         header.serialize(0, bytes);
-    }
-}
-
-impl Default for ApiVersionsRequest {
-    fn default() -> Self {
-        Self {}
     }
 }

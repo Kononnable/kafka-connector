@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct SyncGroupRequest {
     /// The unique group identifier.
     pub group_id: String,
@@ -15,7 +15,7 @@ pub struct SyncGroupRequest {
     pub assignments: Vec<SyncGroupRequestAssignment>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct SyncGroupRequestAssignment {
     /// The ID of the member to assign.
     pub member_id: String,
@@ -60,17 +60,6 @@ impl ApiRequest for SyncGroupRequest {
     }
 }
 
-impl Default for SyncGroupRequest {
-    fn default() -> Self {
-        Self {
-            group_id: Default::default(),
-            generation_id: Default::default(),
-            member_id: Default::default(),
-            assignments: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for SyncGroupRequestAssignment {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -78,15 +67,6 @@ impl ToBytes for SyncGroupRequestAssignment {
         }
         if version >= 0 {
             self.assignment.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for SyncGroupRequestAssignment {
-    fn default() -> Self {
-        Self {
-            member_id: Default::default(),
-            assignment: Default::default(),
         }
     }
 }

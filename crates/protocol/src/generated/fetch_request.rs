@@ -30,7 +30,7 @@ pub struct FetchRequest {
     pub forgotten: Vec<ForgottenTopic>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct FetchableTopic {
     /// The name of the topic to fetch.
     pub name: String,
@@ -39,7 +39,7 @@ pub struct FetchableTopic {
     pub fetch_partitions: Vec<FetchPartition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct ForgottenTopic {
     /// The partition name.
     pub name: String,
@@ -48,7 +48,7 @@ pub struct ForgottenTopic {
     pub forgotten_partition_indexes: Vec<i32>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct FetchPartition {
     /// The partition index.
     pub partition_index: i32,
@@ -144,15 +144,6 @@ impl ToBytes for FetchableTopic {
     }
 }
 
-impl Default for FetchableTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            fetch_partitions: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for ForgottenTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 7 {
@@ -160,15 +151,6 @@ impl ToBytes for ForgottenTopic {
         }
         if version >= 7 {
             self.forgotten_partition_indexes.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for ForgottenTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            forgotten_partition_indexes: Default::default(),
         }
     }
 }

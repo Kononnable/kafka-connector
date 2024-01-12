@@ -1,12 +1,12 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct CreateAclsRequest {
     /// The ACLs that we want to create.
     pub creations: Vec<CreatableAcl>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct CreatableAcl {
     /// The type of the resource.
     pub resource_type: i8,
@@ -53,14 +53,6 @@ impl ApiRequest for CreateAclsRequest {
         header.serialize(0, bytes);
         if version >= 0 {
             self.creations.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for CreateAclsRequest {
-    fn default() -> Self {
-        Self {
-            creations: Default::default(),
         }
     }
 }

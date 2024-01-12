@@ -9,7 +9,7 @@ pub struct MetadataRequest {
     pub allow_auto_topic_creation: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct MetadataRequestTopic {
     /// The topic name.
     pub name: String,
@@ -58,14 +58,6 @@ impl ToBytes for MetadataRequestTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
             self.name.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for MetadataRequestTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
         }
     }
 }

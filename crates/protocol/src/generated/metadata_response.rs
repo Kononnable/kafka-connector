@@ -18,7 +18,7 @@ pub struct MetadataResponse {
     pub topics: Vec<MetadataResponseTopic>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct MetadataResponseBroker {
     /// The broker ID.
     pub node_id: i32,
@@ -33,7 +33,7 @@ pub struct MetadataResponseBroker {
     pub rack: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct MetadataResponseTopic {
     /// The topic error, or 0 if there was no error.
     pub error_code: i16,
@@ -48,7 +48,7 @@ pub struct MetadataResponseTopic {
     pub partitions: Vec<MetadataResponsePartition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct MetadataResponsePartition {
     /// The partition error, or 0 if there was no error.
     pub error_code: i16,
@@ -156,17 +156,6 @@ impl FromBytes for MetadataResponseBroker {
     }
 }
 
-impl Default for MetadataResponseBroker {
-    fn default() -> Self {
-        Self {
-            node_id: Default::default(),
-            host: Default::default(),
-            port: Default::default(),
-            rack: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for MetadataResponseTopic {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let error_code = if version >= 0 {
@@ -194,17 +183,6 @@ impl FromBytes for MetadataResponseTopic {
             name,
             is_internal,
             partitions,
-        }
-    }
-}
-
-impl Default for MetadataResponseTopic {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            name: Default::default(),
-            is_internal: false,
-            partitions: Default::default(),
         }
     }
 }

@@ -9,7 +9,7 @@ pub struct ElectPreferredLeadersRequest {
     pub timeout_ms: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct TopicPartitions {
     /// The name of a topic.
     pub topic: String,
@@ -64,15 +64,6 @@ impl ToBytes for TopicPartitions {
         }
         if version >= 0 {
             self.partition_id.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for TopicPartitions {
-    fn default() -> Self {
-        Self {
-            topic: Default::default(),
-            partition_id: Default::default(),
         }
     }
 }

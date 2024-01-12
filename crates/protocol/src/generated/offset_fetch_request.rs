@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetFetchRequest {
     /// The group to fetch offsets for.
     pub group_id: String,
@@ -9,7 +9,7 @@ pub struct OffsetFetchRequest {
     pub topics: Vec<OffsetFetchRequestTopic>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetFetchRequestTopic {
     pub name: String,
 
@@ -47,15 +47,6 @@ impl ApiRequest for OffsetFetchRequest {
     }
 }
 
-impl Default for OffsetFetchRequest {
-    fn default() -> Self {
-        Self {
-            group_id: Default::default(),
-            topics: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for OffsetFetchRequestTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -63,15 +54,6 @@ impl ToBytes for OffsetFetchRequestTopic {
         }
         if version >= 0 {
             self.partition_indexes.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for OffsetFetchRequestTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partition_indexes: Default::default(),
         }
     }
 }

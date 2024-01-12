@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ProduceRequest {
     /// The transactional ID, or null if the producer is not transactional.
     pub transactional_id: String,
@@ -15,7 +15,7 @@ pub struct ProduceRequest {
     pub topics: Vec<TopicProduceData>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct TopicProduceData {
     /// The topic name.
     pub name: String,
@@ -24,7 +24,7 @@ pub struct TopicProduceData {
     pub partitions: Vec<PartitionProduceData>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct PartitionProduceData {
     /// The partition index.
     pub partition_index: i32,
@@ -69,17 +69,6 @@ impl ApiRequest for ProduceRequest {
     }
 }
 
-impl Default for ProduceRequest {
-    fn default() -> Self {
-        Self {
-            transactional_id: Default::default(),
-            acks: Default::default(),
-            timeout_ms: Default::default(),
-            topics: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for TopicProduceData {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -91,15 +80,6 @@ impl ToBytes for TopicProduceData {
     }
 }
 
-impl Default for TopicProduceData {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for PartitionProduceData {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -107,15 +87,6 @@ impl ToBytes for PartitionProduceData {
         }
         if version >= 0 {
             self.records.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for PartitionProduceData {
-    fn default() -> Self {
-        Self {
-            partition_index: Default::default(),
-            records: Default::default(),
         }
     }
 }

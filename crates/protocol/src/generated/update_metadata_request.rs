@@ -20,7 +20,7 @@ pub struct UpdateMetadataRequest {
     pub brokers: Vec<UpdateMetadataRequestBroker>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct UpdateMetadataRequestTopicState {
     /// The topic name.
     pub topic_name: String,
@@ -29,7 +29,7 @@ pub struct UpdateMetadataRequestTopicState {
     pub partition_states: Vec<UpdateMetadataPartitionState>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct UpdateMetadataRequestPartitionStateV0 {
     /// The topic name.
     pub topic_name: String,
@@ -59,7 +59,7 @@ pub struct UpdateMetadataRequestPartitionStateV0 {
     pub offline_replicas: Vec<i32>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct UpdateMetadataRequestBroker {
     pub id: i32,
 
@@ -76,7 +76,7 @@ pub struct UpdateMetadataRequestBroker {
     pub rack: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct UpdateMetadataPartitionState {
     /// The partition index.
     pub partition_index: i32,
@@ -103,7 +103,7 @@ pub struct UpdateMetadataPartitionState {
     pub offline_replicas: Vec<i32>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct UpdateMetadataRequestEndpoint {
     /// The port of this endpoint
     pub port: i32,
@@ -151,7 +151,7 @@ impl ApiRequest for UpdateMetadataRequest {
         if version >= 5 {
             self.topic_states.serialize(version, bytes);
         }
-        if version >= 0 && version <= 4 {
+        if (0..=4).contains(&version) {
             self.partition_states_v_0.serialize(version, bytes);
         }
         if version >= 0 {
@@ -184,59 +184,34 @@ impl ToBytes for UpdateMetadataRequestTopicState {
     }
 }
 
-impl Default for UpdateMetadataRequestTopicState {
-    fn default() -> Self {
-        Self {
-            topic_name: Default::default(),
-            partition_states: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for UpdateMetadataRequestPartitionStateV0 {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
-        if version >= 0 && version <= 4 {
+        if (0..=4).contains(&version) {
             self.topic_name.serialize(version, bytes);
         }
-        if version >= 0 && version <= 4 {
+        if (0..=4).contains(&version) {
             self.partition_index.serialize(version, bytes);
         }
-        if version >= 0 && version <= 4 {
+        if (0..=4).contains(&version) {
             self.controller_epoch.serialize(version, bytes);
         }
-        if version >= 0 && version <= 4 {
+        if (0..=4).contains(&version) {
             self.leader.serialize(version, bytes);
         }
-        if version >= 0 && version <= 4 {
+        if (0..=4).contains(&version) {
             self.leader_epoch.serialize(version, bytes);
         }
-        if version >= 0 && version <= 4 {
+        if (0..=4).contains(&version) {
             self.isr.serialize(version, bytes);
         }
-        if version >= 0 && version <= 4 {
+        if (0..=4).contains(&version) {
             self.zk_version.serialize(version, bytes);
         }
-        if version >= 0 && version <= 4 {
+        if (0..=4).contains(&version) {
             self.replicas.serialize(version, bytes);
         }
         if version >= 4 {
             self.offline_replicas.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for UpdateMetadataRequestPartitionStateV0 {
-    fn default() -> Self {
-        Self {
-            topic_name: Default::default(),
-            partition_index: Default::default(),
-            controller_epoch: Default::default(),
-            leader: Default::default(),
-            leader_epoch: Default::default(),
-            isr: Default::default(),
-            zk_version: Default::default(),
-            replicas: Default::default(),
-            offline_replicas: Default::default(),
         }
     }
 }
@@ -257,18 +232,6 @@ impl ToBytes for UpdateMetadataRequestBroker {
         }
         if version >= 2 {
             self.rack.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for UpdateMetadataRequestBroker {
-    fn default() -> Self {
-        Self {
-            id: Default::default(),
-            v_0_host: Default::default(),
-            v_0_port: Default::default(),
-            endpoints: Default::default(),
-            rack: Default::default(),
         }
     }
 }
@@ -302,21 +265,6 @@ impl ToBytes for UpdateMetadataPartitionState {
     }
 }
 
-impl Default for UpdateMetadataPartitionState {
-    fn default() -> Self {
-        Self {
-            partition_index: Default::default(),
-            controller_epoch: Default::default(),
-            leader: Default::default(),
-            leader_epoch: Default::default(),
-            isr: Default::default(),
-            zk_version: Default::default(),
-            replicas: Default::default(),
-            offline_replicas: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for UpdateMetadataRequestEndpoint {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 1 {
@@ -330,17 +278,6 @@ impl ToBytes for UpdateMetadataRequestEndpoint {
         }
         if version >= 1 {
             self.security_protocol.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for UpdateMetadataRequestEndpoint {
-    fn default() -> Self {
-        Self {
-            port: Default::default(),
-            host: Default::default(),
-            listener: Default::default(),
-            security_protocol: Default::default(),
         }
     }
 }

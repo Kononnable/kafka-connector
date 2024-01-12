@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct DescribeGroupsResponse {
     pub groups: Vec<DescribedGroup>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribedGroup {
     /// The describe error, or 0 if there was no error.
     pub error_code: i16,
@@ -30,7 +30,7 @@ pub struct DescribedGroup {
     pub members: Vec<DescribedGroupMember>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribedGroupMember {
     /// The member ID assigned by the group coordinator.
     pub member_id: String,
@@ -68,15 +68,6 @@ impl ApiResponse for DescribeGroupsResponse {
                 groups,
             },
         )
-    }
-}
-
-impl Default for DescribeGroupsResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            groups: Default::default(),
-        }
     }
 }
 
@@ -123,19 +114,6 @@ impl FromBytes for DescribedGroup {
     }
 }
 
-impl Default for DescribedGroup {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            group_id: Default::default(),
-            group_state: Default::default(),
-            protocol_type: Default::default(),
-            protocol_data: Default::default(),
-            members: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for DescribedGroupMember {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let member_id = if version >= 0 {
@@ -169,18 +147,6 @@ impl FromBytes for DescribedGroupMember {
             client_host,
             member_metadata,
             member_assignment,
-        }
-    }
-}
-
-impl Default for DescribedGroupMember {
-    fn default() -> Self {
-        Self {
-            member_id: Default::default(),
-            client_id: Default::default(),
-            client_host: Default::default(),
-            member_metadata: Default::default(),
-            member_assignment: Default::default(),
         }
     }
 }

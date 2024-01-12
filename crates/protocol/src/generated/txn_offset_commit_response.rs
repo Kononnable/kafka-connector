@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct TxnOffsetCommitResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct TxnOffsetCommitResponse {
     pub topics: Vec<TxnOffsetCommitResponseTopic>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct TxnOffsetCommitResponseTopic {
     /// The topic name.
     pub name: String,
@@ -18,7 +18,7 @@ pub struct TxnOffsetCommitResponseTopic {
     pub partitions: Vec<TxnOffsetCommitResponsePartition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct TxnOffsetCommitResponsePartition {
     /// The partitition index.
     pub partition_index: i32,
@@ -50,15 +50,6 @@ impl ApiResponse for TxnOffsetCommitResponse {
     }
 }
 
-impl Default for TxnOffsetCommitResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            topics: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for TxnOffsetCommitResponseTopic {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -72,15 +63,6 @@ impl FromBytes for TxnOffsetCommitResponseTopic {
             Default::default()
         };
         TxnOffsetCommitResponseTopic { name, partitions }
-    }
-}
-
-impl Default for TxnOffsetCommitResponseTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
-        }
     }
 }
 
@@ -99,15 +81,6 @@ impl FromBytes for TxnOffsetCommitResponsePartition {
         TxnOffsetCommitResponsePartition {
             partition_index,
             error_code,
-        }
-    }
-}
-
-impl Default for TxnOffsetCommitResponsePartition {
-    fn default() -> Self {
-        Self {
-            partition_index: Default::default(),
-            error_code: Default::default(),
         }
     }
 }

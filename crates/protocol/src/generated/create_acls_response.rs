@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct CreateAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct CreateAclsResponse {
     pub results: Vec<CreatableAclResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct CreatableAclResult {
     /// The result error, or zero if there was no error.
     pub error_code: i16,
@@ -41,15 +41,6 @@ impl ApiResponse for CreateAclsResponse {
     }
 }
 
-impl Default for CreateAclsResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            results: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for CreatableAclResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let error_code = if version >= 0 {
@@ -65,15 +56,6 @@ impl FromBytes for CreatableAclResult {
         CreatableAclResult {
             error_code,
             error_message,
-        }
-    }
-}
-
-impl Default for CreatableAclResult {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            error_message: Default::default(),
         }
     }
 }

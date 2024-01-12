@@ -1,12 +1,12 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct WriteTxnMarkersRequest {
     /// The transaction markers to be written.
     pub markers: Vec<WritableTxnMarker>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct WritableTxnMarker {
     /// The current producer ID.
     pub producer_id: i64,
@@ -24,7 +24,7 @@ pub struct WritableTxnMarker {
     pub coordinator_epoch: i32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct WritableTxnMarkerTopic {
     /// The topic name.
     pub name: String,
@@ -60,14 +60,6 @@ impl ApiRequest for WriteTxnMarkersRequest {
     }
 }
 
-impl Default for WriteTxnMarkersRequest {
-    fn default() -> Self {
-        Self {
-            markers: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for WritableTxnMarker {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -88,18 +80,6 @@ impl ToBytes for WritableTxnMarker {
     }
 }
 
-impl Default for WritableTxnMarker {
-    fn default() -> Self {
-        Self {
-            producer_id: Default::default(),
-            producer_epoch: Default::default(),
-            transaction_result: Default::default(),
-            topics: Default::default(),
-            coordinator_epoch: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for WritableTxnMarkerTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -107,15 +87,6 @@ impl ToBytes for WritableTxnMarkerTopic {
         }
         if version >= 0 {
             self.partition_indexes.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for WritableTxnMarkerTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partition_indexes: Default::default(),
         }
     }
 }

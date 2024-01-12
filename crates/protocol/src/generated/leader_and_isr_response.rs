@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct LeaderAndIsrResponse {
     /// The error code, or 0 if there was no error.
     pub error_code: i16,
@@ -9,7 +9,7 @@ pub struct LeaderAndIsrResponse {
     pub partitions: Vec<LeaderAndIsrResponsePartition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct LeaderAndIsrResponsePartition {
     /// The topic name.
     pub topic_name: String,
@@ -44,15 +44,6 @@ impl ApiResponse for LeaderAndIsrResponse {
     }
 }
 
-impl Default for LeaderAndIsrResponse {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            partitions: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for LeaderAndIsrResponsePartition {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let topic_name = if version >= 0 {
@@ -74,16 +65,6 @@ impl FromBytes for LeaderAndIsrResponsePartition {
             topic_name,
             partition_index,
             error_code,
-        }
-    }
-}
-
-impl Default for LeaderAndIsrResponsePartition {
-    fn default() -> Self {
-        Self {
-            topic_name: Default::default(),
-            partition_index: Default::default(),
-            error_code: Default::default(),
         }
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetForLeaderEpochResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct OffsetForLeaderEpochResponse {
     pub topics: Vec<OffsetForLeaderTopicResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetForLeaderTopicResult {
     /// The topic name.
     pub name: String,
@@ -18,7 +18,7 @@ pub struct OffsetForLeaderTopicResult {
     pub partitions: Vec<OffsetForLeaderPartitionResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct OffsetForLeaderPartitionResult {
     /// The error code 0, or if there was no error.
     pub error_code: i16,
@@ -56,15 +56,6 @@ impl ApiResponse for OffsetForLeaderEpochResponse {
     }
 }
 
-impl Default for OffsetForLeaderEpochResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            topics: Default::default(),
-        }
-    }
-}
-
 impl FromBytes for OffsetForLeaderTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = if version >= 0 {
@@ -78,15 +69,6 @@ impl FromBytes for OffsetForLeaderTopicResult {
             Default::default()
         };
         OffsetForLeaderTopicResult { name, partitions }
-    }
-}
-
-impl Default for OffsetForLeaderTopicResult {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
-        }
     }
 }
 

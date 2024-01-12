@@ -18,7 +18,7 @@ pub struct OffsetCommitRequest {
     pub topics: Vec<OffsetCommitRequestTopic>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetCommitRequestTopic {
     /// The topic name.
     pub name: String,
@@ -27,7 +27,7 @@ pub struct OffsetCommitRequestTopic {
     pub partitions: Vec<OffsetCommitRequestPartition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct OffsetCommitRequestPartition {
     /// The partition index.
     pub partition_index: i32,
@@ -75,7 +75,7 @@ impl ApiRequest for OffsetCommitRequest {
         if version >= 1 {
             self.member_id.serialize(version, bytes);
         }
-        if version >= 2 && version <= 4 {
+        if (2..=4).contains(&version) {
             self.retention_time_ms.serialize(version, bytes);
         }
         if version >= 0 {
@@ -103,15 +103,6 @@ impl ToBytes for OffsetCommitRequestTopic {
         }
         if version >= 0 {
             self.partitions.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for OffsetCommitRequestTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
         }
     }
 }

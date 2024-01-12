@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct SaslAuthenticateRequest {
     /// The SASL authentication bytes from the client, as defined by the SASL mechanism.
     pub auth_bytes: Vec<u8>,
@@ -29,14 +29,6 @@ impl ApiRequest for SaslAuthenticateRequest {
         header.serialize(0, bytes);
         if version >= 0 {
             self.auth_bytes.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for SaslAuthenticateRequest {
-    fn default() -> Self {
-        Self {
-            auth_bytes: Default::default(),
         }
     }
 }

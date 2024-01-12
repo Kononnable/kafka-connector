@@ -1,12 +1,12 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetForLeaderEpochRequest {
     /// Each topic to get offsets for.
     pub topics: Vec<OffsetForLeaderTopic>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct OffsetForLeaderTopic {
     /// The topic name.
     pub name: String,
@@ -15,7 +15,7 @@ pub struct OffsetForLeaderTopic {
     pub partitions: Vec<OffsetForLeaderPartition>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct OffsetForLeaderPartition {
     /// The partition index.
     pub partition_index: i32,
@@ -54,14 +54,6 @@ impl ApiRequest for OffsetForLeaderEpochRequest {
     }
 }
 
-impl Default for OffsetForLeaderEpochRequest {
-    fn default() -> Self {
-        Self {
-            topics: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for OffsetForLeaderTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -69,15 +61,6 @@ impl ToBytes for OffsetForLeaderTopic {
         }
         if version >= 0 {
             self.partitions.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for OffsetForLeaderTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
         }
     }
 }

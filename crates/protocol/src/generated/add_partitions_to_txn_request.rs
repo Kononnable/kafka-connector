@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct AddPartitionsToTxnRequest {
     /// The transactional id corresponding to the transaction.
     pub transactional_id: String,
@@ -15,7 +15,7 @@ pub struct AddPartitionsToTxnRequest {
     pub topics: Vec<AddPartitionsToTxnTopic>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct AddPartitionsToTxnTopic {
     /// The name of the topic.
     pub name: String,
@@ -60,17 +60,6 @@ impl ApiRequest for AddPartitionsToTxnRequest {
     }
 }
 
-impl Default for AddPartitionsToTxnRequest {
-    fn default() -> Self {
-        Self {
-            transactional_id: Default::default(),
-            producer_id: Default::default(),
-            producer_epoch: Default::default(),
-            topics: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for AddPartitionsToTxnTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -78,15 +67,6 @@ impl ToBytes for AddPartitionsToTxnTopic {
         }
         if version >= 0 {
             self.partitions.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for AddPartitionsToTxnTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            partitions: Default::default(),
         }
     }
 }

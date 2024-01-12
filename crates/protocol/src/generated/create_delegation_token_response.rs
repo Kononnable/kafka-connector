@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct CreateDelegationTokenResponse {
     /// The top-level error, or zero if there was no error.
     pub error_code: i16,
@@ -92,21 +92,5 @@ impl ApiResponse for CreateDelegationTokenResponse {
                 throttle_time_ms,
             },
         )
-    }
-}
-
-impl Default for CreateDelegationTokenResponse {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            principal_type: Default::default(),
-            principal_name: Default::default(),
-            issue_timestamp_ms: Default::default(),
-            expiry_timestamp_ms: Default::default(),
-            max_timestamp_ms: Default::default(),
-            token_id: Default::default(),
-            hmac: Default::default(),
-            throttle_time_ms: Default::default(),
-        }
     }
 }

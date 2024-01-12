@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct HeartbeatRequest {
     /// The group id.
     pub group_id: String,
@@ -41,16 +41,6 @@ impl ApiRequest for HeartbeatRequest {
         }
         if version >= 0 {
             self.member_id.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for HeartbeatRequest {
-    fn default() -> Self {
-        Self {
-            group_id: Default::default(),
-            generationid: Default::default(),
-            member_id: Default::default(),
         }
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct LeaveGroupRequest {
     /// The ID of the group to leave.
     pub group_id: String,
@@ -35,15 +35,6 @@ impl ApiRequest for LeaveGroupRequest {
         }
         if version >= 0 {
             self.member_id.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for LeaveGroupRequest {
-    fn default() -> Self {
-        Self {
-            group_id: Default::default(),
-            member_id: Default::default(),
         }
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct InitProducerIdRequest {
     /// The transactional id, or null if the producer is not transactional.
     pub transactional_id: String,
@@ -35,15 +35,6 @@ impl ApiRequest for InitProducerIdRequest {
         }
         if version >= 0 {
             self.transaction_timeout_ms.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for InitProducerIdRequest {
-    fn default() -> Self {
-        Self {
-            transactional_id: Default::default(),
-            transaction_timeout_ms: Default::default(),
         }
     }
 }

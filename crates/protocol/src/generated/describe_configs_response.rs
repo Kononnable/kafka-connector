@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeConfigsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct DescribeConfigsResponse {
     pub results: Vec<DescribeConfigsResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeConfigsResult {
     /// The error code, or 0 if we were able to successfully describe the configurations.
     pub error_code: i16,
@@ -27,7 +27,7 @@ pub struct DescribeConfigsResult {
     pub configs: Vec<DescribeConfigsResourceResult>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct DescribeConfigsResourceResult {
     /// The configuration name.
     pub name: String,
@@ -51,7 +51,7 @@ pub struct DescribeConfigsResourceResult {
     pub synonyms: Vec<DescribeConfigsSynonym>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct DescribeConfigsSynonym {
     /// The synonym name.
     pub name: String,
@@ -83,15 +83,6 @@ impl ApiResponse for DescribeConfigsResponse {
                 results,
             },
         )
-    }
-}
-
-impl Default for DescribeConfigsResponse {
-    fn default() -> Self {
-        Self {
-            throttle_time_ms: Default::default(),
-            results: Default::default(),
-        }
     }
 }
 
@@ -128,18 +119,6 @@ impl FromBytes for DescribeConfigsResult {
             resource_type,
             resource_name,
             configs,
-        }
-    }
-}
-
-impl Default for DescribeConfigsResult {
-    fn default() -> Self {
-        Self {
-            error_code: Default::default(),
-            error_message: Default::default(),
-            resource_type: Default::default(),
-            resource_name: Default::default(),
-            configs: Default::default(),
         }
     }
 }
@@ -228,16 +207,6 @@ impl FromBytes for DescribeConfigsSynonym {
             name,
             value,
             source,
-        }
-    }
-}
-
-impl Default for DescribeConfigsSynonym {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            value: Default::default(),
-            source: Default::default(),
         }
     }
 }

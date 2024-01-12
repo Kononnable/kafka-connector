@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct CreateTopicsRequest {
     /// The topics to create.
     pub topics: Vec<CreatableTopic>,
@@ -12,7 +12,7 @@ pub struct CreateTopicsRequest {
     pub validate_only: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct CreatableTopic {
     /// The topic name.
     pub name: String,
@@ -30,7 +30,7 @@ pub struct CreatableTopic {
     pub configs: Vec<CreateableTopicConfig>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct CreatableReplicaAssignment {
     /// The partition index.
     pub partition_index: i32,
@@ -39,7 +39,7 @@ pub struct CreatableReplicaAssignment {
     pub broker_ids: Vec<i32>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug, Default)]
 pub struct CreateableTopicConfig {
     /// The configuration name.
     pub name: String,
@@ -81,16 +81,6 @@ impl ApiRequest for CreateTopicsRequest {
     }
 }
 
-impl Default for CreateTopicsRequest {
-    fn default() -> Self {
-        Self {
-            topics: Default::default(),
-            timeout_ms: Default::default(),
-            validate_only: false,
-        }
-    }
-}
-
 impl ToBytes for CreatableTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -111,18 +101,6 @@ impl ToBytes for CreatableTopic {
     }
 }
 
-impl Default for CreatableTopic {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            num_partitions: Default::default(),
-            replication_factor: Default::default(),
-            assignments: Default::default(),
-            configs: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for CreatableReplicaAssignment {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -134,15 +112,6 @@ impl ToBytes for CreatableReplicaAssignment {
     }
 }
 
-impl Default for CreatableReplicaAssignment {
-    fn default() -> Self {
-        Self {
-            partition_index: Default::default(),
-            broker_ids: Default::default(),
-        }
-    }
-}
-
 impl ToBytes for CreateableTopicConfig {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) {
         if version >= 0 {
@@ -150,15 +119,6 @@ impl ToBytes for CreateableTopicConfig {
         }
         if version >= 0 {
             self.value.serialize(version, bytes);
-        }
-    }
-}
-
-impl Default for CreateableTopicConfig {
-    fn default() -> Self {
-        Self {
-            name: Default::default(),
-            value: Default::default(),
         }
     }
 }

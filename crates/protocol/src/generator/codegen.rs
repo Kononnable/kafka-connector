@@ -6,7 +6,11 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
     let mut content = "use super::super::prelude::*;\n\n".to_owned();
     let mut sub_structs_partial = VecDeque::new();
     let mut sub_structs = Vec::new();
-    content.push_str("#[derive(Clone, Debug)]\n");
+    if should_derive_default(&spec.fields) {
+        content.push_str("#[derive(Clone, Debug, Default)]\n");
+    } else {
+        content.push_str("#[derive(Clone, Debug)]\n");
+    }
     content.push_str(&format!("pub struct {} {{\n", spec.name));
     for field in &spec.fields {
         content.push_str(&get_field_definition(field, &mut sub_structs_partial));
@@ -14,7 +18,11 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
     content.push_str("}\n\n");
 
     while let Some((s_name, s_fields)) = sub_structs_partial.pop_front() {
-        content.push_str("#[derive(Debug, Clone)]\n");
+        if should_derive_default(&s_fields) {
+            content.push_str("#[derive(Clone, Debug, Default)]\n");
+        } else {
+            content.push_str("#[derive(Clone, Debug)]\n");
+        }
         content.push_str(&format!("pub struct {} {{\n", s_name));
         for field in &s_fields {
             content.push_str(&get_field_definition(field, &mut sub_structs_partial));
@@ -173,7 +181,23 @@ fn get_min_max_supported_version(spec: &ApiSpec) -> String {
     content
 }
 
+fn should_derive_default(fields: &Vec<ApiSpecField>) -> bool {
+    !fields
+        .iter()
+        .any(|x| match (&x.type_.type_, &x.type_.is_array, &x.default) {
+            (_, _, None) => false,
+            (ApiSpecFieldSubtype::Bool, false, Some(str)) if str == "false" => false,
+            (ApiSpecFieldSubtype::Int8, false, Some(str)) if str == "0" => false,
+            (ApiSpecFieldSubtype::Int16, false, Some(str)) if str == "0" => false,
+            (ApiSpecFieldSubtype::Int32, false, Some(str)) if str == "0" => false,
+            (ApiSpecFieldSubtype::Int64, false, Some(str)) if str == "0" => false,
+            (_, _, Some(_)) => true,
+        })
+}
 fn impl_default_trait(name: &str, fields: &Vec<ApiSpecField>) -> String {
+    if should_derive_default(fields) {
+        return "".to_owned();
+    }
     let mut content = format!("impl Default for {name} {{\n",);
     content.push_str("fn default() -> Self {\n");
     content.push_str("    Self {\n");
@@ -202,7 +226,7 @@ fn serialize_field(field: &ApiSpecField) -> String {
         let min = split.next().unwrap().to_owned();
         let max = split.next().unwrap().to_owned();
         content.push_str(&format!(
-            "        if version >= {min} && version <= {max} {{\n"
+            "        if ({min}..={max}).contains(&version) {{\n"
         ));
     } else {
         let min = field.versions.replace("+", "");
@@ -223,7 +247,7 @@ fn deserialize_field(field: &ApiSpecField) -> String {
         let min = split.next().unwrap().to_owned();
         let max = split.next().unwrap().to_owned();
         content.push_str(&format!(
-            "        let {} = if version >= {min} && version <= {max} {{\n",
+            "        let {} = if if ({min}..={max}).contains(&version) {{\n",
             field.name.to_case(Case::Snake)
         ));
     } else {
