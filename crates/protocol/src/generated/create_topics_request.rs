@@ -45,7 +45,7 @@ pub struct CreateableTopicConfig {
     pub name: String,
 
     /// The configuration value.
-    pub value: String,
+    pub value: Option<String>,
 }
 
 impl ApiRequest for CreateTopicsRequest {
@@ -63,62 +63,106 @@ impl ApiRequest for CreateTopicsRequest {
         3
     }
 
-    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) {
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &RequestHeader,
+    ) -> Result<(), SerializationError> {
         debug_assert!(header.request_api_key == Self::get_api_key());
         debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
-        header.serialize(0, bytes);
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
         if version >= 0 {
-            self.topics.serialize(version, bytes);
+            self.topics.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.timeout_ms.serialize(version, bytes);
+            self.timeout_ms.serialize(version, bytes)?;
         }
         if version >= 1 {
-            self.validate_only.serialize(version, bytes);
+            self.validate_only.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl CreateTopicsRequest {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
 impl ToBytes for CreatableTopic {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 0 {
-            self.name.serialize(version, bytes);
+            self.name.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.num_partitions.serialize(version, bytes);
+            self.num_partitions.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.replication_factor.serialize(version, bytes);
+            self.replication_factor.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.assignments.serialize(version, bytes);
+            self.assignments.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.configs.serialize(version, bytes);
+            self.configs.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl CreatableTopic {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
 impl ToBytes for CreatableReplicaAssignment {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 0 {
-            self.partition_index.serialize(version, bytes);
+            self.partition_index.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.broker_ids.serialize(version, bytes);
+            self.broker_ids.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl CreatableReplicaAssignment {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
 impl ToBytes for CreateableTopicConfig {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 0 {
-            self.name.serialize(version, bytes);
+            self.name.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.value.serialize(version, bytes);
+            self.value.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl CreateableTopicConfig {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.value.is_none() && !_version >= 0 {
+            return Err(SerializationError::NullValue(
+                "value",
+                _version,
+                "CreateableTopicConfig",
+            ));
+        }
+        Ok(())
     }
 }

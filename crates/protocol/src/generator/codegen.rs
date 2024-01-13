@@ -42,7 +42,7 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
             ));
             content.push_str(&get_api_key(&spec));
             content.push_str(&get_min_max_supported_version(&spec));
-            content.push_str("    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) {\n");
+            content.push_str("    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) -> Result<(),SerializationError>{\n");
             content.push_str(
                 "        debug_assert!(header.request_api_key == Self::get_api_key());\n",
             );
@@ -51,22 +51,29 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
                 .push_str("        debug_assert!(version >= Self::get_min_supported_version());\n");
             content
                 .push_str("        debug_assert!(version <= Self::get_max_supported_version());\n");
-            content.push_str("        header.serialize(0, bytes);\n");
+            content.push_str("        self.validate_fields(version)?;\n");
+            content.push_str("        header.serialize(0, bytes)?;\n");
             for field in &spec.fields {
                 content.push_str(&serialize_field(field));
             }
+            content.push_str("    Ok(())\n");
             content.push_str("    }\n\n");
             content.push_str("}\n\n");
+
+            content.push_str(&generate_validate_fields(&spec.name, &spec.fields));
             content.push_str(&impl_default_trait(&spec.name, &spec.fields));
 
             for (name, fields) in sub_structs {
                 content.push_str(&format!("impl ToBytes for {name}{{\n"));
-                content.push_str("    fn serialize(&self, version: i16, bytes: &mut BytesMut) {\n");
+                content.push_str("    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(),SerializationError> {\n");
+                content.push_str("        self.validate_fields(version)?;\n");
                 for field in &fields {
                     content.push_str(&serialize_field(field));
                 }
+                content.push_str("    Ok(())\n");
                 content.push_str("    }\n\n");
                 content.push_str("}\n\n");
+                content.push_str(&generate_validate_fields(&name, &fields));
                 content.push_str(&impl_default_trait(&name, &fields));
             }
         }
@@ -116,7 +123,7 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
                 "RequestHeader" => {
                     content.push_str(&get_min_max_supported_version(&spec));
                     content.push_str(
-                        "    pub fn serialize(&self, version: i16, bytes: &mut BytesMut) {\n",
+                        "    pub fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(),SerializationError> {\n",
                     );
                     content.push_str(
                         "        debug_assert!(version >= Self::get_min_supported_version());\n",
@@ -124,10 +131,14 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
                     content.push_str(
                         "        debug_assert!(version <= Self::get_max_supported_version());\n",
                     );
+                    content.push_str("        self.validate_fields(version)?;\n");
                     for field in &spec.fields {
                         content.push_str(&serialize_field(field));
                     }
+                    content.push_str("    Ok(())\n");
                     content.push_str("    }\n\n");
+                    content.push_str("}\n\n");
+                    content.push_str(&generate_validate_fields(&spec.name, &spec.fields));
                 }
                 "ResponseHeader" => {
                     content.push_str(
@@ -146,15 +157,53 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
                     }
                     content.push_str("        }\n\n");
                     content.push_str("    }\n\n");
+                    content.push_str("}\n\n");
                 }
                 _ => panic!("Unknown header type"),
             }
-            content.push_str("}\n\n");
             content.push_str(&impl_default_trait(&spec.name, &spec.fields));
         }
     }
 
     (spec.name.to_case(Case::Snake), content)
+}
+
+fn generate_validate_fields(struct_name: &str, fields: &Vec<ApiSpecField>) -> String {
+    let mut content = "".to_owned();
+
+    content.push_str(&format!("impl {}{{\n", struct_name));
+    content.push_str(
+        "    fn validate_fields(&self, _version: i16) -> Result<(),SerializationError>{\n",
+    );
+    for field in fields.iter().filter(|x| x.nullable_versions.is_some()) {
+        let nullable_versions = field.nullable_versions.clone().unwrap();
+
+        if field.versions.contains("-") {
+            let mut split = nullable_versions.split("-");
+            let min = split.next().unwrap().to_owned();
+            let max = split.next().unwrap().to_owned();
+            content.push_str(&format!(
+                "    if self.{}.is_none() && !({min}..={max}).contains(_version){{\n",
+                field.name.to_case(Case::Snake)
+            ));
+        } else {
+            let min = field.versions.replace("+", "");
+            content.push_str(&format!(
+                "        if self.{}.is_none() && !_version >= {min} {{\n",
+                field.name.to_case(Case::Snake)
+            ));
+        };
+        content.push_str(&format!(
+            "        return Err(SerializationError::NullValue(\"{}\", _version, \"{}\"))\n",
+            field.name.to_case(Case::Snake),
+            struct_name
+        ));
+        content.push_str("        }\n");
+    }
+    content.push_str("    Ok(())\n");
+    content.push_str("    }\n\n");
+    content.push_str("}\n\n");
+    content
 }
 
 fn get_api_key(spec: &ApiSpec) -> String {
@@ -233,7 +282,7 @@ fn serialize_field(field: &ApiSpecField) -> String {
         content.push_str(&format!("        if version >= {min} {{\n"));
     };
     content.push_str(&format!(
-        "            self.{}.serialize(version, bytes);\n",
+        "            self.{}.serialize(version, bytes)?;\n",
         field.name.to_case(Case::Snake)
     ));
     content.push_str("        }\n");
@@ -257,13 +306,10 @@ fn deserialize_field(field: &ApiSpecField) -> String {
             field.name.to_case(Case::Snake)
         ));
     };
-    let mut field_type = get_field_base_type(&field.type_.type_).replace("Vec<u8>", "Vec::<u8>");
-    if field.type_.is_array {
-        field_type = format!("Vec::<{field_type}>");
-    }
+    let field_type = get_field_type(field);
     content.push_str(&format!(
         "            {}::deserialize(version, bytes)\n",
-        field_type
+        apply_turbo_fish(field_type)
     ));
     content.push_str("        } else {\n");
     content.push_str("            Default::default()\n");
@@ -271,18 +317,21 @@ fn deserialize_field(field: &ApiSpecField) -> String {
     content
 }
 
+fn apply_turbo_fish(field_type: String) -> String {
+    field_type.replace("<", "::<")
+}
+
 fn get_field_definition(
     field: &ApiSpecField,
     sub_structs: &mut VecDeque<(String, Vec<ApiSpecField>)>,
 ) -> String {
     let mut content = "".to_owned();
-    let ApiSpecFieldType { type_, is_array } = &field.type_;
-    let mut field_type = get_field_base_type(type_);
-    if *is_array {
-        field_type = format!("Vec<{field_type}>");
-    }
+    let field_type = get_field_type(field);
     if !field.fields.is_empty() {
-        sub_structs.push_back((get_field_base_type(type_), field.fields.clone()));
+        sub_structs.push_back((
+            get_field_base_type(&field.type_.type_),
+            field.fields.clone(),
+        ));
     }
     if let Some(about) = &field.about {
         content.push_str(&format!("    /// {about}\n",));
@@ -292,6 +341,18 @@ fn get_field_definition(
         field.name.to_case(Case::Snake)
     ));
     content
+}
+
+fn get_field_type(field: &ApiSpecField) -> String {
+    let ApiSpecFieldType { type_, is_array } = &field.type_;
+    let mut field_type = get_field_base_type(type_);
+    if *is_array {
+        field_type = format!("Vec<{field_type}>");
+    }
+    if field.nullable_versions.is_some() {
+        field_type = format!("Option<{field_type}>");
+    }
+    field_type
 }
 
 fn get_field_base_type(type_: &ApiSpecFieldSubtype) -> String {

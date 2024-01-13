@@ -27,20 +27,33 @@ impl ApiRequest for HeartbeatRequest {
         2
     }
 
-    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) {
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &RequestHeader,
+    ) -> Result<(), SerializationError> {
         debug_assert!(header.request_api_key == Self::get_api_key());
         debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
-        header.serialize(0, bytes);
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
         if version >= 0 {
-            self.group_id.serialize(version, bytes);
+            self.group_id.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.generationid.serialize(version, bytes);
+            self.generationid.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.member_id.serialize(version, bytes);
+            self.member_id.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl HeartbeatRequest {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }

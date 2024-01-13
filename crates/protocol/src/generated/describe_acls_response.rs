@@ -9,7 +9,7 @@ pub struct DescribeAclsResponse {
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
-    pub error_message: String,
+    pub error_message: Option<String>,
 
     /// Each Resource that is referenced in an ACL.
     pub resources: Vec<DescribeAclsResource>,
@@ -59,7 +59,7 @@ impl ApiResponse for DescribeAclsResponse {
             Default::default()
         };
         let error_message = if version >= 0 {
-            String::deserialize(version, bytes)
+            Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };

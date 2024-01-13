@@ -42,10 +42,10 @@ pub struct FetchablePartitionResponse {
     pub log_start_offset: i64,
 
     /// The aborted transactions.
-    pub aborted: Vec<AbortedTransaction>,
+    pub aborted: Option<Vec<AbortedTransaction>>,
 
     /// The record data.
-    pub records: Vec<u8>,
+    pub records: Option<Vec<u8>>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -136,12 +136,12 @@ impl FromBytes for FetchablePartitionResponse {
             Default::default()
         };
         let aborted = if version >= 4 {
-            Vec::<AbortedTransaction>::deserialize(version, bytes)
+            Option::<Vec<AbortedTransaction>>::deserialize(version, bytes)
         } else {
             Default::default()
         };
         let records = if version >= 0 {
-            Vec::<u8>::deserialize(version, bytes)
+            Option::<Vec<u8>>::deserialize(version, bytes)
         } else {
             Default::default()
         };

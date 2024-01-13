@@ -73,7 +73,7 @@ pub struct UpdateMetadataRequestBroker {
     pub endpoints: Vec<UpdateMetadataRequestEndpoint>,
 
     /// The rack which this broker belongs to.
-    pub rack: String,
+    pub rack: Option<String>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -133,30 +133,43 @@ impl ApiRequest for UpdateMetadataRequest {
         5
     }
 
-    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) {
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &RequestHeader,
+    ) -> Result<(), SerializationError> {
         debug_assert!(header.request_api_key == Self::get_api_key());
         debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
-        header.serialize(0, bytes);
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
         if version >= 0 {
-            self.controller_id.serialize(version, bytes);
+            self.controller_id.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.controller_epoch.serialize(version, bytes);
+            self.controller_epoch.serialize(version, bytes)?;
         }
         if version >= 5 {
-            self.broker_epoch.serialize(version, bytes);
+            self.broker_epoch.serialize(version, bytes)?;
         }
         if version >= 5 {
-            self.topic_states.serialize(version, bytes);
+            self.topic_states.serialize(version, bytes)?;
         }
         if (0..=4).contains(&version) {
-            self.partition_states_v_0.serialize(version, bytes);
+            self.partition_states_v_0.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.brokers.serialize(version, bytes);
+            self.brokers.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl UpdateMetadataRequest {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
@@ -174,110 +187,157 @@ impl Default for UpdateMetadataRequest {
 }
 
 impl ToBytes for UpdateMetadataRequestTopicState {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 0 {
-            self.topic_name.serialize(version, bytes);
+            self.topic_name.serialize(version, bytes)?;
         }
         if version >= 5 {
-            self.partition_states.serialize(version, bytes);
+            self.partition_states.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl UpdateMetadataRequestTopicState {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
 impl ToBytes for UpdateMetadataRequestPartitionStateV0 {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if (0..=4).contains(&version) {
-            self.topic_name.serialize(version, bytes);
+            self.topic_name.serialize(version, bytes)?;
         }
         if (0..=4).contains(&version) {
-            self.partition_index.serialize(version, bytes);
+            self.partition_index.serialize(version, bytes)?;
         }
         if (0..=4).contains(&version) {
-            self.controller_epoch.serialize(version, bytes);
+            self.controller_epoch.serialize(version, bytes)?;
         }
         if (0..=4).contains(&version) {
-            self.leader.serialize(version, bytes);
+            self.leader.serialize(version, bytes)?;
         }
         if (0..=4).contains(&version) {
-            self.leader_epoch.serialize(version, bytes);
+            self.leader_epoch.serialize(version, bytes)?;
         }
         if (0..=4).contains(&version) {
-            self.isr.serialize(version, bytes);
+            self.isr.serialize(version, bytes)?;
         }
         if (0..=4).contains(&version) {
-            self.zk_version.serialize(version, bytes);
+            self.zk_version.serialize(version, bytes)?;
         }
         if (0..=4).contains(&version) {
-            self.replicas.serialize(version, bytes);
+            self.replicas.serialize(version, bytes)?;
         }
         if version >= 4 {
-            self.offline_replicas.serialize(version, bytes);
+            self.offline_replicas.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl UpdateMetadataRequestPartitionStateV0 {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
 impl ToBytes for UpdateMetadataRequestBroker {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 0 {
-            self.id.serialize(version, bytes);
+            self.id.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.v_0_host.serialize(version, bytes);
+            self.v_0_host.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.v_0_port.serialize(version, bytes);
+            self.v_0_port.serialize(version, bytes)?;
         }
         if version >= 1 {
-            self.endpoints.serialize(version, bytes);
+            self.endpoints.serialize(version, bytes)?;
         }
         if version >= 2 {
-            self.rack.serialize(version, bytes);
+            self.rack.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl UpdateMetadataRequestBroker {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.rack.is_none() && !_version >= 2 {
+            return Err(SerializationError::NullValue(
+                "rack",
+                _version,
+                "UpdateMetadataRequestBroker",
+            ));
+        }
+        Ok(())
     }
 }
 
 impl ToBytes for UpdateMetadataPartitionState {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 5 {
-            self.partition_index.serialize(version, bytes);
+            self.partition_index.serialize(version, bytes)?;
         }
         if version >= 5 {
-            self.controller_epoch.serialize(version, bytes);
+            self.controller_epoch.serialize(version, bytes)?;
         }
         if version >= 5 {
-            self.leader.serialize(version, bytes);
+            self.leader.serialize(version, bytes)?;
         }
         if version >= 5 {
-            self.leader_epoch.serialize(version, bytes);
+            self.leader_epoch.serialize(version, bytes)?;
         }
         if version >= 5 {
-            self.isr.serialize(version, bytes);
+            self.isr.serialize(version, bytes)?;
         }
         if version >= 5 {
-            self.zk_version.serialize(version, bytes);
+            self.zk_version.serialize(version, bytes)?;
         }
         if version >= 5 {
-            self.replicas.serialize(version, bytes);
+            self.replicas.serialize(version, bytes)?;
         }
         if version >= 5 {
-            self.offline_replicas.serialize(version, bytes);
+            self.offline_replicas.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl UpdateMetadataPartitionState {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
 impl ToBytes for UpdateMetadataRequestEndpoint {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 1 {
-            self.port.serialize(version, bytes);
+            self.port.serialize(version, bytes)?;
         }
         if version >= 1 {
-            self.host.serialize(version, bytes);
+            self.host.serialize(version, bytes)?;
         }
         if version >= 3 {
-            self.listener.serialize(version, bytes);
+            self.listener.serialize(version, bytes)?;
         }
         if version >= 1 {
-            self.security_protocol.serialize(version, bytes);
+            self.security_protocol.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl UpdateMetadataRequestEndpoint {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }

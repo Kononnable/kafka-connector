@@ -9,7 +9,7 @@ pub struct MetadataResponse {
     pub brokers: Vec<MetadataResponseBroker>,
 
     /// The cluster ID that responding broker belongs to.
-    pub cluster_id: String,
+    pub cluster_id: Option<String>,
 
     /// The ID of the controller broker.
     pub controller_id: i32,
@@ -30,7 +30,7 @@ pub struct MetadataResponseBroker {
     pub port: i32,
 
     /// The rack of the broker, or null if it has not been assigned to a rack.
-    pub rack: String,
+    pub rack: Option<String>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -86,7 +86,7 @@ impl ApiResponse for MetadataResponse {
             Default::default()
         };
         let cluster_id = if version >= 2 {
-            String::deserialize(version, bytes)
+            Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };
@@ -143,7 +143,7 @@ impl FromBytes for MetadataResponseBroker {
             Default::default()
         };
         let rack = if version >= 1 {
-            String::deserialize(version, bytes)
+            Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };

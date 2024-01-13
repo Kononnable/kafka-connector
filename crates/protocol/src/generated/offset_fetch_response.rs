@@ -33,7 +33,7 @@ pub struct OffsetFetchResponsePartition {
     pub committed_leader_epoch: i32,
 
     /// The partition metadata.
-    pub metadata: String,
+    pub metadata: Option<String>,
 
     /// The error code, or 0 if there was no error.
     pub error_code: i16,
@@ -102,7 +102,7 @@ impl FromBytes for OffsetFetchResponsePartition {
             Default::default()
         };
         let metadata = if version >= 0 {
-            String::deserialize(version, bytes)
+            Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };

@@ -18,7 +18,7 @@ pub struct DescribeConfigsResource {
     pub resource_name: String,
 
     /// The configuration keys to list, or null to list all configuration keys.
-    pub configuration_keys: Vec<String>,
+    pub configuration_keys: Option<Vec<String>>,
 }
 
 impl ApiRequest for DescribeConfigsRequest {
@@ -36,31 +36,59 @@ impl ApiRequest for DescribeConfigsRequest {
         2
     }
 
-    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) {
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &RequestHeader,
+    ) -> Result<(), SerializationError> {
         debug_assert!(header.request_api_key == Self::get_api_key());
         debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
-        header.serialize(0, bytes);
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
         if version >= 0 {
-            self.resources.serialize(version, bytes);
+            self.resources.serialize(version, bytes)?;
         }
         if version >= 1 {
-            self.include_synoyms.serialize(version, bytes);
+            self.include_synoyms.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl DescribeConfigsRequest {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
 impl ToBytes for DescribeConfigsResource {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 0 {
-            self.resource_type.serialize(version, bytes);
+            self.resource_type.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.resource_name.serialize(version, bytes);
+            self.resource_name.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.configuration_keys.serialize(version, bytes);
+            self.configuration_keys.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl DescribeConfigsResource {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.configuration_keys.is_none() && !_version >= 0 {
+            return Err(SerializationError::NullValue(
+                "configuration_keys",
+                _version,
+                "DescribeConfigsResource",
+            ));
+        }
+        Ok(())
     }
 }

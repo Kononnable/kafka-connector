@@ -48,45 +48,74 @@ impl ApiRequest for WriteTxnMarkersRequest {
         0
     }
 
-    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) {
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &RequestHeader,
+    ) -> Result<(), SerializationError> {
         debug_assert!(header.request_api_key == Self::get_api_key());
         debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
-        header.serialize(0, bytes);
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
         if version >= 0 {
-            self.markers.serialize(version, bytes);
+            self.markers.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl WriteTxnMarkersRequest {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
 impl ToBytes for WritableTxnMarker {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 0 {
-            self.producer_id.serialize(version, bytes);
+            self.producer_id.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.producer_epoch.serialize(version, bytes);
+            self.producer_epoch.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.transaction_result.serialize(version, bytes);
+            self.transaction_result.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.topics.serialize(version, bytes);
+            self.topics.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.coordinator_epoch.serialize(version, bytes);
+            self.coordinator_epoch.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl WritableTxnMarker {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
 impl ToBytes for WritableTxnMarkerTopic {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 0 {
-            self.name.serialize(version, bytes);
+            self.name.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.partition_indexes.serialize(version, bytes);
+            self.partition_indexes.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl WritableTxnMarkerTopic {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }

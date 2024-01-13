@@ -3,7 +3,7 @@ use super::super::prelude::*;
 #[derive(Clone, Debug)]
 pub struct ElectPreferredLeadersRequest {
     /// The topic partitions to elect the preferred leader of.
-    pub topic_partitions: Vec<TopicPartitions>,
+    pub topic_partitions: Option<Vec<TopicPartitions>>,
 
     /// The time in ms to wait for the election to complete.
     pub timeout_ms: i32,
@@ -33,18 +33,38 @@ impl ApiRequest for ElectPreferredLeadersRequest {
         0
     }
 
-    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) {
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &RequestHeader,
+    ) -> Result<(), SerializationError> {
         debug_assert!(header.request_api_key == Self::get_api_key());
         debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
-        header.serialize(0, bytes);
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
         if version >= 0 {
-            self.topic_partitions.serialize(version, bytes);
+            self.topic_partitions.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.timeout_ms.serialize(version, bytes);
+            self.timeout_ms.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl ElectPreferredLeadersRequest {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.topic_partitions.is_none() && !_version >= 0 {
+            return Err(SerializationError::NullValue(
+                "topic_partitions",
+                _version,
+                "ElectPreferredLeadersRequest",
+            ));
+        }
+        Ok(())
     }
 }
 
@@ -58,12 +78,20 @@ impl Default for ElectPreferredLeadersRequest {
 }
 
 impl ToBytes for TopicPartitions {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 0 {
-            self.topic.serialize(version, bytes);
+            self.topic.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.partition_id.serialize(version, bytes);
+            self.partition_id.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl TopicPartitions {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }

@@ -15,7 +15,7 @@ pub struct DeleteAclsFilterResult {
     pub error_code: i16,
 
     /// The error message, or null if the filter succeeded.
-    pub error_message: String,
+    pub error_message: Option<String>,
 
     /// The ACLs which matched this filter.
     pub matching_acls: Vec<DeleteAclsMatchingAcl>,
@@ -27,7 +27,7 @@ pub struct DeleteAclsMatchingAcl {
     pub error_code: i16,
 
     /// The deletion error message, or null if the deletion succeeded.
-    pub error_message: String,
+    pub error_message: Option<String>,
 
     /// The ACL resource type.
     pub resource_type: i8,
@@ -82,7 +82,7 @@ impl FromBytes for DeleteAclsFilterResult {
             Default::default()
         };
         let error_message = if version >= 0 {
-            String::deserialize(version, bytes)
+            Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };
@@ -107,7 +107,7 @@ impl FromBytes for DeleteAclsMatchingAcl {
             Default::default()
         };
         let error_message = if version >= 0 {
-            String::deserialize(version, bytes)
+            Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };

@@ -15,7 +15,7 @@ pub struct DescribeConfigsResult {
     pub error_code: i16,
 
     /// The error message, or null if we were able to successfully describe the configurations.
-    pub error_message: String,
+    pub error_message: Option<String>,
 
     /// The resource type.
     pub resource_type: i8,
@@ -33,7 +33,7 @@ pub struct DescribeConfigsResourceResult {
     pub name: String,
 
     /// The configuration value.
-    pub value: String,
+    pub value: Option<String>,
 
     /// True if the configuration is read-only.
     pub read_only: bool,
@@ -57,7 +57,7 @@ pub struct DescribeConfigsSynonym {
     pub name: String,
 
     /// The synonym value.
-    pub value: String,
+    pub value: Option<String>,
 
     /// The synonym source.
     pub source: i8,
@@ -94,7 +94,7 @@ impl FromBytes for DescribeConfigsResult {
             Default::default()
         };
         let error_message = if version >= 0 {
-            String::deserialize(version, bytes)
+            Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };
@@ -131,7 +131,7 @@ impl FromBytes for DescribeConfigsResourceResult {
             Default::default()
         };
         let value = if version >= 0 {
-            String::deserialize(version, bytes)
+            Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };
@@ -194,7 +194,7 @@ impl FromBytes for DescribeConfigsSynonym {
             Default::default()
         };
         let value = if version >= 1 {
-            String::deserialize(version, bytes)
+            Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };

@@ -27,7 +27,7 @@ pub struct AlterableConfig {
     pub name: String,
 
     /// The value to set for the configuration key.
-    pub value: String,
+    pub value: Option<String>,
 }
 
 impl ApiRequest for AlterConfigsRequest {
@@ -45,42 +45,78 @@ impl ApiRequest for AlterConfigsRequest {
         1
     }
 
-    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) {
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &RequestHeader,
+    ) -> Result<(), SerializationError> {
         debug_assert!(header.request_api_key == Self::get_api_key());
         debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
-        header.serialize(0, bytes);
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
         if version >= 0 {
-            self.resources.serialize(version, bytes);
+            self.resources.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.validate_only.serialize(version, bytes);
+            self.validate_only.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl AlterConfigsRequest {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
 impl ToBytes for AlterConfigsResource {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 0 {
-            self.resource_type.serialize(version, bytes);
+            self.resource_type.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.resource_name.serialize(version, bytes);
+            self.resource_name.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.configs.serialize(version, bytes);
+            self.configs.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl AlterConfigsResource {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
 impl ToBytes for AlterableConfig {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         if version >= 0 {
-            self.name.serialize(version, bytes);
+            self.name.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.value.serialize(version, bytes);
+            self.value.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl AlterableConfig {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.value.is_none() && !_version >= 0 {
+            return Err(SerializationError::NullValue(
+                "value",
+                _version,
+                "AlterableConfig",
+            ));
+        }
+        Ok(())
     }
 }

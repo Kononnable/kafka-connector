@@ -30,23 +30,36 @@ impl ApiRequest for AddOffsetsToTxnRequest {
         1
     }
 
-    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) {
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &RequestHeader,
+    ) -> Result<(), SerializationError> {
         debug_assert!(header.request_api_key == Self::get_api_key());
         debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
-        header.serialize(0, bytes);
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
         if version >= 0 {
-            self.transactional_id.serialize(version, bytes);
+            self.transactional_id.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.producer_id.serialize(version, bytes);
+            self.producer_id.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.producer_epoch.serialize(version, bytes);
+            self.producer_epoch.serialize(version, bytes)?;
         }
         if version >= 0 {
-            self.group_id.serialize(version, bytes);
+            self.group_id.serialize(version, bytes)?;
         }
+        Ok(())
+    }
+}
+
+impl AddOffsetsToTxnRequest {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }

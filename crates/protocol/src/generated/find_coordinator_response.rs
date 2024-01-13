@@ -9,7 +9,7 @@ pub struct FindCoordinatorResponse {
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
-    pub error_message: String,
+    pub error_message: Option<String>,
 
     /// The node id.
     pub node_id: i32,
@@ -35,7 +35,7 @@ impl ApiResponse for FindCoordinatorResponse {
             Default::default()
         };
         let error_message = if version >= 1 {
-            String::deserialize(version, bytes)
+            Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };

@@ -18,7 +18,7 @@ pub struct CreatableTopicResult {
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
-    pub error_message: String,
+    pub error_message: Option<String>,
 }
 
 impl ApiResponse for CreateTopicsResponse {
@@ -57,7 +57,7 @@ impl FromBytes for CreatableTopicResult {
             Default::default()
         };
         let error_message = if version >= 1 {
-            String::deserialize(version, bytes)
+            Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };
