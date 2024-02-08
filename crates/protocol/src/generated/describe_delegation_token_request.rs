@@ -42,16 +42,14 @@ impl ApiRequest for DescribeDelegationTokenRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.owners.serialize(version, bytes)?;
-        }
+        self.owners.serialize(version, bytes)?;
         Ok(())
     }
 }
 
 impl DescribeDelegationTokenRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.owners.is_none() && !_version >= 0 {
+        if self.owners.is_none() {
             return Err(SerializationError::NullValue(
                 "owners",
                 _version,
@@ -65,12 +63,8 @@ impl DescribeDelegationTokenRequest {
 impl ToBytes for DescribeDelegationTokenOwner {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.principal_type.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.principal_name.serialize(version, bytes)?;
-        }
+        self.principal_type.serialize(version, bytes)?;
+        self.principal_name.serialize(version, bytes)?;
         Ok(())
     }
 }

@@ -24,16 +24,8 @@ pub struct LeaderAndIsrResponsePartition {
 impl ApiResponse for LeaderAndIsrResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partitions = if version >= 0 {
-            Vec::<LeaderAndIsrResponsePartition>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let partitions = Vec::<LeaderAndIsrResponsePartition>::deserialize(version, bytes);
         (
             header,
             LeaderAndIsrResponse {
@@ -46,21 +38,9 @@ impl ApiResponse for LeaderAndIsrResponse {
 
 impl FromBytes for LeaderAndIsrResponsePartition {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let topic_name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partition_index = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let topic_name = String::deserialize(version, bytes);
+        let partition_index = i32::deserialize(version, bytes);
+        let error_code = i16::deserialize(version, bytes);
         LeaderAndIsrResponsePartition {
             topic_name,
             partition_index,

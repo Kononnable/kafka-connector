@@ -18,21 +18,9 @@ pub struct SaslAuthenticateResponse {
 impl ApiResponse for SaslAuthenticateResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_message = if version >= 0 {
-            Option::<String>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let auth_bytes = if version >= 0 {
-            Vec::<u8>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let error_message = Option::<String>::deserialize(version, bytes);
+        let auth_bytes = Vec::<u8>::deserialize(version, bytes);
         let session_lifetime_ms = if version >= 1 {
             i64::deserialize(version, bytes)
         } else {

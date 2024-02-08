@@ -51,21 +51,9 @@ pub struct DescribedDelegationTokenRenewer {
 impl ApiResponse for DescribeDelegationTokenResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let tokens = if version >= 0 {
-            Vec::<DescribedDelegationToken>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let throttle_time_ms = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let tokens = Vec::<DescribedDelegationToken>::deserialize(version, bytes);
+        let throttle_time_ms = i32::deserialize(version, bytes);
         (
             header,
             DescribeDelegationTokenResponse {
@@ -79,46 +67,14 @@ impl ApiResponse for DescribeDelegationTokenResponse {
 
 impl FromBytes for DescribedDelegationToken {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let principal_type = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let principal_name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let issue_timestamp = if version >= 0 {
-            i64::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let expiry_timestamp = if version >= 0 {
-            i64::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let max_timestamp = if version >= 0 {
-            i64::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let token_id = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let hmac = if version >= 0 {
-            Vec::<u8>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let renewers = if version >= 0 {
-            Vec::<DescribedDelegationTokenRenewer>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let principal_type = String::deserialize(version, bytes);
+        let principal_name = String::deserialize(version, bytes);
+        let issue_timestamp = i64::deserialize(version, bytes);
+        let expiry_timestamp = i64::deserialize(version, bytes);
+        let max_timestamp = i64::deserialize(version, bytes);
+        let token_id = String::deserialize(version, bytes);
+        let hmac = Vec::<u8>::deserialize(version, bytes);
+        let renewers = Vec::<DescribedDelegationTokenRenewer>::deserialize(version, bytes);
         DescribedDelegationToken {
             principal_type,
             principal_name,
@@ -134,16 +90,8 @@ impl FromBytes for DescribedDelegationToken {
 
 impl FromBytes for DescribedDelegationTokenRenewer {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let principal_type = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let principal_name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let principal_type = String::deserialize(version, bytes);
+        let principal_name = String::deserialize(version, bytes);
         DescribedDelegationTokenRenewer {
             principal_type,
             principal_name,

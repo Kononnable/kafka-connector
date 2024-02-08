@@ -57,12 +57,8 @@ impl ApiRequest for AlterConfigsRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.resources.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.validate_only.serialize(version, bytes)?;
-        }
+        self.resources.serialize(version, bytes)?;
+        self.validate_only.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -76,15 +72,9 @@ impl AlterConfigsRequest {
 impl ToBytes for AlterConfigsResource {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.resource_type.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.resource_name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.configs.serialize(version, bytes)?;
-        }
+        self.resource_type.serialize(version, bytes)?;
+        self.resource_name.serialize(version, bytes)?;
+        self.configs.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -98,19 +88,15 @@ impl AlterConfigsResource {
 impl ToBytes for AlterableConfig {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.value.serialize(version, bytes)?;
-        }
+        self.name.serialize(version, bytes)?;
+        self.value.serialize(version, bytes)?;
         Ok(())
     }
 }
 
 impl AlterableConfig {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.value.is_none() && !_version >= 0 {
+        if self.value.is_none() {
             return Err(SerializationError::NullValue(
                 "value",
                 _version,

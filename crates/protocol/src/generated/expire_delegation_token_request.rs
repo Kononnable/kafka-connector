@@ -36,12 +36,8 @@ impl ApiRequest for ExpireDelegationTokenRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.hmac.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.expiry_time_period_ms.serialize(version, bytes)?;
-        }
+        self.hmac.serialize(version, bytes)?;
+        self.expiry_time_period_ms.serialize(version, bytes)?;
         Ok(())
     }
 }

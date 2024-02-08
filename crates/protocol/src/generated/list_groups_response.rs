@@ -29,16 +29,8 @@ impl ApiResponse for ListGroupsResponse {
         } else {
             Default::default()
         };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let groups = if version >= 0 {
-            Vec::<ListedGroup>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let groups = Vec::<ListedGroup>::deserialize(version, bytes);
         (
             header,
             ListGroupsResponse {
@@ -52,16 +44,8 @@ impl ApiResponse for ListGroupsResponse {
 
 impl FromBytes for ListedGroup {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let group_id = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let protocol_type = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let group_id = String::deserialize(version, bytes);
+        let protocol_type = String::deserialize(version, bytes);
         ListedGroup {
             group_id,
             protocol_type,

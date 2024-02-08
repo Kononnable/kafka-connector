@@ -44,19 +44,15 @@ impl ApiRequest for OffsetFetchRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.group_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.topics.serialize(version, bytes)?;
-        }
+        self.group_id.serialize(version, bytes)?;
+        self.topics.serialize(version, bytes)?;
         Ok(())
     }
 }
 
 impl OffsetFetchRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.topics.is_none() && !_version >= 0 {
+        if self.topics.is_none() {
             return Err(SerializationError::NullValue(
                 "topics",
                 _version,
@@ -70,12 +66,8 @@ impl OffsetFetchRequest {
 impl ToBytes for OffsetFetchRequestTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.partition_indexes.serialize(version, bytes)?;
-        }
+        self.name.serialize(version, bytes)?;
+        self.partition_indexes.serialize(version, bytes)?;
         Ok(())
     }
 }

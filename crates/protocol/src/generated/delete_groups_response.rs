@@ -21,16 +21,8 @@ pub struct DeletableGroupResult {
 impl ApiResponse for DeleteGroupsResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let results = if version >= 0 {
-            Vec::<DeletableGroupResult>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let throttle_time_ms = i32::deserialize(version, bytes);
+        let results = Vec::<DeletableGroupResult>::deserialize(version, bytes);
         (
             header,
             DeleteGroupsResponse {
@@ -43,16 +35,8 @@ impl ApiResponse for DeleteGroupsResponse {
 
 impl FromBytes for DeletableGroupResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let group_id = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let group_id = String::deserialize(version, bytes);
+        let error_code = i16::deserialize(version, bytes);
         DeletableGroupResult {
             group_id,
             error_code,

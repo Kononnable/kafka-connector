@@ -47,11 +47,7 @@ impl ApiResponse for OffsetFetchResponse {
         } else {
             Default::default()
         };
-        let topics = if version >= 0 {
-            Vec::<OffsetFetchResponseTopic>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let topics = Vec::<OffsetFetchResponseTopic>::deserialize(version, bytes);
         let error_code = if version >= 2 {
             i16::deserialize(version, bytes)
         } else {
@@ -70,47 +66,23 @@ impl ApiResponse for OffsetFetchResponse {
 
 impl FromBytes for OffsetFetchResponseTopic {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partitions = if version >= 0 {
-            Vec::<OffsetFetchResponsePartition>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let name = String::deserialize(version, bytes);
+        let partitions = Vec::<OffsetFetchResponsePartition>::deserialize(version, bytes);
         OffsetFetchResponseTopic { name, partitions }
     }
 }
 
 impl FromBytes for OffsetFetchResponsePartition {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let partition_index = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let committed_offset = if version >= 0 {
-            i64::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let partition_index = i32::deserialize(version, bytes);
+        let committed_offset = i64::deserialize(version, bytes);
         let committed_leader_epoch = if version >= 5 {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let metadata = if version >= 0 {
-            Option::<String>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let metadata = Option::<String>::deserialize(version, bytes);
+        let error_code = i16::deserialize(version, bytes);
         OffsetFetchResponsePartition {
             partition_index,
             committed_offset,

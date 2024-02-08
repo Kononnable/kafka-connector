@@ -145,12 +145,8 @@ impl ApiRequest for UpdateMetadataRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.controller_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.controller_epoch.serialize(version, bytes)?;
-        }
+        self.controller_id.serialize(version, bytes)?;
+        self.controller_epoch.serialize(version, bytes)?;
         if version >= 5 {
             self.broker_epoch.serialize(version, bytes)?;
         }
@@ -160,9 +156,7 @@ impl ApiRequest for UpdateMetadataRequest {
         if (0..=4).contains(&version) {
             self.partition_states_v_0.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.brokers.serialize(version, bytes)?;
-        }
+        self.brokers.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -189,9 +183,7 @@ impl Default for UpdateMetadataRequest {
 impl ToBytes for UpdateMetadataRequestTopicState {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.topic_name.serialize(version, bytes)?;
-        }
+        self.topic_name.serialize(version, bytes)?;
         if version >= 5 {
             self.partition_states.serialize(version, bytes)?;
         }
@@ -248,9 +240,7 @@ impl UpdateMetadataRequestPartitionStateV0 {
 impl ToBytes for UpdateMetadataRequestBroker {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.id.serialize(version, bytes)?;
-        }
+        self.id.serialize(version, bytes)?;
         if version >= 0 {
             self.v_0_host.serialize(version, bytes)?;
         }

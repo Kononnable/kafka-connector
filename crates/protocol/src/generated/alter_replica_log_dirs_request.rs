@@ -51,9 +51,7 @@ impl ApiRequest for AlterReplicaLogDirsRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.dirs.serialize(version, bytes)?;
-        }
+        self.dirs.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -67,12 +65,8 @@ impl AlterReplicaLogDirsRequest {
 impl ToBytes for AlterReplicaLogDir {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.path.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.topics.serialize(version, bytes)?;
-        }
+        self.path.serialize(version, bytes)?;
+        self.topics.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -86,12 +80,8 @@ impl AlterReplicaLogDir {
 impl ToBytes for AlterReplicaLogDirTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.partitions.serialize(version, bytes)?;
-        }
+        self.name.serialize(version, bytes)?;
+        self.partitions.serialize(version, bytes)?;
         Ok(())
     }
 }

@@ -33,51 +33,15 @@ pub struct CreateDelegationTokenResponse {
 impl ApiResponse for CreateDelegationTokenResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let principal_type = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let principal_name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let issue_timestamp_ms = if version >= 0 {
-            i64::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let expiry_timestamp_ms = if version >= 0 {
-            i64::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let max_timestamp_ms = if version >= 0 {
-            i64::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let token_id = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let hmac = if version >= 0 {
-            Vec::<u8>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let throttle_time_ms = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let principal_type = String::deserialize(version, bytes);
+        let principal_name = String::deserialize(version, bytes);
+        let issue_timestamp_ms = i64::deserialize(version, bytes);
+        let expiry_timestamp_ms = i64::deserialize(version, bytes);
+        let max_timestamp_ms = i64::deserialize(version, bytes);
+        let token_id = String::deserialize(version, bytes);
+        let hmac = Vec::<u8>::deserialize(version, bytes);
+        let throttle_time_ms = i32::deserialize(version, bytes);
         (
             header,
             CreateDelegationTokenResponse {

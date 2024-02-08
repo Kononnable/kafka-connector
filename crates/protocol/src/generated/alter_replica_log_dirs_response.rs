@@ -30,16 +30,8 @@ pub struct AlterReplicaLogDirPartitionResult {
 impl ApiResponse for AlterReplicaLogDirsResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let results = if version >= 0 {
-            Vec::<AlterReplicaLogDirTopicResult>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let throttle_time_ms = i32::deserialize(version, bytes);
+        let results = Vec::<AlterReplicaLogDirTopicResult>::deserialize(version, bytes);
         (
             header,
             AlterReplicaLogDirsResponse {
@@ -52,16 +44,8 @@ impl ApiResponse for AlterReplicaLogDirsResponse {
 
 impl FromBytes for AlterReplicaLogDirTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let topic_name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partitions = if version >= 0 {
-            Vec::<AlterReplicaLogDirPartitionResult>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let topic_name = String::deserialize(version, bytes);
+        let partitions = Vec::<AlterReplicaLogDirPartitionResult>::deserialize(version, bytes);
         AlterReplicaLogDirTopicResult {
             topic_name,
             partitions,
@@ -71,16 +55,8 @@ impl FromBytes for AlterReplicaLogDirTopicResult {
 
 impl FromBytes for AlterReplicaLogDirPartitionResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let partition_index = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let partition_index = i32::deserialize(version, bytes);
+        let error_code = i16::deserialize(version, bytes);
         AlterReplicaLogDirPartitionResult {
             partition_index,
             error_code,

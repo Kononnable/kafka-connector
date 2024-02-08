@@ -21,16 +21,8 @@ pub struct RemainingPartition {
 impl ApiResponse for ControlledShutdownResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let remaining_partitions = if version >= 0 {
-            Vec::<RemainingPartition>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let remaining_partitions = Vec::<RemainingPartition>::deserialize(version, bytes);
         (
             header,
             ControlledShutdownResponse {
@@ -43,16 +35,8 @@ impl ApiResponse for ControlledShutdownResponse {
 
 impl FromBytes for RemainingPartition {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let topic_name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partition_index = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let topic_name = String::deserialize(version, bytes);
+        let partition_index = i32::deserialize(version, bytes);
         RemainingPartition {
             topic_name,
             partition_index,

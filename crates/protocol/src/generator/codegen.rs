@@ -186,6 +186,11 @@ fn generate_validate_fields(struct_name: &str, fields: &Vec<ApiSpecField>) -> St
                 "    if self.{}.is_none() && !({min}..={max}).contains(_version){{\n",
                 field.name.to_case(Case::Snake)
             ));
+        } else if field.versions == "0+" {
+            content.push_str(&format!(
+                "        if self.{}.is_none() {{\n",
+                field.name.to_case(Case::Snake)
+            ));
         } else {
             let min = field.versions.replace("+", "");
             content.push_str(&format!(
@@ -269,6 +274,10 @@ fn impl_default_trait(name: &str, fields: &Vec<ApiSpecField>) -> String {
 }
 fn serialize_field(field: &ApiSpecField) -> String {
     let mut content = "".to_owned();
+    let serialize = format!(
+        "self.{}.serialize(version, bytes)?;",
+        field.name.to_case(Case::Snake)
+    );
 
     if field.versions.contains("-") {
         let mut split = field.versions.split("-");
@@ -277,26 +286,41 @@ fn serialize_field(field: &ApiSpecField) -> String {
         content.push_str(&format!(
             "        if ({min}..={max}).contains(&version) {{\n"
         ));
+        content.push_str(&format!("            {serialize}\n"));
+        content.push_str("        }\n");
+    } else if field.versions == "0+" {
+        content.push_str(&format!("        {serialize}\n"));
     } else {
         let min = field.versions.replace("+", "");
         content.push_str(&format!("        if version >= {min} {{\n"));
+        content.push_str(&format!("            {serialize}\n"));
+        content.push_str("        }\n");
     };
-    content.push_str(&format!(
-        "            self.{}.serialize(version, bytes)?;\n",
-        field.name.to_case(Case::Snake)
-    ));
-    content.push_str("        }\n");
     content
 }
 fn deserialize_field(field: &ApiSpecField) -> String {
     let mut content = "".to_owned();
+    let field_type = get_field_type(field);
+    let deserialize = format!(
+        "{}::deserialize(version, bytes)\n",
+        apply_turbo_fish(field_type)
+    );
 
     if field.versions.contains("-") {
         let mut split = field.versions.split("-");
         let min = split.next().unwrap().to_owned();
         let max = split.next().unwrap().to_owned();
         content.push_str(&format!(
-            "        let {} = if if ({min}..={max}).contains(&version) {{\n",
+            "        let {} = if ({min}..={max}).contains(&version) {{\n",
+            field.name.to_case(Case::Snake)
+        ));
+        content.push_str(&format!("            {deserialize}\n"));
+        content.push_str("        } else {\n");
+        content.push_str("            Default::default()\n");
+        content.push_str("        };\n");
+    } else if field.versions == "0+" {
+        content.push_str(&format!(
+            "        let {} = {deserialize};\n",
             field.name.to_case(Case::Snake)
         ));
     } else {
@@ -305,15 +329,12 @@ fn deserialize_field(field: &ApiSpecField) -> String {
             "        let {} = if version >= {min} {{\n",
             field.name.to_case(Case::Snake)
         ));
+        content.push_str(&format!("            {deserialize}\n"));
+        content.push_str("        } else {\n");
+        content.push_str("            Default::default()\n");
+        content.push_str("        };\n");
     };
-    let field_type = get_field_type(field);
-    content.push_str(&format!(
-        "            {}::deserialize(version, bytes)\n",
-        apply_turbo_fish(field_type)
-    ));
-    content.push_str("        } else {\n");
-    content.push_str("            Default::default()\n");
-    content.push_str("        };\n");
+
     content
 }
 

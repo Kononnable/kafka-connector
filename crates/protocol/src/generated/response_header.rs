@@ -8,11 +8,7 @@ pub struct ResponseHeader {
 
 impl ResponseHeader {
     pub fn deserialize(version: i16, bytes: &mut Bytes) -> ResponseHeader {
-        let correlation_id = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let correlation_id = i32::deserialize(version, bytes);
         ResponseHeader { correlation_id }
     }
 }

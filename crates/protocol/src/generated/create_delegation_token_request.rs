@@ -45,12 +45,8 @@ impl ApiRequest for CreateDelegationTokenRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.renewers.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.max_lifetime_ms.serialize(version, bytes)?;
-        }
+        self.renewers.serialize(version, bytes)?;
+        self.max_lifetime_ms.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -64,12 +60,8 @@ impl CreateDelegationTokenRequest {
 impl ToBytes for CreatableRenewers {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.principal_type.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.principal_name.serialize(version, bytes)?;
-        }
+        self.principal_type.serialize(version, bytes)?;
+        self.principal_name.serialize(version, bytes)?;
         Ok(())
     }
 }

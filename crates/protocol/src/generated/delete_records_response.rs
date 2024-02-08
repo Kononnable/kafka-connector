@@ -33,16 +33,8 @@ pub struct DeleteRecordsPartitionResult {
 impl ApiResponse for DeleteRecordsResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let topics = if version >= 0 {
-            Vec::<DeleteRecordsTopicResult>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let throttle_time_ms = i32::deserialize(version, bytes);
+        let topics = Vec::<DeleteRecordsTopicResult>::deserialize(version, bytes);
         (
             header,
             DeleteRecordsResponse {
@@ -55,37 +47,17 @@ impl ApiResponse for DeleteRecordsResponse {
 
 impl FromBytes for DeleteRecordsTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partitions = if version >= 0 {
-            Vec::<DeleteRecordsPartitionResult>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let name = String::deserialize(version, bytes);
+        let partitions = Vec::<DeleteRecordsPartitionResult>::deserialize(version, bytes);
         DeleteRecordsTopicResult { name, partitions }
     }
 }
 
 impl FromBytes for DeleteRecordsPartitionResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let partition_index = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let low_watermark = if version >= 0 {
-            i64::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let partition_index = i32::deserialize(version, bytes);
+        let low_watermark = i64::deserialize(version, bytes);
+        let error_code = i16::deserialize(version, bytes);
         DeleteRecordsPartitionResult {
             partition_index,
             low_watermark,

@@ -66,16 +66,8 @@ pub struct DescribeConfigsSynonym {
 impl ApiResponse for DescribeConfigsResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let results = if version >= 0 {
-            Vec::<DescribeConfigsResult>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let throttle_time_ms = i32::deserialize(version, bytes);
+        let results = Vec::<DescribeConfigsResult>::deserialize(version, bytes);
         (
             header,
             DescribeConfigsResponse {
@@ -88,31 +80,11 @@ impl ApiResponse for DescribeConfigsResponse {
 
 impl FromBytes for DescribeConfigsResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_message = if version >= 0 {
-            Option::<String>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let resource_type = if version >= 0 {
-            i8::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let resource_name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let configs = if version >= 0 {
-            Vec::<DescribeConfigsResourceResult>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let error_message = Option::<String>::deserialize(version, bytes);
+        let resource_type = i8::deserialize(version, bytes);
+        let resource_name = String::deserialize(version, bytes);
+        let configs = Vec::<DescribeConfigsResourceResult>::deserialize(version, bytes);
         DescribeConfigsResult {
             error_code,
             error_message,
@@ -125,21 +97,9 @@ impl FromBytes for DescribeConfigsResult {
 
 impl FromBytes for DescribeConfigsResourceResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let value = if version >= 0 {
-            Option::<String>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let read_only = if version >= 0 {
-            bool::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let name = String::deserialize(version, bytes);
+        let value = Option::<String>::deserialize(version, bytes);
+        let read_only = bool::deserialize(version, bytes);
         let is_default = if version >= 0 {
             bool::deserialize(version, bytes)
         } else {
@@ -150,11 +110,7 @@ impl FromBytes for DescribeConfigsResourceResult {
         } else {
             Default::default()
         };
-        let is_sensitive = if version >= 0 {
-            bool::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let is_sensitive = bool::deserialize(version, bytes);
         let synonyms = if version >= 1 {
             Vec::<DescribeConfigsSynonym>::deserialize(version, bytes)
         } else {

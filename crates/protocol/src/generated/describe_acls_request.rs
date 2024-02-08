@@ -51,48 +51,36 @@ impl ApiRequest for DescribeAclsRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.resource_type.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.resource_name_filter.serialize(version, bytes)?;
-        }
+        self.resource_type.serialize(version, bytes)?;
+        self.resource_name_filter.serialize(version, bytes)?;
         if version >= 1 {
             self.resource_pattern_type.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.principal_filter.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.host_filter.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.operation.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.permission_type.serialize(version, bytes)?;
-        }
+        self.principal_filter.serialize(version, bytes)?;
+        self.host_filter.serialize(version, bytes)?;
+        self.operation.serialize(version, bytes)?;
+        self.permission_type.serialize(version, bytes)?;
         Ok(())
     }
 }
 
 impl DescribeAclsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.resource_name_filter.is_none() && !_version >= 0 {
+        if self.resource_name_filter.is_none() {
             return Err(SerializationError::NullValue(
                 "resource_name_filter",
                 _version,
                 "DescribeAclsRequest",
             ));
         }
-        if self.principal_filter.is_none() && !_version >= 0 {
+        if self.principal_filter.is_none() {
             return Err(SerializationError::NullValue(
                 "principal_filter",
                 _version,
                 "DescribeAclsRequest",
             ));
         }
-        if self.host_filter.is_none() && !_version >= 0 {
+        if self.host_filter.is_none() {
             return Err(SerializationError::NullValue(
                 "host_filter",
                 _version,

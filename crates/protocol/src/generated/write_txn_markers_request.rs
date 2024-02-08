@@ -60,9 +60,7 @@ impl ApiRequest for WriteTxnMarkersRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.markers.serialize(version, bytes)?;
-        }
+        self.markers.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -76,21 +74,11 @@ impl WriteTxnMarkersRequest {
 impl ToBytes for WritableTxnMarker {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.producer_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.producer_epoch.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.transaction_result.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.topics.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.coordinator_epoch.serialize(version, bytes)?;
-        }
+        self.producer_id.serialize(version, bytes)?;
+        self.producer_epoch.serialize(version, bytes)?;
+        self.transaction_result.serialize(version, bytes)?;
+        self.topics.serialize(version, bytes)?;
+        self.coordinator_epoch.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -104,12 +92,8 @@ impl WritableTxnMarker {
 impl ToBytes for WritableTxnMarkerTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.partition_indexes.serialize(version, bytes)?;
-        }
+        self.name.serialize(version, bytes)?;
+        self.partition_indexes.serialize(version, bytes)?;
         Ok(())
     }
 }

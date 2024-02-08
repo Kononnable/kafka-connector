@@ -20,16 +20,8 @@ impl ApiResponse for SyncGroupResponse {
         } else {
             Default::default()
         };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let assignment = if version >= 0 {
-            Vec::<u8>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let assignment = Vec::<u8>::deserialize(version, bytes);
         (
             header,
             SyncGroupResponse {

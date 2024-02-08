@@ -56,11 +56,7 @@ impl ApiResponse for DescribeGroupsResponse {
         } else {
             Default::default()
         };
-        let groups = if version >= 0 {
-            Vec::<DescribedGroup>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let groups = Vec::<DescribedGroup>::deserialize(version, bytes);
         (
             header,
             DescribeGroupsResponse {
@@ -73,36 +69,12 @@ impl ApiResponse for DescribeGroupsResponse {
 
 impl FromBytes for DescribedGroup {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let group_id = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let group_state = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let protocol_type = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let protocol_data = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let members = if version >= 0 {
-            Vec::<DescribedGroupMember>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let group_id = String::deserialize(version, bytes);
+        let group_state = String::deserialize(version, bytes);
+        let protocol_type = String::deserialize(version, bytes);
+        let protocol_data = String::deserialize(version, bytes);
+        let members = Vec::<DescribedGroupMember>::deserialize(version, bytes);
         DescribedGroup {
             error_code,
             group_id,
@@ -116,31 +88,11 @@ impl FromBytes for DescribedGroup {
 
 impl FromBytes for DescribedGroupMember {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let member_id = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let client_id = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let client_host = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let member_metadata = if version >= 0 {
-            Vec::<u8>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let member_assignment = if version >= 0 {
-            Vec::<u8>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let member_id = String::deserialize(version, bytes);
+        let client_id = String::deserialize(version, bytes);
+        let client_host = String::deserialize(version, bytes);
+        let member_metadata = Vec::<u8>::deserialize(version, bytes);
+        let member_assignment = Vec::<u8>::deserialize(version, bytes);
         DescribedGroupMember {
             member_id,
             client_id,

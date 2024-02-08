@@ -33,9 +33,7 @@ impl ApiRequest for DeleteGroupsRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.groups_names.serialize(version, bytes)?;
-        }
+        self.groups_names.serialize(version, bytes)?;
         Ok(())
     }
 }

@@ -17,11 +17,7 @@ impl ApiResponse for HeartbeatResponse {
         } else {
             Default::default()
         };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
         (
             header,
             HeartbeatResponse {

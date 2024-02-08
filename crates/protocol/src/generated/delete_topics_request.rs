@@ -36,12 +36,8 @@ impl ApiRequest for DeleteTopicsRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.topic_names.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.timeout_ms.serialize(version, bytes)?;
-        }
+        self.topic_names.serialize(version, bytes)?;
+        self.timeout_ms.serialize(version, bytes)?;
         Ok(())
     }
 }

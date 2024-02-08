@@ -28,18 +28,10 @@ impl RequestHeader {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.request_api_key.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.request_api_version.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.correlation_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.client_id.serialize(version, bytes)?;
-        }
+        self.request_api_key.serialize(version, bytes)?;
+        self.request_api_version.serialize(version, bytes)?;
+        self.correlation_id.serialize(version, bytes)?;
+        self.client_id.serialize(version, bytes)?;
         Ok(())
     }
 }

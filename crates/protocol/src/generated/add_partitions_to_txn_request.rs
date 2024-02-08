@@ -51,18 +51,10 @@ impl ApiRequest for AddPartitionsToTxnRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.transactional_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.producer_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.producer_epoch.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.topics.serialize(version, bytes)?;
-        }
+        self.transactional_id.serialize(version, bytes)?;
+        self.producer_id.serialize(version, bytes)?;
+        self.producer_epoch.serialize(version, bytes)?;
+        self.topics.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -76,12 +68,8 @@ impl AddPartitionsToTxnRequest {
 impl ToBytes for AddPartitionsToTxnTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.partitions.serialize(version, bytes)?;
-        }
+        self.name.serialize(version, bytes)?;
+        self.partitions.serialize(version, bytes)?;
         Ok(())
     }
 }

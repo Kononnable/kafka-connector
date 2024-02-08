@@ -57,24 +57,14 @@ impl ApiRequest for JoinGroupRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.group_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.session_timeout_ms.serialize(version, bytes)?;
-        }
+        self.group_id.serialize(version, bytes)?;
+        self.session_timeout_ms.serialize(version, bytes)?;
         if version >= 1 {
             self.rebalance_timeout_ms.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.member_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.protocol_type.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.protocols.serialize(version, bytes)?;
-        }
+        self.member_id.serialize(version, bytes)?;
+        self.protocol_type.serialize(version, bytes)?;
+        self.protocols.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -101,12 +91,8 @@ impl Default for JoinGroupRequest {
 impl ToBytes for JoinGroupRequestProtocol {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.metadata.serialize(version, bytes)?;
-        }
+        self.name.serialize(version, bytes)?;
+        self.metadata.serialize(version, bytes)?;
         Ok(())
     }
 }

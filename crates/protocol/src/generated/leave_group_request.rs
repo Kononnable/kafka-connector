@@ -36,12 +36,8 @@ impl ApiRequest for LeaveGroupRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.group_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.member_id.serialize(version, bytes)?;
-        }
+        self.group_id.serialize(version, bytes)?;
+        self.member_id.serialize(version, bytes)?;
         Ok(())
     }
 }

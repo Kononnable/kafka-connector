@@ -57,15 +57,9 @@ impl ApiRequest for CreatePartitionsRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.topics.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.timeout_ms.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.validate_only.serialize(version, bytes)?;
-        }
+        self.topics.serialize(version, bytes)?;
+        self.timeout_ms.serialize(version, bytes)?;
+        self.validate_only.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -79,22 +73,16 @@ impl CreatePartitionsRequest {
 impl ToBytes for CreatePartitionsTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.count.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.assignments.serialize(version, bytes)?;
-        }
+        self.name.serialize(version, bytes)?;
+        self.count.serialize(version, bytes)?;
+        self.assignments.serialize(version, bytes)?;
         Ok(())
     }
 }
 
 impl CreatePartitionsTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.assignments.is_none() && !_version >= 0 {
+        if self.assignments.is_none() {
             return Err(SerializationError::NullValue(
                 "assignments",
                 _version,
@@ -108,9 +96,7 @@ impl CreatePartitionsTopic {
 impl ToBytes for CreatePartitionsAssignment {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.broker_ids.serialize(version, bytes)?;
-        }
+        self.broker_ids.serialize(version, bytes)?;
         Ok(())
     }
 }

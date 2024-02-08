@@ -42,9 +42,7 @@ impl ApiRequest for MetadataRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.topics.serialize(version, bytes)?;
-        }
+        self.topics.serialize(version, bytes)?;
         if version >= 4 {
             self.allow_auto_topic_creation.serialize(version, bytes)?;
         }
@@ -54,7 +52,7 @@ impl ApiRequest for MetadataRequest {
 
 impl MetadataRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.topics.is_none() && !_version >= 0 {
+        if self.topics.is_none() {
             return Err(SerializationError::NullValue(
                 "topics",
                 _version,
@@ -77,9 +75,7 @@ impl Default for MetadataRequest {
 impl ToBytes for MetadataRequestTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.name.serialize(version, bytes)?;
-        }
+        self.name.serialize(version, bytes)?;
         Ok(())
     }
 }

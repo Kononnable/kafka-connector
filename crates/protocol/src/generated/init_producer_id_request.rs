@@ -36,19 +36,15 @@ impl ApiRequest for InitProducerIdRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.transactional_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.transaction_timeout_ms.serialize(version, bytes)?;
-        }
+        self.transactional_id.serialize(version, bytes)?;
+        self.transaction_timeout_ms.serialize(version, bytes)?;
         Ok(())
     }
 }
 
 impl InitProducerIdRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.transactional_id.is_none() && !_version >= 0 {
+        if self.transactional_id.is_none() {
             return Err(SerializationError::NullValue(
                 "transactional_id",
                 _version,

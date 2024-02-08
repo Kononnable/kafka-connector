@@ -26,11 +26,7 @@ impl ApiResponse for DeleteTopicsResponse {
         } else {
             Default::default()
         };
-        let responses = if version >= 0 {
-            Vec::<DeletableTopicResult>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let responses = Vec::<DeletableTopicResult>::deserialize(version, bytes);
         (
             header,
             DeleteTopicsResponse {
@@ -43,16 +39,8 @@ impl ApiResponse for DeleteTopicsResponse {
 
 impl FromBytes for DeletableTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let name = String::deserialize(version, bytes);
+        let error_code = i16::deserialize(version, bytes);
         DeletableTopicResult { name, error_code }
     }
 }

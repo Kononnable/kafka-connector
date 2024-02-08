@@ -66,18 +66,12 @@ impl ApiRequest for StopReplicaRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.controller_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.controller_epoch.serialize(version, bytes)?;
-        }
+        self.controller_id.serialize(version, bytes)?;
+        self.controller_epoch.serialize(version, bytes)?;
         if version >= 1 {
             self.broker_epoch.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.delete_partitions.serialize(version, bytes)?;
-        }
+        self.delete_partitions.serialize(version, bytes)?;
         if version >= 0 {
             self.partitions_v_0.serialize(version, bytes)?;
         }

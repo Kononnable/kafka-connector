@@ -69,21 +69,11 @@ impl ApiRequest for TxnOffsetCommitRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.transactional_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.group_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.producer_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.producer_epoch.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.topics.serialize(version, bytes)?;
-        }
+        self.transactional_id.serialize(version, bytes)?;
+        self.group_id.serialize(version, bytes)?;
+        self.producer_id.serialize(version, bytes)?;
+        self.producer_epoch.serialize(version, bytes)?;
+        self.topics.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -97,12 +87,8 @@ impl TxnOffsetCommitRequest {
 impl ToBytes for TxnOffsetCommitRequestTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.partitions.serialize(version, bytes)?;
-        }
+        self.name.serialize(version, bytes)?;
+        self.partitions.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -116,25 +102,19 @@ impl TxnOffsetCommitRequestTopic {
 impl ToBytes for TxnOffsetCommitRequestPartition {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.partition_index.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.committed_offset.serialize(version, bytes)?;
-        }
+        self.partition_index.serialize(version, bytes)?;
+        self.committed_offset.serialize(version, bytes)?;
         if version >= 2 {
             self.committed_leader_epoch.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.committed_metadata.serialize(version, bytes)?;
-        }
+        self.committed_metadata.serialize(version, bytes)?;
         Ok(())
     }
 }
 
 impl TxnOffsetCommitRequestPartition {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.committed_metadata.is_none() && !_version >= 0 {
+        if self.committed_metadata.is_none() {
             return Err(SerializationError::NullValue(
                 "committed_metadata",
                 _version,

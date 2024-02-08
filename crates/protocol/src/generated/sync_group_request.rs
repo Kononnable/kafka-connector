@@ -51,18 +51,10 @@ impl ApiRequest for SyncGroupRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.group_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.generation_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.member_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.assignments.serialize(version, bytes)?;
-        }
+        self.group_id.serialize(version, bytes)?;
+        self.generation_id.serialize(version, bytes)?;
+        self.member_id.serialize(version, bytes)?;
+        self.assignments.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -76,12 +68,8 @@ impl SyncGroupRequest {
 impl ToBytes for SyncGroupRequestAssignment {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.member_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.assignment.serialize(version, bytes)?;
-        }
+        self.member_id.serialize(version, bytes)?;
+        self.assignment.serialize(version, bytes)?;
         Ok(())
     }
 }

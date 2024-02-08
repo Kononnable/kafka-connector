@@ -46,11 +46,7 @@ impl ApiResponse for ListOffsetResponse {
         } else {
             Default::default()
         };
-        let topics = if version >= 0 {
-            Vec::<ListOffsetTopicResponse>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let topics = Vec::<ListOffsetTopicResponse>::deserialize(version, bytes);
         (
             header,
             ListOffsetResponse {
@@ -63,32 +59,16 @@ impl ApiResponse for ListOffsetResponse {
 
 impl FromBytes for ListOffsetTopicResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partitions = if version >= 0 {
-            Vec::<ListOffsetPartitionResponse>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let name = String::deserialize(version, bytes);
+        let partitions = Vec::<ListOffsetPartitionResponse>::deserialize(version, bytes);
         ListOffsetTopicResponse { name, partitions }
     }
 }
 
 impl FromBytes for ListOffsetPartitionResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let partition_index = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let partition_index = i32::deserialize(version, bytes);
+        let error_code = i16::deserialize(version, bytes);
         let old_style_offsets = if version >= 0 {
             Vec::<i64>::deserialize(version, bytes)
         } else {

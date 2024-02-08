@@ -41,11 +41,7 @@ impl ApiResponse for OffsetForLeaderEpochResponse {
         } else {
             Default::default()
         };
-        let topics = if version >= 0 {
-            Vec::<OffsetForLeaderTopicResult>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let topics = Vec::<OffsetForLeaderTopicResult>::deserialize(version, bytes);
         (
             header,
             OffsetForLeaderEpochResponse {
@@ -58,42 +54,22 @@ impl ApiResponse for OffsetForLeaderEpochResponse {
 
 impl FromBytes for OffsetForLeaderTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partitions = if version >= 0 {
-            Vec::<OffsetForLeaderPartitionResult>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let name = String::deserialize(version, bytes);
+        let partitions = Vec::<OffsetForLeaderPartitionResult>::deserialize(version, bytes);
         OffsetForLeaderTopicResult { name, partitions }
     }
 }
 
 impl FromBytes for OffsetForLeaderPartitionResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partition_index = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let partition_index = i32::deserialize(version, bytes);
         let leader_epoch = if version >= 1 {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let end_offset = if version >= 0 {
-            i64::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let end_offset = i64::deserialize(version, bytes);
         OffsetForLeaderPartitionResult {
             error_code,
             partition_index,

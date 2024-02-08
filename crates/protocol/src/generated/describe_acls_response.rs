@@ -48,26 +48,10 @@ pub struct AclDescription {
 impl ApiResponse for DescribeAclsResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_message = if version >= 0 {
-            Option::<String>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let resources = if version >= 0 {
-            Vec::<DescribeAclsResource>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let throttle_time_ms = i32::deserialize(version, bytes);
+        let error_code = i16::deserialize(version, bytes);
+        let error_message = Option::<String>::deserialize(version, bytes);
+        let resources = Vec::<DescribeAclsResource>::deserialize(version, bytes);
         (
             header,
             DescribeAclsResponse {
@@ -82,26 +66,14 @@ impl ApiResponse for DescribeAclsResponse {
 
 impl FromBytes for DescribeAclsResource {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let r#type = if version >= 0 {
-            i8::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let r#type = i8::deserialize(version, bytes);
+        let name = String::deserialize(version, bytes);
         let pattern_type = if version >= 1 {
             i8::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let acls = if version >= 0 {
-            Vec::<AclDescription>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let acls = Vec::<AclDescription>::deserialize(version, bytes);
         DescribeAclsResource {
             r#type,
             name,
@@ -124,26 +96,10 @@ impl Default for DescribeAclsResource {
 
 impl FromBytes for AclDescription {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let principal = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let host = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let operation = if version >= 0 {
-            i8::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let permission_type = if version >= 0 {
-            i8::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let principal = String::deserialize(version, bytes);
+        let host = String::deserialize(version, bytes);
+        let operation = i8::deserialize(version, bytes);
+        let permission_type = i8::deserialize(version, bytes);
         AclDescription {
             principal,
             host,

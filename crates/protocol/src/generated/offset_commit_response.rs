@@ -35,11 +35,7 @@ impl ApiResponse for OffsetCommitResponse {
         } else {
             Default::default()
         };
-        let topics = if version >= 0 {
-            Vec::<OffsetCommitResponseTopic>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let topics = Vec::<OffsetCommitResponseTopic>::deserialize(version, bytes);
         (
             header,
             OffsetCommitResponse {
@@ -52,32 +48,16 @@ impl ApiResponse for OffsetCommitResponse {
 
 impl FromBytes for OffsetCommitResponseTopic {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partitions = if version >= 0 {
-            Vec::<OffsetCommitResponsePartition>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let name = String::deserialize(version, bytes);
+        let partitions = Vec::<OffsetCommitResponsePartition>::deserialize(version, bytes);
         OffsetCommitResponseTopic { name, partitions }
     }
 }
 
 impl FromBytes for OffsetCommitResponsePartition {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let partition_index = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let partition_index = i32::deserialize(version, bytes);
+        let error_code = i16::deserialize(version, bytes);
         OffsetCommitResponsePartition {
             partition_index,
             error_code,

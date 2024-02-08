@@ -45,19 +45,15 @@ impl ApiRequest for ElectPreferredLeadersRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.topic_partitions.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.timeout_ms.serialize(version, bytes)?;
-        }
+        self.topic_partitions.serialize(version, bytes)?;
+        self.timeout_ms.serialize(version, bytes)?;
         Ok(())
     }
 }
 
 impl ElectPreferredLeadersRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.topic_partitions.is_none() && !_version >= 0 {
+        if self.topic_partitions.is_none() {
             return Err(SerializationError::NullValue(
                 "topic_partitions",
                 _version,
@@ -80,12 +76,8 @@ impl Default for ElectPreferredLeadersRequest {
 impl ToBytes for TopicPartitions {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.topic.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.partition_id.serialize(version, bytes)?;
-        }
+        self.topic.serialize(version, bytes)?;
+        self.partition_id.serialize(version, bytes)?;
         Ok(())
     }
 }

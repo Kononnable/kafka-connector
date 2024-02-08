@@ -27,16 +27,8 @@ pub struct AlterConfigsResourceResponse {
 impl ApiResponse for AlterConfigsResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let resources = if version >= 0 {
-            Vec::<AlterConfigsResourceResponse>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let throttle_time_ms = i32::deserialize(version, bytes);
+        let resources = Vec::<AlterConfigsResourceResponse>::deserialize(version, bytes);
         (
             header,
             AlterConfigsResponse {
@@ -49,26 +41,10 @@ impl ApiResponse for AlterConfigsResponse {
 
 impl FromBytes for AlterConfigsResourceResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_message = if version >= 0 {
-            Option::<String>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let resource_type = if version >= 0 {
-            i8::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let resource_name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let error_message = Option::<String>::deserialize(version, bytes);
+        let resource_type = i8::deserialize(version, bytes);
+        let resource_name = String::deserialize(version, bytes);
         AlterConfigsResourceResponse {
             error_code,
             error_message,

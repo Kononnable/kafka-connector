@@ -29,11 +29,7 @@ impl ApiResponse for CreateTopicsResponse {
         } else {
             Default::default()
         };
-        let topics = if version >= 0 {
-            Vec::<CreatableTopicResult>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let topics = Vec::<CreatableTopicResult>::deserialize(version, bytes);
         (
             header,
             CreateTopicsResponse {
@@ -46,16 +42,8 @@ impl ApiResponse for CreateTopicsResponse {
 
 impl FromBytes for CreatableTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let name = String::deserialize(version, bytes);
+        let error_code = i16::deserialize(version, bytes);
         let error_message = if version >= 1 {
             Option::<String>::deserialize(version, bytes)
         } else {

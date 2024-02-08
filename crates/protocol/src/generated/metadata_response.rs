@@ -80,11 +80,7 @@ impl ApiResponse for MetadataResponse {
         } else {
             Default::default()
         };
-        let brokers = if version >= 0 {
-            Vec::<MetadataResponseBroker>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let brokers = Vec::<MetadataResponseBroker>::deserialize(version, bytes);
         let cluster_id = if version >= 2 {
             Option::<String>::deserialize(version, bytes)
         } else {
@@ -95,11 +91,7 @@ impl ApiResponse for MetadataResponse {
         } else {
             Default::default()
         };
-        let topics = if version >= 0 {
-            Vec::<MetadataResponseTopic>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let topics = Vec::<MetadataResponseTopic>::deserialize(version, bytes);
         (
             header,
             MetadataResponse {
@@ -127,21 +119,9 @@ impl Default for MetadataResponse {
 
 impl FromBytes for MetadataResponseBroker {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let node_id = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let host = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let port = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let node_id = i32::deserialize(version, bytes);
+        let host = String::deserialize(version, bytes);
+        let port = i32::deserialize(version, bytes);
         let rack = if version >= 1 {
             Option::<String>::deserialize(version, bytes)
         } else {
@@ -158,26 +138,14 @@ impl FromBytes for MetadataResponseBroker {
 
 impl FromBytes for MetadataResponseTopic {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let name = String::deserialize(version, bytes);
         let is_internal = if version >= 1 {
             bool::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let partitions = if version >= 0 {
-            Vec::<MetadataResponsePartition>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let partitions = Vec::<MetadataResponsePartition>::deserialize(version, bytes);
         MetadataResponseTopic {
             error_code,
             name,
@@ -189,36 +157,16 @@ impl FromBytes for MetadataResponseTopic {
 
 impl FromBytes for MetadataResponsePartition {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partition_index = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let leader_id = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let partition_index = i32::deserialize(version, bytes);
+        let leader_id = i32::deserialize(version, bytes);
         let leader_epoch = if version >= 7 {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let replica_nodes = if version >= 0 {
-            Vec::<i32>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let isr_nodes = if version >= 0 {
-            Vec::<i32>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let replica_nodes = Vec::<i32>::deserialize(version, bytes);
+        let isr_nodes = Vec::<i32>::deserialize(version, bytes);
         let offline_replicas = if version >= 5 {
             Vec::<i32>::deserialize(version, bytes)
         } else {

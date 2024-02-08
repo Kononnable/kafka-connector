@@ -42,18 +42,10 @@ impl ApiRequest for AddOffsetsToTxnRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.transactional_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.producer_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.producer_epoch.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.group_id.serialize(version, bytes)?;
-        }
+        self.transactional_id.serialize(version, bytes)?;
+        self.producer_id.serialize(version, bytes)?;
+        self.producer_epoch.serialize(version, bytes)?;
+        self.group_id.serialize(version, bytes)?;
         Ok(())
     }
 }

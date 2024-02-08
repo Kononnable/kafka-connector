@@ -40,36 +40,12 @@ impl ApiResponse for JoinGroupResponse {
         } else {
             Default::default()
         };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let generation_id = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let protocol_name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let leader = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let member_id = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let members = if version >= 0 {
-            Vec::<JoinGroupResponseMember>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let generation_id = i32::deserialize(version, bytes);
+        let protocol_name = String::deserialize(version, bytes);
+        let leader = String::deserialize(version, bytes);
+        let member_id = String::deserialize(version, bytes);
+        let members = Vec::<JoinGroupResponseMember>::deserialize(version, bytes);
         (
             header,
             JoinGroupResponse {
@@ -87,16 +63,8 @@ impl ApiResponse for JoinGroupResponse {
 
 impl FromBytes for JoinGroupResponseMember {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let member_id = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let metadata = if version >= 0 {
-            Vec::<u8>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let member_id = String::deserialize(version, bytes);
+        let metadata = Vec::<u8>::deserialize(version, bytes);
         JoinGroupResponseMember {
             member_id,
             metadata,

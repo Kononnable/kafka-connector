@@ -63,15 +63,9 @@ impl ApiRequest for ProduceRequest {
         if version >= 3 {
             self.transactional_id.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.acks.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.timeout_ms.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.topics.serialize(version, bytes)?;
-        }
+        self.acks.serialize(version, bytes)?;
+        self.timeout_ms.serialize(version, bytes)?;
+        self.topics.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -92,12 +86,8 @@ impl ProduceRequest {
 impl ToBytes for TopicProduceData {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.partitions.serialize(version, bytes)?;
-        }
+        self.name.serialize(version, bytes)?;
+        self.partitions.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -111,19 +101,15 @@ impl TopicProduceData {
 impl ToBytes for PartitionProduceData {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.partition_index.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.records.serialize(version, bytes)?;
-        }
+        self.partition_index.serialize(version, bytes)?;
+        self.records.serialize(version, bytes)?;
         Ok(())
     }
 }
 
 impl PartitionProduceData {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.records.is_none() && !_version >= 0 {
+        if self.records.is_none() {
             return Err(SerializationError::NullValue(
                 "records",
                 _version,

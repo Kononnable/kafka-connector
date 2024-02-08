@@ -93,15 +93,9 @@ impl ApiRequest for FetchRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.replica_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.max_wait.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.min_bytes.serialize(version, bytes)?;
-        }
+        self.replica_id.serialize(version, bytes)?;
+        self.max_wait.serialize(version, bytes)?;
+        self.min_bytes.serialize(version, bytes)?;
         if version >= 3 {
             self.max_bytes.serialize(version, bytes)?;
         }
@@ -114,9 +108,7 @@ impl ApiRequest for FetchRequest {
         if version >= 7 {
             self.epoch.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.topics.serialize(version, bytes)?;
-        }
+        self.topics.serialize(version, bytes)?;
         if version >= 7 {
             self.forgotten.serialize(version, bytes)?;
         }
@@ -149,12 +141,8 @@ impl Default for FetchRequest {
 impl ToBytes for FetchableTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.fetch_partitions.serialize(version, bytes)?;
-        }
+        self.name.serialize(version, bytes)?;
+        self.fetch_partitions.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -187,21 +175,15 @@ impl ForgottenTopic {
 impl ToBytes for FetchPartition {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.partition_index.serialize(version, bytes)?;
-        }
+        self.partition_index.serialize(version, bytes)?;
         if version >= 9 {
             self.current_leader_epoch.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.fetch_offset.serialize(version, bytes)?;
-        }
+        self.fetch_offset.serialize(version, bytes)?;
         if version >= 5 {
             self.log_start_offset.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.max_bytes.serialize(version, bytes)?;
-        }
+        self.max_bytes.serialize(version, bytes)?;
         Ok(())
     }
 }

@@ -63,15 +63,11 @@ impl ApiRequest for ListOffsetRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.replica_id.serialize(version, bytes)?;
-        }
+        self.replica_id.serialize(version, bytes)?;
         if version >= 2 {
             self.isolation_level.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.topics.serialize(version, bytes)?;
-        }
+        self.topics.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -85,12 +81,8 @@ impl ListOffsetRequest {
 impl ToBytes for ListOffsetTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.partitions.serialize(version, bytes)?;
-        }
+        self.name.serialize(version, bytes)?;
+        self.partitions.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -104,15 +96,11 @@ impl ListOffsetTopic {
 impl ToBytes for ListOffsetPartition {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.partition_index.serialize(version, bytes)?;
-        }
+        self.partition_index.serialize(version, bytes)?;
         if version >= 4 {
             self.current_leader_epoch.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.timestamp.serialize(version, bytes)?;
-        }
+        self.timestamp.serialize(version, bytes)?;
         if version >= 0 {
             self.max_num_offsets.serialize(version, bytes)?;
         }

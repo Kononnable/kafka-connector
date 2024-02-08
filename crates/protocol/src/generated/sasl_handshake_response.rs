@@ -12,16 +12,8 @@ pub struct SaslHandshakeResponse {
 impl ApiResponse for SaslHandshakeResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let mechanisms = if version >= 0 {
-            Vec::<String>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
+        let mechanisms = Vec::<String>::deserialize(version, bytes);
         (
             header,
             SaslHandshakeResponse {

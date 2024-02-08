@@ -36,9 +36,7 @@ impl ApiRequest for FindCoordinatorRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.key.serialize(version, bytes)?;
-        }
+        self.key.serialize(version, bytes)?;
         if version >= 1 {
             self.key_type.serialize(version, bytes)?;
         }

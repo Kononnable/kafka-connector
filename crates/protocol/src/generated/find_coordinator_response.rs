@@ -29,31 +29,15 @@ impl ApiResponse for FindCoordinatorResponse {
         } else {
             Default::default()
         };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let error_code = i16::deserialize(version, bytes);
         let error_message = if version >= 1 {
             Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let node_id = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let host = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let port = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let node_id = i32::deserialize(version, bytes);
+        let host = String::deserialize(version, bytes);
+        let port = i32::deserialize(version, bytes);
         (
             header,
             FindCoordinatorResponse {

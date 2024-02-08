@@ -126,12 +126,8 @@ impl ApiRequest for LeaderAndIsrRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         header.serialize(0, bytes)?;
-        if version >= 0 {
-            self.controller_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.controller_epoch.serialize(version, bytes)?;
-        }
+        self.controller_id.serialize(version, bytes)?;
+        self.controller_epoch.serialize(version, bytes)?;
         if version >= 2 {
             self.broker_epoch.serialize(version, bytes)?;
         }
@@ -141,9 +137,7 @@ impl ApiRequest for LeaderAndIsrRequest {
         if (0..=1).contains(&version) {
             self.partition_states_v_0.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.live_leaders.serialize(version, bytes)?;
-        }
+        self.live_leaders.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -173,9 +167,7 @@ impl ToBytes for LeaderAndIsrRequestTopicState {
         if version >= 2 {
             self.name.serialize(version, bytes)?;
         }
-        if version >= 0 {
-            self.partition_states.serialize(version, bytes)?;
-        }
+        self.partition_states.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -229,15 +221,9 @@ impl LeaderAndIsrRequestPartitionStateV0 {
 impl ToBytes for LeaderAndIsrLiveLeader {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.broker_id.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.host_name.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.port.serialize(version, bytes)?;
-        }
+        self.broker_id.serialize(version, bytes)?;
+        self.host_name.serialize(version, bytes)?;
+        self.port.serialize(version, bytes)?;
         Ok(())
     }
 }
@@ -251,27 +237,13 @@ impl LeaderAndIsrLiveLeader {
 impl ToBytes for LeaderAndIsrRequestPartitionState {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.partition_index.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.controller_epoch.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.leader_key.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.leader_epoch.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.isr_replicas.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.zk_version.serialize(version, bytes)?;
-        }
-        if version >= 0 {
-            self.replicas.serialize(version, bytes)?;
-        }
+        self.partition_index.serialize(version, bytes)?;
+        self.controller_epoch.serialize(version, bytes)?;
+        self.leader_key.serialize(version, bytes)?;
+        self.leader_epoch.serialize(version, bytes)?;
+        self.isr_replicas.serialize(version, bytes)?;
+        self.zk_version.serialize(version, bytes)?;
+        self.replicas.serialize(version, bytes)?;
         if version >= 1 {
             self.is_new.serialize(version, bytes)?;
         }

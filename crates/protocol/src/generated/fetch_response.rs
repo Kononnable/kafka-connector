@@ -75,11 +75,7 @@ impl ApiResponse for FetchResponse {
         } else {
             Default::default()
         };
-        let topics = if version >= 0 {
-            Vec::<FetchableTopicResponse>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let topics = Vec::<FetchableTopicResponse>::deserialize(version, bytes);
         (
             header,
             FetchResponse {
@@ -94,37 +90,17 @@ impl ApiResponse for FetchResponse {
 
 impl FromBytes for FetchableTopicResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let name = if version >= 0 {
-            String::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partitions = if version >= 0 {
-            Vec::<FetchablePartitionResponse>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let name = String::deserialize(version, bytes);
+        let partitions = Vec::<FetchablePartitionResponse>::deserialize(version, bytes);
         FetchableTopicResponse { name, partitions }
     }
 }
 
 impl FromBytes for FetchablePartitionResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let partition_index = if version >= 0 {
-            i32::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let error_code = if version >= 0 {
-            i16::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let high_watermark = if version >= 0 {
-            i64::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let partition_index = i32::deserialize(version, bytes);
+        let error_code = i16::deserialize(version, bytes);
+        let high_watermark = i64::deserialize(version, bytes);
         let last_stable_offset = if version >= 4 {
             i64::deserialize(version, bytes)
         } else {
@@ -140,11 +116,7 @@ impl FromBytes for FetchablePartitionResponse {
         } else {
             Default::default()
         };
-        let records = if version >= 0 {
-            Option::<Vec<u8>>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
+        let records = Option::<Vec<u8>>::deserialize(version, bytes);
         FetchablePartitionResponse {
             partition_index,
             error_code,
