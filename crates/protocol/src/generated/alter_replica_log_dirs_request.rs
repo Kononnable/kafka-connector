@@ -3,23 +3,29 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default)]
 pub struct AlterReplicaLogDirsRequest {
     /// The alterations to make for each directory.
-    pub dirs: Vec<AlterReplicaLogDir>,
+    pub dirs: BTreeMap<AlterReplicaLogDirKey, AlterReplicaLogDir>,
+}
+
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct AlterReplicaLogDirKey {
+    /// The absolute directory path.
+    pub path: String,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct AlterReplicaLogDir {
-    /// The absolute directory path.
-    pub path: String,
-
     /// The topics to add to the directory.
-    pub topics: Vec<AlterReplicaLogDirTopic>,
+    pub topics: BTreeMap<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic>,
+}
+
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct AlterReplicaLogDirTopicKey {
+    /// The topic name.
+    pub name: String,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct AlterReplicaLogDirTopic {
-    /// The topic name.
-    pub name: String,
-
     /// The partition indexes.
     pub partitions: Vec<i32>,
 }
@@ -62,10 +68,23 @@ impl AlterReplicaLogDirsRequest {
     }
 }
 
-impl ToBytes for AlterReplicaLogDir {
+impl ToBytes for AlterReplicaLogDirKey {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
         self.path.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl AlterReplicaLogDirKey {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for AlterReplicaLogDir {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         self.topics.serialize(version, bytes)?;
         Ok(())
     }
@@ -77,10 +96,23 @@ impl AlterReplicaLogDir {
     }
 }
 
-impl ToBytes for AlterReplicaLogDirTopic {
+impl ToBytes for AlterReplicaLogDirTopicKey {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
         self.name.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl AlterReplicaLogDirTopicKey {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for AlterReplicaLogDirTopic {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         self.partitions.serialize(version, bytes)?;
         Ok(())
     }

@@ -6,23 +6,29 @@ pub struct AddPartitionsToTxnResponse {
     pub throttle_time_ms: i32,
 
     /// The results for each topic.
-    pub results: Vec<AddPartitionsToTxnTopicResult>,
+    pub results: BTreeMap<AddPartitionsToTxnTopicResultKey, AddPartitionsToTxnTopicResult>,
+}
+
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct AddPartitionsToTxnTopicResultKey {
+    /// The topic name.
+    pub name: String,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct AddPartitionsToTxnTopicResult {
-    /// The topic name.
-    pub name: String,
-
     /// The results for each partition
-    pub results: Vec<AddPartitionsToTxnPartitionResult>,
+    pub results: BTreeMap<AddPartitionsToTxnPartitionResultKey, AddPartitionsToTxnPartitionResult>,
+}
+
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct AddPartitionsToTxnPartitionResultKey {
+    /// The partition indexes.
+    pub partition_index: i32,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct AddPartitionsToTxnPartitionResult {
-    /// The partition indexes.
-    pub partition_index: i32,
-
     /// The response error code.
     pub error_code: i16,
 }
@@ -31,7 +37,8 @@ impl ApiResponse for AddPartitionsToTxnResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
-        let results = Vec::<AddPartitionsToTxnTopicResult>::deserialize(version, bytes);
+        let results = BTreeMap::<AddPartitionsToTxnTopicResultKey,AddPartitionsToTxnTopicResult>::deserialize(version, bytes)
+;
         (
             header,
             AddPartitionsToTxnResponse {
@@ -42,21 +49,33 @@ impl ApiResponse for AddPartitionsToTxnResponse {
     }
 }
 
-impl FromBytes for AddPartitionsToTxnTopicResult {
+impl FromBytes for AddPartitionsToTxnTopicResultKey {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = String::deserialize(version, bytes);
-        let results = Vec::<AddPartitionsToTxnPartitionResult>::deserialize(version, bytes);
-        AddPartitionsToTxnTopicResult { name, results }
+        AddPartitionsToTxnTopicResultKey { name }
+    }
+}
+
+impl FromBytes for AddPartitionsToTxnTopicResult {
+    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+        let results = BTreeMap::<
+            AddPartitionsToTxnPartitionResultKey,
+            AddPartitionsToTxnPartitionResult,
+        >::deserialize(version, bytes);
+        AddPartitionsToTxnTopicResult { results }
+    }
+}
+
+impl FromBytes for AddPartitionsToTxnPartitionResultKey {
+    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+        let partition_index = i32::deserialize(version, bytes);
+        AddPartitionsToTxnPartitionResultKey { partition_index }
     }
 }
 
 impl FromBytes for AddPartitionsToTxnPartitionResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let partition_index = i32::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);
-        AddPartitionsToTxnPartitionResult {
-            partition_index,
-            error_code,
-        }
+        AddPartitionsToTxnPartitionResult { error_code }
     }
 }

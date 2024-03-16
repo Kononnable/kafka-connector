@@ -1,8 +1,40 @@
 use crate::prelude::SerializationError;
 use bytes::{BufMut, BytesMut};
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 
 pub trait ToBytes {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError>;
+}
+
+impl<K, V> ToBytes for BTreeMap<K, V>
+where
+    K: ToBytes,
+    V: ToBytes,
+{
+    fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        bytes.put_i32(self.len() as i32);
+
+        for (key, value) in self {
+            key.serialize(_version, bytes)?;
+            value.serialize(_version, bytes)?;
+        }
+        Ok(())
+    }
+}
+
+impl<K> ToBytes for BTreeSet<K>
+where
+    K: ToBytes,
+{
+    fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        bytes.put_i32(self.len() as i32);
+
+        for key in self {
+            key.serialize(_version, bytes)?;
+        }
+        Ok(())
+    }
 }
 
 impl<T> ToBytes for Vec<T>
@@ -34,6 +66,7 @@ impl ToBytes for &str {
         Ok(())
     }
 }
+
 impl ToBytes for String {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.as_str().serialize(version, bytes)
@@ -46,42 +79,49 @@ impl ToBytes for bool {
         Ok(())
     }
 }
+
 impl ToBytes for i8 {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_i8(*self);
         Ok(())
     }
 }
+
 impl ToBytes for i16 {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_i16(*self);
         Ok(())
     }
 }
+
 impl ToBytes for i32 {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_i32(*self);
         Ok(())
     }
 }
+
 impl ToBytes for u32 {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_u32(*self);
         Ok(())
     }
 }
+
 impl ToBytes for i64 {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_i64(*self);
         Ok(())
     }
 }
+
 impl ToBytes for f64 {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_f64(*self);
         Ok(())
     }
 }
+
 impl<T> ToBytes for Option<T>
 where
     T: ToBytes + Default,

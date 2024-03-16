@@ -35,6 +35,10 @@ pub enum ApiSpecFieldSubtype {
     Int64,
     String,
     SubObject(String),
+    BTreeMap {
+        name: String,
+        keys: Vec<ApiSpecField>,
+    },
 }
 
 #[derive(Clone, Debug, serde::Deserialize)]

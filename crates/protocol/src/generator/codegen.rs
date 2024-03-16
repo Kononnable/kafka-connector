@@ -1,8 +1,8 @@
-use super::structs::{ApiSpec, ApiSpecField, ApiSpecFieldSubtype, ApiSpecFieldType, ApiSpecType};
+use super::structs::{ApiSpec, ApiSpecField, ApiSpecFieldSubtype, ApiSpecType};
 use convert_case::{Case, Casing};
 use std::collections::VecDeque;
 
-pub fn generate_source(spec: &ApiSpec) -> (String, String) {
+pub fn generate_source(spec: ApiSpec) -> (String, String) {
     let mut content = "use super::super::prelude::*;\n\n".to_owned();
     let mut sub_structs_partial = VecDeque::new();
     let mut sub_structs = Vec::new();
@@ -17,18 +17,27 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
     }
     content.push_str("}\n\n");
 
-    while let Some((s_name, s_fields)) = sub_structs_partial.pop_front() {
-        if should_derive_default(&s_fields) {
-            content.push_str("#[derive(Clone, Debug, Default)]\n");
+    while let Some(sub_struct) = sub_structs_partial.pop_front() {
+        let default_derive = if should_derive_default(&sub_struct.fields) {
+            ", Default"
         } else {
-            content.push_str("#[derive(Clone, Debug)]\n");
-        }
-        content.push_str(&format!("pub struct {} {{\n", s_name));
-        for field in &s_fields {
+            ""
+        };
+        let btreemapkey_derive = if sub_struct.is_btreemap_key {
+            ", Eq, Ord, PartialEq, PartialOrd"
+        } else {
+            ""
+        };
+        content.push_str(&format!(
+            "#[derive(Clone, Debug{}{})]\n",
+            default_derive, btreemapkey_derive
+        ));
+        content.push_str(&format!("pub struct {} {{\n", sub_struct.name));
+        for field in &sub_struct.fields {
             content.push_str(&get_field_definition(field, &mut sub_structs_partial));
         }
         content.push_str("}\n\n");
-        sub_structs.push((s_name, s_fields));
+        sub_structs.push(sub_struct);
     }
 
     match spec.type_ {
@@ -63,18 +72,21 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
             content.push_str(&generate_validate_fields(&spec.name, &spec.fields));
             content.push_str(&impl_default_trait(&spec.name, &spec.fields));
 
-            for (name, fields) in sub_structs {
-                content.push_str(&format!("impl ToBytes for {name}{{\n"));
+            for substruct in sub_structs {
+                content.push_str(&format!("impl ToBytes for {}{{\n", substruct.name));
                 content.push_str("    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(),SerializationError> {\n");
                 content.push_str("        self.validate_fields(version)?;\n");
-                for field in &fields {
+                for field in &substruct.fields {
                     content.push_str(&serialize_field(field));
                 }
                 content.push_str("    Ok(())\n");
                 content.push_str("    }\n\n");
                 content.push_str("}\n\n");
-                content.push_str(&generate_validate_fields(&name, &fields));
-                content.push_str(&impl_default_trait(&name, &fields));
+                content.push_str(&generate_validate_fields(
+                    &substruct.name,
+                    &substruct.fields,
+                ));
+                content.push_str(&impl_default_trait(&substruct.name, &substruct.fields));
             }
         }
         ApiSpecType::Response => {
@@ -98,14 +110,14 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
             content.push_str("}\n\n");
             content.push_str(&impl_default_trait(&spec.name, &spec.fields));
 
-            for (name, fields) in sub_structs {
-                content.push_str(&format!("impl  FromBytes for {name}{{\n"));
+            for substruct in sub_structs {
+                content.push_str(&format!("impl  FromBytes for {}{{\n", substruct.name));
                 content.push_str("    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {\n");
-                for field in &fields {
+                for field in &substruct.fields {
                     content.push_str(&deserialize_field(field));
                 }
-                content.push_str(&format!("        {} {{\n", name));
-                for field in &fields {
+                content.push_str(&format!("        {} {{\n", substruct.name));
+                for field in &substruct.fields {
                     content.push_str(&format!(
                         "            {},\n",
                         field.name.to_case(Case::Snake)
@@ -114,7 +126,7 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
                 content.push_str("        }\n\n");
                 content.push_str("    }\n\n");
                 content.push_str("}\n\n");
-                content.push_str(&impl_default_trait(&name, &fields));
+                content.push_str(&impl_default_trait(&substruct.name, &substruct.fields));
             }
         }
         ApiSpecType::Header => {
@@ -168,7 +180,7 @@ pub fn generate_source(spec: &ApiSpec) -> (String, String) {
     (spec.name.to_case(Case::Snake), content)
 }
 
-fn generate_validate_fields(struct_name: &str, fields: &Vec<ApiSpecField>) -> String {
+fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> String {
     let mut content = "".to_owned();
 
     content.push_str(&format!("impl {}{{\n", struct_name));
@@ -178,8 +190,8 @@ fn generate_validate_fields(struct_name: &str, fields: &Vec<ApiSpecField>) -> St
     for field in fields.iter().filter(|x| x.nullable_versions.is_some()) {
         let nullable_versions = field.nullable_versions.clone().unwrap();
 
-        if field.versions.contains("-") {
-            let mut split = nullable_versions.split("-");
+        if field.versions.contains('-') {
+            let mut split = nullable_versions.split('-');
             let min = split.next().unwrap().to_owned();
             let max = split.next().unwrap().to_owned();
             content.push_str(&format!(
@@ -192,7 +204,7 @@ fn generate_validate_fields(struct_name: &str, fields: &Vec<ApiSpecField>) -> St
                 field.name.to_case(Case::Snake)
             ));
         } else {
-            let min = field.versions.replace("+", "");
+            let min = field.versions.replace('+', "");
             content.push_str(&format!(
                 "        if self.{}.is_none() && !_version >= {min} {{\n",
                 field.name.to_case(Case::Snake)
@@ -224,8 +236,8 @@ fn get_api_key(spec: &ApiSpec) -> String {
 fn get_min_max_supported_version(spec: &ApiSpec) -> String {
     let mut content = "".to_owned();
 
-    let min_supported_version = spec.valid_versions.split("-").next().unwrap();
-    let max_supported_version = spec.valid_versions.split("-").last().unwrap();
+    let min_supported_version = spec.valid_versions.split('-').next().unwrap();
+    let max_supported_version = spec.valid_versions.split('-').last().unwrap();
     content.push_str("    fn get_min_supported_version() -> i16 {\n");
     content.push_str(&format!("        {}\n", min_supported_version));
     content.push_str("    }\n\n");
@@ -235,7 +247,7 @@ fn get_min_max_supported_version(spec: &ApiSpec) -> String {
     content
 }
 
-fn should_derive_default(fields: &Vec<ApiSpecField>) -> bool {
+fn should_derive_default(fields: &[ApiSpecField]) -> bool {
     !fields
         .iter()
         .any(|x| match (&x.type_.type_, &x.type_.is_array, &x.default) {
@@ -248,11 +260,12 @@ fn should_derive_default(fields: &Vec<ApiSpecField>) -> bool {
             (_, _, Some(_)) => true,
         })
 }
+
 fn impl_default_trait(name: &str, fields: &Vec<ApiSpecField>) -> String {
     if should_derive_default(fields) {
         return "".to_owned();
     }
-    let mut content = format!("impl Default for {name} {{\n",);
+    let mut content = format!("impl Default for {name} {{\n", );
     content.push_str("fn default() -> Self {\n");
     content.push_str("    Self {\n");
     for field in fields {
@@ -272,6 +285,7 @@ fn impl_default_trait(name: &str, fields: &Vec<ApiSpecField>) -> String {
 
     content
 }
+
 fn serialize_field(field: &ApiSpecField) -> String {
     let mut content = "".to_owned();
     let serialize = format!(
@@ -279,8 +293,8 @@ fn serialize_field(field: &ApiSpecField) -> String {
         field.name.to_case(Case::Snake)
     );
 
-    if field.versions.contains("-") {
-        let mut split = field.versions.split("-");
+    if field.versions.contains('-') {
+        let mut split = field.versions.split('-');
         let min = split.next().unwrap().to_owned();
         let max = split.next().unwrap().to_owned();
         content.push_str(&format!(
@@ -291,13 +305,14 @@ fn serialize_field(field: &ApiSpecField) -> String {
     } else if field.versions == "0+" {
         content.push_str(&format!("        {serialize}\n"));
     } else {
-        let min = field.versions.replace("+", "");
+        let min = field.versions.replace('+', "");
         content.push_str(&format!("        if version >= {min} {{\n"));
         content.push_str(&format!("            {serialize}\n"));
         content.push_str("        }\n");
     };
     content
 }
+
 fn deserialize_field(field: &ApiSpecField) -> String {
     let mut content = "".to_owned();
     let field_type = get_field_type(field);
@@ -306,8 +321,8 @@ fn deserialize_field(field: &ApiSpecField) -> String {
         apply_turbo_fish(field_type)
     );
 
-    if field.versions.contains("-") {
-        let mut split = field.versions.split("-");
+    if field.versions.contains('-') {
+        let mut split = field.versions.split('-');
         let min = split.next().unwrap().to_owned();
         let max = split.next().unwrap().to_owned();
         content.push_str(&format!(
@@ -324,7 +339,7 @@ fn deserialize_field(field: &ApiSpecField) -> String {
             field.name.to_case(Case::Snake)
         ));
     } else {
-        let min = field.versions.replace("+", "");
+        let min = field.versions.replace('+', "");
         content.push_str(&format!(
             "        let {} = if version >= {min} {{\n",
             field.name.to_case(Case::Snake)
@@ -339,23 +354,48 @@ fn deserialize_field(field: &ApiSpecField) -> String {
 }
 
 fn apply_turbo_fish(field_type: String) -> String {
-    field_type.replace("<", "::<")
+    field_type.replace('<', "::<")
 }
 
-fn get_field_definition(
-    field: &ApiSpecField,
-    sub_structs: &mut VecDeque<(String, Vec<ApiSpecField>)>,
-) -> String {
+struct SubStructs {
+    name: String,
+    fields: Vec<ApiSpecField>,
+    is_btreemap_key: bool,
+}
+
+fn get_field_definition(field: &ApiSpecField, sub_structs: &mut VecDeque<SubStructs>) -> String {
     let mut content = "".to_owned();
     let field_type = get_field_type(field);
-    if !field.fields.is_empty() {
-        sub_structs.push_back((
-            get_field_base_type(&field.type_.type_),
-            field.fields.clone(),
-        ));
+    match &field.type_.type_ {
+        ApiSpecFieldSubtype::SubObject(name) => {
+            sub_structs.push_back(SubStructs {
+                name: name.to_owned(),
+                fields: field.fields.clone(),
+                is_btreemap_key: false,
+            });
+        }
+        ApiSpecFieldSubtype::BTreeMap { name, keys } => {
+            let type_names = get_btree_type_names(name, &field.fields);
+
+            sub_structs.push_back(SubStructs {
+                name: type_names.key_type,
+                fields: keys.clone(),
+                is_btreemap_key: true,
+            });
+
+            if let Some(value_type) = type_names.value_type {
+                sub_structs.push_back(SubStructs {
+                    name: value_type,
+                    fields: field.fields.clone(),
+                    is_btreemap_key: false,
+                });
+            }
+        }
+        _ => ()
     }
+
     if let Some(about) = &field.about {
-        content.push_str(&format!("    /// {about}\n",));
+        content.push_str(&format!("    /// {about}\n", ));
     }
     content.push_str(&format!(
         "    pub {}: {field_type}, \n\n",
@@ -365,9 +405,8 @@ fn get_field_definition(
 }
 
 fn get_field_type(field: &ApiSpecField) -> String {
-    let ApiSpecFieldType { type_, is_array } = &field.type_;
-    let mut field_type = get_field_base_type(type_);
-    if *is_array {
+    let mut field_type = get_field_base_type(field);
+    if field.type_.is_array {
         field_type = format!("Vec<{field_type}>");
     }
     if field.nullable_versions.is_some() {
@@ -376,8 +415,8 @@ fn get_field_type(field: &ApiSpecField) -> String {
     field_type
 }
 
-fn get_field_base_type(type_: &ApiSpecFieldSubtype) -> String {
-    match type_ {
+fn get_field_base_type(field: &ApiSpecField) -> String {
+    match &field.type_.type_ {
         ApiSpecFieldSubtype::Bool => "bool".to_owned(),
         ApiSpecFieldSubtype::Bytes => "Vec<u8>".to_owned(),
         ApiSpecFieldSubtype::Int16 => "i16".to_owned(),
@@ -386,5 +425,30 @@ fn get_field_base_type(type_: &ApiSpecFieldSubtype) -> String {
         ApiSpecFieldSubtype::Int64 => "i64".to_owned(),
         ApiSpecFieldSubtype::String => "String".to_owned(),
         ApiSpecFieldSubtype::SubObject(sub) => sub.to_owned(),
+        ApiSpecFieldSubtype::BTreeMap { name, keys: _ } => {
+            get_btree_type_names(name, &field.fields).full_type
+        }
+    }
+}
+
+pub struct BTreeMapTypeNames {
+    pub full_type: String,
+    pub key_type: String,
+    pub value_type: Option<String>,
+}
+
+fn get_btree_type_names(name: &str, subfields: &[ApiSpecField]) -> BTreeMapTypeNames {
+    if subfields.is_empty() {
+        BTreeMapTypeNames {
+            full_type: format!("BTreeSet<{name}>"),
+            key_type: name.to_owned(),
+            value_type: None,
+        }
+    } else {
+        BTreeMapTypeNames {
+            full_type: format!("BTreeMap<{name}Key,{name}>"),
+            key_type: format!("{name}Key"),
+            value_type: Some(name.to_owned()),
+        }
     }
 }

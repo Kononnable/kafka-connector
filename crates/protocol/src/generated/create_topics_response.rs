@@ -6,14 +6,17 @@ pub struct CreateTopicsResponse {
     pub throttle_time_ms: i32,
 
     /// Results for each topic we tried to create.
-    pub topics: Vec<CreatableTopicResult>,
+    pub topics: BTreeMap<CreatableTopicResultKey, CreatableTopicResult>,
+}
+
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct CreatableTopicResultKey {
+    /// The topic name.
+    pub name: String,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct CreatableTopicResult {
-    /// The topic name.
-    pub name: String,
-
     /// The error code, or 0 if there was no error.
     pub error_code: i16,
 
@@ -29,7 +32,8 @@ impl ApiResponse for CreateTopicsResponse {
         } else {
             Default::default()
         };
-        let topics = Vec::<CreatableTopicResult>::deserialize(version, bytes);
+        let topics =
+            BTreeMap::<CreatableTopicResultKey, CreatableTopicResult>::deserialize(version, bytes);
         (
             header,
             CreateTopicsResponse {
@@ -40,9 +44,15 @@ impl ApiResponse for CreateTopicsResponse {
     }
 }
 
-impl FromBytes for CreatableTopicResult {
+impl FromBytes for CreatableTopicResultKey {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let name = String::deserialize(version, bytes);
+        CreatableTopicResultKey { name }
+    }
+}
+
+impl FromBytes for CreatableTopicResult {
+    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let error_message = if version >= 1 {
             Option::<String>::deserialize(version, bytes)
@@ -50,7 +60,6 @@ impl FromBytes for CreatableTopicResult {
             Default::default()
         };
         CreatableTopicResult {
-            name,
             error_code,
             error_message,
         }

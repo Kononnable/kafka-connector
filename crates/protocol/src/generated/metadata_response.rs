@@ -6,7 +6,7 @@ pub struct MetadataResponse {
     pub throttle_time_ms: i32,
 
     /// Each broker in the response.
-    pub brokers: Vec<MetadataResponseBroker>,
+    pub brokers: BTreeMap<MetadataResponseBrokerKey, MetadataResponseBroker>,
 
     /// The cluster ID that responding broker belongs to.
     pub cluster_id: Option<String>,
@@ -15,14 +15,17 @@ pub struct MetadataResponse {
     pub controller_id: i32,
 
     /// Each topic in the response.
-    pub topics: Vec<MetadataResponseTopic>,
+    pub topics: BTreeMap<MetadataResponseTopicKey, MetadataResponseTopic>,
+}
+
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct MetadataResponseBrokerKey {
+    /// The broker ID.
+    pub node_id: i32,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct MetadataResponseBroker {
-    /// The broker ID.
-    pub node_id: i32,
-
     /// The broker hostname.
     pub host: String,
 
@@ -33,13 +36,16 @@ pub struct MetadataResponseBroker {
     pub rack: Option<String>,
 }
 
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct MetadataResponseTopicKey {
+    /// The topic name.
+    pub name: String,
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct MetadataResponseTopic {
     /// The topic error, or 0 if there was no error.
     pub error_code: i16,
-
-    /// The topic name.
-    pub name: String,
 
     /// True if the topic is internal.
     pub is_internal: bool,
@@ -80,7 +86,9 @@ impl ApiResponse for MetadataResponse {
         } else {
             Default::default()
         };
-        let brokers = Vec::<MetadataResponseBroker>::deserialize(version, bytes);
+        let brokers = BTreeMap::<MetadataResponseBrokerKey, MetadataResponseBroker>::deserialize(
+            version, bytes,
+        );
         let cluster_id = if version >= 2 {
             Option::<String>::deserialize(version, bytes)
         } else {
@@ -91,7 +99,9 @@ impl ApiResponse for MetadataResponse {
         } else {
             Default::default()
         };
-        let topics = Vec::<MetadataResponseTopic>::deserialize(version, bytes);
+        let topics = BTreeMap::<MetadataResponseTopicKey, MetadataResponseTopic>::deserialize(
+            version, bytes,
+        );
         (
             header,
             MetadataResponse {
@@ -117,9 +127,15 @@ impl Default for MetadataResponse {
     }
 }
 
-impl FromBytes for MetadataResponseBroker {
+impl FromBytes for MetadataResponseBrokerKey {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let node_id = i32::deserialize(version, bytes);
+        MetadataResponseBrokerKey { node_id }
+    }
+}
+
+impl FromBytes for MetadataResponseBroker {
+    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let host = String::deserialize(version, bytes);
         let port = i32::deserialize(version, bytes);
         let rack = if version >= 1 {
@@ -127,19 +143,20 @@ impl FromBytes for MetadataResponseBroker {
         } else {
             Default::default()
         };
-        MetadataResponseBroker {
-            node_id,
-            host,
-            port,
-            rack,
-        }
+        MetadataResponseBroker { host, port, rack }
+    }
+}
+
+impl FromBytes for MetadataResponseTopicKey {
+    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+        let name = String::deserialize(version, bytes);
+        MetadataResponseTopicKey { name }
     }
 }
 
 impl FromBytes for MetadataResponseTopic {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let error_code = i16::deserialize(version, bytes);
-        let name = String::deserialize(version, bytes);
         let is_internal = if version >= 1 {
             bool::deserialize(version, bytes)
         } else {
@@ -148,7 +165,6 @@ impl FromBytes for MetadataResponseTopic {
         let partitions = Vec::<MetadataResponsePartition>::deserialize(version, bytes);
         MetadataResponseTopic {
             error_code,
-            name,
             is_internal,
             partitions,
         }

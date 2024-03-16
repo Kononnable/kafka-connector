@@ -1,5 +1,6 @@
 use crate::generator::structs::ApiSpec;
 use anyhow::Context;
+use std::fmt::Write;
 use std::fs;
 use std::fs::read_dir;
 use std::path::Path;
@@ -19,8 +20,10 @@ pub fn get_api_specs() -> anyhow::Result<Vec<ApiSpec>> {
             .unwrap()
             .lines()
             .filter(|f| !f.trim().starts_with("//"))
-            .map(|f| format!("{f}\n"))
-            .collect::<String>();
+            .fold(String::new(), |mut output, f| {
+                let _ = writeln!(output, "{f}");
+                output
+            });
         specs.push(serde_json::from_str(&content).context(format!("Failed to parse {filename}"))?);
     }
     Ok(specs)

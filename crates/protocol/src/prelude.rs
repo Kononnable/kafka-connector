@@ -3,9 +3,11 @@ pub use crate::generated::request_header::RequestHeader;
 pub use crate::generated::response_header::ResponseHeader;
 pub use crate::to_bytes::ToBytes;
 pub use bytes::{Bytes, BytesMut};
+pub use std::collections::{BTreeMap, BTreeSet};
 pub use std::fmt::Debug;
 
 use thiserror::Error as DeriveError;
+
 pub trait ApiRequest: Clone + Debug + Default {
     type Response: ApiResponse;
 

@@ -1,8 +1,41 @@
 use bytes::Bytes;
+use std::collections::{BTreeMap, BTreeSet};
 use std::mem::size_of;
 
 pub trait FromBytes {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self;
+}
+
+impl<K, V> FromBytes for BTreeMap<K, V>
+where
+    K: FromBytes + Ord,
+    V: FromBytes,
+{
+    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = BTreeMap::new();
+        for _i in 0..cap {
+            let key = FromBytes::deserialize(version, bytes);
+            let value = FromBytes::deserialize(version, bytes);
+            ret.insert(key, value);
+        }
+        ret
+    }
+}
+
+impl<K> FromBytes for BTreeSet<K>
+where
+    K: FromBytes + Ord,
+{
+    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = BTreeSet::new();
+        for _i in 0..cap {
+            let key = FromBytes::deserialize(version, bytes);
+            ret.insert(key);
+        }
+        ret
+    }
 }
 
 impl<R> FromBytes for Vec<R>
@@ -22,6 +55,7 @@ where
         ret
     }
 }
+
 impl FromBytes for Vec<u8> {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let len: i32 = FromBytes::deserialize(version, bytes);
@@ -31,6 +65,7 @@ impl FromBytes for Vec<u8> {
         bytes.split_to(len as usize).into_iter().collect()
     }
 }
+
 impl FromBytes for String {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let len: i16 = FromBytes::deserialize(version, bytes);
@@ -50,11 +85,13 @@ impl FromBytes for i8 {
         i8::from_be_bytes(data)
     }
 }
+
 impl FromBytes for bool {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         i8::deserialize(version, bytes) == 0
     }
 }
+
 impl FromBytes for i16 {
     fn deserialize(_version: i16, bytes: &mut Bytes) -> Self {
         let data = bytes
@@ -65,6 +102,7 @@ impl FromBytes for i16 {
         i16::from_be_bytes(data)
     }
 }
+
 impl FromBytes for i32 {
     fn deserialize(_version: i16, bytes: &mut Bytes) -> Self {
         let data = bytes
@@ -75,6 +113,7 @@ impl FromBytes for i32 {
         i32::from_be_bytes(data)
     }
 }
+
 impl FromBytes for u32 {
     fn deserialize(_version: i16, bytes: &mut Bytes) -> Self {
         let data = bytes
@@ -85,6 +124,7 @@ impl FromBytes for u32 {
         u32::from_be_bytes(data)
     }
 }
+
 impl FromBytes for i64 {
     fn deserialize(_version: i16, bytes: &mut Bytes) -> Self {
         let data = bytes
@@ -95,6 +135,7 @@ impl FromBytes for i64 {
         i64::from_be_bytes(data)
     }
 }
+
 impl FromBytes for f64 {
     fn deserialize(_version: i16, bytes: &mut Bytes) -> Self {
         let data = bytes

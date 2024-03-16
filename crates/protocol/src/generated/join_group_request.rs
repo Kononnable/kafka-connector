@@ -18,14 +18,17 @@ pub struct JoinGroupRequest {
     pub protocol_type: String,
 
     /// The list of protocols that the member supports.
-    pub protocols: Vec<JoinGroupRequestProtocol>,
+    pub protocols: BTreeMap<JoinGroupRequestProtocolKey, JoinGroupRequestProtocol>,
+}
+
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct JoinGroupRequestProtocolKey {
+    /// The protocol name.
+    pub name: String,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct JoinGroupRequestProtocol {
-    /// The protocol name.
-    pub name: String,
-
     /// The protocol metadata.
     pub metadata: Vec<u8>,
 }
@@ -88,10 +91,23 @@ impl Default for JoinGroupRequest {
     }
 }
 
-impl ToBytes for JoinGroupRequestProtocol {
+impl ToBytes for JoinGroupRequestProtocolKey {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
         self.name.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl JoinGroupRequestProtocolKey {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for JoinGroupRequestProtocol {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         self.metadata.serialize(version, bytes)?;
         Ok(())
     }

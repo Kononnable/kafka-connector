@@ -24,26 +24,32 @@ pub struct CreatableTopic {
     pub replication_factor: i16,
 
     /// The manual partition assignment, or the empty array if we are using automatic assignment.
-    pub assignments: Vec<CreatableReplicaAssignment>,
+    pub assignments: BTreeMap<CreatableReplicaAssignmentKey, CreatableReplicaAssignment>,
 
     /// The custom topic configurations to set.
-    pub configs: Vec<CreateableTopicConfig>,
+    pub configs: BTreeMap<CreateableTopicConfigKey, CreateableTopicConfig>,
+}
+
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct CreatableReplicaAssignmentKey {
+    /// The partition index.
+    pub partition_index: i32,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct CreatableReplicaAssignment {
-    /// The partition index.
-    pub partition_index: i32,
-
     /// The brokers to place the partition on.
     pub broker_ids: Vec<i32>,
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct CreateableTopicConfig {
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct CreateableTopicConfigKey {
     /// The configuration name.
     pub name: String,
+}
 
+#[derive(Clone, Debug, Default)]
+pub struct CreateableTopicConfig {
     /// The configuration value.
     pub value: Option<String>,
 }
@@ -108,10 +114,23 @@ impl CreatableTopic {
     }
 }
 
-impl ToBytes for CreatableReplicaAssignment {
+impl ToBytes for CreatableReplicaAssignmentKey {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
         self.partition_index.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl CreatableReplicaAssignmentKey {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for CreatableReplicaAssignment {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         self.broker_ids.serialize(version, bytes)?;
         Ok(())
     }
@@ -123,10 +142,23 @@ impl CreatableReplicaAssignment {
     }
 }
 
-impl ToBytes for CreateableTopicConfig {
+impl ToBytes for CreateableTopicConfigKey {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
         self.name.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl CreateableTopicConfigKey {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for CreateableTopicConfig {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         self.value.serialize(version, bytes)?;
         Ok(())
     }

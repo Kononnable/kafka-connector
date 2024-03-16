@@ -3,29 +3,35 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default)]
 pub struct AlterConfigsRequest {
     /// The updates for each resource.
-    pub resources: Vec<AlterConfigsResource>,
+    pub resources: BTreeMap<AlterConfigsResourceKey, AlterConfigsResource>,
 
     /// True if we should validate the request, but not change the configurations.
     pub validate_only: bool,
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct AlterConfigsResource {
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct AlterConfigsResourceKey {
     /// The resource type.
     pub resource_type: i8,
 
     /// The resource name.
     pub resource_name: String,
+}
 
+#[derive(Clone, Debug, Default)]
+pub struct AlterConfigsResource {
     /// The configurations.
-    pub configs: Vec<AlterableConfig>,
+    pub configs: BTreeMap<AlterableConfigKey, AlterableConfig>,
+}
+
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct AlterableConfigKey {
+    /// The configuration key name.
+    pub name: String,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct AlterableConfig {
-    /// The configuration key name.
-    pub name: String,
-
     /// The value to set for the configuration key.
     pub value: Option<String>,
 }
@@ -69,11 +75,24 @@ impl AlterConfigsRequest {
     }
 }
 
-impl ToBytes for AlterConfigsResource {
+impl ToBytes for AlterConfigsResourceKey {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
         self.resource_type.serialize(version, bytes)?;
         self.resource_name.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl AlterConfigsResourceKey {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for AlterConfigsResource {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         self.configs.serialize(version, bytes)?;
         Ok(())
     }
@@ -85,10 +104,23 @@ impl AlterConfigsResource {
     }
 }
 
-impl ToBytes for AlterableConfig {
+impl ToBytes for AlterableConfigKey {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
         self.name.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl AlterableConfigKey {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for AlterableConfig {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         self.value.serialize(version, bytes)?;
         Ok(())
     }

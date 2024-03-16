@@ -6,14 +6,17 @@ pub struct DeleteGroupsResponse {
     pub throttle_time_ms: i32,
 
     /// The deletion results
-    pub results: Vec<DeletableGroupResult>,
+    pub results: BTreeMap<DeletableGroupResultKey, DeletableGroupResult>,
+}
+
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct DeletableGroupResultKey {
+    /// The group id
+    pub group_id: String,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct DeletableGroupResult {
-    /// The group id
-    pub group_id: String,
-
     /// The deletion error, or 0 if the deletion succeeded.
     pub error_code: i16,
 }
@@ -22,7 +25,8 @@ impl ApiResponse for DeleteGroupsResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
-        let results = Vec::<DeletableGroupResult>::deserialize(version, bytes);
+        let results =
+            BTreeMap::<DeletableGroupResultKey, DeletableGroupResult>::deserialize(version, bytes);
         (
             header,
             DeleteGroupsResponse {
@@ -33,13 +37,16 @@ impl ApiResponse for DeleteGroupsResponse {
     }
 }
 
-impl FromBytes for DeletableGroupResult {
+impl FromBytes for DeletableGroupResultKey {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let group_id = String::deserialize(version, bytes);
+        DeletableGroupResultKey { group_id }
+    }
+}
+
+impl FromBytes for DeletableGroupResult {
+    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let error_code = i16::deserialize(version, bytes);
-        DeletableGroupResult {
-            group_id,
-            error_code,
-        }
+        DeletableGroupResult { error_code }
     }
 }

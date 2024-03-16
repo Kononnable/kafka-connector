@@ -1,4 +1,4 @@
-use crate::generator::structs::ApiSpec;
+use crate::generator::structs::{ApiSpec, ApiSpecField, ApiSpecFieldSubtype};
 use anyhow::{bail, Context};
 use convert_case::{Case, Casing};
 use std::env;
@@ -14,14 +14,14 @@ fn generates_structures() -> anyhow::Result<()> {
     use expect_test::expect_file;
     const FILE_PATH_PREFIX: &str = "/src/generated/";
     let specs = parse::get_api_specs()?;
-    // .into_iter()
-    // .filter(|x| x.name == "DescribeAclsResponse")
-    // .collect::<Vec<_>>();
+
+    let mod_files = generate_mod_file(&specs);
     let mut generated = specs
-        .iter()
+        .into_iter()
+        .map(transform_map_key)
         .map(codegen::generate_source)
         .collect::<Vec<_>>();
-    generated.push(generate_mod_file(&specs));
+    generated.push(mod_files);
 
     let formatted = generated
         .into_iter()
@@ -44,6 +44,31 @@ fn generates_structures() -> anyhow::Result<()> {
         expected.assert_eq(&file.1);
     }
     Ok(())
+}
+
+fn transform_map_key(mut spec: ApiSpec) -> ApiSpec {
+    for field in spec.fields.iter_mut() {
+        transform_map_key_field(field);
+    }
+    spec
+}
+
+fn transform_map_key_field(field: &mut ApiSpecField) {
+    if let ApiSpecFieldSubtype::SubObject(name) = &field.type_.type_ {
+        let (keys, subfields): (Vec<_>, Vec<_>) =
+            field.fields.clone().into_iter().partition(|z| z.map_key);
+        if !keys.is_empty() {
+            field.fields = subfields;
+            field.type_.is_array = false;
+            field.type_.type_ = ApiSpecFieldSubtype::BTreeMap {
+                name: name.to_owned(),
+                keys,
+            };
+        }
+    }
+    for sub in field.fields.iter_mut() {
+        transform_map_key_field(sub);
+    }
 }
 
 fn generate_mod_file(specs: &Vec<ApiSpec>) -> (String, String) {

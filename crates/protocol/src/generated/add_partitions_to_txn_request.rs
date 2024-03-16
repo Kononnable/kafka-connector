@@ -12,14 +12,17 @@ pub struct AddPartitionsToTxnRequest {
     pub producer_epoch: i16,
 
     /// The partitions to add to the transation.
-    pub topics: Vec<AddPartitionsToTxnTopic>,
+    pub topics: BTreeMap<AddPartitionsToTxnTopicKey, AddPartitionsToTxnTopic>,
+}
+
+#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub struct AddPartitionsToTxnTopicKey {
+    /// The name of the topic.
+    pub name: String,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct AddPartitionsToTxnTopic {
-    /// The name of the topic.
-    pub name: String,
-
     /// The partition indexes to add to the transaction
     pub partitions: Vec<i32>,
 }
@@ -65,10 +68,23 @@ impl AddPartitionsToTxnRequest {
     }
 }
 
-impl ToBytes for AddPartitionsToTxnTopic {
+impl ToBytes for AddPartitionsToTxnTopicKey {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
         self.name.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl AddPartitionsToTxnTopicKey {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for AddPartitionsToTxnTopic {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
         self.partitions.serialize(version, bytes)?;
         Ok(())
     }
