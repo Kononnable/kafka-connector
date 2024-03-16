@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct OffsetFetchRequest {
     /// The group to fetch offsets for.
     pub group_id: String,
@@ -9,7 +9,7 @@ pub struct OffsetFetchRequest {
     pub topics: Option<Vec<OffsetFetchRequestTopic>>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct OffsetFetchRequestTopic {
     pub name: String,
 
@@ -59,6 +59,20 @@ impl OffsetFetchRequest {
                 "OffsetFetchRequest",
             ));
         }
+        if self.group_id != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "group_id",
+                _version,
+                "OffsetFetchRequest",
+            ));
+        }
+        if self.topics.is_some() && self.topics != Some(Vec::<OffsetFetchRequestTopic>::default()) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topics",
+                _version,
+                "OffsetFetchRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -74,6 +88,20 @@ impl ToBytes for OffsetFetchRequestTopic {
 
 impl OffsetFetchRequestTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "name",
+                _version,
+                "OffsetFetchRequestTopic",
+            ));
+        }
+        if self.partition_indexes != Vec::<i32>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partition_indexes",
+                _version,
+                "OffsetFetchRequestTopic",
+            ));
+        }
         Ok(())
     }
 }

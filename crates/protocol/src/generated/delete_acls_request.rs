@@ -1,12 +1,12 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DeleteAclsRequest {
     /// The filters to use when deleting ACLs.
     pub filters: Vec<DeleteAclsFilter>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct DeleteAclsFilter {
     /// The resource type.
     pub resource_type_filter: i8,
@@ -64,6 +64,13 @@ impl ApiRequest for DeleteAclsRequest {
 
 impl DeleteAclsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.filters != Vec::<DeleteAclsFilter>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "filters",
+                _version,
+                "DeleteAclsRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -103,6 +110,57 @@ impl DeleteAclsFilter {
         if self.host_filter.is_none() {
             return Err(SerializationError::NullValue(
                 "host_filter",
+                _version,
+                "DeleteAclsFilter",
+            ));
+        }
+        if self.resource_type_filter != i8::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "resource_type_filter",
+                _version,
+                "DeleteAclsFilter",
+            ));
+        }
+        if self.resource_name_filter.is_some()
+            && self.resource_name_filter != Some(String::default())
+        {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "resource_name_filter",
+                _version,
+                "DeleteAclsFilter",
+            ));
+        }
+        if self.pattern_type_filter != i8::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "pattern_type_filter",
+                _version,
+                "DeleteAclsFilter",
+            ));
+        }
+        if self.principal_filter.is_some() && self.principal_filter != Some(String::default()) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "principal_filter",
+                _version,
+                "DeleteAclsFilter",
+            ));
+        }
+        if self.host_filter.is_some() && self.host_filter != Some(String::default()) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "host_filter",
+                _version,
+                "DeleteAclsFilter",
+            ));
+        }
+        if self.operation != i8::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "operation",
+                _version,
+                "DeleteAclsFilter",
+            ));
+        }
+        if self.permission_type != i8::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "permission_type",
                 _version,
                 "DeleteAclsFilter",
             ));

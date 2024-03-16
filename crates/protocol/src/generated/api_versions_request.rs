@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ApiVersionsRequest {}
 
 impl ApiRequest for ApiVersionsRequest {

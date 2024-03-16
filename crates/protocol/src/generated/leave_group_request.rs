@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct LeaveGroupRequest {
     /// The ID of the group to leave.
     pub group_id: String,
@@ -44,6 +44,20 @@ impl ApiRequest for LeaveGroupRequest {
 
 impl LeaveGroupRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.group_id != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "group_id",
+                _version,
+                "LeaveGroupRequest",
+            ));
+        }
+        if self.member_id != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "member_id",
+                _version,
+                "LeaveGroupRequest",
+            ));
+        }
         Ok(())
     }
 }

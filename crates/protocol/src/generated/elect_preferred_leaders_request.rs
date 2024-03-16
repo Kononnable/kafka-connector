@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ElectPreferredLeadersRequest {
     /// The topic partitions to elect the preferred leader of.
     pub topic_partitions: Option<Vec<TopicPartitions>>,
@@ -9,7 +9,7 @@ pub struct ElectPreferredLeadersRequest {
     pub timeout_ms: i32,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct TopicPartitions {
     /// The name of a topic.
     pub topic: String,
@@ -60,6 +60,22 @@ impl ElectPreferredLeadersRequest {
                 "ElectPreferredLeadersRequest",
             ));
         }
+        if self.topic_partitions.is_some()
+            && self.topic_partitions != Some(Vec::<TopicPartitions>::default())
+        {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topic_partitions",
+                _version,
+                "ElectPreferredLeadersRequest",
+            ));
+        }
+        if self.timeout_ms != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "timeout_ms",
+                _version,
+                "ElectPreferredLeadersRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -84,6 +100,20 @@ impl ToBytes for TopicPartitions {
 
 impl TopicPartitions {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.topic != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topic",
+                _version,
+                "TopicPartitions",
+            ));
+        }
+        if self.partition_id != Vec::<i32>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partition_id",
+                _version,
+                "TopicPartitions",
+            ));
+        }
         Ok(())
     }
 }

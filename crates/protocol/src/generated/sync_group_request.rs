@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct SyncGroupRequest {
     /// The unique group identifier.
     pub group_id: String,
@@ -15,7 +15,7 @@ pub struct SyncGroupRequest {
     pub assignments: Vec<SyncGroupRequestAssignment>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct SyncGroupRequestAssignment {
     /// The ID of the member to assign.
     pub member_id: String,
@@ -61,6 +61,34 @@ impl ApiRequest for SyncGroupRequest {
 
 impl SyncGroupRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.group_id != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "group_id",
+                _version,
+                "SyncGroupRequest",
+            ));
+        }
+        if self.generation_id != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "generation_id",
+                _version,
+                "SyncGroupRequest",
+            ));
+        }
+        if self.member_id != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "member_id",
+                _version,
+                "SyncGroupRequest",
+            ));
+        }
+        if self.assignments != Vec::<SyncGroupRequestAssignment>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "assignments",
+                _version,
+                "SyncGroupRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -76,6 +104,20 @@ impl ToBytes for SyncGroupRequestAssignment {
 
 impl SyncGroupRequestAssignment {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.member_id != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "member_id",
+                _version,
+                "SyncGroupRequestAssignment",
+            ));
+        }
+        if self.assignment != Vec::<u8>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "assignment",
+                _version,
+                "SyncGroupRequestAssignment",
+            ));
+        }
         Ok(())
     }
 }

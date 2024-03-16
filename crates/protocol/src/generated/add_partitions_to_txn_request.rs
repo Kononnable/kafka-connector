@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct AddPartitionsToTxnRequest {
     /// The transactional id corresponding to the transaction.
     pub transactional_id: String,
@@ -15,13 +15,13 @@ pub struct AddPartitionsToTxnRequest {
     pub topics: BTreeMap<AddPartitionsToTxnTopicKey, AddPartitionsToTxnTopic>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct AddPartitionsToTxnTopicKey {
     /// The name of the topic.
     pub name: String,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct AddPartitionsToTxnTopic {
     /// The partition indexes to add to the transaction
     pub partitions: Vec<i32>,
@@ -64,6 +64,35 @@ impl ApiRequest for AddPartitionsToTxnRequest {
 
 impl AddPartitionsToTxnRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.transactional_id != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "transactional_id",
+                _version,
+                "AddPartitionsToTxnRequest",
+            ));
+        }
+        if self.producer_id != i64::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "producer_id",
+                _version,
+                "AddPartitionsToTxnRequest",
+            ));
+        }
+        if self.producer_epoch != i16::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "producer_epoch",
+                _version,
+                "AddPartitionsToTxnRequest",
+            ));
+        }
+        if self.topics != BTreeMap::<AddPartitionsToTxnTopicKey, AddPartitionsToTxnTopic>::default()
+        {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topics",
+                _version,
+                "AddPartitionsToTxnRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -78,6 +107,13 @@ impl ToBytes for AddPartitionsToTxnTopicKey {
 
 impl AddPartitionsToTxnTopicKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "name",
+                _version,
+                "AddPartitionsToTxnTopicKey",
+            ));
+        }
         Ok(())
     }
 }
@@ -92,6 +128,13 @@ impl ToBytes for AddPartitionsToTxnTopic {
 
 impl AddPartitionsToTxnTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.partitions != Vec::<i32>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partitions",
+                _version,
+                "AddPartitionsToTxnTopic",
+            ));
+        }
         Ok(())
     }
 }

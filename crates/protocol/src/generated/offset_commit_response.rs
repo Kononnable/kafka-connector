@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct OffsetCommitResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct OffsetCommitResponse {
     pub topics: Vec<OffsetCommitResponseTopic>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct OffsetCommitResponseTopic {
     /// The topic name.
     pub name: String,
@@ -18,7 +18,7 @@ pub struct OffsetCommitResponseTopic {
     pub partitions: Vec<OffsetCommitResponsePartition>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct OffsetCommitResponsePartition {
     /// The partition index.
     pub partition_index: i32,

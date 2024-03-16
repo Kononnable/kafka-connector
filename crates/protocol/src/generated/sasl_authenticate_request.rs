@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct SaslAuthenticateRequest {
     /// The SASL authentication bytes from the client, as defined by the SASL mechanism.
     pub auth_bytes: Vec<u8>,
@@ -40,6 +40,13 @@ impl ApiRequest for SaslAuthenticateRequest {
 
 impl SaslAuthenticateRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.auth_bytes != Vec::<u8>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "auth_bytes",
+                _version,
+                "SaslAuthenticateRequest",
+            ));
+        }
         Ok(())
     }
 }

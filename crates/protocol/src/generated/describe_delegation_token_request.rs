@@ -1,12 +1,12 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeDelegationTokenRequest {
     /// Each owner that we want to describe delegation tokens for, or null to describe all tokens.
     pub owners: Option<Vec<DescribeDelegationTokenOwner>>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribeDelegationTokenOwner {
     /// The owner principal type.
     pub principal_type: String,
@@ -56,6 +56,15 @@ impl DescribeDelegationTokenRequest {
                 "DescribeDelegationTokenRequest",
             ));
         }
+        if self.owners.is_some()
+            && self.owners != Some(Vec::<DescribeDelegationTokenOwner>::default())
+        {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "owners",
+                _version,
+                "DescribeDelegationTokenRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -71,6 +80,20 @@ impl ToBytes for DescribeDelegationTokenOwner {
 
 impl DescribeDelegationTokenOwner {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.principal_type != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "principal_type",
+                _version,
+                "DescribeDelegationTokenOwner",
+            ));
+        }
+        if self.principal_name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "principal_name",
+                _version,
+                "DescribeDelegationTokenOwner",
+            ));
+        }
         Ok(())
     }
 }

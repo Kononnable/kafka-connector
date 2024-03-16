@@ -1,12 +1,12 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeLogDirsRequest {
     /// Each topic that we want to describe log directories for, or null for all topics.
     pub topics: Option<Vec<DescribableLogDirTopic>>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribableLogDirTopic {
     /// The topic name
     pub topic: String,
@@ -56,6 +56,13 @@ impl DescribeLogDirsRequest {
                 "DescribeLogDirsRequest",
             ));
         }
+        if self.topics.is_some() && self.topics != Some(Vec::<DescribableLogDirTopic>::default()) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topics",
+                _version,
+                "DescribeLogDirsRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -71,6 +78,20 @@ impl ToBytes for DescribableLogDirTopic {
 
 impl DescribableLogDirTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.topic != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topic",
+                _version,
+                "DescribableLogDirTopic",
+            ));
+        }
+        if self.partition_index != Vec::<i32>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partition_index",
+                _version,
+                "DescribableLogDirTopic",
+            ));
+        }
         Ok(())
     }
 }

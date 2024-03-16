@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct AddOffsetsToTxnRequest {
     /// The transactional id corresponding to the transaction.
     pub transactional_id: String,
@@ -52,6 +52,34 @@ impl ApiRequest for AddOffsetsToTxnRequest {
 
 impl AddOffsetsToTxnRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.transactional_id != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "transactional_id",
+                _version,
+                "AddOffsetsToTxnRequest",
+            ));
+        }
+        if self.producer_id != i64::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "producer_id",
+                _version,
+                "AddOffsetsToTxnRequest",
+            ));
+        }
+        if self.producer_epoch != i16::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "producer_epoch",
+                _version,
+                "AddOffsetsToTxnRequest",
+            ));
+        }
+        if self.group_id != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "group_id",
+                _version,
+                "AddOffsetsToTxnRequest",
+            ));
+        }
         Ok(())
     }
 }

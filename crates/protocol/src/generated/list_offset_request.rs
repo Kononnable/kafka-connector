@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ListOffsetRequest {
     /// The broker ID of the requestor, or -1 if this request is being made by a normal consumer.
     pub replica_id: i32,
@@ -12,7 +12,7 @@ pub struct ListOffsetRequest {
     pub topics: Vec<ListOffsetTopic>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct ListOffsetTopic {
     /// The topic name.
     pub name: String,
@@ -21,7 +21,7 @@ pub struct ListOffsetTopic {
     pub partitions: Vec<ListOffsetPartition>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct ListOffsetPartition {
     /// The partition index.
     pub partition_index: i32,
@@ -74,6 +74,27 @@ impl ApiRequest for ListOffsetRequest {
 
 impl ListOffsetRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.replica_id != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "replica_id",
+                _version,
+                "ListOffsetRequest",
+            ));
+        }
+        if self.isolation_level != i8::default() && _version >= 2 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "isolation_level",
+                _version,
+                "ListOffsetRequest",
+            ));
+        }
+        if self.topics != Vec::<ListOffsetTopic>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topics",
+                _version,
+                "ListOffsetRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -89,6 +110,20 @@ impl ToBytes for ListOffsetTopic {
 
 impl ListOffsetTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "name",
+                _version,
+                "ListOffsetTopic",
+            ));
+        }
+        if self.partitions != Vec::<ListOffsetPartition>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partitions",
+                _version,
+                "ListOffsetTopic",
+            ));
+        }
         Ok(())
     }
 }
@@ -110,6 +145,34 @@ impl ToBytes for ListOffsetPartition {
 
 impl ListOffsetPartition {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.partition_index != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partition_index",
+                _version,
+                "ListOffsetPartition",
+            ));
+        }
+        if self.current_leader_epoch != i32::default() && _version >= 4 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "current_leader_epoch",
+                _version,
+                "ListOffsetPartition",
+            ));
+        }
+        if self.timestamp != i64::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "timestamp",
+                _version,
+                "ListOffsetPartition",
+            ));
+        }
+        if self.max_num_offsets != i32::default() && _version >= 0 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "max_num_offsets",
+                _version,
+                "ListOffsetPartition",
+            ));
+        }
         Ok(())
     }
 }

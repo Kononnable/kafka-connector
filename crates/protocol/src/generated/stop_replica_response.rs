@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct StopReplicaResponse {
     /// The top-level error code, or 0 if there was no top-level error.
     pub error_code: i16,
@@ -9,7 +9,7 @@ pub struct StopReplicaResponse {
     pub partitions: Vec<StopReplicaResponsePartition>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct StopReplicaResponsePartition {
     /// The topic name.
     pub topic_name: String,

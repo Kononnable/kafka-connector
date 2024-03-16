@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ExpireDelegationTokenResponse {
     /// The error code, or 0 if there was no error.
     pub error_code: i16,

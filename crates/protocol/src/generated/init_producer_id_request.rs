@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct InitProducerIdRequest {
     /// The transactional id, or null if the producer is not transactional.
     pub transactional_id: Option<String>,
@@ -47,6 +47,20 @@ impl InitProducerIdRequest {
         if self.transactional_id.is_none() {
             return Err(SerializationError::NullValue(
                 "transactional_id",
+                _version,
+                "InitProducerIdRequest",
+            ));
+        }
+        if self.transactional_id.is_some() && self.transactional_id != Some(String::default()) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "transactional_id",
+                _version,
+                "InitProducerIdRequest",
+            ));
+        }
+        if self.transaction_timeout_ms != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "transaction_timeout_ms",
                 _version,
                 "InitProducerIdRequest",
             ));

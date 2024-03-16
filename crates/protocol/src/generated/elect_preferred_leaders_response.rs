@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ElectPreferredLeadersResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct ElectPreferredLeadersResponse {
     pub replica_election_results: Vec<ReplicaElectionResult>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct ReplicaElectionResult {
     /// The topic name
     pub topic: String,
@@ -18,7 +18,7 @@ pub struct ReplicaElectionResult {
     pub partition_result: Vec<PartitionResult>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct PartitionResult {
     /// The partition id
     pub partition_id: i32,

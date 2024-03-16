@@ -7,9 +7,9 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
     let mut sub_structs_partial = VecDeque::new();
     let mut sub_structs = Vec::new();
     if should_derive_default(&spec.fields) {
-        content.push_str("#[derive(Clone, Debug, Default)]\n");
+        content.push_str("#[derive(Clone, Debug, Default, PartialEq)]\n");
     } else {
-        content.push_str("#[derive(Clone, Debug)]\n");
+        content.push_str("#[derive(Clone, Debug, PartialEq)]\n");
     }
     content.push_str(&format!("pub struct {} {{\n", spec.name));
     for field in &spec.fields {
@@ -24,12 +24,12 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
             ""
         };
         let btreemapkey_derive = if sub_struct.is_btreemap_key {
-            ", Eq, Ord, PartialEq, PartialOrd"
+            ", Eq, Ord, PartialOrd"
         } else {
             ""
         };
         content.push_str(&format!(
-            "#[derive(Clone, Debug{}{})]\n",
+            "#[derive(Clone, Debug, PartialEq{}{})]\n",
             default_derive, btreemapkey_derive
         ));
         content.push_str(&format!("pub struct {} {{\n", sub_struct.name));
@@ -217,6 +217,50 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
         ));
         content.push_str("        }\n");
     }
+    for field in fields.iter().filter(|x| !x.ignorable) {
+        let field_non_option_type = {
+            let mut field_type = get_field_base_type(field);
+            if field.type_.is_array {
+                field_type = format!("Vec<{field_type}>");
+            }
+            field_type
+        };
+        let nullable_filter = if field.nullable_versions.is_some() {
+            format!(
+                "self.{}.is_some() && self.{} != Some({}::default())",
+                field.name.to_case(Case::Snake),
+                field.name.to_case(Case::Snake),
+                apply_turbo_fish(field_non_option_type)
+            )
+        } else {
+            format!(
+                "self.{} != {}::default()",
+                field.name.to_case(Case::Snake),
+                apply_turbo_fish(field_non_option_type)
+            )
+        };
+        if field.versions.contains('-') {
+            let mut split = field.versions.split('-');
+            let min = split.next().unwrap().to_owned();
+            let max = split.next().unwrap().to_owned();
+            content.push_str(&format!(
+                "    if {nullable_filter} && !({min}..={max}).contains(&_version){{\n",
+            ));
+        } else if field.versions == "0+" {
+            content.push_str(&format!("        if {nullable_filter}{{\n",));
+        } else {
+            let min = field.versions.replace('+', "");
+            content.push_str(&format!(
+                "        if {nullable_filter} && _version >= {min}{{\n",
+            ));
+        };
+        content.push_str(&format!(
+            "        return Err(SerializationError::NonIgnorableFieldSet(\"{}\", _version, \"{}\"))\n",
+            field.name.to_case(Case::Snake),
+            struct_name
+        ));
+        content.push_str("        }\n");
+    }
     content.push_str("    Ok(())\n");
     content.push_str("    }\n\n");
     content.push_str("}\n\n");
@@ -265,7 +309,7 @@ fn impl_default_trait(name: &str, fields: &Vec<ApiSpecField>) -> String {
     if should_derive_default(fields) {
         return "".to_owned();
     }
-    let mut content = format!("impl Default for {name} {{\n", );
+    let mut content = format!("impl Default for {name} {{\n",);
     content.push_str("fn default() -> Self {\n");
     content.push_str("    Self {\n");
     for field in fields {
@@ -391,11 +435,11 @@ fn get_field_definition(field: &ApiSpecField, sub_structs: &mut VecDeque<SubStru
                 });
             }
         }
-        _ => ()
+        _ => (),
     }
 
     if let Some(about) = &field.about {
-        content.push_str(&format!("    /// {about}\n", ));
+        content.push_str(&format!("    /// {about}\n",));
     }
     content.push_str(&format!(
         "    pub {}: {field_type}, \n\n",

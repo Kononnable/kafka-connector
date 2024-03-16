@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeConfigsRequest {
     /// The resources whose configurations we want to describe.
     pub resources: Vec<DescribeConfigsResource>,
@@ -9,7 +9,7 @@ pub struct DescribeConfigsRequest {
     pub include_synoyms: bool,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribeConfigsResource {
     /// The resource type.
     pub resource_type: i8,
@@ -58,6 +58,20 @@ impl ApiRequest for DescribeConfigsRequest {
 
 impl DescribeConfigsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.resources != Vec::<DescribeConfigsResource>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "resources",
+                _version,
+                "DescribeConfigsRequest",
+            ));
+        }
+        if self.include_synoyms != bool::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "include_synoyms",
+                _version,
+                "DescribeConfigsRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -76,6 +90,29 @@ impl DescribeConfigsResource {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         if self.configuration_keys.is_none() {
             return Err(SerializationError::NullValue(
+                "configuration_keys",
+                _version,
+                "DescribeConfigsResource",
+            ));
+        }
+        if self.resource_type != i8::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "resource_type",
+                _version,
+                "DescribeConfigsResource",
+            ));
+        }
+        if self.resource_name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "resource_name",
+                _version,
+                "DescribeConfigsResource",
+            ));
+        }
+        if self.configuration_keys.is_some()
+            && self.configuration_keys != Some(Vec::<String>::default())
+        {
+            return Err(SerializationError::NonIgnorableFieldSet(
                 "configuration_keys",
                 _version,
                 "DescribeConfigsResource",

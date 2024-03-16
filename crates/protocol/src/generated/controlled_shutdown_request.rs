@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ControlledShutdownRequest {
     /// The id of the broker for which controlled shutdown has been requested.
     pub broker_id: i32,
@@ -46,6 +46,13 @@ impl ApiRequest for ControlledShutdownRequest {
 
 impl ControlledShutdownRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.broker_id != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "broker_id",
+                _version,
+                "ControlledShutdownRequest",
+            ));
+        }
         Ok(())
     }
 }

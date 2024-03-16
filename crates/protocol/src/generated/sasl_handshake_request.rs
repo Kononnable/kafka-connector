@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct SaslHandshakeRequest {
     /// The SASL mechanism chosen by the client.
     pub mechanism: String,
@@ -40,6 +40,13 @@ impl ApiRequest for SaslHandshakeRequest {
 
 impl SaslHandshakeRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.mechanism != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "mechanism",
+                _version,
+                "SaslHandshakeRequest",
+            ));
+        }
         Ok(())
     }
 }

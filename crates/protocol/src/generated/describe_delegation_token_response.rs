@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeDelegationTokenResponse {
     /// The error code, or 0 if there was no error.
     pub error_code: i16,
@@ -12,7 +12,7 @@ pub struct DescribeDelegationTokenResponse {
     pub throttle_time_ms: i32,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribedDelegationToken {
     /// The token principal type.
     pub principal_type: String,
@@ -39,7 +39,7 @@ pub struct DescribedDelegationToken {
     pub renewers: Vec<DescribedDelegationTokenRenewer>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribedDelegationTokenRenewer {
     /// The renewer principal type
     pub principal_type: String,

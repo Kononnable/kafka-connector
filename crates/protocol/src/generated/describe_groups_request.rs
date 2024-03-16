@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeGroupsRequest {
     /// The names of the groups to describe
     pub groups: Vec<String>,
@@ -40,6 +40,13 @@ impl ApiRequest for DescribeGroupsRequest {
 
 impl DescribeGroupsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.groups != Vec::<String>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "groups",
+                _version,
+                "DescribeGroupsRequest",
+            ));
+        }
         Ok(())
     }
 }

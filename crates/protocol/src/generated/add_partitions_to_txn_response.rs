@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct AddPartitionsToTxnResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,25 +9,25 @@ pub struct AddPartitionsToTxnResponse {
     pub results: BTreeMap<AddPartitionsToTxnTopicResultKey, AddPartitionsToTxnTopicResult>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct AddPartitionsToTxnTopicResultKey {
     /// The topic name.
     pub name: String,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct AddPartitionsToTxnTopicResult {
     /// The results for each partition
     pub results: BTreeMap<AddPartitionsToTxnPartitionResultKey, AddPartitionsToTxnPartitionResult>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct AddPartitionsToTxnPartitionResultKey {
     /// The partition indexes.
     pub partition_index: i32,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct AddPartitionsToTxnPartitionResult {
     /// The response error code.
     pub error_code: i16,

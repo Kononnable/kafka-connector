@@ -1,12 +1,12 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct WriteTxnMarkersRequest {
     /// The transaction markers to be written.
     pub markers: Vec<WritableTxnMarker>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct WritableTxnMarker {
     /// The current producer ID.
     pub producer_id: i64,
@@ -24,7 +24,7 @@ pub struct WritableTxnMarker {
     pub coordinator_epoch: i32,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct WritableTxnMarkerTopic {
     /// The topic name.
     pub name: String,
@@ -67,6 +67,13 @@ impl ApiRequest for WriteTxnMarkersRequest {
 
 impl WriteTxnMarkersRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.markers != Vec::<WritableTxnMarker>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "markers",
+                _version,
+                "WriteTxnMarkersRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -85,6 +92,41 @@ impl ToBytes for WritableTxnMarker {
 
 impl WritableTxnMarker {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.producer_id != i64::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "producer_id",
+                _version,
+                "WritableTxnMarker",
+            ));
+        }
+        if self.producer_epoch != i16::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "producer_epoch",
+                _version,
+                "WritableTxnMarker",
+            ));
+        }
+        if self.transaction_result != bool::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "transaction_result",
+                _version,
+                "WritableTxnMarker",
+            ));
+        }
+        if self.topics != Vec::<WritableTxnMarkerTopic>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topics",
+                _version,
+                "WritableTxnMarker",
+            ));
+        }
+        if self.coordinator_epoch != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "coordinator_epoch",
+                _version,
+                "WritableTxnMarker",
+            ));
+        }
         Ok(())
     }
 }
@@ -100,6 +142,20 @@ impl ToBytes for WritableTxnMarkerTopic {
 
 impl WritableTxnMarkerTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "name",
+                _version,
+                "WritableTxnMarkerTopic",
+            ));
+        }
+        if self.partition_indexes != Vec::<i32>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partition_indexes",
+                _version,
+                "WritableTxnMarkerTopic",
+            ));
+        }
         Ok(())
     }
 }

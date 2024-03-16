@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeConfigsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct DescribeConfigsResponse {
     pub results: Vec<DescribeConfigsResult>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribeConfigsResult {
     /// The error code, or 0 if we were able to successfully describe the configurations.
     pub error_code: i16,
@@ -27,7 +27,7 @@ pub struct DescribeConfigsResult {
     pub configs: Vec<DescribeConfigsResourceResult>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct DescribeConfigsResourceResult {
     /// The configuration name.
     pub name: String,
@@ -51,7 +51,7 @@ pub struct DescribeConfigsResourceResult {
     pub synonyms: Vec<DescribeConfigsSynonym>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribeConfigsSynonym {
     /// The synonym name.
     pub name: String,

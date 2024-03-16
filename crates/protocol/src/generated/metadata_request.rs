@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct MetadataRequest {
     /// The topics to fetch metadata for.
     pub topics: Option<Vec<MetadataRequestTopic>>,
@@ -9,7 +9,7 @@ pub struct MetadataRequest {
     pub allow_auto_topic_creation: bool,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct MetadataRequestTopic {
     /// The topic name.
     pub name: String,
@@ -59,6 +59,20 @@ impl MetadataRequest {
                 "MetadataRequest",
             ));
         }
+        if self.topics.is_some() && self.topics != Some(Vec::<MetadataRequestTopic>::default()) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topics",
+                _version,
+                "MetadataRequest",
+            ));
+        }
+        if self.allow_auto_topic_creation != bool::default() && _version >= 4 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "allow_auto_topic_creation",
+                _version,
+                "MetadataRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -82,6 +96,13 @@ impl ToBytes for MetadataRequestTopic {
 
 impl MetadataRequestTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "name",
+                _version,
+                "MetadataRequestTopic",
+            ));
+        }
         Ok(())
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DeleteGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,13 +9,13 @@ pub struct DeleteGroupsResponse {
     pub results: BTreeMap<DeletableGroupResultKey, DeletableGroupResult>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct DeletableGroupResultKey {
     /// The group id
     pub group_id: String,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DeletableGroupResult {
     /// The deletion error, or 0 if the deletion succeeded.
     pub error_code: i16,

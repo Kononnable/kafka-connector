@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct CreateDelegationTokenResponse {
     /// The top-level error, or zero if there was no error.
     pub error_code: i16,

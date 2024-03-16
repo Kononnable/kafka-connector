@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct LeaderAndIsrResponse {
     /// The error code, or 0 if there was no error.
     pub error_code: i16,
@@ -9,7 +9,7 @@ pub struct LeaderAndIsrResponse {
     pub partitions: Vec<LeaderAndIsrResponsePartition>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct LeaderAndIsrResponsePartition {
     /// The topic name.
     pub topic_name: String,

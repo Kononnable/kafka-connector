@@ -1,12 +1,12 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct WriteTxnMarkersResponse {
     /// The results for writing makers.
     pub markers: Vec<WritableTxnMarkerResult>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct WritableTxnMarkerResult {
     /// The current producer ID in use by the transactional ID.
     pub producer_id: i64,
@@ -15,7 +15,7 @@ pub struct WritableTxnMarkerResult {
     pub topics: Vec<WritableTxnMarkerTopicResult>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct WritableTxnMarkerTopicResult {
     /// The topic name.
     pub name: String,
@@ -24,7 +24,7 @@ pub struct WritableTxnMarkerTopicResult {
     pub partitions: Vec<WritableTxnMarkerPartitionResult>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct WritableTxnMarkerPartitionResult {
     /// The partition index.
     pub partition_index: i32,

@@ -1,30 +1,30 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct AlterReplicaLogDirsRequest {
     /// The alterations to make for each directory.
     pub dirs: BTreeMap<AlterReplicaLogDirKey, AlterReplicaLogDir>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct AlterReplicaLogDirKey {
     /// The absolute directory path.
     pub path: String,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct AlterReplicaLogDir {
     /// The topics to add to the directory.
     pub topics: BTreeMap<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct AlterReplicaLogDirTopicKey {
     /// The topic name.
     pub name: String,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct AlterReplicaLogDirTopic {
     /// The partition indexes.
     pub partitions: Vec<i32>,
@@ -64,6 +64,13 @@ impl ApiRequest for AlterReplicaLogDirsRequest {
 
 impl AlterReplicaLogDirsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.dirs != BTreeMap::<AlterReplicaLogDirKey, AlterReplicaLogDir>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "dirs",
+                _version,
+                "AlterReplicaLogDirsRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -78,6 +85,13 @@ impl ToBytes for AlterReplicaLogDirKey {
 
 impl AlterReplicaLogDirKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.path != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "path",
+                _version,
+                "AlterReplicaLogDirKey",
+            ));
+        }
         Ok(())
     }
 }
@@ -92,6 +106,14 @@ impl ToBytes for AlterReplicaLogDir {
 
 impl AlterReplicaLogDir {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.topics != BTreeMap::<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic>::default()
+        {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topics",
+                _version,
+                "AlterReplicaLogDir",
+            ));
+        }
         Ok(())
     }
 }
@@ -106,6 +128,13 @@ impl ToBytes for AlterReplicaLogDirTopicKey {
 
 impl AlterReplicaLogDirTopicKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "name",
+                _version,
+                "AlterReplicaLogDirTopicKey",
+            ));
+        }
         Ok(())
     }
 }
@@ -120,6 +149,13 @@ impl ToBytes for AlterReplicaLogDirTopic {
 
 impl AlterReplicaLogDirTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.partitions != Vec::<i32>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partitions",
+                _version,
+                "AlterReplicaLogDirTopic",
+            ));
+        }
         Ok(())
     }
 }

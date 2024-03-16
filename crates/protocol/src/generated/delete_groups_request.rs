@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DeleteGroupsRequest {
     /// The group names to delete.
     pub groups_names: Vec<String>,
@@ -40,6 +40,13 @@ impl ApiRequest for DeleteGroupsRequest {
 
 impl DeleteGroupsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.groups_names != Vec::<String>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "groups_names",
+                _version,
+                "DeleteGroupsRequest",
+            ));
+        }
         Ok(())
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -15,7 +15,7 @@ pub struct DescribeAclsResponse {
     pub resources: Vec<DescribeAclsResource>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct DescribeAclsResource {
     /// The resource type.
     pub r#type: i8,
@@ -30,7 +30,7 @@ pub struct DescribeAclsResource {
     pub acls: Vec<AclDescription>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct AclDescription {
     /// The ACL principal.
     pub principal: String,

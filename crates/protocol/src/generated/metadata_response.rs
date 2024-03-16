@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct MetadataResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -18,13 +18,13 @@ pub struct MetadataResponse {
     pub topics: BTreeMap<MetadataResponseTopicKey, MetadataResponseTopic>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct MetadataResponseBrokerKey {
     /// The broker ID.
     pub node_id: i32,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct MetadataResponseBroker {
     /// The broker hostname.
     pub host: String,
@@ -36,13 +36,13 @@ pub struct MetadataResponseBroker {
     pub rack: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct MetadataResponseTopicKey {
     /// The topic name.
     pub name: String,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct MetadataResponseTopic {
     /// The topic error, or 0 if there was no error.
     pub error_code: i16,
@@ -54,7 +54,7 @@ pub struct MetadataResponseTopic {
     pub partitions: Vec<MetadataResponsePartition>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct MetadataResponsePartition {
     /// The partition error, or 0 if there was no error.
     pub error_code: i16,

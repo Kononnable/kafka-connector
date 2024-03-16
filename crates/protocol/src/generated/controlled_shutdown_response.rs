@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ControlledShutdownResponse {
     /// The top-level error code.
     pub error_code: i16,
@@ -9,7 +9,7 @@ pub struct ControlledShutdownResponse {
     pub remaining_partitions: BTreeSet<RemainingPartition>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct RemainingPartition {
     /// The name of the topic.
     pub topic_name: String,

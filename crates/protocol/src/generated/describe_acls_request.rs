@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct DescribeAclsRequest {
     /// The resource type.
     pub resource_type: i8,
@@ -83,6 +83,57 @@ impl DescribeAclsRequest {
         if self.host_filter.is_none() {
             return Err(SerializationError::NullValue(
                 "host_filter",
+                _version,
+                "DescribeAclsRequest",
+            ));
+        }
+        if self.resource_type != i8::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "resource_type",
+                _version,
+                "DescribeAclsRequest",
+            ));
+        }
+        if self.resource_name_filter.is_some()
+            && self.resource_name_filter != Some(String::default())
+        {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "resource_name_filter",
+                _version,
+                "DescribeAclsRequest",
+            ));
+        }
+        if self.resource_pattern_type != i8::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "resource_pattern_type",
+                _version,
+                "DescribeAclsRequest",
+            ));
+        }
+        if self.principal_filter.is_some() && self.principal_filter != Some(String::default()) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "principal_filter",
+                _version,
+                "DescribeAclsRequest",
+            ));
+        }
+        if self.host_filter.is_some() && self.host_filter != Some(String::default()) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "host_filter",
+                _version,
+                "DescribeAclsRequest",
+            ));
+        }
+        if self.operation != i8::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "operation",
+                _version,
+                "DescribeAclsRequest",
+            ));
+        }
+        if self.permission_type != i8::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "permission_type",
                 _version,
                 "DescribeAclsRequest",
             ));

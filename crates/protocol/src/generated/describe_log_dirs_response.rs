@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeLogDirsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct DescribeLogDirsResponse {
     pub results: Vec<DescribeLogDirsResult>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribeLogDirsResult {
     /// The error code, or 0 if there was no error.
     pub error_code: i16,
@@ -21,7 +21,7 @@ pub struct DescribeLogDirsResult {
     pub topics: Vec<DescribeLogDirsTopic>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribeLogDirsTopic {
     /// The topic name.
     pub name: String,
@@ -29,7 +29,7 @@ pub struct DescribeLogDirsTopic {
     pub partitions: Vec<DescribeLogDirsPartition>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribeLogDirsPartition {
     /// The partition index.
     pub partition_index: i32,

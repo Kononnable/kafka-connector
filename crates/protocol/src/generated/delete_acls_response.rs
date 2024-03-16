@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DeleteAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct DeleteAclsResponse {
     pub filter_results: Vec<DeleteAclsFilterResult>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DeleteAclsFilterResult {
     /// The error code, or 0 if the filter succeeded.
     pub error_code: i16,
@@ -21,7 +21,7 @@ pub struct DeleteAclsFilterResult {
     pub matching_acls: Vec<DeleteAclsMatchingAcl>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct DeleteAclsMatchingAcl {
     /// The deletion error code, or 0 if the deletion succeeded.
     pub error_code: i16,

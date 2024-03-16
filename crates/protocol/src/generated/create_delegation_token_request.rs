@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct CreateDelegationTokenRequest {
     /// A list of those who are allowed to renew this token before it expires.
     pub renewers: Vec<CreatableRenewers>,
@@ -9,7 +9,7 @@ pub struct CreateDelegationTokenRequest {
     pub max_lifetime_ms: i64,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct CreatableRenewers {
     /// The type of the Kafka principal.
     pub principal_type: String,
@@ -53,6 +53,20 @@ impl ApiRequest for CreateDelegationTokenRequest {
 
 impl CreateDelegationTokenRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.renewers != Vec::<CreatableRenewers>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "renewers",
+                _version,
+                "CreateDelegationTokenRequest",
+            ));
+        }
+        if self.max_lifetime_ms != i64::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "max_lifetime_ms",
+                _version,
+                "CreateDelegationTokenRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -68,6 +82,20 @@ impl ToBytes for CreatableRenewers {
 
 impl CreatableRenewers {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.principal_type != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "principal_type",
+                _version,
+                "CreatableRenewers",
+            ));
+        }
+        if self.principal_name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "principal_name",
+                _version,
+                "CreatableRenewers",
+            ));
+        }
         Ok(())
     }
 }

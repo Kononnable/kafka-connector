@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct JoinGroupRequest {
     /// The group identifier.
     pub group_id: String,
@@ -21,13 +21,13 @@ pub struct JoinGroupRequest {
     pub protocols: BTreeMap<JoinGroupRequestProtocolKey, JoinGroupRequestProtocol>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct JoinGroupRequestProtocolKey {
     /// The protocol name.
     pub name: String,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct JoinGroupRequestProtocol {
     /// The protocol metadata.
     pub metadata: Vec<u8>,
@@ -74,6 +74,43 @@ impl ApiRequest for JoinGroupRequest {
 
 impl JoinGroupRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.group_id != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "group_id",
+                _version,
+                "JoinGroupRequest",
+            ));
+        }
+        if self.session_timeout_ms != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "session_timeout_ms",
+                _version,
+                "JoinGroupRequest",
+            ));
+        }
+        if self.member_id != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "member_id",
+                _version,
+                "JoinGroupRequest",
+            ));
+        }
+        if self.protocol_type != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "protocol_type",
+                _version,
+                "JoinGroupRequest",
+            ));
+        }
+        if self.protocols
+            != BTreeMap::<JoinGroupRequestProtocolKey, JoinGroupRequestProtocol>::default()
+        {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "protocols",
+                _version,
+                "JoinGroupRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -101,6 +138,13 @@ impl ToBytes for JoinGroupRequestProtocolKey {
 
 impl JoinGroupRequestProtocolKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "name",
+                _version,
+                "JoinGroupRequestProtocolKey",
+            ));
+        }
         Ok(())
     }
 }
@@ -115,6 +159,13 @@ impl ToBytes for JoinGroupRequestProtocol {
 
 impl JoinGroupRequestProtocol {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.metadata != Vec::<u8>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "metadata",
+                _version,
+                "JoinGroupRequestProtocol",
+            ));
+        }
         Ok(())
     }
 }

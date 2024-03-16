@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct UpdateMetadataRequest {
     /// The controller id.
     pub controller_id: i32,
@@ -20,7 +20,7 @@ pub struct UpdateMetadataRequest {
     pub brokers: Vec<UpdateMetadataRequestBroker>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct UpdateMetadataRequestTopicState {
     /// The topic name.
     pub topic_name: String,
@@ -29,7 +29,7 @@ pub struct UpdateMetadataRequestTopicState {
     pub partition_states: Vec<UpdateMetadataPartitionState>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct UpdateMetadataRequestPartitionStateV0 {
     /// The topic name.
     pub topic_name: String,
@@ -59,7 +59,7 @@ pub struct UpdateMetadataRequestPartitionStateV0 {
     pub offline_replicas: Vec<i32>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct UpdateMetadataRequestBroker {
     pub id: i32,
 
@@ -76,7 +76,7 @@ pub struct UpdateMetadataRequestBroker {
     pub rack: Option<String>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct UpdateMetadataPartitionState {
     /// The partition index.
     pub partition_index: i32,
@@ -103,7 +103,7 @@ pub struct UpdateMetadataPartitionState {
     pub offline_replicas: Vec<i32>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct UpdateMetadataRequestEndpoint {
     /// The port of this endpoint
     pub port: i32,
@@ -163,6 +163,43 @@ impl ApiRequest for UpdateMetadataRequest {
 
 impl UpdateMetadataRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.controller_id != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "controller_id",
+                _version,
+                "UpdateMetadataRequest",
+            ));
+        }
+        if self.controller_epoch != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "controller_epoch",
+                _version,
+                "UpdateMetadataRequest",
+            ));
+        }
+        if self.topic_states != Vec::<UpdateMetadataRequestTopicState>::default() && _version >= 5 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topic_states",
+                _version,
+                "UpdateMetadataRequest",
+            ));
+        }
+        if self.partition_states_v_0 != Vec::<UpdateMetadataRequestPartitionStateV0>::default()
+            && !(0..=4).contains(&_version)
+        {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partition_states_v_0",
+                _version,
+                "UpdateMetadataRequest",
+            ));
+        }
+        if self.brokers != Vec::<UpdateMetadataRequestBroker>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "brokers",
+                _version,
+                "UpdateMetadataRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -193,6 +230,21 @@ impl ToBytes for UpdateMetadataRequestTopicState {
 
 impl UpdateMetadataRequestTopicState {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.topic_name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topic_name",
+                _version,
+                "UpdateMetadataRequestTopicState",
+            ));
+        }
+        if self.partition_states != Vec::<UpdateMetadataPartitionState>::default() && _version >= 5
+        {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partition_states",
+                _version,
+                "UpdateMetadataRequestTopicState",
+            ));
+        }
         Ok(())
     }
 }
@@ -233,6 +285,69 @@ impl ToBytes for UpdateMetadataRequestPartitionStateV0 {
 
 impl UpdateMetadataRequestPartitionStateV0 {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.topic_name != String::default() && !(0..=4).contains(&_version) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topic_name",
+                _version,
+                "UpdateMetadataRequestPartitionStateV0",
+            ));
+        }
+        if self.partition_index != i32::default() && !(0..=4).contains(&_version) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partition_index",
+                _version,
+                "UpdateMetadataRequestPartitionStateV0",
+            ));
+        }
+        if self.controller_epoch != i32::default() && !(0..=4).contains(&_version) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "controller_epoch",
+                _version,
+                "UpdateMetadataRequestPartitionStateV0",
+            ));
+        }
+        if self.leader != i32::default() && !(0..=4).contains(&_version) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "leader",
+                _version,
+                "UpdateMetadataRequestPartitionStateV0",
+            ));
+        }
+        if self.leader_epoch != i32::default() && !(0..=4).contains(&_version) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "leader_epoch",
+                _version,
+                "UpdateMetadataRequestPartitionStateV0",
+            ));
+        }
+        if self.isr != Vec::<i32>::default() && !(0..=4).contains(&_version) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "isr",
+                _version,
+                "UpdateMetadataRequestPartitionStateV0",
+            ));
+        }
+        if self.zk_version != i32::default() && !(0..=4).contains(&_version) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "zk_version",
+                _version,
+                "UpdateMetadataRequestPartitionStateV0",
+            ));
+        }
+        if self.replicas != Vec::<i32>::default() && !(0..=4).contains(&_version) {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "replicas",
+                _version,
+                "UpdateMetadataRequestPartitionStateV0",
+            ));
+        }
+        if self.offline_replicas != Vec::<i32>::default() && _version >= 4 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "offline_replicas",
+                _version,
+                "UpdateMetadataRequestPartitionStateV0",
+            ));
+        }
         Ok(())
     }
 }
@@ -262,6 +377,20 @@ impl UpdateMetadataRequestBroker {
         if self.rack.is_none() && !_version >= 2 {
             return Err(SerializationError::NullValue(
                 "rack",
+                _version,
+                "UpdateMetadataRequestBroker",
+            ));
+        }
+        if self.id != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "id",
+                _version,
+                "UpdateMetadataRequestBroker",
+            ));
+        }
+        if self.endpoints != Vec::<UpdateMetadataRequestEndpoint>::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "endpoints",
                 _version,
                 "UpdateMetadataRequestBroker",
             ));
@@ -303,6 +432,62 @@ impl ToBytes for UpdateMetadataPartitionState {
 
 impl UpdateMetadataPartitionState {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.partition_index != i32::default() && _version >= 5 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partition_index",
+                _version,
+                "UpdateMetadataPartitionState",
+            ));
+        }
+        if self.controller_epoch != i32::default() && _version >= 5 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "controller_epoch",
+                _version,
+                "UpdateMetadataPartitionState",
+            ));
+        }
+        if self.leader != i32::default() && _version >= 5 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "leader",
+                _version,
+                "UpdateMetadataPartitionState",
+            ));
+        }
+        if self.leader_epoch != i32::default() && _version >= 5 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "leader_epoch",
+                _version,
+                "UpdateMetadataPartitionState",
+            ));
+        }
+        if self.isr != Vec::<i32>::default() && _version >= 5 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "isr",
+                _version,
+                "UpdateMetadataPartitionState",
+            ));
+        }
+        if self.zk_version != i32::default() && _version >= 5 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "zk_version",
+                _version,
+                "UpdateMetadataPartitionState",
+            ));
+        }
+        if self.replicas != Vec::<i32>::default() && _version >= 5 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "replicas",
+                _version,
+                "UpdateMetadataPartitionState",
+            ));
+        }
+        if self.offline_replicas != Vec::<i32>::default() && _version >= 5 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "offline_replicas",
+                _version,
+                "UpdateMetadataPartitionState",
+            ));
+        }
         Ok(())
     }
 }
@@ -328,6 +513,34 @@ impl ToBytes for UpdateMetadataRequestEndpoint {
 
 impl UpdateMetadataRequestEndpoint {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.port != i32::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "port",
+                _version,
+                "UpdateMetadataRequestEndpoint",
+            ));
+        }
+        if self.host != String::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "host",
+                _version,
+                "UpdateMetadataRequestEndpoint",
+            ));
+        }
+        if self.listener != String::default() && _version >= 3 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "listener",
+                _version,
+                "UpdateMetadataRequestEndpoint",
+            ));
+        }
+        if self.security_protocol != i16::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "security_protocol",
+                _version,
+                "UpdateMetadataRequestEndpoint",
+            ));
+        }
         Ok(())
     }
 }

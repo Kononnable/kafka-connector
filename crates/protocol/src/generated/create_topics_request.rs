@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct CreateTopicsRequest {
     /// The topics to create.
     pub topics: Vec<CreatableTopic>,
@@ -12,7 +12,7 @@ pub struct CreateTopicsRequest {
     pub validate_only: bool,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct CreatableTopic {
     /// The topic name.
     pub name: String,
@@ -30,25 +30,25 @@ pub struct CreatableTopic {
     pub configs: BTreeMap<CreateableTopicConfigKey, CreateableTopicConfig>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct CreatableReplicaAssignmentKey {
     /// The partition index.
     pub partition_index: i32,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct CreatableReplicaAssignment {
     /// The brokers to place the partition on.
     pub broker_ids: Vec<i32>,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct CreateableTopicConfigKey {
     /// The configuration name.
     pub name: String,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct CreateableTopicConfig {
     /// The configuration value.
     pub value: Option<String>,
@@ -92,6 +92,27 @@ impl ApiRequest for CreateTopicsRequest {
 
 impl CreateTopicsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.topics != Vec::<CreatableTopic>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topics",
+                _version,
+                "CreateTopicsRequest",
+            ));
+        }
+        if self.timeout_ms != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "timeout_ms",
+                _version,
+                "CreateTopicsRequest",
+            ));
+        }
+        if self.validate_only != bool::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "validate_only",
+                _version,
+                "CreateTopicsRequest",
+            ));
+        }
         Ok(())
     }
 }
@@ -110,6 +131,43 @@ impl ToBytes for CreatableTopic {
 
 impl CreatableTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "name",
+                _version,
+                "CreatableTopic",
+            ));
+        }
+        if self.num_partitions != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "num_partitions",
+                _version,
+                "CreatableTopic",
+            ));
+        }
+        if self.replication_factor != i16::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "replication_factor",
+                _version,
+                "CreatableTopic",
+            ));
+        }
+        if self.assignments
+            != BTreeMap::<CreatableReplicaAssignmentKey, CreatableReplicaAssignment>::default()
+        {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "assignments",
+                _version,
+                "CreatableTopic",
+            ));
+        }
+        if self.configs != BTreeMap::<CreateableTopicConfigKey, CreateableTopicConfig>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "configs",
+                _version,
+                "CreatableTopic",
+            ));
+        }
         Ok(())
     }
 }
@@ -124,6 +182,13 @@ impl ToBytes for CreatableReplicaAssignmentKey {
 
 impl CreatableReplicaAssignmentKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.partition_index != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "partition_index",
+                _version,
+                "CreatableReplicaAssignmentKey",
+            ));
+        }
         Ok(())
     }
 }
@@ -138,6 +203,13 @@ impl ToBytes for CreatableReplicaAssignment {
 
 impl CreatableReplicaAssignment {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.broker_ids != Vec::<i32>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "broker_ids",
+                _version,
+                "CreatableReplicaAssignment",
+            ));
+        }
         Ok(())
     }
 }
@@ -152,6 +224,13 @@ impl ToBytes for CreateableTopicConfigKey {
 
 impl CreateableTopicConfigKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.name != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "name",
+                _version,
+                "CreateableTopicConfigKey",
+            ));
+        }
         Ok(())
     }
 }
@@ -168,6 +247,13 @@ impl CreateableTopicConfig {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         if self.value.is_none() {
             return Err(SerializationError::NullValue(
+                "value",
+                _version,
+                "CreateableTopicConfig",
+            ));
+        }
+        if self.value.is_some() && self.value != Some(String::default()) {
+            return Err(SerializationError::NonIgnorableFieldSet(
                 "value",
                 _version,
                 "CreateableTopicConfig",

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DeleteTopicsRequest {
     /// The names of the topics to delete
     pub topic_names: Vec<String>,
@@ -44,6 +44,20 @@ impl ApiRequest for DeleteTopicsRequest {
 
 impl DeleteTopicsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.topic_names != Vec::<String>::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "topic_names",
+                _version,
+                "DeleteTopicsRequest",
+            ));
+        }
+        if self.timeout_ms != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "timeout_ms",
+                _version,
+                "DeleteTopicsRequest",
+            ));
+        }
         Ok(())
     }
 }

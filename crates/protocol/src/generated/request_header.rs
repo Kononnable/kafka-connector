@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct RequestHeader {
     /// The API key of this request.
     pub request_api_key: i16,
@@ -38,6 +38,34 @@ impl RequestHeader {
 
 impl RequestHeader {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.request_api_key != i16::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "request_api_key",
+                _version,
+                "RequestHeader",
+            ));
+        }
+        if self.request_api_version != i16::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "request_api_version",
+                _version,
+                "RequestHeader",
+            ));
+        }
+        if self.correlation_id != i32::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "correlation_id",
+                _version,
+                "RequestHeader",
+            ));
+        }
+        if self.client_id != String::default() {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "client_id",
+                _version,
+                "RequestHeader",
+            ));
+        }
         Ok(())
     }
 }

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ProduceResponse {
     /// Each produce response
     pub responses: Vec<TopicProduceResponse>,
@@ -9,7 +9,7 @@ pub struct ProduceResponse {
     pub throttle_time_ms: i32,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct TopicProduceResponse {
     /// The topic name
     pub name: String,
@@ -18,7 +18,7 @@ pub struct TopicProduceResponse {
     pub partitions: Vec<PartitionProduceResponse>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct PartitionProduceResponse {
     /// The partition index.
     pub partition_index: i32,

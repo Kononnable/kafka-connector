@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct FetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -15,7 +15,7 @@ pub struct FetchResponse {
     pub topics: Vec<FetchableTopicResponse>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct FetchableTopicResponse {
     /// The topic name.
     pub name: String,
@@ -24,7 +24,7 @@ pub struct FetchableTopicResponse {
     pub partitions: Vec<FetchablePartitionResponse>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FetchablePartitionResponse {
     /// The partiiton index.
     pub partition_index: i32,
@@ -48,7 +48,7 @@ pub struct FetchablePartitionResponse {
     pub records: Option<Vec<u8>>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct AbortedTransaction {
     /// The producer id associated with the aborted transaction.
     pub producer_id: i64,

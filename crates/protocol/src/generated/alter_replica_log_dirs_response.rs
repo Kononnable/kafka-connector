@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct AlterReplicaLogDirsResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct AlterReplicaLogDirsResponse {
     pub results: Vec<AlterReplicaLogDirTopicResult>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct AlterReplicaLogDirTopicResult {
     /// The name of the topic.
     pub topic_name: String,
@@ -18,7 +18,7 @@ pub struct AlterReplicaLogDirTopicResult {
     pub partitions: Vec<AlterReplicaLogDirPartitionResult>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct AlterReplicaLogDirPartitionResult {
     /// The partition index.
     pub partition_index: i32,

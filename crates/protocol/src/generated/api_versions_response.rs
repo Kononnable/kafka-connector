@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ApiVersionsResponse {
     /// The top-level error code.
     pub error_code: i16,
@@ -12,13 +12,13 @@ pub struct ApiVersionsResponse {
     pub throttle_time_ms: i32,
 }
 
-#[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct ApiVersionsResponseKeyKey {
     /// The API index.
     pub index: i16,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct ApiVersionsResponseKey {
     /// The minimum supported version, inclusive.
     pub min_version: i16,

@@ -1,6 +1,6 @@
 use super::super::prelude::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DeleteRecordsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
@@ -9,7 +9,7 @@ pub struct DeleteRecordsResponse {
     pub topics: Vec<DeleteRecordsTopicResult>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DeleteRecordsTopicResult {
     /// The topic name.
     pub name: String,
@@ -18,7 +18,7 @@ pub struct DeleteRecordsTopicResult {
     pub partitions: Vec<DeleteRecordsPartitionResult>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DeleteRecordsPartitionResult {
     /// The partition index.
     pub partition_index: i32,
