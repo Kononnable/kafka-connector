@@ -12,10 +12,10 @@ pub struct AddPartitionsToTxnRequest {
     pub producer_epoch: i16,
 
     /// The partitions to add to the transation.
-    pub topics: BTreeMap<AddPartitionsToTxnTopicKey, AddPartitionsToTxnTopic>,
+    pub topics: IndexMap<AddPartitionsToTxnTopicKey, AddPartitionsToTxnTopic>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct AddPartitionsToTxnTopicKey {
     /// The name of the topic.
     pub name: String,
@@ -85,7 +85,7 @@ impl AddPartitionsToTxnRequest {
                 "AddPartitionsToTxnRequest",
             ));
         }
-        if self.topics != BTreeMap::<AddPartitionsToTxnTopicKey, AddPartitionsToTxnTopic>::default()
+        if self.topics != IndexMap::<AddPartitionsToTxnTopicKey, AddPartitionsToTxnTopic>::default()
         {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "topics",

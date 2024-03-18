@@ -6,7 +6,7 @@ pub struct MetadataResponse {
     pub throttle_time_ms: i32,
 
     /// Each broker in the response.
-    pub brokers: BTreeMap<MetadataResponseBrokerKey, MetadataResponseBroker>,
+    pub brokers: IndexMap<MetadataResponseBrokerKey, MetadataResponseBroker>,
 
     /// The cluster ID that responding broker belongs to.
     pub cluster_id: Option<String>,
@@ -15,10 +15,10 @@ pub struct MetadataResponse {
     pub controller_id: i32,
 
     /// Each topic in the response.
-    pub topics: BTreeMap<MetadataResponseTopicKey, MetadataResponseTopic>,
+    pub topics: IndexMap<MetadataResponseTopicKey, MetadataResponseTopic>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct MetadataResponseBrokerKey {
     /// The broker ID.
     pub node_id: i32,
@@ -36,7 +36,7 @@ pub struct MetadataResponseBroker {
     pub rack: Option<String>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct MetadataResponseTopicKey {
     /// The topic name.
     pub name: String,
@@ -86,7 +86,7 @@ impl ApiResponse for MetadataResponse {
         } else {
             Default::default()
         };
-        let brokers = BTreeMap::<MetadataResponseBrokerKey, MetadataResponseBroker>::deserialize(
+        let brokers = IndexMap::<MetadataResponseBrokerKey, MetadataResponseBroker>::deserialize(
             version, bytes,
         );
         let cluster_id = if version >= 2 {
@@ -99,7 +99,7 @@ impl ApiResponse for MetadataResponse {
         } else {
             Default::default()
         };
-        let topics = BTreeMap::<MetadataResponseTopicKey, MetadataResponseTopic>::deserialize(
+        let topics = IndexMap::<MetadataResponseTopicKey, MetadataResponseTopic>::deserialize(
             version, bytes,
         );
         (

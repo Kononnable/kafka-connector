@@ -18,10 +18,10 @@ pub struct JoinGroupRequest {
     pub protocol_type: String,
 
     /// The list of protocols that the member supports.
-    pub protocols: BTreeMap<JoinGroupRequestProtocolKey, JoinGroupRequestProtocol>,
+    pub protocols: IndexMap<JoinGroupRequestProtocolKey, JoinGroupRequestProtocol>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct JoinGroupRequestProtocolKey {
     /// The protocol name.
     pub name: String,
@@ -103,7 +103,7 @@ impl JoinGroupRequest {
             ));
         }
         if self.protocols
-            != BTreeMap::<JoinGroupRequestProtocolKey, JoinGroupRequestProtocol>::default()
+            != IndexMap::<JoinGroupRequestProtocolKey, JoinGroupRequestProtocol>::default()
         {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "protocols",

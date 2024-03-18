@@ -60,7 +60,7 @@ fn transform_map_key_field(field: &mut ApiSpecField) {
         if !keys.is_empty() {
             field.fields = subfields;
             field.type_.is_array = false;
-            field.type_.type_ = ApiSpecFieldSubtype::BTreeMap {
+            field.type_.type_ = ApiSpecFieldSubtype::Map {
                 name: name.to_owned(),
                 keys,
             };

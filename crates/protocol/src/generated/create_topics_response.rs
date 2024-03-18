@@ -6,10 +6,10 @@ pub struct CreateTopicsResponse {
     pub throttle_time_ms: i32,
 
     /// Results for each topic we tried to create.
-    pub topics: BTreeMap<CreatableTopicResultKey, CreatableTopicResult>,
+    pub topics: IndexMap<CreatableTopicResultKey, CreatableTopicResult>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct CreatableTopicResultKey {
     /// The topic name.
     pub name: String,
@@ -33,7 +33,7 @@ impl ApiResponse for CreateTopicsResponse {
             Default::default()
         };
         let topics =
-            BTreeMap::<CreatableTopicResultKey, CreatableTopicResult>::deserialize(version, bytes);
+            IndexMap::<CreatableTopicResultKey, CreatableTopicResult>::deserialize(version, bytes);
         (
             header,
             CreateTopicsResponse {

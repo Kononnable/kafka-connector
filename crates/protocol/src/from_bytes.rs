@@ -1,19 +1,20 @@
 use bytes::Bytes;
-use std::collections::{BTreeMap, BTreeSet};
+use indexmap::{IndexMap, IndexSet};
+use std::hash::Hash;
 use std::mem::size_of;
 
 pub trait FromBytes {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self;
 }
 
-impl<K, V> FromBytes for BTreeMap<K, V>
+impl<K, V> FromBytes for IndexMap<K, V>
 where
-    K: FromBytes + Ord,
+    K: FromBytes + Hash + Eq,
     V: FromBytes,
 {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let cap: i32 = FromBytes::deserialize(version, bytes);
-        let mut ret = BTreeMap::new();
+        let mut ret = IndexMap::new();
         for _i in 0..cap {
             let key = FromBytes::deserialize(version, bytes);
             let value = FromBytes::deserialize(version, bytes);
@@ -23,13 +24,13 @@ where
     }
 }
 
-impl<K> FromBytes for BTreeSet<K>
+impl<K> FromBytes for IndexSet<K>
 where
-    K: FromBytes + Ord,
+    K: FromBytes + Hash + Eq,
 {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
         let cap: i32 = FromBytes::deserialize(version, bytes);
-        let mut ret = BTreeSet::new();
+        let mut ret = IndexSet::new();
         for _i in 0..cap {
             let key = FromBytes::deserialize(version, bytes);
             ret.insert(key);

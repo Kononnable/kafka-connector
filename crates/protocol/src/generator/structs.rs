@@ -35,7 +35,7 @@ pub enum ApiSpecFieldSubtype {
     Int64,
     String,
     SubObject(String),
-    BTreeMap {
+    Map {
         name: String,
         keys: Vec<ApiSpecField>,
     },

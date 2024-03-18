@@ -3,13 +3,13 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct AlterConfigsRequest {
     /// The updates for each resource.
-    pub resources: BTreeMap<AlterConfigsResourceKey, AlterConfigsResource>,
+    pub resources: IndexMap<AlterConfigsResourceKey, AlterConfigsResource>,
 
     /// True if we should validate the request, but not change the configurations.
     pub validate_only: bool,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct AlterConfigsResourceKey {
     /// The resource type.
     pub resource_type: i8,
@@ -21,10 +21,10 @@ pub struct AlterConfigsResourceKey {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct AlterConfigsResource {
     /// The configurations.
-    pub configs: BTreeMap<AlterableConfigKey, AlterableConfig>,
+    pub configs: IndexMap<AlterableConfigKey, AlterableConfig>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct AlterableConfigKey {
     /// The configuration key name.
     pub name: String,
@@ -71,7 +71,7 @@ impl ApiRequest for AlterConfigsRequest {
 
 impl AlterConfigsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.resources != BTreeMap::<AlterConfigsResourceKey, AlterConfigsResource>::default() {
+        if self.resources != IndexMap::<AlterConfigsResourceKey, AlterConfigsResource>::default() {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "resources",
                 _version,
@@ -128,7 +128,7 @@ impl ToBytes for AlterConfigsResource {
 
 impl AlterConfigsResource {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.configs != BTreeMap::<AlterableConfigKey, AlterableConfig>::default() {
+        if self.configs != IndexMap::<AlterableConfigKey, AlterableConfig>::default() {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "configs",
                 _version,

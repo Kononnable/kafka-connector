@@ -6,10 +6,10 @@ pub struct AddPartitionsToTxnResponse {
     pub throttle_time_ms: i32,
 
     /// The results for each topic.
-    pub results: BTreeMap<AddPartitionsToTxnTopicResultKey, AddPartitionsToTxnTopicResult>,
+    pub results: IndexMap<AddPartitionsToTxnTopicResultKey, AddPartitionsToTxnTopicResult>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct AddPartitionsToTxnTopicResultKey {
     /// The topic name.
     pub name: String,
@@ -18,10 +18,10 @@ pub struct AddPartitionsToTxnTopicResultKey {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct AddPartitionsToTxnTopicResult {
     /// The results for each partition
-    pub results: BTreeMap<AddPartitionsToTxnPartitionResultKey, AddPartitionsToTxnPartitionResult>,
+    pub results: IndexMap<AddPartitionsToTxnPartitionResultKey, AddPartitionsToTxnPartitionResult>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct AddPartitionsToTxnPartitionResultKey {
     /// The partition indexes.
     pub partition_index: i32,
@@ -37,7 +37,7 @@ impl ApiResponse for AddPartitionsToTxnResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
-        let results = BTreeMap::<AddPartitionsToTxnTopicResultKey,AddPartitionsToTxnTopicResult>::deserialize(version, bytes)
+        let results = IndexMap::<AddPartitionsToTxnTopicResultKey,AddPartitionsToTxnTopicResult>::deserialize(version, bytes)
 ;
         (
             header,
@@ -58,7 +58,7 @@ impl FromBytes for AddPartitionsToTxnTopicResultKey {
 
 impl FromBytes for AddPartitionsToTxnTopicResult {
     fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
-        let results = BTreeMap::<
+        let results = IndexMap::<
             AddPartitionsToTxnPartitionResultKey,
             AddPartitionsToTxnPartitionResult,
         >::deserialize(version, bytes);

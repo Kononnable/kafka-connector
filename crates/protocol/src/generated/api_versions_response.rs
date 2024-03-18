@@ -6,13 +6,13 @@ pub struct ApiVersionsResponse {
     pub error_code: i16,
 
     /// The APIs supported by the broker.
-    pub api_keys: BTreeMap<ApiVersionsResponseKeyKey, ApiVersionsResponseKey>,
+    pub api_keys: IndexMap<ApiVersionsResponseKeyKey, ApiVersionsResponseKey>,
 
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     pub throttle_time_ms: i32,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct ApiVersionsResponseKeyKey {
     /// The API index.
     pub index: i16,
@@ -31,7 +31,7 @@ impl ApiResponse for ApiVersionsResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let error_code = i16::deserialize(version, bytes);
-        let api_keys = BTreeMap::<ApiVersionsResponseKeyKey, ApiVersionsResponseKey>::deserialize(
+        let api_keys = IndexMap::<ApiVersionsResponseKeyKey, ApiVersionsResponseKey>::deserialize(
             version, bytes,
         );
         let throttle_time_ms = if version >= 1 {

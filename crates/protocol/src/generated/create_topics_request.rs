@@ -24,13 +24,13 @@ pub struct CreatableTopic {
     pub replication_factor: i16,
 
     /// The manual partition assignment, or the empty array if we are using automatic assignment.
-    pub assignments: BTreeMap<CreatableReplicaAssignmentKey, CreatableReplicaAssignment>,
+    pub assignments: IndexMap<CreatableReplicaAssignmentKey, CreatableReplicaAssignment>,
 
     /// The custom topic configurations to set.
-    pub configs: BTreeMap<CreateableTopicConfigKey, CreateableTopicConfig>,
+    pub configs: IndexMap<CreateableTopicConfigKey, CreateableTopicConfig>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct CreatableReplicaAssignmentKey {
     /// The partition index.
     pub partition_index: i32,
@@ -42,7 +42,7 @@ pub struct CreatableReplicaAssignment {
     pub broker_ids: Vec<i32>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct CreateableTopicConfigKey {
     /// The configuration name.
     pub name: String,
@@ -153,7 +153,7 @@ impl CreatableTopic {
             ));
         }
         if self.assignments
-            != BTreeMap::<CreatableReplicaAssignmentKey, CreatableReplicaAssignment>::default()
+            != IndexMap::<CreatableReplicaAssignmentKey, CreatableReplicaAssignment>::default()
         {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "assignments",
@@ -161,7 +161,7 @@ impl CreatableTopic {
                 "CreatableTopic",
             ));
         }
-        if self.configs != BTreeMap::<CreateableTopicConfigKey, CreateableTopicConfig>::default() {
+        if self.configs != IndexMap::<CreateableTopicConfigKey, CreateableTopicConfig>::default() {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "configs",
                 _version,

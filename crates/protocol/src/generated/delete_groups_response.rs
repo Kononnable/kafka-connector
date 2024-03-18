@@ -6,10 +6,10 @@ pub struct DeleteGroupsResponse {
     pub throttle_time_ms: i32,
 
     /// The deletion results
-    pub results: BTreeMap<DeletableGroupResultKey, DeletableGroupResult>,
+    pub results: IndexMap<DeletableGroupResultKey, DeletableGroupResult>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct DeletableGroupResultKey {
     /// The group id
     pub group_id: String,
@@ -26,7 +26,7 @@ impl ApiResponse for DeleteGroupsResponse {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
         let results =
-            BTreeMap::<DeletableGroupResultKey, DeletableGroupResult>::deserialize(version, bytes);
+            IndexMap::<DeletableGroupResultKey, DeletableGroupResult>::deserialize(version, bytes);
         (
             header,
             DeleteGroupsResponse {

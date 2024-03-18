@@ -1,13 +1,12 @@
 use crate::prelude::SerializationError;
 use bytes::{BufMut, BytesMut};
-use std::collections::BTreeMap;
-use std::collections::BTreeSet;
+use indexmap::{IndexMap, IndexSet};
 
 pub trait ToBytes {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError>;
 }
 
-impl<K, V> ToBytes for BTreeMap<K, V>
+impl<K, V> ToBytes for IndexMap<K, V>
 where
     K: ToBytes,
     V: ToBytes,
@@ -23,7 +22,7 @@ where
     }
 }
 
-impl<K> ToBytes for BTreeSet<K>
+impl<K> ToBytes for IndexSet<K>
 where
     K: ToBytes,
 {

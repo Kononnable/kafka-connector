@@ -3,10 +3,10 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct AlterReplicaLogDirsRequest {
     /// The alterations to make for each directory.
-    pub dirs: BTreeMap<AlterReplicaLogDirKey, AlterReplicaLogDir>,
+    pub dirs: IndexMap<AlterReplicaLogDirKey, AlterReplicaLogDir>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct AlterReplicaLogDirKey {
     /// The absolute directory path.
     pub path: String,
@@ -15,10 +15,10 @@ pub struct AlterReplicaLogDirKey {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct AlterReplicaLogDir {
     /// The topics to add to the directory.
-    pub topics: BTreeMap<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic>,
+    pub topics: IndexMap<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct AlterReplicaLogDirTopicKey {
     /// The topic name.
     pub name: String,
@@ -64,7 +64,7 @@ impl ApiRequest for AlterReplicaLogDirsRequest {
 
 impl AlterReplicaLogDirsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.dirs != BTreeMap::<AlterReplicaLogDirKey, AlterReplicaLogDir>::default() {
+        if self.dirs != IndexMap::<AlterReplicaLogDirKey, AlterReplicaLogDir>::default() {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "dirs",
                 _version,
@@ -106,7 +106,7 @@ impl ToBytes for AlterReplicaLogDir {
 
 impl AlterReplicaLogDir {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.topics != BTreeMap::<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic>::default()
+        if self.topics != IndexMap::<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic>::default()
         {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "topics",

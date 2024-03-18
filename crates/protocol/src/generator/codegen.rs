@@ -23,14 +23,14 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
         } else {
             ""
         };
-        let btreemapkey_derive = if sub_struct.is_btreemap_key {
-            ", Eq, Ord, PartialOrd"
+        let map_key_derive = if sub_struct.is_map_key {
+            ", Eq, Hash"
         } else {
             ""
         };
         content.push_str(&format!(
             "#[derive(Clone, Debug, PartialEq{}{})]\n",
-            default_derive, btreemapkey_derive
+            default_derive, map_key_derive
         ));
         content.push_str(&format!("pub struct {} {{\n", sub_struct.name));
         for field in &sub_struct.fields {
@@ -404,7 +404,7 @@ fn apply_turbo_fish(field_type: String) -> String {
 struct SubStructs {
     name: String,
     fields: Vec<ApiSpecField>,
-    is_btreemap_key: bool,
+    is_map_key: bool,
 }
 
 fn get_field_definition(field: &ApiSpecField, sub_structs: &mut VecDeque<SubStructs>) -> String {
@@ -415,23 +415,23 @@ fn get_field_definition(field: &ApiSpecField, sub_structs: &mut VecDeque<SubStru
             sub_structs.push_back(SubStructs {
                 name: name.to_owned(),
                 fields: field.fields.clone(),
-                is_btreemap_key: false,
+                is_map_key: false,
             });
         }
-        ApiSpecFieldSubtype::BTreeMap { name, keys } => {
-            let type_names = get_btree_type_names(name, &field.fields);
+        ApiSpecFieldSubtype::Map { name, keys } => {
+            let type_names = get_map_key_type_names(name, &field.fields);
 
             sub_structs.push_back(SubStructs {
                 name: type_names.key_type,
                 fields: keys.clone(),
-                is_btreemap_key: true,
+                is_map_key: true,
             });
 
             if let Some(value_type) = type_names.value_type {
                 sub_structs.push_back(SubStructs {
                     name: value_type,
                     fields: field.fields.clone(),
-                    is_btreemap_key: false,
+                    is_map_key: false,
                 });
             }
         }
@@ -469,28 +469,28 @@ fn get_field_base_type(field: &ApiSpecField) -> String {
         ApiSpecFieldSubtype::Int64 => "i64".to_owned(),
         ApiSpecFieldSubtype::String => "String".to_owned(),
         ApiSpecFieldSubtype::SubObject(sub) => sub.to_owned(),
-        ApiSpecFieldSubtype::BTreeMap { name, keys: _ } => {
-            get_btree_type_names(name, &field.fields).full_type
+        ApiSpecFieldSubtype::Map { name, keys: _ } => {
+            get_map_key_type_names(name, &field.fields).full_type
         }
     }
 }
 
-pub struct BTreeMapTypeNames {
+pub struct MapKeyTypeNames {
     pub full_type: String,
     pub key_type: String,
     pub value_type: Option<String>,
 }
 
-fn get_btree_type_names(name: &str, subfields: &[ApiSpecField]) -> BTreeMapTypeNames {
+fn get_map_key_type_names(name: &str, subfields: &[ApiSpecField]) -> MapKeyTypeNames {
     if subfields.is_empty() {
-        BTreeMapTypeNames {
-            full_type: format!("BTreeSet<{name}>"),
+        MapKeyTypeNames {
+            full_type: format!("IndexSet<{name}>"),
             key_type: name.to_owned(),
             value_type: None,
         }
     } else {
-        BTreeMapTypeNames {
-            full_type: format!("BTreeMap<{name}Key,{name}>"),
+        MapKeyTypeNames {
+            full_type: format!("IndexMap<{name}Key,{name}>"),
             key_type: format!("{name}Key"),
             value_type: Some(name.to_owned()),
         }

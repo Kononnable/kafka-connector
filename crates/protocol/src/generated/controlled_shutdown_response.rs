@@ -6,10 +6,10 @@ pub struct ControlledShutdownResponse {
     pub error_code: i16,
 
     /// The partitions that the broker still leads.
-    pub remaining_partitions: BTreeSet<RemainingPartition>,
+    pub remaining_partitions: IndexSet<RemainingPartition>,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Hash)]
 pub struct RemainingPartition {
     /// The name of the topic.
     pub topic_name: String,
@@ -22,7 +22,7 @@ impl ApiResponse for ControlledShutdownResponse {
     fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let error_code = i16::deserialize(version, bytes);
-        let remaining_partitions = BTreeSet::<RemainingPartition>::deserialize(version, bytes);
+        let remaining_partitions = IndexSet::<RemainingPartition>::deserialize(version, bytes);
         (
             header,
             ControlledShutdownResponse {
