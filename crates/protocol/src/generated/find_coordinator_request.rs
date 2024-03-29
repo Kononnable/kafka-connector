@@ -1,5 +1,7 @@
 use super::super::prelude::*;
 
+/// Version 1 adds KeyType.
+/// Version 2 is the same as version 1.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct FindCoordinatorRequest {
     /// The coordinator key.

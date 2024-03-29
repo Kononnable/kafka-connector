@@ -1,5 +1,7 @@
 use super::super::prelude::*;
 
+/// Version 1 adds throttle time to the response.
+/// Starting in version 2, on quota violation, brokers send out responses before throttling.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ApiVersionsResponse {
     /// The top-level error code.

@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Version 1 adds validateOnly.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct CreateTopicsRequest {
     /// The topics to create.

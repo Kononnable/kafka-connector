@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Version 1 is the same as version 0.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct SaslAuthenticateRequest {
     /// The SASL authentication bytes from the client, as defined by the SASL mechanism.

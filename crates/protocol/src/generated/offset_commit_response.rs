@@ -1,5 +1,12 @@
 use super::super::prelude::*;
 
+/// Versions 1 and 2 are the same as version 0.
+///
+/// Version 3 adds the throttle time to the response.
+///
+/// Starting in version 4, on quota violation, brokers send out responses before throttling.
+///
+/// Versions 5 and 6 are the same as version 4.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct OffsetCommitResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.

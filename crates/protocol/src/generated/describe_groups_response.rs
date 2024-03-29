@@ -1,5 +1,11 @@
 use super::super::prelude::*;
 
+/// Version 1 added throttle time.
+/// Starting in version 2, on quota violation, brokers send out responses before throttling.
+/// ProtocolData is currently only filled in if the group state is in the Stable state.
+/// N.B. If the group is in the Dead state, the members array will always be empty.
+/// This is currently only provided if the group is in the Stable state.
+/// This is currently only provided if the group is in the Stable state.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.

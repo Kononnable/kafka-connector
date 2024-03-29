@@ -1,5 +1,16 @@
 use super::super::prelude::*;
 
+/// Version 1 allows specifying multiple endpoints for each broker.
+///
+/// Version 2 adds the rack.
+///
+/// Version 3 adds the listener name.
+///
+/// Version 4 adds the offline replica list.
+///
+/// Version 5 adds the broker epoch field and normalizes partitions by topic.
+/// Version 0 of the protocol only allowed specifying a single host and
+/// port per broker, rather than an array of endpoints.
 #[derive(Clone, Debug, PartialEq)]
 pub struct UpdateMetadataRequest {
     /// The controller id.

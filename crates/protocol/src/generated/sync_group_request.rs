@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Versions 1 and 2 are the same as version 0.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct SyncGroupRequest {
     /// The unique group identifier.

@@ -1,5 +1,10 @@
 use super::super::prelude::*;
 
+/// Version 1 is the same as version 0.
+/// Version 2 adds throttle time.
+/// Starting in version 3, on quota violation, brokers send out responses before throttling.
+/// Starting in version 4, the client needs to issue a second request to join group
+/// with assigned id.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct JoinGroupResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.

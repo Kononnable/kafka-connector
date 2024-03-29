@@ -1,5 +1,20 @@
 use super::super::prelude::*;
 
+/// Version 1 adds fields for the rack of each broker, the controller id, and
+/// whether or not the topic is internal.
+///
+/// Version 2 adds the cluster ID field.
+///
+/// Version 3 adds the throttle time.
+///
+/// Version 4 is the same as version 3.
+///
+/// Version 5 adds a per-partition offline_replicas field. This field specifies
+/// the list of replicas that are offline.
+///
+/// Starting in version 6, on quota violation, brokers send out responses before throttling.
+///
+/// Version 7 adds the leader epoch to the partition metadata.
 #[derive(Clone, Debug, PartialEq)]
 pub struct MetadataResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.

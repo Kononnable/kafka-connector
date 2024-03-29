@@ -6,6 +6,9 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
     let mut content = "use super::super::prelude::*;\n\n".to_owned();
     let mut sub_structs_partial = VecDeque::new();
     let mut sub_structs = Vec::new();
+    for line in &spec.api_versions_comment {
+        content.push_str(&format!("/// {line}\n"));
+    }
     if should_derive_default(&spec.fields) {
         content.push_str("#[derive(Clone, Debug, Default, PartialEq)]\n");
     } else {

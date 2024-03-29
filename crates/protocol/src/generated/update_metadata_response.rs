@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Versions 1, 2, 3, 4, and 5 are the same as version 0
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct UpdateMetadataResponse {
     /// The error code, or 0 if there was no error.

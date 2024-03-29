@@ -1,5 +1,11 @@
 use super::super::prelude::*;
 
+/// Version 1 adds RebalanceTimeoutMs.
+/// Version 2 and 3 are the same as version 1.
+/// Starting from version 4, the client needs to issue a second request to join group
+/// with assigned id.
+/// Note: if RebalanceTimeoutMs is not present, SessionTimeoutMs should be
+/// used instead.  The default of -1 here is just intended as a placeholder.
 #[derive(Clone, Debug, PartialEq)]
 pub struct JoinGroupRequest {
     /// The group identifier.

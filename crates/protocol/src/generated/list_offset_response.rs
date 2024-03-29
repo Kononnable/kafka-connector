@@ -1,5 +1,11 @@
 use super::super::prelude::*;
 
+/// Version 1 removes the offsets array in favor of returning a single offset.
+/// Version 1 also adds the timestamp associated with the returned offset.
+/// Version 2 adds the throttle time.
+/// Starting in version 3, on quota violation, brokers send out responses before throttling.
+/// Version 4 adds the leader epoch, which is used for fencing.
+/// Version 5 adds a new error code, OFFSET_NOT_AVAILABLE.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ListOffsetResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.

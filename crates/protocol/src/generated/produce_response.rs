@@ -1,5 +1,15 @@
 use super::super::prelude::*;
 
+/// Version 1 added the throttle time.
+///
+/// Version 2 added the log append time.
+///
+/// Version 3 is the same as version 2.
+///
+/// Version 4 added KAFKA_STORAGE_ERROR as a possible error code.
+///
+/// Version 5 added LogStartOffset to filter out spurious
+/// OutOfOrderSequenceExceptions on the client.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ProduceResponse {
     /// Each produce response

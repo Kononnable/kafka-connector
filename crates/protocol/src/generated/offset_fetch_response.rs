@@ -1,5 +1,14 @@
 use super::super::prelude::*;
 
+/// Version 1 is the same as version 0.
+///
+/// Version 2 adds a top-level error code.
+///
+/// Version 3 adds the throttle time.
+///
+/// Starting in version 4, on quota violation, brokers send out responses before throttling.
+///
+/// Version 5 adds the leader epoch to the committed offset.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct OffsetFetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.

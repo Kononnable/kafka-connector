@@ -1,5 +1,32 @@
 use super::super::prelude::*;
 
+///
+/// Version 1 is the same as version 0.
+///
+/// Starting in Version 2, the requestor must be able to handle Kafka Log
+/// Message format version 1.
+///
+/// Version 3 adds MaxBytes.  Starting in version 3, the partition ordering in
+/// the request is now relevant.  Partitions will be processed in the order
+/// they appear in the request.
+///
+/// Version 4 adds IsolationLevel.  Starting in version 4, the reqestor must be
+/// able to handle Kafka log message format version 2.
+///
+/// Version 5 adds LogStartOffset to indicate the earliest available offset of
+/// partition data that can be consumed.
+///
+/// Version 6 is the same as version 5.
+///
+/// Version 7 adds incremental fetch request support.
+///
+/// Version 8 is the same as version 7.
+///
+/// Version 9 adds CurrentLeaderEpoch, as described in KIP-320.
+///
+/// Version 10 indicates that we can use the ZStd compression algorithm, as
+/// described in KIP-110.
+///
 #[derive(Clone, Debug, PartialEq)]
 pub struct FetchRequest {
     /// The broker ID of the follower, of -1 if this request is from a consumer.

@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Version 1 adds resource pattern type.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct CreateAclsRequest {
     /// The ACLs that we want to create.

@@ -1,5 +1,15 @@
 use super::super::prelude::*;
 
+/// Version 1 adds timestamp and group membership information, as well as the commit timestamp.
+///
+/// Version 2 adds retention time.  It removes the commit timestamp added in version 1.
+///
+/// Version 3 and 4 are the same as version 2.
+///
+/// Version 5 removes the retention time, which is now controlled only by a broker configuration.
+///
+/// Version 6 adds the leader epoch for fencing.
+/// CommitTimestamp has been removed from v2 and later.
 #[derive(Clone, Debug, PartialEq)]
 pub struct OffsetCommitRequest {
     /// The unique group identifier.

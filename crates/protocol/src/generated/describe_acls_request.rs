@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Version 1 adds resource pattern type.
 #[derive(Clone, Debug, PartialEq)]
 pub struct DescribeAclsRequest {
     /// The resource type.

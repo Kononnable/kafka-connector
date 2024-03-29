@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Version 1 is the same as version 0.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeLogDirsRequest {
     /// Each topic that we want to describe log directories for, or null for all topics.

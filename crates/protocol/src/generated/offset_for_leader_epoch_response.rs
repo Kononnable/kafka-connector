@@ -1,5 +1,7 @@
 use super::super::prelude::*;
 
+/// Version 1 added the leader epoch to the response.
+/// Version 2 added the throttle time.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct OffsetForLeaderEpochResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.

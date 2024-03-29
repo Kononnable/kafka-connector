@@ -1,5 +1,8 @@
 use super::super::prelude::*;
 
+/// Version 1 adds KAFKA_STORAGE_ERROR as a valid error code.
+///
+/// Version 2 is the same as version 1.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct LeaderAndIsrResponse {
     /// The error code, or 0 if there was no error.

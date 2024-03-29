@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Version 1 supports SASL_AUTHENTICATE.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct SaslHandshakeRequest {
     /// The SASL mechanism chosen by the client.

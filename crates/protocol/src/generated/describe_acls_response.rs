@@ -1,5 +1,7 @@
 use super::super::prelude::*;
 
+/// Version 1 adds PatternType.
+/// Starting in version 1, on quota violation, brokers send out responses before throttling.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.

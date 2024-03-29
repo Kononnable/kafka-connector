@@ -1,5 +1,7 @@
 use super::super::prelude::*;
 
+/// Version 1 adds throttle time.
+/// Starting in version 2, on quota violation, brokers send out responses before throttling.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct HeartbeatResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.

@@ -17,6 +17,8 @@ pub struct ApiSpec {
     pub name: String,
     pub valid_versions: String,
     pub fields: Vec<ApiSpecField>,
+    #[serde(default)]
+    pub api_versions_comment: Vec<String>,
 }
 
 #[derive(Clone, Debug)]

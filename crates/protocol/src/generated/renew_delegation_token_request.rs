@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Version 1 is the same as version 0.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct RenewDelegationTokenRequest {
     /// The HMAC of the delegation token to be renewed.

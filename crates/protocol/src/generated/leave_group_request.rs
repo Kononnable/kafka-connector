@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Version 1 and 2 are the same as version 0.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct LeaveGroupRequest {
     /// The ID of the group to leave.

@@ -1,5 +1,10 @@
 use super::super::prelude::*;
 
+/// Version 1 adds ConfigSource and the synonyms.
+/// Starting in version 2, on quota violation, brokers send out responses before throttling.
+/// Note: the v0 default for this field that shouldd be exposed to callers is
+/// context-dependent. For example, if the resource is a broker, this should default to 4.
+/// -1 is just a placeholder value.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeConfigsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.

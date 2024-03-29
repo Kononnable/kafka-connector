@@ -4,6 +4,7 @@ use std::fmt::Write;
 use std::fs;
 use std::fs::read_dir;
 use std::path::Path;
+use std::string::String;
 
 pub fn get_api_specs() -> anyhow::Result<Vec<ApiSpec>> {
     let mut message_specs_path = Path::new(env!("CARGO_MANIFEST_DIR")).to_owned();
@@ -19,12 +20,21 @@ pub fn get_api_specs() -> anyhow::Result<Vec<ApiSpec>> {
         let content = fs::read_to_string(path)
             .unwrap()
             .lines()
-            .filter(|f| !f.trim().starts_with("//"))
-            .fold(String::new(), |mut output, f| {
-                let _ = writeln!(output, "{f}");
+            .skip_while(|f| f.trim().starts_with("//"))
+            .fold((vec![], String::new()), |mut output, f| {
+                if f.trim().starts_with("//") {
+                    output
+                        .0
+                        .push(f.replace("//", "").replace('\n', "").trim().to_string());
+                } else {
+                    let _ = writeln!(output.1, "{f}");
+                }
                 output
             });
-        specs.push(serde_json::from_str(&content).context(format!("Failed to parse {filename}"))?);
+        let mut api_spec: ApiSpec =
+            serde_json::from_str(&content.1).context(format!("Failed to parse {filename}"))?;
+        api_spec.api_versions_comment = content.0;
+        specs.push(api_spec);
     }
     Ok(specs)
 }

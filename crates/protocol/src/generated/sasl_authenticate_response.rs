@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Version 1 adds the session lifetime.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct SaslAuthenticateResponse {
     /// The error code, or 0 if there was no error.

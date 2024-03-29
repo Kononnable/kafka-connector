@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Versions 0 through 2 of ApiVersionsRequest are the same.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ApiVersionsRequest {}
 

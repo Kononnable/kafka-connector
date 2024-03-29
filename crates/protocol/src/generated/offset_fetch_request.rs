@@ -1,5 +1,11 @@
 use super::super::prelude::*;
 
+/// Starting in version 1, the broker supports fetching offsets from the internal __consumer_offsets topic.
+///
+/// Starting in version 2, the request can contain a null topics array to indicate that offsets
+/// for all topics should be fetched.
+///
+/// Version 3, 4, and 5 are the same as version 2.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct OffsetFetchRequest {
     /// The group to fetch offsets for.

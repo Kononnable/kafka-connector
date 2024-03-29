@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Version 1 is the same as version 0.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct EndTxnRequest {
     /// The ID of the transaction to end.

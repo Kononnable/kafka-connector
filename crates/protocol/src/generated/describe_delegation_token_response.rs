@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Starting in version 1, on quota violation, brokers send out responses before throttling.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeDelegationTokenResponse {
     /// The error code, or 0 if there was no error.

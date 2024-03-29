@@ -1,5 +1,7 @@
 use super::super::prelude::*;
 
+/// Starting in version 1, on quota violation, brokers send out responses before throttling.
+/// Version 2 is the same as version 1.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct TxnOffsetCommitResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.

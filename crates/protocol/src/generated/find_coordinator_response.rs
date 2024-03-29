@@ -1,5 +1,7 @@
 use super::super::prelude::*;
 
+/// Version 1 adds throttle time and error messages.
+/// Starting in version 2, on quota violation, brokers send out responses before throttling.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct FindCoordinatorResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.

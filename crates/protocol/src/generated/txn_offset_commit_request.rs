@@ -1,5 +1,8 @@
 use super::super::prelude::*;
 
+/// Version 1 is the same as version 0.
+///
+/// Version 2 adds the committed leader epoch.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct TxnOffsetCommitRequest {
     /// The ID of the transaction.

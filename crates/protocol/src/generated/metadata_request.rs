@@ -1,5 +1,12 @@
 use super::super::prelude::*;
 
+/// In version 0, an empty array indicates "request metadata for all topics."  In version 1 and
+/// higher, an empty array indicates "request metadata for no topics," and a null array is used to
+/// indiate "request metadata for all topics."
+///
+/// Version 2 and 3 are the same as version 1.
+///
+/// Version 4 adds AllowAutoTopicCreation.
 #[derive(Clone, Debug, PartialEq)]
 pub struct MetadataRequest {
     /// The topics to fetch metadata for.

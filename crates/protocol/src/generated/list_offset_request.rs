@@ -1,5 +1,11 @@
 use super::super::prelude::*;
 
+/// Version 1 removes MaxNumOffsets.  From this version forward, only a single
+/// offset can be returned.
+/// Version 2 adds the isolation level, which is used for transactional reads.
+/// Version 3 is the same as version 2.
+/// Version 4 adds the current leader epoch, which is used for fencing.
+/// Version 5 is the same as version 5.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ListOffsetRequest {
     /// The broker ID of the requestor, or -1 if this request is being made by a normal consumer.

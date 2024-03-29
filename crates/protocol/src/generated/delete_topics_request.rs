@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Versions 0, 1, 2, and 3 are the same.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DeleteTopicsRequest {
     /// The names of the topics to delete

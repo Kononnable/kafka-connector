@@ -1,5 +1,12 @@
 use super::super::prelude::*;
 
+/// Version 0 of ControlledShutdownRequest has a non-standard request header
+/// which does not include clientId.  Version 1 and later use the standard
+/// request header.
+///
+/// Version 1 is the same as version 0.
+///
+/// Version 2 adds BrokerEpoch.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ControlledShutdownRequest {
     /// The id of the broker for which controlled shutdown has been requested.

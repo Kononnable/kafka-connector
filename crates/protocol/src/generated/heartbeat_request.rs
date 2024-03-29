@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Version 1 and version 2 are the same as version 0.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct HeartbeatRequest {
     /// The group id.

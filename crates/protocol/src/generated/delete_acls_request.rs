@@ -1,5 +1,6 @@
 use super::super::prelude::*;
 
+/// Version 1 adds the pattern type.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DeleteAclsRequest {
     /// The filters to use when deleting ACLs.

@@ -1,5 +1,8 @@
 use super::super::prelude::*;
 
+/// Version 1 adds IsNew.
+///
+/// Version 2 adds broker epoch and reorganizes the partitions by topic.
 #[derive(Clone, Debug, PartialEq)]
 pub struct LeaderAndIsrRequest {
     /// The current controller ID.

@@ -1,5 +1,7 @@
 use super::super::prelude::*;
 
+/// Version 1 adds the broker epoch and reorganizes the partitions to be stored
+/// per topic.
 #[derive(Clone, Debug, PartialEq)]
 pub struct StopReplicaRequest {
     /// The controller id.

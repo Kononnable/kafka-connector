@@ -1,5 +1,8 @@
 use super::super::prelude::*;
 
+/// Version 1 is the same as version 0.
+///
+/// Version 2 adds the current leader epoch to support fencing.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct OffsetForLeaderEpochRequest {
     /// Each topic to get offsets for.

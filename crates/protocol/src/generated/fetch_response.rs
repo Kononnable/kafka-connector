@@ -1,5 +1,26 @@
 use super::super::prelude::*;
 
+///
+/// Version 1 adds throttle time.
+///
+/// Version 2 and 3 are the same as version 1.
+///
+/// Version 4 adds features for transactional consumption.
+///
+/// Version 5 adds LogStartOffset to indicate the earliest available offset of
+/// partition data that can be consumed.
+///
+/// Starting in version 6, we may return KAFKA_STORAGE_ERROR as an error code.
+///
+/// Version 7 adds incremental fetch request support.
+///
+/// Starting in version 8, on quota violation, brokers send out responses before throttling.
+///
+/// Version 9 is the same as version 8.
+///
+/// Version 10 indicates that the response data can use the ZStd compression
+/// algorithm, as described in KIP-110.
+///
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct FetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
