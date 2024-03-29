@@ -45,20 +45,6 @@ impl ApiRequest for RenewDelegationTokenRequest {
 
 impl RenewDelegationTokenRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.hmac != Vec::<u8>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "hmac",
-                _version,
-                "RenewDelegationTokenRequest",
-            ));
-        }
-        if self.renew_period_ms != i64::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "renew_period_ms",
-                _version,
-                "RenewDelegationTokenRequest",
-            ));
-        }
         Ok(())
     }
 }

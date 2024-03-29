@@ -65,35 +65,6 @@ impl ApiRequest for AddPartitionsToTxnRequest {
 
 impl AddPartitionsToTxnRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.transactional_id != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "transactional_id",
-                _version,
-                "AddPartitionsToTxnRequest",
-            ));
-        }
-        if self.producer_id != i64::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "producer_id",
-                _version,
-                "AddPartitionsToTxnRequest",
-            ));
-        }
-        if self.producer_epoch != i16::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "producer_epoch",
-                _version,
-                "AddPartitionsToTxnRequest",
-            ));
-        }
-        if self.topics != IndexMap::<AddPartitionsToTxnTopicKey, AddPartitionsToTxnTopic>::default()
-        {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "topics",
-                _version,
-                "AddPartitionsToTxnRequest",
-            ));
-        }
         Ok(())
     }
 }
@@ -108,13 +79,6 @@ impl ToBytes for AddPartitionsToTxnTopicKey {
 
 impl AddPartitionsToTxnTopicKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "name",
-                _version,
-                "AddPartitionsToTxnTopicKey",
-            ));
-        }
         Ok(())
     }
 }
@@ -129,13 +93,6 @@ impl ToBytes for AddPartitionsToTxnTopic {
 
 impl AddPartitionsToTxnTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.partitions != Vec::<i32>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partitions",
-                _version,
-                "AddPartitionsToTxnTopic",
-            ));
-        }
         Ok(())
     }
 }

@@ -66,13 +66,6 @@ impl MetadataRequest {
                 "MetadataRequest",
             ));
         }
-        if self.topics.is_some() && self.topics != Some(Vec::<MetadataRequestTopic>::default()) {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "topics",
-                _version,
-                "MetadataRequest",
-            ));
-        }
         if self.allow_auto_topic_creation != bool::default() && _version >= 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "allow_auto_topic_creation",
@@ -103,13 +96,6 @@ impl ToBytes for MetadataRequestTopic {
 
 impl MetadataRequestTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "name",
-                _version,
-                "MetadataRequestTopic",
-            ));
-        }
         Ok(())
     }
 }

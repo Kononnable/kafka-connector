@@ -64,13 +64,6 @@ impl ApiRequest for OffsetForLeaderEpochRequest {
 
 impl OffsetForLeaderEpochRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.topics != Vec::<OffsetForLeaderTopic>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "topics",
-                _version,
-                "OffsetForLeaderEpochRequest",
-            ));
-        }
         Ok(())
     }
 }
@@ -86,20 +79,6 @@ impl ToBytes for OffsetForLeaderTopic {
 
 impl OffsetForLeaderTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "name",
-                _version,
-                "OffsetForLeaderTopic",
-            ));
-        }
-        if self.partitions != Vec::<OffsetForLeaderPartition>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partitions",
-                _version,
-                "OffsetForLeaderTopic",
-            ));
-        }
         Ok(())
     }
 }
@@ -118,20 +97,6 @@ impl ToBytes for OffsetForLeaderPartition {
 
 impl OffsetForLeaderPartition {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.partition_index != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partition_index",
-                _version,
-                "OffsetForLeaderPartition",
-            ));
-        }
-        if self.leader_epoch != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "leader_epoch",
-                _version,
-                "OffsetForLeaderPartition",
-            ));
-        }
         Ok(())
     }
 }

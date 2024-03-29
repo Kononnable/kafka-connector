@@ -145,27 +145,6 @@ impl ApiRequest for FetchRequest {
 
 impl FetchRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.replica_id != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "replica_id",
-                _version,
-                "FetchRequest",
-            ));
-        }
-        if self.max_wait != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "max_wait",
-                _version,
-                "FetchRequest",
-            ));
-        }
-        if self.min_bytes != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "min_bytes",
-                _version,
-                "FetchRequest",
-            ));
-        }
         if self.isolation_level != i8::default() && _version >= 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "isolation_level",
@@ -183,13 +162,6 @@ impl FetchRequest {
         if self.epoch != i32::default() && _version >= 7 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "epoch",
-                _version,
-                "FetchRequest",
-            ));
-        }
-        if self.topics != Vec::<FetchableTopic>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "topics",
                 _version,
                 "FetchRequest",
             ));
@@ -232,20 +204,6 @@ impl ToBytes for FetchableTopic {
 
 impl FetchableTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "name",
-                _version,
-                "FetchableTopic",
-            ));
-        }
-        if self.fetch_partitions != Vec::<FetchPartition>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "fetch_partitions",
-                _version,
-                "FetchableTopic",
-            ));
-        }
         Ok(())
     }
 }
@@ -301,30 +259,9 @@ impl ToBytes for FetchPartition {
 
 impl FetchPartition {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.partition_index != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partition_index",
-                _version,
-                "FetchPartition",
-            ));
-        }
-        if self.fetch_offset != i64::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "fetch_offset",
-                _version,
-                "FetchPartition",
-            ));
-        }
         if self.log_start_offset != i64::default() && _version >= 5 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "log_start_offset",
-                _version,
-                "FetchPartition",
-            ));
-        }
-        if self.max_bytes != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "max_bytes",
                 _version,
                 "FetchPartition",
             ));

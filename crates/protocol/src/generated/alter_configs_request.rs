@@ -72,20 +72,6 @@ impl ApiRequest for AlterConfigsRequest {
 
 impl AlterConfigsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.resources != IndexMap::<AlterConfigsResourceKey, AlterConfigsResource>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "resources",
-                _version,
-                "AlterConfigsRequest",
-            ));
-        }
-        if self.validate_only != bool::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "validate_only",
-                _version,
-                "AlterConfigsRequest",
-            ));
-        }
         Ok(())
     }
 }
@@ -101,20 +87,6 @@ impl ToBytes for AlterConfigsResourceKey {
 
 impl AlterConfigsResourceKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.resource_type != i8::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "resource_type",
-                _version,
-                "AlterConfigsResourceKey",
-            ));
-        }
-        if self.resource_name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "resource_name",
-                _version,
-                "AlterConfigsResourceKey",
-            ));
-        }
         Ok(())
     }
 }
@@ -129,13 +101,6 @@ impl ToBytes for AlterConfigsResource {
 
 impl AlterConfigsResource {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.configs != IndexMap::<AlterableConfigKey, AlterableConfig>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "configs",
-                _version,
-                "AlterConfigsResource",
-            ));
-        }
         Ok(())
     }
 }
@@ -150,13 +115,6 @@ impl ToBytes for AlterableConfigKey {
 
 impl AlterableConfigKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "name",
-                _version,
-                "AlterableConfigKey",
-            ));
-        }
         Ok(())
     }
 }
@@ -173,13 +131,6 @@ impl AlterableConfig {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         if self.value.is_none() {
             return Err(SerializationError::NullValue(
-                "value",
-                _version,
-                "AlterableConfig",
-            ));
-        }
-        if self.value.is_some() && self.value != Some(String::default()) {
-            return Err(SerializationError::NonIgnorableFieldSet(
                 "value",
                 _version,
                 "AlterableConfig",

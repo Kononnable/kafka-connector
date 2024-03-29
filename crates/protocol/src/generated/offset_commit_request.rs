@@ -99,20 +99,6 @@ impl ApiRequest for OffsetCommitRequest {
 
 impl OffsetCommitRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.group_id != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "group_id",
-                _version,
-                "OffsetCommitRequest",
-            ));
-        }
-        if self.topics != Vec::<OffsetCommitRequestTopic>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "topics",
-                _version,
-                "OffsetCommitRequest",
-            ));
-        }
         Ok(())
     }
 }
@@ -140,20 +126,6 @@ impl ToBytes for OffsetCommitRequestTopic {
 
 impl OffsetCommitRequestTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "name",
-                _version,
-                "OffsetCommitRequestTopic",
-            ));
-        }
-        if self.partitions != Vec::<OffsetCommitRequestPartition>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partitions",
-                _version,
-                "OffsetCommitRequestTopic",
-            ));
-        }
         Ok(())
     }
 }
@@ -183,30 +155,9 @@ impl OffsetCommitRequestPartition {
                 "OffsetCommitRequestPartition",
             ));
         }
-        if self.partition_index != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partition_index",
-                _version,
-                "OffsetCommitRequestPartition",
-            ));
-        }
-        if self.committed_offset != i64::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "committed_offset",
-                _version,
-                "OffsetCommitRequestPartition",
-            ));
-        }
         if self.commit_timestamp != i64::default() && _version >= 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "commit_timestamp",
-                _version,
-                "OffsetCommitRequestPartition",
-            ));
-        }
-        if self.committed_metadata.is_some() && self.committed_metadata != Some(String::default()) {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "committed_metadata",
                 _version,
                 "OffsetCommitRequestPartition",
             ));

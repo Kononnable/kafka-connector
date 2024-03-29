@@ -100,27 +100,6 @@ impl ProduceRequest {
                 "ProduceRequest",
             ));
         }
-        if self.acks != i16::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "acks",
-                _version,
-                "ProduceRequest",
-            ));
-        }
-        if self.timeout_ms != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "timeout_ms",
-                _version,
-                "ProduceRequest",
-            ));
-        }
-        if self.topics != Vec::<TopicProduceData>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "topics",
-                _version,
-                "ProduceRequest",
-            ));
-        }
         Ok(())
     }
 }
@@ -136,20 +115,6 @@ impl ToBytes for TopicProduceData {
 
 impl TopicProduceData {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "name",
-                _version,
-                "TopicProduceData",
-            ));
-        }
-        if self.partitions != Vec::<PartitionProduceData>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partitions",
-                _version,
-                "TopicProduceData",
-            ));
-        }
         Ok(())
     }
 }
@@ -167,20 +132,6 @@ impl PartitionProduceData {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         if self.records.is_none() {
             return Err(SerializationError::NullValue(
-                "records",
-                _version,
-                "PartitionProduceData",
-            ));
-        }
-        if self.partition_index != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partition_index",
-                _version,
-                "PartitionProduceData",
-            ));
-        }
-        if self.records.is_some() && self.records != Some(Vec::<u8>::default()) {
-            return Err(SerializationError::NonIgnorableFieldSet(
                 "records",
                 _version,
                 "PartitionProduceData",

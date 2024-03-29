@@ -57,13 +57,6 @@ impl DescribeLogDirsRequest {
                 "DescribeLogDirsRequest",
             ));
         }
-        if self.topics.is_some() && self.topics != Some(Vec::<DescribableLogDirTopic>::default()) {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "topics",
-                _version,
-                "DescribeLogDirsRequest",
-            ));
-        }
         Ok(())
     }
 }
@@ -79,20 +72,6 @@ impl ToBytes for DescribableLogDirTopic {
 
 impl DescribableLogDirTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.topic != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "topic",
-                _version,
-                "DescribableLogDirTopic",
-            ));
-        }
-        if self.partition_index != Vec::<i32>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partition_index",
-                _version,
-                "DescribableLogDirTopic",
-            ));
-        }
         Ok(())
     }
 }

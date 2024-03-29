@@ -83,41 +83,6 @@ impl ApiRequest for TxnOffsetCommitRequest {
 
 impl TxnOffsetCommitRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.transactional_id != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "transactional_id",
-                _version,
-                "TxnOffsetCommitRequest",
-            ));
-        }
-        if self.group_id != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "group_id",
-                _version,
-                "TxnOffsetCommitRequest",
-            ));
-        }
-        if self.producer_id != i64::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "producer_id",
-                _version,
-                "TxnOffsetCommitRequest",
-            ));
-        }
-        if self.producer_epoch != i16::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "producer_epoch",
-                _version,
-                "TxnOffsetCommitRequest",
-            ));
-        }
-        if self.topics != Vec::<TxnOffsetCommitRequestTopic>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "topics",
-                _version,
-                "TxnOffsetCommitRequest",
-            ));
-        }
         Ok(())
     }
 }
@@ -133,20 +98,6 @@ impl ToBytes for TxnOffsetCommitRequestTopic {
 
 impl TxnOffsetCommitRequestTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "name",
-                _version,
-                "TxnOffsetCommitRequestTopic",
-            ));
-        }
-        if self.partitions != Vec::<TxnOffsetCommitRequestPartition>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partitions",
-                _version,
-                "TxnOffsetCommitRequestTopic",
-            ));
-        }
         Ok(())
     }
 }
@@ -168,27 +119,6 @@ impl TxnOffsetCommitRequestPartition {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         if self.committed_metadata.is_none() {
             return Err(SerializationError::NullValue(
-                "committed_metadata",
-                _version,
-                "TxnOffsetCommitRequestPartition",
-            ));
-        }
-        if self.partition_index != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partition_index",
-                _version,
-                "TxnOffsetCommitRequestPartition",
-            ));
-        }
-        if self.committed_offset != i64::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "committed_offset",
-                _version,
-                "TxnOffsetCommitRequestPartition",
-            ));
-        }
-        if self.committed_metadata.is_some() && self.committed_metadata != Some(String::default()) {
-            return Err(SerializationError::NonIgnorableFieldSet(
                 "committed_metadata",
                 _version,
                 "TxnOffsetCommitRequestPartition",

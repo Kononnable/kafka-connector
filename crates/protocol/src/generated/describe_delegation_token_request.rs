@@ -57,15 +57,6 @@ impl DescribeDelegationTokenRequest {
                 "DescribeDelegationTokenRequest",
             ));
         }
-        if self.owners.is_some()
-            && self.owners != Some(Vec::<DescribeDelegationTokenOwner>::default())
-        {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "owners",
-                _version,
-                "DescribeDelegationTokenRequest",
-            ));
-        }
         Ok(())
     }
 }
@@ -81,20 +72,6 @@ impl ToBytes for DescribeDelegationTokenOwner {
 
 impl DescribeDelegationTokenOwner {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.principal_type != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "principal_type",
-                _version,
-                "DescribeDelegationTokenOwner",
-            ));
-        }
-        if self.principal_name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "principal_name",
-                _version,
-                "DescribeDelegationTokenOwner",
-            ));
-        }
         Ok(())
     }
 }

@@ -53,34 +53,6 @@ impl ApiRequest for EndTxnRequest {
 
 impl EndTxnRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.transactional_id != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "transactional_id",
-                _version,
-                "EndTxnRequest",
-            ));
-        }
-        if self.producer_id != i64::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "producer_id",
-                _version,
-                "EndTxnRequest",
-            ));
-        }
-        if self.producer_epoch != i16::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "producer_epoch",
-                _version,
-                "EndTxnRequest",
-            ));
-        }
-        if self.committed != bool::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "committed",
-                _version,
-                "EndTxnRequest",
-            ));
-        }
         Ok(())
     }
 }

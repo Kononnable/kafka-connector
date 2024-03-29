@@ -86,27 +86,6 @@ impl ApiRequest for StopReplicaRequest {
 
 impl StopReplicaRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.controller_id != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "controller_id",
-                _version,
-                "StopReplicaRequest",
-            ));
-        }
-        if self.controller_epoch != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "controller_epoch",
-                _version,
-                "StopReplicaRequest",
-            ));
-        }
-        if self.delete_partitions != bool::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "delete_partitions",
-                _version,
-                "StopReplicaRequest",
-            ));
-        }
         if self.partitions_v_0 != Vec::<StopReplicaRequestPartitionV0>::default() && _version >= 0 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partitions_v_0",

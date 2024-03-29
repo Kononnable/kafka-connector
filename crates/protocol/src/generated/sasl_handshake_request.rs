@@ -41,13 +41,6 @@ impl ApiRequest for SaslHandshakeRequest {
 
 impl SaslHandshakeRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.mechanism != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "mechanism",
-                _version,
-                "SaslHandshakeRequest",
-            ));
-        }
         Ok(())
     }
 }

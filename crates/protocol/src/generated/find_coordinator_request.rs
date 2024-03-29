@@ -48,13 +48,6 @@ impl ApiRequest for FindCoordinatorRequest {
 
 impl FindCoordinatorRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.key != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "key",
-                _version,
-                "FindCoordinatorRequest",
-            ));
-        }
         if self.key_type != i8::default() && _version >= 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "key_type",

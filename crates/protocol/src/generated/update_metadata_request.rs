@@ -174,20 +174,6 @@ impl ApiRequest for UpdateMetadataRequest {
 
 impl UpdateMetadataRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.controller_id != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "controller_id",
-                _version,
-                "UpdateMetadataRequest",
-            ));
-        }
-        if self.controller_epoch != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "controller_epoch",
-                _version,
-                "UpdateMetadataRequest",
-            ));
-        }
         if self.topic_states != Vec::<UpdateMetadataRequestTopicState>::default() && _version >= 5 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "topic_states",
@@ -200,13 +186,6 @@ impl UpdateMetadataRequest {
         {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partition_states_v_0",
-                _version,
-                "UpdateMetadataRequest",
-            ));
-        }
-        if self.brokers != Vec::<UpdateMetadataRequestBroker>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "brokers",
                 _version,
                 "UpdateMetadataRequest",
             ));
@@ -241,13 +220,6 @@ impl ToBytes for UpdateMetadataRequestTopicState {
 
 impl UpdateMetadataRequestTopicState {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.topic_name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "topic_name",
-                _version,
-                "UpdateMetadataRequestTopicState",
-            ));
-        }
         if self.partition_states != Vec::<UpdateMetadataPartitionState>::default() && _version >= 5
         {
             return Err(SerializationError::NonIgnorableFieldSet(
@@ -388,13 +360,6 @@ impl UpdateMetadataRequestBroker {
         if self.rack.is_none() && !_version >= 2 {
             return Err(SerializationError::NullValue(
                 "rack",
-                _version,
-                "UpdateMetadataRequestBroker",
-            ));
-        }
-        if self.id != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "id",
                 _version,
                 "UpdateMetadataRequestBroker",
             ));

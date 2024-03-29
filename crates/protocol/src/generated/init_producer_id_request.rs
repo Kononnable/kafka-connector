@@ -52,20 +52,6 @@ impl InitProducerIdRequest {
                 "InitProducerIdRequest",
             ));
         }
-        if self.transactional_id.is_some() && self.transactional_id != Some(String::default()) {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "transactional_id",
-                _version,
-                "InitProducerIdRequest",
-            ));
-        }
-        if self.transaction_timeout_ms != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "transaction_timeout_ms",
-                _version,
-                "InitProducerIdRequest",
-            ));
-        }
         Ok(())
     }
 }

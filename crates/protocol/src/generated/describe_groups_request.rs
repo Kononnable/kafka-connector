@@ -41,13 +41,6 @@ impl ApiRequest for DescribeGroupsRequest {
 
 impl DescribeGroupsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.groups != Vec::<String>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "groups",
-                _version,
-                "DescribeGroupsRequest",
-            ));
-        }
         Ok(())
     }
 }

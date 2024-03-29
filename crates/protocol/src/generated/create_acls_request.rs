@@ -65,13 +65,6 @@ impl ApiRequest for CreateAclsRequest {
 
 impl CreateAclsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.creations != Vec::<CreatableAcl>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "creations",
-                _version,
-                "CreateAclsRequest",
-            ));
-        }
         Ok(())
     }
 }
@@ -94,51 +87,9 @@ impl ToBytes for CreatableAcl {
 
 impl CreatableAcl {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.resource_type != i8::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "resource_type",
-                _version,
-                "CreatableAcl",
-            ));
-        }
-        if self.resource_name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "resource_name",
-                _version,
-                "CreatableAcl",
-            ));
-        }
         if self.resource_pattern_type != i8::default() && _version >= 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "resource_pattern_type",
-                _version,
-                "CreatableAcl",
-            ));
-        }
-        if self.principal != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "principal",
-                _version,
-                "CreatableAcl",
-            ));
-        }
-        if self.host != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "host",
-                _version,
-                "CreatableAcl",
-            ));
-        }
-        if self.operation != i8::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "operation",
-                _version,
-                "CreatableAcl",
-            ));
-        }
-        if self.permission_type != i8::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "permission_type",
                 _version,
                 "CreatableAcl",
             ));

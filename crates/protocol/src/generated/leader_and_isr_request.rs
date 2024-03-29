@@ -147,20 +147,6 @@ impl ApiRequest for LeaderAndIsrRequest {
 
 impl LeaderAndIsrRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.controller_id != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "controller_id",
-                _version,
-                "LeaderAndIsrRequest",
-            ));
-        }
-        if self.controller_epoch != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "controller_epoch",
-                _version,
-                "LeaderAndIsrRequest",
-            ));
-        }
         if self.topic_states != Vec::<LeaderAndIsrRequestTopicState>::default() && _version >= 2 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "topic_states",
@@ -173,13 +159,6 @@ impl LeaderAndIsrRequest {
         {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partition_states_v_0",
-                _version,
-                "LeaderAndIsrRequest",
-            ));
-        }
-        if self.live_leaders != Vec::<LeaderAndIsrLiveLeader>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "live_leaders",
                 _version,
                 "LeaderAndIsrRequest",
             ));
@@ -217,13 +196,6 @@ impl LeaderAndIsrRequestTopicState {
         if self.name != String::default() && _version >= 2 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "name",
-                _version,
-                "LeaderAndIsrRequestTopicState",
-            ));
-        }
-        if self.partition_states != Vec::<LeaderAndIsrRequestPartitionState>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partition_states",
                 _version,
                 "LeaderAndIsrRequestTopicState",
             ));
@@ -340,27 +312,6 @@ impl ToBytes for LeaderAndIsrLiveLeader {
 
 impl LeaderAndIsrLiveLeader {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.broker_id != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "broker_id",
-                _version,
-                "LeaderAndIsrLiveLeader",
-            ));
-        }
-        if self.host_name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "host_name",
-                _version,
-                "LeaderAndIsrLiveLeader",
-            ));
-        }
-        if self.port != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "port",
-                _version,
-                "LeaderAndIsrLiveLeader",
-            ));
-        }
         Ok(())
     }
 }
@@ -384,55 +335,6 @@ impl ToBytes for LeaderAndIsrRequestPartitionState {
 
 impl LeaderAndIsrRequestPartitionState {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.partition_index != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partition_index",
-                _version,
-                "LeaderAndIsrRequestPartitionState",
-            ));
-        }
-        if self.controller_epoch != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "controller_epoch",
-                _version,
-                "LeaderAndIsrRequestPartitionState",
-            ));
-        }
-        if self.leader_key != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "leader_key",
-                _version,
-                "LeaderAndIsrRequestPartitionState",
-            ));
-        }
-        if self.leader_epoch != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "leader_epoch",
-                _version,
-                "LeaderAndIsrRequestPartitionState",
-            ));
-        }
-        if self.isr_replicas != Vec::<i32>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "isr_replicas",
-                _version,
-                "LeaderAndIsrRequestPartitionState",
-            ));
-        }
-        if self.zk_version != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "zk_version",
-                _version,
-                "LeaderAndIsrRequestPartitionState",
-            ));
-        }
-        if self.replicas != Vec::<i32>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "replicas",
-                _version,
-                "LeaderAndIsrRequestPartitionState",
-            ));
-        }
         Ok(())
     }
 }

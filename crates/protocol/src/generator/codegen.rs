@@ -250,7 +250,7 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
                 "    if {nullable_filter} && !({min}..={max}).contains(&_version){{\n",
             ));
         } else if field.versions == "0+" {
-            content.push_str(&format!("        if {nullable_filter}{{\n",));
+            continue;
         } else {
             let min = field.versions.replace('+', "");
             content.push_str(&format!(
@@ -312,7 +312,7 @@ fn impl_default_trait(name: &str, fields: &Vec<ApiSpecField>) -> String {
     if should_derive_default(fields) {
         return "".to_owned();
     }
-    let mut content = format!("impl Default for {name} {{\n",);
+    let mut content = format!("impl Default for {name} {{\n", );
     content.push_str("fn default() -> Self {\n");
     content.push_str("    Self {\n");
     for field in fields {
@@ -442,7 +442,7 @@ fn get_field_definition(field: &ApiSpecField, sub_structs: &mut VecDeque<SubStru
     }
 
     if let Some(about) = &field.about {
-        content.push_str(&format!("    /// {about}\n",));
+        content.push_str(&format!("    /// {about}\n", ));
     }
     content.push_str(&format!(
         "    pub {}: {field_type}, \n\n",

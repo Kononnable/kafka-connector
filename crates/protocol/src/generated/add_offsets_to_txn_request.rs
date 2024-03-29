@@ -53,34 +53,6 @@ impl ApiRequest for AddOffsetsToTxnRequest {
 
 impl AddOffsetsToTxnRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.transactional_id != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "transactional_id",
-                _version,
-                "AddOffsetsToTxnRequest",
-            ));
-        }
-        if self.producer_id != i64::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "producer_id",
-                _version,
-                "AddOffsetsToTxnRequest",
-            ));
-        }
-        if self.producer_epoch != i16::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "producer_epoch",
-                _version,
-                "AddOffsetsToTxnRequest",
-            ));
-        }
-        if self.group_id != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "group_id",
-                _version,
-                "AddOffsetsToTxnRequest",
-            ));
-        }
         Ok(())
     }
 }

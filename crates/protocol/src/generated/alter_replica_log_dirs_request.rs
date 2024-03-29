@@ -65,13 +65,6 @@ impl ApiRequest for AlterReplicaLogDirsRequest {
 
 impl AlterReplicaLogDirsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.dirs != IndexMap::<AlterReplicaLogDirKey, AlterReplicaLogDir>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "dirs",
-                _version,
-                "AlterReplicaLogDirsRequest",
-            ));
-        }
         Ok(())
     }
 }
@@ -86,13 +79,6 @@ impl ToBytes for AlterReplicaLogDirKey {
 
 impl AlterReplicaLogDirKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.path != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "path",
-                _version,
-                "AlterReplicaLogDirKey",
-            ));
-        }
         Ok(())
     }
 }
@@ -107,14 +93,6 @@ impl ToBytes for AlterReplicaLogDir {
 
 impl AlterReplicaLogDir {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.topics != IndexMap::<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic>::default()
-        {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "topics",
-                _version,
-                "AlterReplicaLogDir",
-            ));
-        }
         Ok(())
     }
 }
@@ -129,13 +107,6 @@ impl ToBytes for AlterReplicaLogDirTopicKey {
 
 impl AlterReplicaLogDirTopicKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "name",
-                _version,
-                "AlterReplicaLogDirTopicKey",
-            ));
-        }
         Ok(())
     }
 }
@@ -150,13 +121,6 @@ impl ToBytes for AlterReplicaLogDirTopic {
 
 impl AlterReplicaLogDirTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.partitions != Vec::<i32>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "partitions",
-                _version,
-                "AlterReplicaLogDirTopic",
-            ));
-        }
         Ok(())
     }
 }

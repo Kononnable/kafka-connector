@@ -67,27 +67,6 @@ impl ApiRequest for CreatePartitionsRequest {
 
 impl CreatePartitionsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.topics != Vec::<CreatePartitionsTopic>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "topics",
-                _version,
-                "CreatePartitionsRequest",
-            ));
-        }
-        if self.timeout_ms != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "timeout_ms",
-                _version,
-                "CreatePartitionsRequest",
-            ));
-        }
-        if self.validate_only != bool::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "validate_only",
-                _version,
-                "CreatePartitionsRequest",
-            ));
-        }
         Ok(())
     }
 }
@@ -111,29 +90,6 @@ impl CreatePartitionsTopic {
                 "CreatePartitionsTopic",
             ));
         }
-        if self.name != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "name",
-                _version,
-                "CreatePartitionsTopic",
-            ));
-        }
-        if self.count != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "count",
-                _version,
-                "CreatePartitionsTopic",
-            ));
-        }
-        if self.assignments.is_some()
-            && self.assignments != Some(Vec::<CreatePartitionsAssignment>::default())
-        {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "assignments",
-                _version,
-                "CreatePartitionsTopic",
-            ));
-        }
         Ok(())
     }
 }
@@ -148,13 +104,6 @@ impl ToBytes for CreatePartitionsAssignment {
 
 impl CreatePartitionsAssignment {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.broker_ids != Vec::<i32>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "broker_ids",
-                _version,
-                "CreatePartitionsAssignment",
-            ));
-        }
         Ok(())
     }
 }

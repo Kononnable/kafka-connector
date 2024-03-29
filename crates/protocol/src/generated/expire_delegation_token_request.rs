@@ -45,20 +45,6 @@ impl ApiRequest for ExpireDelegationTokenRequest {
 
 impl ExpireDelegationTokenRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.hmac != Vec::<u8>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "hmac",
-                _version,
-                "ExpireDelegationTokenRequest",
-            ));
-        }
-        if self.expiry_time_period_ms != i64::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "expiry_time_period_ms",
-                _version,
-                "ExpireDelegationTokenRequest",
-            ));
-        }
         Ok(())
     }
 }

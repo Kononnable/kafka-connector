@@ -41,13 +41,6 @@ impl ApiRequest for DeleteGroupsRequest {
 
 impl DeleteGroupsRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.groups_names != Vec::<String>::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "groups_names",
-                _version,
-                "DeleteGroupsRequest",
-            ));
-        }
         Ok(())
     }
 }

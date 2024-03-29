@@ -49,27 +49,6 @@ impl ApiRequest for HeartbeatRequest {
 
 impl HeartbeatRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.group_id != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "group_id",
-                _version,
-                "HeartbeatRequest",
-            ));
-        }
-        if self.generationid != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "generationid",
-                _version,
-                "HeartbeatRequest",
-            ));
-        }
-        if self.member_id != String::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "member_id",
-                _version,
-                "HeartbeatRequest",
-            ));
-        }
         Ok(())
     }
 }

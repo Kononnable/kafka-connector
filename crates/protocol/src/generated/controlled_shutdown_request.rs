@@ -53,13 +53,6 @@ impl ApiRequest for ControlledShutdownRequest {
 
 impl ControlledShutdownRequest {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.broker_id != i32::default() {
-            return Err(SerializationError::NonIgnorableFieldSet(
-                "broker_id",
-                _version,
-                "ControlledShutdownRequest",
-            ));
-        }
         Ok(())
     }
 }
