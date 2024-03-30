@@ -38,7 +38,7 @@ pub struct JoinGroupResponseMember {
 }
 
 impl ApiResponse for JoinGroupResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 2 {
             i32::deserialize(version, bytes)
@@ -67,7 +67,7 @@ impl ApiResponse for JoinGroupResponse {
 }
 
 impl FromBytes for JoinGroupResponseMember {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let member_id = String::deserialize(version, bytes);
         let metadata = Vec::<u8>::deserialize(version, bytes);
         JoinGroupResponseMember {

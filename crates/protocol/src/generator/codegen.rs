@@ -95,7 +95,7 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
         ApiSpecType::Response => {
             content.push_str(&format!("impl ApiResponse for {}{{\n", spec.name));
             content.push_str(
-                "    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {\n",
+                "    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {\n",
             );
             content.push_str("        let header = ResponseHeader::deserialize(0, bytes);\n");
             for field in &spec.fields {
@@ -115,7 +115,8 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
 
             for substruct in sub_structs {
                 content.push_str(&format!("impl  FromBytes for {}{{\n", substruct.name));
-                content.push_str("    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {\n");
+                content
+                    .push_str("    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {\n");
                 for field in &substruct.fields {
                     content.push_str(&deserialize_field(field));
                 }
@@ -157,7 +158,7 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
                 }
                 "ResponseHeader" => {
                     content.push_str(
-                        "    pub fn deserialize(version: i16, bytes: &mut Bytes) -> ResponseHeader {\n",
+                        "    pub fn deserialize(version: i16, bytes: &mut BytesMut) -> ResponseHeader {\n",
                     );
                     for field in &spec.fields {
                         content.push_str(&deserialize_field(field));
@@ -312,7 +313,7 @@ fn impl_default_trait(name: &str, fields: &Vec<ApiSpecField>) -> String {
     if should_derive_default(fields) {
         return "".to_owned();
     }
-    let mut content = format!("impl Default for {name} {{\n", );
+    let mut content = format!("impl Default for {name} {{\n",);
     content.push_str("fn default() -> Self {\n");
     content.push_str("    Self {\n");
     for field in fields {
@@ -442,7 +443,7 @@ fn get_field_definition(field: &ApiSpecField, sub_structs: &mut VecDeque<SubStru
     }
 
     if let Some(about) = &field.about {
-        content.push_str(&format!("    /// {about}\n", ));
+        content.push_str(&format!("    /// {about}\n",));
     }
     content.push_str(&format!(
         "    pub {}: {field_type}, \n\n",

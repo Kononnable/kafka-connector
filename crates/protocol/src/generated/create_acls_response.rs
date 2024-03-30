@@ -20,7 +20,7 @@ pub struct CreatableAclResult {
 }
 
 impl ApiResponse for CreateAclsResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
         let results = Vec::<CreatableAclResult>::deserialize(version, bytes);
@@ -35,7 +35,7 @@ impl ApiResponse for CreateAclsResponse {
 }
 
 impl FromBytes for CreatableAclResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         CreatableAclResult {

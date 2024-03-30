@@ -15,7 +15,7 @@ pub struct SyncGroupResponse {
 }
 
 impl ApiResponse for SyncGroupResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 1 {
             i32::deserialize(version, bytes)

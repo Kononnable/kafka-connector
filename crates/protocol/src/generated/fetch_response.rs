@@ -79,7 +79,7 @@ pub struct AbortedTransaction {
 }
 
 impl ApiResponse for FetchResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 1 {
             i32::deserialize(version, bytes)
@@ -110,7 +110,7 @@ impl ApiResponse for FetchResponse {
 }
 
 impl FromBytes for FetchableTopicResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<FetchablePartitionResponse>::deserialize(version, bytes);
         FetchableTopicResponse { name, partitions }
@@ -118,7 +118,7 @@ impl FromBytes for FetchableTopicResponse {
 }
 
 impl FromBytes for FetchablePartitionResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);
         let high_watermark = i64::deserialize(version, bytes);
@@ -165,7 +165,7 @@ impl Default for FetchablePartitionResponse {
 }
 
 impl FromBytes for AbortedTransaction {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let producer_id = if version >= 4 {
             i64::deserialize(version, bytes)
         } else {

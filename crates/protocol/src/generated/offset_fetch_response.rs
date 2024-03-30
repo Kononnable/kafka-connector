@@ -49,7 +49,7 @@ pub struct OffsetFetchResponsePartition {
 }
 
 impl ApiResponse for OffsetFetchResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 3 {
             i32::deserialize(version, bytes)
@@ -74,7 +74,7 @@ impl ApiResponse for OffsetFetchResponse {
 }
 
 impl FromBytes for OffsetFetchResponseTopic {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<OffsetFetchResponsePartition>::deserialize(version, bytes);
         OffsetFetchResponseTopic { name, partitions }
@@ -82,7 +82,7 @@ impl FromBytes for OffsetFetchResponseTopic {
 }
 
 impl FromBytes for OffsetFetchResponsePartition {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let committed_offset = i64::deserialize(version, bytes);
         let committed_leader_epoch = if version >= 5 {

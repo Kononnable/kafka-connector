@@ -1,10 +1,10 @@
-use bytes::Bytes;
+use bytes::BytesMut;
 use indexmap::{IndexMap, IndexSet};
 use std::hash::Hash;
 use std::mem::size_of;
 
 pub trait FromBytes {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self;
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self;
 }
 
 impl<K, V> FromBytes for IndexMap<K, V>
@@ -12,7 +12,7 @@ where
     K: FromBytes + Hash + Eq,
     V: FromBytes,
 {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let cap: i32 = FromBytes::deserialize(version, bytes);
         let mut ret = IndexMap::new();
         for _i in 0..cap {
@@ -28,7 +28,7 @@ impl<K> FromBytes for IndexSet<K>
 where
     K: FromBytes + Hash + Eq,
 {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let cap: i32 = FromBytes::deserialize(version, bytes);
         let mut ret = IndexSet::new();
         for _i in 0..cap {
@@ -43,7 +43,7 @@ impl<R> FromBytes for Vec<R>
 where
     R: FromBytes,
 {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let cap: i32 = FromBytes::deserialize(version, bytes);
         if cap == -1 || cap == 0 {
             return vec![];
@@ -58,7 +58,7 @@ where
 }
 
 impl FromBytes for Vec<u8> {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let len: i32 = FromBytes::deserialize(version, bytes);
         if len == -1 || len == 0 {
             return vec![];
@@ -68,7 +68,7 @@ impl FromBytes for Vec<u8> {
 }
 
 impl FromBytes for String {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let len: i16 = FromBytes::deserialize(version, bytes);
         let slice = bytes.split_to(len as usize).into_iter();
         let data: Vec<u8> = slice.take(len as usize).collect();
@@ -77,7 +77,7 @@ impl FromBytes for String {
 }
 
 impl FromBytes for i8 {
-    fn deserialize(_version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(_version: i16, bytes: &mut BytesMut) -> Self {
         let data = bytes
             .split_to(size_of::<i8>())
             .as_ref()
@@ -88,13 +88,13 @@ impl FromBytes for i8 {
 }
 
 impl FromBytes for bool {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         i8::deserialize(version, bytes) == 0
     }
 }
 
 impl FromBytes for i16 {
-    fn deserialize(_version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(_version: i16, bytes: &mut BytesMut) -> Self {
         let data = bytes
             .split_to(size_of::<i16>())
             .as_ref()
@@ -105,7 +105,7 @@ impl FromBytes for i16 {
 }
 
 impl FromBytes for i32 {
-    fn deserialize(_version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(_version: i16, bytes: &mut BytesMut) -> Self {
         let data = bytes
             .split_to(size_of::<i32>())
             .as_ref()
@@ -116,7 +116,7 @@ impl FromBytes for i32 {
 }
 
 impl FromBytes for u32 {
-    fn deserialize(_version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(_version: i16, bytes: &mut BytesMut) -> Self {
         let data = bytes
             .split_to(size_of::<u32>())
             .as_ref()
@@ -127,7 +127,7 @@ impl FromBytes for u32 {
 }
 
 impl FromBytes for i64 {
-    fn deserialize(_version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(_version: i16, bytes: &mut BytesMut) -> Self {
         let data = bytes
             .split_to(size_of::<i64>())
             .as_ref()
@@ -138,7 +138,7 @@ impl FromBytes for i64 {
 }
 
 impl FromBytes for f64 {
-    fn deserialize(_version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(_version: i16, bytes: &mut BytesMut) -> Self {
         let data = bytes
             .split_to(size_of::<f64>())
             .as_ref()
@@ -152,7 +152,7 @@ impl<T> FromBytes for Option<T>
 where
     T: FromBytes,
 {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         Some(T::deserialize(version, bytes))
     }
 }

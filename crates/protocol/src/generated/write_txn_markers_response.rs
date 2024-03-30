@@ -34,7 +34,7 @@ pub struct WritableTxnMarkerPartitionResult {
 }
 
 impl ApiResponse for WriteTxnMarkersResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let markers = Vec::<WritableTxnMarkerResult>::deserialize(version, bytes);
         (header, WriteTxnMarkersResponse { markers })
@@ -42,7 +42,7 @@ impl ApiResponse for WriteTxnMarkersResponse {
 }
 
 impl FromBytes for WritableTxnMarkerResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let producer_id = i64::deserialize(version, bytes);
         let topics = Vec::<WritableTxnMarkerTopicResult>::deserialize(version, bytes);
         WritableTxnMarkerResult {
@@ -53,7 +53,7 @@ impl FromBytes for WritableTxnMarkerResult {
 }
 
 impl FromBytes for WritableTxnMarkerTopicResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<WritableTxnMarkerPartitionResult>::deserialize(version, bytes);
         WritableTxnMarkerTopicResult { name, partitions }
@@ -61,7 +61,7 @@ impl FromBytes for WritableTxnMarkerTopicResult {
 }
 
 impl FromBytes for WritableTxnMarkerPartitionResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);
         WritableTxnMarkerPartitionResult {

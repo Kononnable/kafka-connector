@@ -94,7 +94,7 @@ pub struct MetadataResponsePartition {
 }
 
 impl ApiResponse for MetadataResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 3 {
             i32::deserialize(version, bytes)
@@ -143,14 +143,14 @@ impl Default for MetadataResponse {
 }
 
 impl FromBytes for MetadataResponseBrokerKey {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let node_id = i32::deserialize(version, bytes);
         MetadataResponseBrokerKey { node_id }
     }
 }
 
 impl FromBytes for MetadataResponseBroker {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let host = String::deserialize(version, bytes);
         let port = i32::deserialize(version, bytes);
         let rack = if version >= 1 {
@@ -163,14 +163,14 @@ impl FromBytes for MetadataResponseBroker {
 }
 
 impl FromBytes for MetadataResponseTopicKey {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         MetadataResponseTopicKey { name }
     }
 }
 
 impl FromBytes for MetadataResponseTopic {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let is_internal = if version >= 1 {
             bool::deserialize(version, bytes)
@@ -187,7 +187,7 @@ impl FromBytes for MetadataResponseTopic {
 }
 
 impl FromBytes for MetadataResponsePartition {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let partition_index = i32::deserialize(version, bytes);
         let leader_id = i32::deserialize(version, bytes);

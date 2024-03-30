@@ -7,7 +7,7 @@ pub struct ResponseHeader {
 }
 
 impl ResponseHeader {
-    pub fn deserialize(version: i16, bytes: &mut Bytes) -> ResponseHeader {
+    pub fn deserialize(version: i16, bytes: &mut BytesMut) -> ResponseHeader {
         let correlation_id = i32::deserialize(version, bytes);
         ResponseHeader { correlation_id }
     }

@@ -28,7 +28,7 @@ pub struct CreatableTopicResult {
 }
 
 impl ApiResponse for CreateTopicsResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 2 {
             i32::deserialize(version, bytes)
@@ -48,14 +48,14 @@ impl ApiResponse for CreateTopicsResponse {
 }
 
 impl FromBytes for CreatableTopicResultKey {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         CreatableTopicResultKey { name }
     }
 }
 
 impl FromBytes for CreatableTopicResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let error_message = if version >= 1 {
             Option::<String>::deserialize(version, bytes)

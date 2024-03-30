@@ -24,7 +24,7 @@ pub struct ListedGroup {
 }
 
 impl ApiResponse for ListGroupsResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 1 {
             i32::deserialize(version, bytes)
@@ -45,7 +45,7 @@ impl ApiResponse for ListGroupsResponse {
 }
 
 impl FromBytes for ListedGroup {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let group_id = String::deserialize(version, bytes);
         let protocol_type = String::deserialize(version, bytes);
         ListedGroup {

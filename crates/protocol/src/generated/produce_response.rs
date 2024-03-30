@@ -47,7 +47,7 @@ pub struct PartitionProduceResponse {
 }
 
 impl ApiResponse for ProduceResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let responses = Vec::<TopicProduceResponse>::deserialize(version, bytes);
         let throttle_time_ms = if version >= 1 {
@@ -66,7 +66,7 @@ impl ApiResponse for ProduceResponse {
 }
 
 impl FromBytes for TopicProduceResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<PartitionProduceResponse>::deserialize(version, bytes);
         TopicProduceResponse { name, partitions }
@@ -74,7 +74,7 @@ impl FromBytes for TopicProduceResponse {
 }
 
 impl FromBytes for PartitionProduceResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);
         let base_offset = i64::deserialize(version, bytes);

@@ -69,7 +69,7 @@ pub struct DescribeConfigsSynonym {
 }
 
 impl ApiResponse for DescribeConfigsResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
         let results = Vec::<DescribeConfigsResult>::deserialize(version, bytes);
@@ -84,7 +84,7 @@ impl ApiResponse for DescribeConfigsResponse {
 }
 
 impl FromBytes for DescribeConfigsResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         let resource_type = i8::deserialize(version, bytes);
@@ -101,7 +101,7 @@ impl FromBytes for DescribeConfigsResult {
 }
 
 impl FromBytes for DescribeConfigsResourceResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let value = Option::<String>::deserialize(version, bytes);
         let read_only = bool::deserialize(version, bytes);
@@ -148,7 +148,7 @@ impl Default for DescribeConfigsResourceResult {
 }
 
 impl FromBytes for DescribeConfigsSynonym {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = if version >= 1 {
             String::deserialize(version, bytes)
         } else {

@@ -22,7 +22,7 @@ pub struct DeletableTopicResult {
 }
 
 impl ApiResponse for DeleteTopicsResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 1 {
             i32::deserialize(version, bytes)
@@ -41,7 +41,7 @@ impl ApiResponse for DeleteTopicsResponse {
 }
 
 impl FromBytes for DeletableTopicResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);
         DeletableTopicResult { name, error_code }

@@ -50,7 +50,7 @@ pub struct DescribedDelegationTokenRenewer {
 }
 
 impl ApiResponse for DescribeDelegationTokenResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let error_code = i16::deserialize(version, bytes);
         let tokens = Vec::<DescribedDelegationToken>::deserialize(version, bytes);
@@ -67,7 +67,7 @@ impl ApiResponse for DescribeDelegationTokenResponse {
 }
 
 impl FromBytes for DescribedDelegationToken {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let principal_type = String::deserialize(version, bytes);
         let principal_name = String::deserialize(version, bytes);
         let issue_timestamp = i64::deserialize(version, bytes);
@@ -90,7 +90,7 @@ impl FromBytes for DescribedDelegationToken {
 }
 
 impl FromBytes for DescribedDelegationTokenRenewer {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let principal_type = String::deserialize(version, bytes);
         let principal_name = String::deserialize(version, bytes);
         DescribedDelegationTokenRenewer {

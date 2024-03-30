@@ -14,7 +14,7 @@ pub struct RenewDelegationTokenResponse {
 }
 
 impl ApiResponse for RenewDelegationTokenResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let error_code = i16::deserialize(version, bytes);
         let expiry_timestamp_ms = i64::deserialize(version, bytes);

@@ -46,7 +46,7 @@ pub struct DescribeLogDirsPartition {
 }
 
 impl ApiResponse for DescribeLogDirsResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
         let results = Vec::<DescribeLogDirsResult>::deserialize(version, bytes);
@@ -61,7 +61,7 @@ impl ApiResponse for DescribeLogDirsResponse {
 }
 
 impl FromBytes for DescribeLogDirsResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let log_dir = String::deserialize(version, bytes);
         let topics = Vec::<DescribeLogDirsTopic>::deserialize(version, bytes);
@@ -74,7 +74,7 @@ impl FromBytes for DescribeLogDirsResult {
 }
 
 impl FromBytes for DescribeLogDirsTopic {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<DescribeLogDirsPartition>::deserialize(version, bytes);
         DescribeLogDirsTopic { name, partitions }
@@ -82,7 +82,7 @@ impl FromBytes for DescribeLogDirsTopic {
 }
 
 impl FromBytes for DescribeLogDirsPartition {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let partition_size = i64::deserialize(version, bytes);
         let offset_lag = i64::deserialize(version, bytes);

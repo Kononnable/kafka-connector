@@ -35,7 +35,7 @@ pub struct AddPartitionsToTxnPartitionResult {
 }
 
 impl ApiResponse for AddPartitionsToTxnResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
         let results = IndexMap::<AddPartitionsToTxnTopicResultKey,AddPartitionsToTxnTopicResult>::deserialize(version, bytes)
@@ -51,14 +51,14 @@ impl ApiResponse for AddPartitionsToTxnResponse {
 }
 
 impl FromBytes for AddPartitionsToTxnTopicResultKey {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         AddPartitionsToTxnTopicResultKey { name }
     }
 }
 
 impl FromBytes for AddPartitionsToTxnTopicResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let results = IndexMap::<
             AddPartitionsToTxnPartitionResultKey,
             AddPartitionsToTxnPartitionResult,
@@ -68,14 +68,14 @@ impl FromBytes for AddPartitionsToTxnTopicResult {
 }
 
 impl FromBytes for AddPartitionsToTxnPartitionResultKey {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         AddPartitionsToTxnPartitionResultKey { partition_index }
     }
 }
 
 impl FromBytes for AddPartitionsToTxnPartitionResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         AddPartitionsToTxnPartitionResult { error_code }
     }

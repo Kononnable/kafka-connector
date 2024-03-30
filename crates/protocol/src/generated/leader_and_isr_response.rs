@@ -25,7 +25,7 @@ pub struct LeaderAndIsrResponsePartition {
 }
 
 impl ApiResponse for LeaderAndIsrResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let error_code = i16::deserialize(version, bytes);
         let partitions = Vec::<LeaderAndIsrResponsePartition>::deserialize(version, bytes);
@@ -40,7 +40,7 @@ impl ApiResponse for LeaderAndIsrResponse {
 }
 
 impl FromBytes for LeaderAndIsrResponsePartition {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let topic_name = String::deserialize(version, bytes);
         let partition_index = i32::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);

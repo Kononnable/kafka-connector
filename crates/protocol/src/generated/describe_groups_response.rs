@@ -55,7 +55,7 @@ pub struct DescribedGroupMember {
 }
 
 impl ApiResponse for DescribeGroupsResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 1 {
             i32::deserialize(version, bytes)
@@ -74,7 +74,7 @@ impl ApiResponse for DescribeGroupsResponse {
 }
 
 impl FromBytes for DescribedGroup {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let group_id = String::deserialize(version, bytes);
         let group_state = String::deserialize(version, bytes);
@@ -93,7 +93,7 @@ impl FromBytes for DescribedGroup {
 }
 
 impl FromBytes for DescribedGroupMember {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let member_id = String::deserialize(version, bytes);
         let client_id = String::deserialize(version, bytes);
         let client_host = String::deserialize(version, bytes);

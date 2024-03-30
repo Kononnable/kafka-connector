@@ -36,7 +36,7 @@ pub struct OffsetForLeaderPartitionResult {
 }
 
 impl ApiResponse for OffsetForLeaderEpochResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 2 {
             i32::deserialize(version, bytes)
@@ -55,7 +55,7 @@ impl ApiResponse for OffsetForLeaderEpochResponse {
 }
 
 impl FromBytes for OffsetForLeaderTopicResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<OffsetForLeaderPartitionResult>::deserialize(version, bytes);
         OffsetForLeaderTopicResult { name, partitions }
@@ -63,7 +63,7 @@ impl FromBytes for OffsetForLeaderTopicResult {
 }
 
 impl FromBytes for OffsetForLeaderPartitionResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let partition_index = i32::deserialize(version, bytes);
         let leader_epoch = if version >= 1 {

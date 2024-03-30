@@ -2,7 +2,7 @@ pub use crate::from_bytes::FromBytes;
 pub use crate::generated::request_header::RequestHeader;
 pub use crate::generated::response_header::ResponseHeader;
 pub use crate::to_bytes::ToBytes;
-pub use bytes::{Bytes, BytesMut};
+pub use bytes::BytesMut;
 pub use indexmap::{IndexMap, IndexSet};
 pub use std::fmt::Debug;
 
@@ -23,7 +23,7 @@ pub trait ApiRequest: Clone + Debug + Default {
 }
 
 pub trait ApiResponse: Clone + Debug + Default {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self);
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self);
 }
 
 #[non_exhaustive]

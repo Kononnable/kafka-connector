@@ -23,7 +23,7 @@ pub struct DeletableGroupResult {
 }
 
 impl ApiResponse for DeleteGroupsResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
         let results =
@@ -39,14 +39,14 @@ impl ApiResponse for DeleteGroupsResponse {
 }
 
 impl FromBytes for DeletableGroupResultKey {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let group_id = String::deserialize(version, bytes);
         DeletableGroupResultKey { group_id }
     }
 }
 
 impl FromBytes for DeletableGroupResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         DeletableGroupResult { error_code }
     }

@@ -30,7 +30,7 @@ pub struct ApiVersionsResponseKey {
 }
 
 impl ApiResponse for ApiVersionsResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let error_code = i16::deserialize(version, bytes);
         let api_keys = IndexMap::<ApiVersionsResponseKeyKey, ApiVersionsResponseKey>::deserialize(
@@ -53,14 +53,14 @@ impl ApiResponse for ApiVersionsResponse {
 }
 
 impl FromBytes for ApiVersionsResponseKeyKey {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let index = i16::deserialize(version, bytes);
         ApiVersionsResponseKeyKey { index }
     }
 }
 
 impl FromBytes for ApiVersionsResponseKey {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let min_version = i16::deserialize(version, bytes);
         let max_version = i16::deserialize(version, bytes);
         ApiVersionsResponseKey {

@@ -29,7 +29,7 @@ pub struct AlterReplicaLogDirPartitionResult {
 }
 
 impl ApiResponse for AlterReplicaLogDirsResponse {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> (ResponseHeader, Self) {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
         let results = Vec::<AlterReplicaLogDirTopicResult>::deserialize(version, bytes);
@@ -44,7 +44,7 @@ impl ApiResponse for AlterReplicaLogDirsResponse {
 }
 
 impl FromBytes for AlterReplicaLogDirTopicResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let topic_name = String::deserialize(version, bytes);
         let partitions = Vec::<AlterReplicaLogDirPartitionResult>::deserialize(version, bytes);
         AlterReplicaLogDirTopicResult {
@@ -55,7 +55,7 @@ impl FromBytes for AlterReplicaLogDirTopicResult {
 }
 
 impl FromBytes for AlterReplicaLogDirPartitionResult {
-    fn deserialize(version: i16, bytes: &mut Bytes) -> Self {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);
         AlterReplicaLogDirPartitionResult {
