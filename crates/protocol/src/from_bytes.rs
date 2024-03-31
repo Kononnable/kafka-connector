@@ -8,14 +8,14 @@ pub trait FromBytes {
 }
 
 impl<K, V> FromBytes for IndexMap<K, V>
-where
-    K: FromBytes + Hash + Eq,
-    V: FromBytes,
+    where
+        K: FromBytes + Hash + Eq,
+        V: FromBytes,
 {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let cap: i32 = FromBytes::deserialize(version, bytes);
         let mut ret = IndexMap::new();
-        for _i in 0..cap {
+        for _ in 0..cap {
             let key = FromBytes::deserialize(version, bytes);
             let value = FromBytes::deserialize(version, bytes);
             ret.insert(key, value);
@@ -25,8 +25,8 @@ where
 }
 
 impl<K> FromBytes for IndexSet<K>
-where
-    K: FromBytes + Hash + Eq,
+    where
+        K: FromBytes + Hash + Eq,
 {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let cap: i32 = FromBytes::deserialize(version, bytes);
@@ -39,40 +39,73 @@ where
     }
 }
 
-impl<R> FromBytes for Vec<R>
-where
-    R: FromBytes,
+impl<T> FromBytes for Vec<T>
+    where
+        T: FromBytes,
+{
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        Option::<Vec<T>>::deserialize(version, bytes)
+            .expect("Received null array response for non-nullable field")
+    }
+}
+
+impl<T> FromBytes for Option<Vec<T>>
+    where
+        T: FromBytes,
 {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let cap: i32 = FromBytes::deserialize(version, bytes);
-        if cap == -1 || cap == 0 {
-            return vec![];
+        if cap == -1 {
+            return None;
+        }
+        if cap == 0 {
+            return Some(vec![]);
         }
         let mut ret = Vec::with_capacity(cap as usize);
         for _i in 0..cap {
             let element = FromBytes::deserialize(version, bytes);
             ret.push(element);
         }
-        ret
+        Some(ret)
     }
 }
 
 impl FromBytes for Vec<u8> {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        Option::<Vec<u8>>::deserialize(version, bytes)
+            .expect("Received null bytes response for non-nullable field")
+    }
+}
+
+impl FromBytes for Option<Vec<u8>> {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let len: i32 = FromBytes::deserialize(version, bytes);
-        if len == -1 || len == 0 {
-            return vec![];
+        match len {
+            -1 => None,
+            0 => Some(vec![]),
+            // TODO: zero-copy, consider BytesMut growth on non-unique BytesMut
+            _ => Some(bytes.split_to(len as usize).into_iter().collect())
         }
-        bytes.split_to(len as usize).into_iter().collect()
     }
 }
 
 impl FromBytes for String {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        Option::<String>::deserialize(version, bytes)
+            .expect("Received null string response for non-nullable field")
+    }
+}
+
+impl FromBytes for Option<String> {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let len: i16 = FromBytes::deserialize(version, bytes);
+        if len == -1 {
+            return None;
+        }
         let slice = bytes.split_to(len as usize).into_iter();
+        // TODO: zero-copy, consider BytesMut growth on non-unique BytesMut
         let data: Vec<u8> = slice.take(len as usize).collect();
-        String::from_utf8_lossy(&data).to_string()
+        Some(String::from_utf8_lossy(&data).to_string())
     }
 }
 
@@ -145,14 +178,5 @@ impl FromBytes for f64 {
             .try_into()
             .expect("Data deserialization error");
         f64::from_be_bytes(data)
-    }
-}
-
-impl<T> FromBytes for Option<T>
-where
-    T: FromBytes,
-{
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
-        Some(T::deserialize(version, bytes))
     }
 }

@@ -7,9 +7,9 @@ pub trait ToBytes {
 }
 
 impl<K, V> ToBytes for IndexMap<K, V>
-where
-    K: ToBytes,
-    V: ToBytes,
+    where
+        K: ToBytes,
+        V: ToBytes,
 {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_i32(self.len() as i32);
@@ -23,8 +23,8 @@ where
 }
 
 impl<K> ToBytes for IndexSet<K>
-where
-    K: ToBytes,
+    where
+        K: ToBytes,
 {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_i32(self.len() as i32);
@@ -36,9 +36,23 @@ where
     }
 }
 
+impl<T> ToBytes for Option<Vec<T>>
+    where
+        T: ToBytes {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        match self {
+            Some(val) => val.serialize(version, bytes),
+            None => {
+                bytes.put_i32(-1);
+                Ok(())
+            }
+        }
+    }
+}
+
 impl<T> ToBytes for Vec<T>
-where
-    T: ToBytes,
+    where
+        T: ToBytes,
 {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_i32(self.len() as i32);
@@ -50,6 +64,19 @@ where
     }
 }
 
+impl ToBytes for Option<Vec<u8>>
+{
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        match self {
+            Some(val) => val.serialize(version, bytes),
+            None => {
+                bytes.put_i32(-1);
+                Ok(())
+            }
+        }
+    }
+}
+
 impl ToBytes for Vec<u8> {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_i32(self.len() as i32);
@@ -58,17 +85,23 @@ impl ToBytes for Vec<u8> {
     }
 }
 
-impl ToBytes for &str {
-    fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
-        bytes.put_i16(self.len() as i16);
-        bytes.put_slice(self.as_bytes());
-        Ok(())
+impl ToBytes for Option<String> {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        match self {
+            Some(val) => val.serialize(version, bytes),
+            None => {
+                bytes.put_i16(-1);
+                Ok(())
+            }
+        }
     }
 }
 
 impl ToBytes for String {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
-        self.as_str().serialize(version, bytes)
+    fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        bytes.put_i16(self.len() as i16);
+        bytes.put_slice(self.as_bytes());
+        Ok(())
     }
 }
 
@@ -121,14 +154,3 @@ impl ToBytes for f64 {
     }
 }
 
-impl<T> ToBytes for Option<T>
-where
-    T: ToBytes + Default,
-{
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
-        match self {
-            Some(value) => T::serialize(value, version, bytes),
-            None => T::serialize(&T::default(), version, bytes),
-        }
-    }
-}
