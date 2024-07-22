@@ -1,3 +1,4 @@
+use crate::cluster::send_api_request::SendApiRequestError;
 use thiserror::Error as DeriveError;
 
 #[non_exhaustive]
@@ -7,8 +8,21 @@ pub enum ClusterControllerCreationError {
     // ConnectionError(Vec<KafkaApiCallError>),
     // #[error("Failed to recognize cluster address {0}")]
     // AddressRecognitionFailed(#[from] std::io::Error),
-    // #[error("No cluster address provided")]
-    // NoClusterAddressFound(),
+    #[error("Bootstrap address list is empty")]
+    NoClusterAddressFound,
+    #[error("No connection established within {0} attempts")]
+    OutOfRetryAttempts(u16),
     // #[error("Failed to fetch broker list {0}")]
     // MetadataFetchFailed(#[from] KafkaApiCallError),
+}
+
+#[non_exhaustive]
+#[derive(Debug, DeriveError)]
+pub(super) enum ClusterControllerInitializationError {
+    #[error(transparent)]
+    ApiCallError(#[from] SendApiRequestError),
+    #[error("Failed to connect with the broker. {0}")]
+    ConnectionError(std::io::Error),
+    #[error("Connection not established within specified time")]
+    ConnectionTimeoutReached,
 }
