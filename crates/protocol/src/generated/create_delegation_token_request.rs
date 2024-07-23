@@ -50,6 +50,15 @@ impl ApiRequest for CreateDelegationTokenRequest {
         self.max_lifetime_ms.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let renewers = Vec::<CreatableRenewers>::deserialize(version, bytes);
+        let max_lifetime_ms = i64::deserialize(version, bytes);
+        CreateDelegationTokenRequest {
+            renewers,
+            max_lifetime_ms,
+        }
+    }
 }
 
 impl CreateDelegationTokenRequest {
@@ -70,5 +79,16 @@ impl ToBytes for CreatableRenewers {
 impl CreatableRenewers {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for CreatableRenewers {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let principal_type = String::deserialize(version, bytes);
+        let principal_name = String::deserialize(version, bytes);
+        CreatableRenewers {
+            principal_type,
+            principal_name,
+        }
     }
 }

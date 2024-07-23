@@ -21,9 +21,23 @@ pub trait ApiRequest: Clone + Debug + Default {
         bytes: &mut BytesMut,
         header: &RequestHeader,
     ) -> Result<(), SerializationError>;
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self;
 }
 
 pub trait ApiResponse: Clone + Debug + Default {
+    type Request: ApiRequest;
+
+    fn get_api_key() -> i16;
+    fn get_min_supported_version() -> i16;
+    fn get_max_supported_version() -> i16;
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError>;
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self);
 }
 

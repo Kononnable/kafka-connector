@@ -82,6 +82,35 @@ impl ApiRequest for StopReplicaRequest {
         }
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let controller_id = i32::deserialize(version, bytes);
+        let controller_epoch = i32::deserialize(version, bytes);
+        let broker_epoch = if version >= 1 {
+            i64::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let delete_partitions = bool::deserialize(version, bytes);
+        let partitions_v_0 = if version >= 0 {
+            Vec::<StopReplicaRequestPartitionV0>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let topics = if version >= 1 {
+            Vec::<StopReplicaRequestTopic>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        StopReplicaRequest {
+            controller_id,
+            controller_epoch,
+            broker_epoch,
+            delete_partitions,
+            partitions_v_0,
+            topics,
+        }
+    }
 }
 
 impl StopReplicaRequest {
@@ -150,6 +179,25 @@ impl StopReplicaRequestPartitionV0 {
     }
 }
 
+impl FromBytes for StopReplicaRequestPartitionV0 {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topic_name = if version >= 0 {
+            String::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let partition_index = if version >= 0 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        StopReplicaRequestPartitionV0 {
+            topic_name,
+            partition_index,
+        }
+    }
+}
+
 impl ToBytes for StopReplicaRequestTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -180,5 +228,24 @@ impl StopReplicaRequestTopic {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for StopReplicaRequestTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = if version >= 1 {
+            String::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let partition_indexes = if version >= 1 {
+            Vec::<i32>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        StopReplicaRequestTopic {
+            name,
+            partition_indexes,
+        }
     }
 }

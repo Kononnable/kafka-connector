@@ -54,6 +54,12 @@ impl ApiRequest for OffsetFetchRequest {
         self.topics.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let group_id = String::deserialize(version, bytes);
+        let topics = Option::<Vec<OffsetFetchRequestTopic>>::deserialize(version, bytes);
+        OffsetFetchRequest { group_id, topics }
+    }
 }
 
 impl OffsetFetchRequest {
@@ -81,5 +87,16 @@ impl ToBytes for OffsetFetchRequestTopic {
 impl OffsetFetchRequestTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for OffsetFetchRequestTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        let partition_indexes = Vec::<i32>::deserialize(version, bytes);
+        OffsetFetchRequestTopic {
+            name,
+            partition_indexes,
+        }
     }
 }

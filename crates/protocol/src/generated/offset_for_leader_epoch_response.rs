@@ -36,6 +36,37 @@ pub struct OffsetForLeaderPartitionResult {
 }
 
 impl ApiResponse for OffsetForLeaderEpochResponse {
+    type Request = super::offset_for_leader_epoch_request::OffsetForLeaderEpochRequest;
+
+    fn get_api_key() -> i16 {
+        23
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        if version >= 2 {
+            self.throttle_time_ms.serialize(version, bytes)?;
+        }
+        self.topics.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 2 {
@@ -54,11 +85,51 @@ impl ApiResponse for OffsetForLeaderEpochResponse {
     }
 }
 
+impl OffsetForLeaderEpochResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for OffsetForLeaderTopicResult {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.name.serialize(version, bytes)?;
+        self.partitions.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl OffsetForLeaderTopicResult {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
 impl FromBytes for OffsetForLeaderTopicResult {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<OffsetForLeaderPartitionResult>::deserialize(version, bytes);
         OffsetForLeaderTopicResult { name, partitions }
+    }
+}
+
+impl ToBytes for OffsetForLeaderPartitionResult {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.error_code.serialize(version, bytes)?;
+        self.partition_index.serialize(version, bytes)?;
+        if version >= 1 {
+            self.leader_epoch.serialize(version, bytes)?;
+        }
+        self.end_offset.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl OffsetForLeaderPartitionResult {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 

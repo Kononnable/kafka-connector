@@ -37,6 +37,11 @@ impl ApiRequest for SaslAuthenticateRequest {
         self.auth_bytes.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let auth_bytes = Vec::<u8>::deserialize(version, bytes);
+        SaslAuthenticateRequest { auth_bytes }
+    }
 }
 
 impl SaslAuthenticateRequest {

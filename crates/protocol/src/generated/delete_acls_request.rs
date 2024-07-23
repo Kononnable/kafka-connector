@@ -61,6 +61,11 @@ impl ApiRequest for DeleteAclsRequest {
         self.filters.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let filters = Vec::<DeleteAclsFilter>::deserialize(version, bytes);
+        DeleteAclsRequest { filters }
+    }
 }
 
 impl DeleteAclsRequest {
@@ -116,6 +121,31 @@ impl DeleteAclsFilter {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for DeleteAclsFilter {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let resource_type_filter = i8::deserialize(version, bytes);
+        let resource_name_filter = Option::<String>::deserialize(version, bytes);
+        let pattern_type_filter = if version >= 1 {
+            i8::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let principal_filter = Option::<String>::deserialize(version, bytes);
+        let host_filter = Option::<String>::deserialize(version, bytes);
+        let operation = i8::deserialize(version, bytes);
+        let permission_type = i8::deserialize(version, bytes);
+        DeleteAclsFilter {
+            resource_type_filter,
+            resource_name_filter,
+            pattern_type_filter,
+            principal_filter,
+            host_filter,
+            operation,
+            permission_type,
+        }
     }
 }
 

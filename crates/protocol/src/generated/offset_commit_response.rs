@@ -35,6 +35,37 @@ pub struct OffsetCommitResponsePartition {
 }
 
 impl ApiResponse for OffsetCommitResponse {
+    type Request = super::offset_commit_request::OffsetCommitRequest;
+
+    fn get_api_key() -> i16 {
+        8
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        6
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        if version >= 3 {
+            self.throttle_time_ms.serialize(version, bytes)?;
+        }
+        self.topics.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 3 {
@@ -53,11 +84,47 @@ impl ApiResponse for OffsetCommitResponse {
     }
 }
 
+impl OffsetCommitResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for OffsetCommitResponseTopic {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.name.serialize(version, bytes)?;
+        self.partitions.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl OffsetCommitResponseTopic {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
 impl FromBytes for OffsetCommitResponseTopic {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<OffsetCommitResponsePartition>::deserialize(version, bytes);
         OffsetCommitResponseTopic { name, partitions }
+    }
+}
+
+impl ToBytes for OffsetCommitResponsePartition {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.partition_index.serialize(version, bytes)?;
+        self.error_code.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl OffsetCommitResponsePartition {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 

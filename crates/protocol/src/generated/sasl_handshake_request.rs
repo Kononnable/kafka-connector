@@ -37,6 +37,11 @@ impl ApiRequest for SaslHandshakeRequest {
         self.mechanism.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let mechanism = String::deserialize(version, bytes);
+        SaslHandshakeRequest { mechanism }
+    }
 }
 
 impl SaslHandshakeRequest {

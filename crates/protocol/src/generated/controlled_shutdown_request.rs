@@ -49,6 +49,19 @@ impl ApiRequest for ControlledShutdownRequest {
         }
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let broker_id = i32::deserialize(version, bytes);
+        let broker_epoch = if version >= 2 {
+            i64::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        ControlledShutdownRequest {
+            broker_id,
+            broker_epoch,
+        }
+    }
 }
 
 impl ControlledShutdownRequest {

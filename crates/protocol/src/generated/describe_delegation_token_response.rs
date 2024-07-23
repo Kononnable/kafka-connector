@@ -50,6 +50,36 @@ pub struct DescribedDelegationTokenRenewer {
 }
 
 impl ApiResponse for DescribeDelegationTokenResponse {
+    type Request = super::describe_delegation_token_request::DescribeDelegationTokenRequest;
+
+    fn get_api_key() -> i16 {
+        41
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        1
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        self.error_code.serialize(version, bytes)?;
+        self.tokens.serialize(version, bytes)?;
+        self.throttle_time_ms.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let error_code = i16::deserialize(version, bytes);
@@ -63,6 +93,33 @@ impl ApiResponse for DescribeDelegationTokenResponse {
                 throttle_time_ms,
             },
         )
+    }
+}
+
+impl DescribeDelegationTokenResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for DescribedDelegationToken {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.principal_type.serialize(version, bytes)?;
+        self.principal_name.serialize(version, bytes)?;
+        self.issue_timestamp.serialize(version, bytes)?;
+        self.expiry_timestamp.serialize(version, bytes)?;
+        self.max_timestamp.serialize(version, bytes)?;
+        self.token_id.serialize(version, bytes)?;
+        self.hmac.serialize(version, bytes)?;
+        self.renewers.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl DescribedDelegationToken {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
@@ -86,6 +143,21 @@ impl FromBytes for DescribedDelegationToken {
             hmac,
             renewers,
         }
+    }
+}
+
+impl ToBytes for DescribedDelegationTokenRenewer {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.principal_type.serialize(version, bytes)?;
+        self.principal_name.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl DescribedDelegationTokenRenewer {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 

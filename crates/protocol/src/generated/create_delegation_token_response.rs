@@ -32,6 +32,42 @@ pub struct CreateDelegationTokenResponse {
 }
 
 impl ApiResponse for CreateDelegationTokenResponse {
+    type Request = super::create_delegation_token_request::CreateDelegationTokenRequest;
+
+    fn get_api_key() -> i16 {
+        38
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        1
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        self.error_code.serialize(version, bytes)?;
+        self.principal_type.serialize(version, bytes)?;
+        self.principal_name.serialize(version, bytes)?;
+        self.issue_timestamp_ms.serialize(version, bytes)?;
+        self.expiry_timestamp_ms.serialize(version, bytes)?;
+        self.max_timestamp_ms.serialize(version, bytes)?;
+        self.token_id.serialize(version, bytes)?;
+        self.hmac.serialize(version, bytes)?;
+        self.throttle_time_ms.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let error_code = i16::deserialize(version, bytes);
@@ -57,5 +93,11 @@ impl ApiResponse for CreateDelegationTokenResponse {
                 throttle_time_ms,
             },
         )
+    }
+}
+
+impl CreateDelegationTokenResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }

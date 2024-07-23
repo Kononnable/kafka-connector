@@ -54,6 +54,35 @@ pub struct DeleteAclsMatchingAcl {
 }
 
 impl ApiResponse for DeleteAclsResponse {
+    type Request = super::delete_acls_request::DeleteAclsRequest;
+
+    fn get_api_key() -> i16 {
+        31
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        1
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        self.throttle_time_ms.serialize(version, bytes)?;
+        self.filter_results.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
@@ -68,6 +97,35 @@ impl ApiResponse for DeleteAclsResponse {
     }
 }
 
+impl DeleteAclsResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for DeleteAclsFilterResult {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.error_code.serialize(version, bytes)?;
+        self.error_message.serialize(version, bytes)?;
+        self.matching_acls.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl DeleteAclsFilterResult {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.error_message.is_none() {
+            return Err(SerializationError::NullValue(
+                "error_message",
+                _version,
+                "DeleteAclsFilterResult",
+            ));
+        }
+        Ok(())
+    }
+}
+
 impl FromBytes for DeleteAclsFilterResult {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
@@ -78,6 +136,44 @@ impl FromBytes for DeleteAclsFilterResult {
             error_message,
             matching_acls,
         }
+    }
+}
+
+impl ToBytes for DeleteAclsMatchingAcl {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.error_code.serialize(version, bytes)?;
+        self.error_message.serialize(version, bytes)?;
+        self.resource_type.serialize(version, bytes)?;
+        self.resource_name.serialize(version, bytes)?;
+        if version >= 1 {
+            self.pattern_type.serialize(version, bytes)?;
+        }
+        self.principal.serialize(version, bytes)?;
+        self.host.serialize(version, bytes)?;
+        self.operation.serialize(version, bytes)?;
+        self.permission_type.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl DeleteAclsMatchingAcl {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.error_message.is_none() {
+            return Err(SerializationError::NullValue(
+                "error_message",
+                _version,
+                "DeleteAclsMatchingAcl",
+            ));
+        }
+        if self.pattern_type != i8::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "pattern_type",
+                _version,
+                "DeleteAclsMatchingAcl",
+            ));
+        }
+        Ok(())
     }
 }
 

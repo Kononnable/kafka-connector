@@ -76,6 +76,30 @@ impl ApiRequest for JoinGroupRequest {
         self.protocols.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let group_id = String::deserialize(version, bytes);
+        let session_timeout_ms = i32::deserialize(version, bytes);
+        let rebalance_timeout_ms = if version >= 1 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let member_id = String::deserialize(version, bytes);
+        let protocol_type = String::deserialize(version, bytes);
+        let protocols =
+            IndexMap::<JoinGroupRequestProtocolKey, JoinGroupRequestProtocol>::deserialize(
+                version, bytes,
+            );
+        JoinGroupRequest {
+            group_id,
+            session_timeout_ms,
+            rebalance_timeout_ms,
+            member_id,
+            protocol_type,
+            protocols,
+        }
+    }
 }
 
 impl JoinGroupRequest {
@@ -111,6 +135,13 @@ impl JoinGroupRequestProtocolKey {
     }
 }
 
+impl FromBytes for JoinGroupRequestProtocolKey {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        JoinGroupRequestProtocolKey { name }
+    }
+}
+
 impl ToBytes for JoinGroupRequestProtocol {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -122,5 +153,12 @@ impl ToBytes for JoinGroupRequestProtocol {
 impl JoinGroupRequestProtocol {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for JoinGroupRequestProtocol {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let metadata = Vec::<u8>::deserialize(version, bytes);
+        JoinGroupRequestProtocol { metadata }
     }
 }

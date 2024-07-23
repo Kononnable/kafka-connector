@@ -58,6 +58,19 @@ impl ApiRequest for SyncGroupRequest {
         self.assignments.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let group_id = String::deserialize(version, bytes);
+        let generation_id = i32::deserialize(version, bytes);
+        let member_id = String::deserialize(version, bytes);
+        let assignments = Vec::<SyncGroupRequestAssignment>::deserialize(version, bytes);
+        SyncGroupRequest {
+            group_id,
+            generation_id,
+            member_id,
+            assignments,
+        }
+    }
 }
 
 impl SyncGroupRequest {
@@ -78,5 +91,16 @@ impl ToBytes for SyncGroupRequestAssignment {
 impl SyncGroupRequestAssignment {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for SyncGroupRequestAssignment {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let member_id = String::deserialize(version, bytes);
+        let assignment = Vec::<u8>::deserialize(version, bytes);
+        SyncGroupRequestAssignment {
+            member_id,
+            assignment,
+        }
     }
 }

@@ -61,6 +61,21 @@ impl ApiRequest for AddPartitionsToTxnRequest {
         self.topics.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let transactional_id = String::deserialize(version, bytes);
+        let producer_id = i64::deserialize(version, bytes);
+        let producer_epoch = i16::deserialize(version, bytes);
+        let topics = IndexMap::<AddPartitionsToTxnTopicKey, AddPartitionsToTxnTopic>::deserialize(
+            version, bytes,
+        );
+        AddPartitionsToTxnRequest {
+            transactional_id,
+            producer_id,
+            producer_epoch,
+            topics,
+        }
+    }
 }
 
 impl AddPartitionsToTxnRequest {
@@ -83,6 +98,13 @@ impl AddPartitionsToTxnTopicKey {
     }
 }
 
+impl FromBytes for AddPartitionsToTxnTopicKey {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        AddPartitionsToTxnTopicKey { name }
+    }
+}
+
 impl ToBytes for AddPartitionsToTxnTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -94,5 +116,12 @@ impl ToBytes for AddPartitionsToTxnTopic {
 impl AddPartitionsToTxnTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for AddPartitionsToTxnTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let partitions = Vec::<i32>::deserialize(version, bytes);
+        AddPartitionsToTxnTopic { partitions }
     }
 }

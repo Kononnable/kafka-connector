@@ -55,6 +55,37 @@ pub struct DescribedGroupMember {
 }
 
 impl ApiResponse for DescribeGroupsResponse {
+    type Request = super::describe_groups_request::DescribeGroupsRequest;
+
+    fn get_api_key() -> i16 {
+        15
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        if version >= 1 {
+            self.throttle_time_ms.serialize(version, bytes)?;
+        }
+        self.groups.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 1 {
@@ -70,6 +101,31 @@ impl ApiResponse for DescribeGroupsResponse {
                 groups,
             },
         )
+    }
+}
+
+impl DescribeGroupsResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for DescribedGroup {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.error_code.serialize(version, bytes)?;
+        self.group_id.serialize(version, bytes)?;
+        self.group_state.serialize(version, bytes)?;
+        self.protocol_type.serialize(version, bytes)?;
+        self.protocol_data.serialize(version, bytes)?;
+        self.members.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl DescribedGroup {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
@@ -89,6 +145,24 @@ impl FromBytes for DescribedGroup {
             protocol_data,
             members,
         }
+    }
+}
+
+impl ToBytes for DescribedGroupMember {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.member_id.serialize(version, bytes)?;
+        self.client_id.serialize(version, bytes)?;
+        self.client_host.serialize(version, bytes)?;
+        self.member_metadata.serialize(version, bytes)?;
+        self.member_assignment.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl DescribedGroupMember {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 

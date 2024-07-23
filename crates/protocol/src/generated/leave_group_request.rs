@@ -41,6 +41,15 @@ impl ApiRequest for LeaveGroupRequest {
         self.member_id.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let group_id = String::deserialize(version, bytes);
+        let member_id = String::deserialize(version, bytes);
+        LeaveGroupRequest {
+            group_id,
+            member_id,
+        }
+    }
 }
 
 impl LeaveGroupRequest {

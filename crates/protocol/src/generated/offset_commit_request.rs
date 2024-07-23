@@ -95,6 +95,33 @@ impl ApiRequest for OffsetCommitRequest {
         self.topics.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let group_id = String::deserialize(version, bytes);
+        let generation_id = if version >= 1 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let member_id = if version >= 1 {
+            String::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let retention_time_ms = if (2..=4).contains(&version) {
+            i64::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let topics = Vec::<OffsetCommitRequestTopic>::deserialize(version, bytes);
+        OffsetCommitRequest {
+            group_id,
+            generation_id,
+            member_id,
+            retention_time_ms,
+            topics,
+        }
+    }
 }
 
 impl OffsetCommitRequest {
@@ -127,6 +154,14 @@ impl ToBytes for OffsetCommitRequestTopic {
 impl OffsetCommitRequestTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for OffsetCommitRequestTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        let partitions = Vec::<OffsetCommitRequestPartition>::deserialize(version, bytes);
+        OffsetCommitRequestTopic { name, partitions }
     }
 }
 
@@ -163,6 +198,31 @@ impl OffsetCommitRequestPartition {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for OffsetCommitRequestPartition {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let partition_index = i32::deserialize(version, bytes);
+        let committed_offset = i64::deserialize(version, bytes);
+        let committed_leader_epoch = if version >= 6 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let commit_timestamp = if version >= 1 {
+            i64::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let committed_metadata = Option::<String>::deserialize(version, bytes);
+        OffsetCommitRequestPartition {
+            partition_index,
+            committed_offset,
+            committed_leader_epoch,
+            commit_timestamp,
+            committed_metadata,
+        }
     }
 }
 

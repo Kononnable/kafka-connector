@@ -44,21 +44,51 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
     }
 
     match spec.type_ {
-        ApiSpecType::Request => {
-            let response_type = spec.name.replace("Request", "Response");
-            content.push_str(&format!("impl ApiRequest for {}{{\n", spec.name));
-            content.push_str(&format!(
-                "    type Response = super::{}::{};\n\n",
-                response_type.to_case(Case::Snake),
-                response_type
-            ));
+        ApiSpecType::Request | ApiSpecType::Response => {
+            match spec.type_ {
+                ApiSpecType::Request => {
+                    let response_type = spec.name.replace("Request", "Response");
+                    content.push_str(&format!("impl ApiRequest for {}{{\n", spec.name));
+                    content.push_str(&format!(
+                        "    type Response = super::{}::{};\n\n",
+                        response_type.to_case(Case::Snake),
+                        response_type
+                    ));
+                }
+                ApiSpecType::Response => {
+                    let request_type = spec.name.replace("Response", "Request");
+                    content.push_str(&format!("impl ApiResponse for {}{{\n", spec.name));
+                    content.push_str(&format!(
+                        "    type Request = super::{}::{};\n\n",
+                        request_type.to_case(Case::Snake),
+                        request_type
+                    ));
+                }
+                ApiSpecType::Header => {
+                    unreachable!()
+                }
+            }
+
             content.push_str(&get_api_key(&spec));
             content.push_str(&get_min_max_supported_version(&spec));
-            content.push_str("    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) -> Result<(),SerializationError>{\n");
-            content.push_str(
-                "        debug_assert!(header.request_api_key == Self::get_api_key());\n",
-            );
-            content.push_str("        debug_assert!(header.request_api_version == version);\n");
+
+            match spec.type_ {
+                ApiSpecType::Request => {
+                    content.push_str("    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) -> Result<(),SerializationError>{\n");
+                    content.push_str(
+                        "        debug_assert!(header.request_api_key == Self::get_api_key());\n",
+                    );
+                    content.push_str(
+                        "        debug_assert!(header.request_api_version == version);\n",
+                    );
+                }
+                ApiSpecType::Response => {
+                    content.push_str("    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &ResponseHeader) -> Result<(),SerializationError>{\n");
+                }
+                ApiSpecType::Header => {
+                    unreachable!()
+                }
+            }
             content
                 .push_str("        debug_assert!(version >= Self::get_min_supported_version());\n");
             content
@@ -70,6 +100,51 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
             }
             content.push_str("    Ok(())\n");
             content.push_str("    }\n\n");
+
+            let no_fields_marker = if spec.fields.is_empty() { "_" } else { "" };
+            match spec.type_ {
+                ApiSpecType::Request => {
+                    content.push_str(
+                        &format!("    fn deserialize({no_fields_marker}version: i16, {no_fields_marker}bytes: &mut BytesMut) -> Self {{\n"),
+                    );
+                    for field in &spec.fields {
+                        content.push_str(&deserialize_field(field));
+                    }
+                    content.push_str(&format!("        {} {{\n", spec.name));
+                    for field in &spec.fields {
+                        content.push_str(&format!(
+                            "            {},\n",
+                            field.name.to_case(Case::Snake)
+                        ));
+                    }
+                    content.push_str("        }\n\n");
+                    content.push_str("    }\n\n");
+                }
+                ApiSpecType::Response => {
+                    content.push_str(
+                        &format!("    fn deserialize({no_fields_marker}version: i16, {no_fields_marker}bytes: &mut BytesMut) -> (ResponseHeader, Self) {{\n"),
+                    );
+                    content
+                        .push_str("        let header = ResponseHeader::deserialize(0, bytes);\n");
+                    for field in &spec.fields {
+                        content.push_str(&deserialize_field(field));
+                    }
+                    content.push_str(&format!("        (header, {} {{\n", spec.name));
+                    for field in &spec.fields {
+                        content.push_str(&format!(
+                            "            {},\n",
+                            field.name.to_case(Case::Snake)
+                        ));
+                    }
+                    content.push_str("        })\n\n");
+                    content.push_str("    }\n\n");
+                }
+
+                ApiSpecType::Header => {
+                    unreachable!()
+                }
+            }
+
             content.push_str("}\n\n");
 
             content.push_str(&generate_validate_fields(&spec.name, &spec.fields));
@@ -89,31 +164,7 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
                     &substruct.name,
                     &substruct.fields,
                 ));
-                content.push_str(&impl_default_trait(&substruct.name, &substruct.fields));
-            }
-        }
-        ApiSpecType::Response => {
-            content.push_str(&format!("impl ApiResponse for {}{{\n", spec.name));
-            content.push_str(
-                "    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {\n",
-            );
-            content.push_str("        let header = ResponseHeader::deserialize(0, bytes);\n");
-            for field in &spec.fields {
-                content.push_str(&deserialize_field(field));
-            }
-            content.push_str(&format!("        (header, {} {{\n", spec.name));
-            for field in &spec.fields {
-                content.push_str(&format!(
-                    "            {},\n",
-                    field.name.to_case(Case::Snake)
-                ));
-            }
-            content.push_str("        })\n\n");
-            content.push_str("    }\n\n");
-            content.push_str("}\n\n");
-            content.push_str(&impl_default_trait(&spec.name, &spec.fields));
 
-            for substruct in sub_structs {
                 content.push_str(&format!("impl  FromBytes for {}{{\n", substruct.name));
                 content
                     .push_str("    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {\n");
@@ -130,53 +181,43 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
                 content.push_str("        }\n\n");
                 content.push_str("    }\n\n");
                 content.push_str("}\n\n");
+
                 content.push_str(&impl_default_trait(&substruct.name, &substruct.fields));
             }
         }
         ApiSpecType::Header => {
             content.push_str(&format!("impl {}{{\n", spec.name));
-            match spec.name.as_str() {
-                "RequestHeader" => {
-                    content.push_str(&get_min_max_supported_version(&spec));
-                    content.push_str(
+            content.push_str(&get_min_max_supported_version(&spec));
+            content.push_str(
                         "    pub fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(),SerializationError> {\n",
                     );
-                    content.push_str(
-                        "        debug_assert!(version >= Self::get_min_supported_version());\n",
-                    );
-                    content.push_str(
-                        "        debug_assert!(version <= Self::get_max_supported_version());\n",
-                    );
-                    content.push_str("        self.validate_fields(version)?;\n");
-                    for field in &spec.fields {
-                        content.push_str(&serialize_field(field));
-                    }
-                    content.push_str("    Ok(())\n");
-                    content.push_str("    }\n\n");
-                    content.push_str("}\n\n");
-                    content.push_str(&generate_validate_fields(&spec.name, &spec.fields));
-                }
-                "ResponseHeader" => {
-                    content.push_str(
-                        "    pub fn deserialize(version: i16, bytes: &mut BytesMut) -> ResponseHeader {\n",
-                    );
-                    for field in &spec.fields {
-                        content.push_str(&deserialize_field(field));
-                    }
-
-                    content.push_str(&format!("        {} {{\n", spec.name));
-                    for field in &spec.fields {
-                        content.push_str(&format!(
-                            "            {},\n",
-                            field.name.to_case(Case::Snake)
-                        ));
-                    }
-                    content.push_str("        }\n\n");
-                    content.push_str("    }\n\n");
-                    content.push_str("}\n\n");
-                }
-                _ => panic!("Unknown header type"),
+            content
+                .push_str("        debug_assert!(version >= Self::get_min_supported_version());\n");
+            content
+                .push_str("        debug_assert!(version <= Self::get_max_supported_version());\n");
+            content.push_str("        self.validate_fields(version)?;\n");
+            for field in &spec.fields {
+                content.push_str(&serialize_field(field));
             }
+            content.push_str("    Ok(())\n");
+            content.push_str("    }\n\n");
+            content
+                .push_str("    pub fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {\n");
+            for field in &spec.fields {
+                content.push_str(&deserialize_field(field));
+            }
+
+            content.push_str(&format!("        {} {{\n", spec.name));
+            for field in &spec.fields {
+                content.push_str(&format!(
+                    "            {},\n",
+                    field.name.to_case(Case::Snake)
+                ));
+            }
+            content.push_str("        }\n\n");
+            content.push_str("    }\n\n");
+            content.push_str("}\n\n");
+            content.push_str(&generate_validate_fields(&spec.name, &spec.fields));
             content.push_str(&impl_default_trait(&spec.name, &spec.fields));
         }
     }

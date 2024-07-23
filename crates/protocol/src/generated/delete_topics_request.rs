@@ -41,6 +41,15 @@ impl ApiRequest for DeleteTopicsRequest {
         self.timeout_ms.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topic_names = Vec::<String>::deserialize(version, bytes);
+        let timeout_ms = i32::deserialize(version, bytes);
+        DeleteTopicsRequest {
+            topic_names,
+            timeout_ms,
+        }
+    }
 }
 
 impl DeleteTopicsRequest {

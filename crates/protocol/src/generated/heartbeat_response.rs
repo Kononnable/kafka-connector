@@ -12,6 +12,37 @@ pub struct HeartbeatResponse {
 }
 
 impl ApiResponse for HeartbeatResponse {
+    type Request = super::heartbeat_request::HeartbeatRequest;
+
+    fn get_api_key() -> i16 {
+        12
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        if version >= 1 {
+            self.throttle_time_ms.serialize(version, bytes)?;
+        }
+        self.error_code.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 1 {
@@ -27,5 +58,11 @@ impl ApiResponse for HeartbeatResponse {
                 error_code,
             },
         )
+    }
+}
+
+impl HeartbeatResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }

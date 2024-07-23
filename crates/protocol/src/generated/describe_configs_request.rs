@@ -56,6 +56,19 @@ impl ApiRequest for DescribeConfigsRequest {
         }
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let resources = Vec::<DescribeConfigsResource>::deserialize(version, bytes);
+        let include_synoyms = if version >= 1 {
+            bool::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        DescribeConfigsRequest {
+            resources,
+            include_synoyms,
+        }
+    }
 }
 
 impl DescribeConfigsRequest {
@@ -91,5 +104,18 @@ impl DescribeConfigsResource {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for DescribeConfigsResource {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let resource_type = i8::deserialize(version, bytes);
+        let resource_name = String::deserialize(version, bytes);
+        let configuration_keys = Option::<Vec<String>>::deserialize(version, bytes);
+        DescribeConfigsResource {
+            resource_type,
+            resource_name,
+            configuration_keys,
+        }
     }
 }

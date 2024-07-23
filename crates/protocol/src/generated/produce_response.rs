@@ -47,6 +47,37 @@ pub struct PartitionProduceResponse {
 }
 
 impl ApiResponse for ProduceResponse {
+    type Request = super::produce_request::ProduceRequest;
+
+    fn get_api_key() -> i16 {
+        0
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        7
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        self.responses.serialize(version, bytes)?;
+        if version >= 1 {
+            self.throttle_time_ms.serialize(version, bytes)?;
+        }
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let responses = Vec::<TopicProduceResponse>::deserialize(version, bytes);
@@ -65,11 +96,54 @@ impl ApiResponse for ProduceResponse {
     }
 }
 
+impl ProduceResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for TopicProduceResponse {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.name.serialize(version, bytes)?;
+        self.partitions.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl TopicProduceResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
 impl FromBytes for TopicProduceResponse {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<PartitionProduceResponse>::deserialize(version, bytes);
         TopicProduceResponse { name, partitions }
+    }
+}
+
+impl ToBytes for PartitionProduceResponse {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.partition_index.serialize(version, bytes)?;
+        self.error_code.serialize(version, bytes)?;
+        self.base_offset.serialize(version, bytes)?;
+        if version >= 2 {
+            self.log_append_time_ms.serialize(version, bytes)?;
+        }
+        if version >= 5 {
+            self.log_start_offset.serialize(version, bytes)?;
+        }
+        Ok(())
+    }
+}
+
+impl PartitionProduceResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 

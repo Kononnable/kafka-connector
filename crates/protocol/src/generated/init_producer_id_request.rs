@@ -41,6 +41,15 @@ impl ApiRequest for InitProducerIdRequest {
         self.transaction_timeout_ms.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let transactional_id = Option::<String>::deserialize(version, bytes);
+        let transaction_timeout_ms = i32::deserialize(version, bytes);
+        InitProducerIdRequest {
+            transactional_id,
+            transaction_timeout_ms,
+        }
+    }
 }
 
 impl InitProducerIdRequest {

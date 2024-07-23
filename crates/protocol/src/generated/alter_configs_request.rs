@@ -68,6 +68,16 @@ impl ApiRequest for AlterConfigsRequest {
         self.validate_only.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let resources =
+            IndexMap::<AlterConfigsResourceKey, AlterConfigsResource>::deserialize(version, bytes);
+        let validate_only = bool::deserialize(version, bytes);
+        AlterConfigsRequest {
+            resources,
+            validate_only,
+        }
+    }
 }
 
 impl AlterConfigsRequest {
@@ -91,6 +101,17 @@ impl AlterConfigsResourceKey {
     }
 }
 
+impl FromBytes for AlterConfigsResourceKey {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let resource_type = i8::deserialize(version, bytes);
+        let resource_name = String::deserialize(version, bytes);
+        AlterConfigsResourceKey {
+            resource_type,
+            resource_name,
+        }
+    }
+}
+
 impl ToBytes for AlterConfigsResource {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -105,6 +126,13 @@ impl AlterConfigsResource {
     }
 }
 
+impl FromBytes for AlterConfigsResource {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let configs = IndexMap::<AlterableConfigKey, AlterableConfig>::deserialize(version, bytes);
+        AlterConfigsResource { configs }
+    }
+}
+
 impl ToBytes for AlterableConfigKey {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -116,6 +144,13 @@ impl ToBytes for AlterableConfigKey {
 impl AlterableConfigKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for AlterableConfigKey {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        AlterableConfigKey { name }
     }
 }
 
@@ -137,5 +172,12 @@ impl AlterableConfig {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for AlterableConfig {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let value = Option::<String>::deserialize(version, bytes);
+        AlterableConfig { value }
     }
 }

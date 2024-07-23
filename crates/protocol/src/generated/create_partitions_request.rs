@@ -63,6 +63,17 @@ impl ApiRequest for CreatePartitionsRequest {
         self.validate_only.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topics = Vec::<CreatePartitionsTopic>::deserialize(version, bytes);
+        let timeout_ms = i32::deserialize(version, bytes);
+        let validate_only = bool::deserialize(version, bytes);
+        CreatePartitionsRequest {
+            topics,
+            timeout_ms,
+            validate_only,
+        }
+    }
 }
 
 impl CreatePartitionsRequest {
@@ -94,6 +105,19 @@ impl CreatePartitionsTopic {
     }
 }
 
+impl FromBytes for CreatePartitionsTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        let count = i32::deserialize(version, bytes);
+        let assignments = Option::<Vec<CreatePartitionsAssignment>>::deserialize(version, bytes);
+        CreatePartitionsTopic {
+            name,
+            count,
+            assignments,
+        }
+    }
+}
+
 impl ToBytes for CreatePartitionsAssignment {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -105,5 +129,12 @@ impl ToBytes for CreatePartitionsAssignment {
 impl CreatePartitionsAssignment {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for CreatePartitionsAssignment {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let broker_ids = Vec::<i32>::deserialize(version, bytes);
+        CreatePartitionsAssignment { broker_ids }
     }
 }

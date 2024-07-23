@@ -141,6 +141,49 @@ impl ApiRequest for FetchRequest {
         }
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let replica_id = i32::deserialize(version, bytes);
+        let max_wait = i32::deserialize(version, bytes);
+        let min_bytes = i32::deserialize(version, bytes);
+        let max_bytes = if version >= 3 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let isolation_level = if version >= 4 {
+            i8::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let session_id = if version >= 7 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let epoch = if version >= 7 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let topics = Vec::<FetchableTopic>::deserialize(version, bytes);
+        let forgotten = if version >= 7 {
+            Vec::<ForgottenTopic>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        FetchRequest {
+            replica_id,
+            max_wait,
+            min_bytes,
+            max_bytes,
+            isolation_level,
+            session_id,
+            epoch,
+            topics,
+            forgotten,
+        }
+    }
 }
 
 impl FetchRequest {
@@ -208,6 +251,17 @@ impl FetchableTopic {
     }
 }
 
+impl FromBytes for FetchableTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        let fetch_partitions = Vec::<FetchPartition>::deserialize(version, bytes);
+        FetchableTopic {
+            name,
+            fetch_partitions,
+        }
+    }
+}
+
 impl ToBytes for ForgottenTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -241,6 +295,25 @@ impl ForgottenTopic {
     }
 }
 
+impl FromBytes for ForgottenTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = if version >= 7 {
+            String::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let forgotten_partition_indexes = if version >= 7 {
+            Vec::<i32>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        ForgottenTopic {
+            name,
+            forgotten_partition_indexes,
+        }
+    }
+}
+
 impl ToBytes for FetchPartition {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -267,6 +340,31 @@ impl FetchPartition {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for FetchPartition {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let partition_index = i32::deserialize(version, bytes);
+        let current_leader_epoch = if version >= 9 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let fetch_offset = i64::deserialize(version, bytes);
+        let log_start_offset = if version >= 5 {
+            i64::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let max_bytes = i32::deserialize(version, bytes);
+        FetchPartition {
+            partition_index,
+            current_leader_epoch,
+            fetch_offset,
+            log_start_offset,
+            max_bytes,
+        }
     }
 }
 

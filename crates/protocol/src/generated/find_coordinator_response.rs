@@ -24,6 +24,43 @@ pub struct FindCoordinatorResponse {
 }
 
 impl ApiResponse for FindCoordinatorResponse {
+    type Request = super::find_coordinator_request::FindCoordinatorRequest;
+
+    fn get_api_key() -> i16 {
+        10
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        if version >= 1 {
+            self.throttle_time_ms.serialize(version, bytes)?;
+        }
+        self.error_code.serialize(version, bytes)?;
+        if version >= 1 {
+            self.error_message.serialize(version, bytes)?;
+        }
+        self.node_id.serialize(version, bytes)?;
+        self.host.serialize(version, bytes)?;
+        self.port.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 1 {
@@ -51,5 +88,18 @@ impl ApiResponse for FindCoordinatorResponse {
                 port,
             },
         )
+    }
+}
+
+impl FindCoordinatorResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.error_message.is_none() && !_version >= 1 {
+            return Err(SerializationError::NullValue(
+                "error_message",
+                _version,
+                "FindCoordinatorResponse",
+            ));
+        }
+        Ok(())
     }
 }

@@ -41,6 +41,15 @@ impl ApiRequest for ExpireDelegationTokenRequest {
         self.expiry_time_period_ms.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let hmac = Vec::<u8>::deserialize(version, bytes);
+        let expiry_time_period_ms = i64::deserialize(version, bytes);
+        ExpireDelegationTokenRequest {
+            hmac,
+            expiry_time_period_ms,
+        }
+    }
 }
 
 impl ExpireDelegationTokenRequest {

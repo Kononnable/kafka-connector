@@ -46,6 +46,11 @@ impl ApiRequest for DescribeLogDirsRequest {
         self.topics.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topics = Option::<Vec<DescribableLogDirTopic>>::deserialize(version, bytes);
+        DescribeLogDirsRequest { topics }
+    }
 }
 
 impl DescribeLogDirsRequest {
@@ -73,5 +78,16 @@ impl ToBytes for DescribableLogDirTopic {
 impl DescribableLogDirTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for DescribableLogDirTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topic = String::deserialize(version, bytes);
+        let partition_index = Vec::<i32>::deserialize(version, bytes);
+        DescribableLogDirTopic {
+            topic,
+            partition_index,
+        }
     }
 }

@@ -79,6 +79,21 @@ impl ApiRequest for TxnOffsetCommitRequest {
         self.topics.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let transactional_id = String::deserialize(version, bytes);
+        let group_id = String::deserialize(version, bytes);
+        let producer_id = i64::deserialize(version, bytes);
+        let producer_epoch = i16::deserialize(version, bytes);
+        let topics = Vec::<TxnOffsetCommitRequestTopic>::deserialize(version, bytes);
+        TxnOffsetCommitRequest {
+            transactional_id,
+            group_id,
+            producer_id,
+            producer_epoch,
+            topics,
+        }
+    }
 }
 
 impl TxnOffsetCommitRequest {
@@ -99,6 +114,14 @@ impl ToBytes for TxnOffsetCommitRequestTopic {
 impl TxnOffsetCommitRequestTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for TxnOffsetCommitRequestTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        let partitions = Vec::<TxnOffsetCommitRequestPartition>::deserialize(version, bytes);
+        TxnOffsetCommitRequestTopic { name, partitions }
     }
 }
 
@@ -125,6 +148,25 @@ impl TxnOffsetCommitRequestPartition {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for TxnOffsetCommitRequestPartition {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let partition_index = i32::deserialize(version, bytes);
+        let committed_offset = i64::deserialize(version, bytes);
+        let committed_leader_epoch = if version >= 2 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let committed_metadata = Option::<String>::deserialize(version, bytes);
+        TxnOffsetCommitRequestPartition {
+            partition_index,
+            committed_offset,
+            committed_leader_epoch,
+            committed_metadata,
+        }
     }
 }
 

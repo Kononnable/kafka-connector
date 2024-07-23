@@ -63,6 +63,11 @@ impl ApiRequest for WriteTxnMarkersRequest {
         self.markers.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let markers = Vec::<WritableTxnMarker>::deserialize(version, bytes);
+        WriteTxnMarkersRequest { markers }
+    }
 }
 
 impl WriteTxnMarkersRequest {
@@ -89,6 +94,23 @@ impl WritableTxnMarker {
     }
 }
 
+impl FromBytes for WritableTxnMarker {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let producer_id = i64::deserialize(version, bytes);
+        let producer_epoch = i16::deserialize(version, bytes);
+        let transaction_result = bool::deserialize(version, bytes);
+        let topics = Vec::<WritableTxnMarkerTopic>::deserialize(version, bytes);
+        let coordinator_epoch = i32::deserialize(version, bytes);
+        WritableTxnMarker {
+            producer_id,
+            producer_epoch,
+            transaction_result,
+            topics,
+            coordinator_epoch,
+        }
+    }
+}
+
 impl ToBytes for WritableTxnMarkerTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -101,5 +123,16 @@ impl ToBytes for WritableTxnMarkerTopic {
 impl WritableTxnMarkerTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for WritableTxnMarkerTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        let partition_indexes = Vec::<i32>::deserialize(version, bytes);
+        WritableTxnMarkerTopic {
+            name,
+            partition_indexes,
+        }
     }
 }

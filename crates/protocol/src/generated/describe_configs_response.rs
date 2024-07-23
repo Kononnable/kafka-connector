@@ -69,6 +69,35 @@ pub struct DescribeConfigsSynonym {
 }
 
 impl ApiResponse for DescribeConfigsResponse {
+    type Request = super::describe_configs_request::DescribeConfigsRequest;
+
+    fn get_api_key() -> i16 {
+        32
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        2
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        self.throttle_time_ms.serialize(version, bytes)?;
+        self.results.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
@@ -80,6 +109,37 @@ impl ApiResponse for DescribeConfigsResponse {
                 results,
             },
         )
+    }
+}
+
+impl DescribeConfigsResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for DescribeConfigsResult {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.error_code.serialize(version, bytes)?;
+        self.error_message.serialize(version, bytes)?;
+        self.resource_type.serialize(version, bytes)?;
+        self.resource_name.serialize(version, bytes)?;
+        self.configs.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl DescribeConfigsResult {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.error_message.is_none() {
+            return Err(SerializationError::NullValue(
+                "error_message",
+                _version,
+                "DescribeConfigsResult",
+            ));
+        }
+        Ok(())
     }
 }
 
@@ -97,6 +157,46 @@ impl FromBytes for DescribeConfigsResult {
             resource_name,
             configs,
         }
+    }
+}
+
+impl ToBytes for DescribeConfigsResourceResult {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.name.serialize(version, bytes)?;
+        self.value.serialize(version, bytes)?;
+        self.read_only.serialize(version, bytes)?;
+        if version >= 0 {
+            self.is_default.serialize(version, bytes)?;
+        }
+        if version >= 1 {
+            self.config_source.serialize(version, bytes)?;
+        }
+        self.is_sensitive.serialize(version, bytes)?;
+        if version >= 1 {
+            self.synonyms.serialize(version, bytes)?;
+        }
+        Ok(())
+    }
+}
+
+impl DescribeConfigsResourceResult {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.value.is_none() {
+            return Err(SerializationError::NullValue(
+                "value",
+                _version,
+                "DescribeConfigsResourceResult",
+            ));
+        }
+        if self.is_default != bool::default() && _version >= 0 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "is_default",
+                _version,
+                "DescribeConfigsResourceResult",
+            ));
+        }
+        Ok(())
     }
 }
 
@@ -144,6 +244,56 @@ impl Default for DescribeConfigsResourceResult {
             is_sensitive: Default::default(),
             synonyms: Default::default(),
         }
+    }
+}
+
+impl ToBytes for DescribeConfigsSynonym {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        if version >= 1 {
+            self.name.serialize(version, bytes)?;
+        }
+        if version >= 1 {
+            self.value.serialize(version, bytes)?;
+        }
+        if version >= 1 {
+            self.source.serialize(version, bytes)?;
+        }
+        Ok(())
+    }
+}
+
+impl DescribeConfigsSynonym {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.value.is_none() && !_version >= 1 {
+            return Err(SerializationError::NullValue(
+                "value",
+                _version,
+                "DescribeConfigsSynonym",
+            ));
+        }
+        if self.name != String::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "name",
+                _version,
+                "DescribeConfigsSynonym",
+            ));
+        }
+        if self.value.is_some() && self.value != Some(String::default()) && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "value",
+                _version,
+                "DescribeConfigsSynonym",
+            ));
+        }
+        if self.source != i8::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "source",
+                _version,
+                "DescribeConfigsSynonym",
+            ));
+        }
+        Ok(())
     }
 }
 

@@ -45,6 +45,17 @@ impl ApiRequest for HeartbeatRequest {
         self.member_id.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let group_id = String::deserialize(version, bytes);
+        let generationid = i32::deserialize(version, bytes);
+        let member_id = String::deserialize(version, bytes);
+        HeartbeatRequest {
+            group_id,
+            generationid,
+            member_id,
+        }
+    }
 }
 
 impl HeartbeatRequest {

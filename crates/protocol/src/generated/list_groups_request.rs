@@ -33,6 +33,10 @@ impl ApiRequest for ListGroupsRequest {
         header.serialize(0, bytes)?;
         Ok(())
     }
+
+    fn deserialize(_version: i16, _bytes: &mut BytesMut) -> Self {
+        ListGroupsRequest {}
+    }
 }
 
 impl ListGroupsRequest {

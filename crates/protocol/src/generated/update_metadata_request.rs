@@ -170,6 +170,35 @@ impl ApiRequest for UpdateMetadataRequest {
         self.brokers.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let controller_id = i32::deserialize(version, bytes);
+        let controller_epoch = i32::deserialize(version, bytes);
+        let broker_epoch = if version >= 5 {
+            i64::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let topic_states = if version >= 5 {
+            Vec::<UpdateMetadataRequestTopicState>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let partition_states_v_0 = if (0..=4).contains(&version) {
+            Vec::<UpdateMetadataRequestPartitionStateV0>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let brokers = Vec::<UpdateMetadataRequestBroker>::deserialize(version, bytes);
+        UpdateMetadataRequest {
+            controller_id,
+            controller_epoch,
+            broker_epoch,
+            topic_states,
+            partition_states_v_0,
+            brokers,
+        }
+    }
 }
 
 impl UpdateMetadataRequest {
@@ -229,6 +258,21 @@ impl UpdateMetadataRequestTopicState {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for UpdateMetadataRequestTopicState {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topic_name = String::deserialize(version, bytes);
+        let partition_states = if version >= 5 {
+            Vec::<UpdateMetadataPartitionState>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        UpdateMetadataRequestTopicState {
+            topic_name,
+            partition_states,
+        }
     }
 }
 
@@ -335,6 +379,67 @@ impl UpdateMetadataRequestPartitionStateV0 {
     }
 }
 
+impl FromBytes for UpdateMetadataRequestPartitionStateV0 {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topic_name = if (0..=4).contains(&version) {
+            String::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let partition_index = if (0..=4).contains(&version) {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let controller_epoch = if (0..=4).contains(&version) {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let leader = if (0..=4).contains(&version) {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let leader_epoch = if (0..=4).contains(&version) {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let isr = if (0..=4).contains(&version) {
+            Vec::<i32>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let zk_version = if (0..=4).contains(&version) {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let replicas = if (0..=4).contains(&version) {
+            Vec::<i32>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let offline_replicas = if version >= 4 {
+            Vec::<i32>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        UpdateMetadataRequestPartitionStateV0 {
+            topic_name,
+            partition_index,
+            controller_epoch,
+            leader,
+            leader_epoch,
+            isr,
+            zk_version,
+            replicas,
+            offline_replicas,
+        }
+    }
+}
+
 impl ToBytes for UpdateMetadataRequestBroker {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -372,6 +477,39 @@ impl UpdateMetadataRequestBroker {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for UpdateMetadataRequestBroker {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let id = i32::deserialize(version, bytes);
+        let v_0_host = if version >= 0 {
+            String::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let v_0_port = if version >= 0 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let endpoints = if version >= 1 {
+            Vec::<UpdateMetadataRequestEndpoint>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let rack = if version >= 2 {
+            Option::<String>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        UpdateMetadataRequestBroker {
+            id,
+            v_0_host,
+            v_0_port,
+            endpoints,
+            rack,
+        }
     }
 }
 
@@ -468,6 +606,61 @@ impl UpdateMetadataPartitionState {
     }
 }
 
+impl FromBytes for UpdateMetadataPartitionState {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let partition_index = if version >= 5 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let controller_epoch = if version >= 5 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let leader = if version >= 5 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let leader_epoch = if version >= 5 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let isr = if version >= 5 {
+            Vec::<i32>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let zk_version = if version >= 5 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let replicas = if version >= 5 {
+            Vec::<i32>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let offline_replicas = if version >= 5 {
+            Vec::<i32>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        UpdateMetadataPartitionState {
+            partition_index,
+            controller_epoch,
+            leader,
+            leader_epoch,
+            isr,
+            zk_version,
+            replicas,
+            offline_replicas,
+        }
+    }
+}
+
 impl ToBytes for UpdateMetadataRequestEndpoint {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -518,5 +711,36 @@ impl UpdateMetadataRequestEndpoint {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for UpdateMetadataRequestEndpoint {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let port = if version >= 1 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let host = if version >= 1 {
+            String::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let listener = if version >= 3 {
+            String::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let security_protocol = if version >= 1 {
+            i16::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        UpdateMetadataRequestEndpoint {
+            port,
+            host,
+            listener,
+            security_protocol,
+        }
     }
 }

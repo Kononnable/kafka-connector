@@ -46,6 +46,35 @@ pub struct DescribeLogDirsPartition {
 }
 
 impl ApiResponse for DescribeLogDirsResponse {
+    type Request = super::describe_log_dirs_request::DescribeLogDirsRequest;
+
+    fn get_api_key() -> i16 {
+        35
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        1
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        self.throttle_time_ms.serialize(version, bytes)?;
+        self.results.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
@@ -57,6 +86,28 @@ impl ApiResponse for DescribeLogDirsResponse {
                 results,
             },
         )
+    }
+}
+
+impl DescribeLogDirsResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for DescribeLogDirsResult {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.error_code.serialize(version, bytes)?;
+        self.log_dir.serialize(version, bytes)?;
+        self.topics.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl DescribeLogDirsResult {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
@@ -73,11 +124,43 @@ impl FromBytes for DescribeLogDirsResult {
     }
 }
 
+impl ToBytes for DescribeLogDirsTopic {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.name.serialize(version, bytes)?;
+        self.partitions.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl DescribeLogDirsTopic {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
 impl FromBytes for DescribeLogDirsTopic {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<DescribeLogDirsPartition>::deserialize(version, bytes);
         DescribeLogDirsTopic { name, partitions }
+    }
+}
+
+impl ToBytes for DescribeLogDirsPartition {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.partition_index.serialize(version, bytes)?;
+        self.partition_size.serialize(version, bytes)?;
+        self.offset_lag.serialize(version, bytes)?;
+        self.is_future_key.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl DescribeLogDirsPartition {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 

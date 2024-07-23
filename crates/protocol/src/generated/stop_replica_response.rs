@@ -23,6 +23,35 @@ pub struct StopReplicaResponsePartition {
 }
 
 impl ApiResponse for StopReplicaResponse {
+    type Request = super::stop_replica_request::StopReplicaRequest;
+
+    fn get_api_key() -> i16 {
+        5
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        1
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        self.error_code.serialize(version, bytes)?;
+        self.partitions.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let error_code = i16::deserialize(version, bytes);
@@ -34,6 +63,28 @@ impl ApiResponse for StopReplicaResponse {
                 partitions,
             },
         )
+    }
+}
+
+impl StopReplicaResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for StopReplicaResponsePartition {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.topic_name.serialize(version, bytes)?;
+        self.partition_index.serialize(version, bytes)?;
+        self.error_code.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl StopReplicaResponsePartition {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 

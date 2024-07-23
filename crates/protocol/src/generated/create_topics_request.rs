@@ -89,6 +89,21 @@ impl ApiRequest for CreateTopicsRequest {
         }
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topics = Vec::<CreatableTopic>::deserialize(version, bytes);
+        let timeout_ms = i32::deserialize(version, bytes);
+        let validate_only = if version >= 1 {
+            bool::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        CreateTopicsRequest {
+            topics,
+            timeout_ms,
+            validate_only,
+        }
+    }
 }
 
 impl CreateTopicsRequest {
@@ -122,6 +137,28 @@ impl CreatableTopic {
     }
 }
 
+impl FromBytes for CreatableTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        let num_partitions = i32::deserialize(version, bytes);
+        let replication_factor = i16::deserialize(version, bytes);
+        let assignments =
+            IndexMap::<CreatableReplicaAssignmentKey, CreatableReplicaAssignment>::deserialize(
+                version, bytes,
+            );
+        let configs = IndexMap::<CreateableTopicConfigKey, CreateableTopicConfig>::deserialize(
+            version, bytes,
+        );
+        CreatableTopic {
+            name,
+            num_partitions,
+            replication_factor,
+            assignments,
+            configs,
+        }
+    }
+}
+
 impl ToBytes for CreatableReplicaAssignmentKey {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -133,6 +170,13 @@ impl ToBytes for CreatableReplicaAssignmentKey {
 impl CreatableReplicaAssignmentKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for CreatableReplicaAssignmentKey {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let partition_index = i32::deserialize(version, bytes);
+        CreatableReplicaAssignmentKey { partition_index }
     }
 }
 
@@ -150,6 +194,13 @@ impl CreatableReplicaAssignment {
     }
 }
 
+impl FromBytes for CreatableReplicaAssignment {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let broker_ids = Vec::<i32>::deserialize(version, bytes);
+        CreatableReplicaAssignment { broker_ids }
+    }
+}
+
 impl ToBytes for CreateableTopicConfigKey {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -161,6 +212,13 @@ impl ToBytes for CreateableTopicConfigKey {
 impl CreateableTopicConfigKey {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for CreateableTopicConfigKey {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        CreateableTopicConfigKey { name }
     }
 }
 
@@ -182,5 +240,12 @@ impl CreateableTopicConfig {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for CreateableTopicConfig {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let value = Option::<String>::deserialize(version, bytes);
+        CreateableTopicConfig { value }
     }
 }

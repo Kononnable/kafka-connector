@@ -55,6 +55,19 @@ impl ApiRequest for MetadataRequest {
         }
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topics = Option::<Vec<MetadataRequestTopic>>::deserialize(version, bytes);
+        let allow_auto_topic_creation = if version >= 4 {
+            bool::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        MetadataRequest {
+            topics,
+            allow_auto_topic_creation,
+        }
+    }
 }
 
 impl MetadataRequest {
@@ -97,5 +110,12 @@ impl ToBytes for MetadataRequestTopic {
 impl MetadataRequestTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for MetadataRequestTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        MetadataRequestTopic { name }
     }
 }

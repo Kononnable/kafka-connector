@@ -143,6 +143,35 @@ impl ApiRequest for LeaderAndIsrRequest {
         self.live_leaders.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let controller_id = i32::deserialize(version, bytes);
+        let controller_epoch = i32::deserialize(version, bytes);
+        let broker_epoch = if version >= 2 {
+            i64::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let topic_states = if version >= 2 {
+            Vec::<LeaderAndIsrRequestTopicState>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let partition_states_v_0 = if (0..=1).contains(&version) {
+            Vec::<LeaderAndIsrRequestPartitionStateV0>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let live_leaders = Vec::<LeaderAndIsrLiveLeader>::deserialize(version, bytes);
+        LeaderAndIsrRequest {
+            controller_id,
+            controller_epoch,
+            broker_epoch,
+            topic_states,
+            partition_states_v_0,
+            live_leaders,
+        }
+    }
 }
 
 impl LeaderAndIsrRequest {
@@ -201,6 +230,22 @@ impl LeaderAndIsrRequestTopicState {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for LeaderAndIsrRequestTopicState {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = if version >= 2 {
+            String::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let partition_states =
+            Vec::<LeaderAndIsrRequestPartitionState>::deserialize(version, bytes);
+        LeaderAndIsrRequestTopicState {
+            name,
+            partition_states,
+        }
     }
 }
 
@@ -300,6 +345,67 @@ impl LeaderAndIsrRequestPartitionStateV0 {
     }
 }
 
+impl FromBytes for LeaderAndIsrRequestPartitionStateV0 {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topic_name = if (0..=1).contains(&version) {
+            String::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let partition_index = if (0..=1).contains(&version) {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let controller_epoch = if (0..=1).contains(&version) {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let leader_key = if (0..=1).contains(&version) {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let leader_epoch = if (0..=1).contains(&version) {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let isr_replicas = if (0..=1).contains(&version) {
+            Vec::<i32>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let zk_version = if (0..=1).contains(&version) {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let replicas = if (0..=1).contains(&version) {
+            Vec::<i32>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let is_new = if version >= 1 {
+            bool::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        LeaderAndIsrRequestPartitionStateV0 {
+            topic_name,
+            partition_index,
+            controller_epoch,
+            leader_key,
+            leader_epoch,
+            isr_replicas,
+            zk_version,
+            replicas,
+            is_new,
+        }
+    }
+}
+
 impl ToBytes for LeaderAndIsrLiveLeader {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -313,6 +419,19 @@ impl ToBytes for LeaderAndIsrLiveLeader {
 impl LeaderAndIsrLiveLeader {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for LeaderAndIsrLiveLeader {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let broker_id = i32::deserialize(version, bytes);
+        let host_name = String::deserialize(version, bytes);
+        let port = i32::deserialize(version, bytes);
+        LeaderAndIsrLiveLeader {
+            broker_id,
+            host_name,
+            port,
+        }
     }
 }
 
@@ -336,5 +455,32 @@ impl ToBytes for LeaderAndIsrRequestPartitionState {
 impl LeaderAndIsrRequestPartitionState {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for LeaderAndIsrRequestPartitionState {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let partition_index = i32::deserialize(version, bytes);
+        let controller_epoch = i32::deserialize(version, bytes);
+        let leader_key = i32::deserialize(version, bytes);
+        let leader_epoch = i32::deserialize(version, bytes);
+        let isr_replicas = Vec::<i32>::deserialize(version, bytes);
+        let zk_version = i32::deserialize(version, bytes);
+        let replicas = Vec::<i32>::deserialize(version, bytes);
+        let is_new = if version >= 1 {
+            bool::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        LeaderAndIsrRequestPartitionState {
+            partition_index,
+            controller_epoch,
+            leader_key,
+            leader_epoch,
+            isr_replicas,
+            zk_version,
+            replicas,
+            is_new,
+        }
     }
 }

@@ -79,6 +79,23 @@ impl ApiRequest for ProduceRequest {
         self.topics.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let transactional_id = if version >= 3 {
+            Option::<String>::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let acks = i16::deserialize(version, bytes);
+        let timeout_ms = i32::deserialize(version, bytes);
+        let topics = Vec::<TopicProduceData>::deserialize(version, bytes);
+        ProduceRequest {
+            transactional_id,
+            acks,
+            timeout_ms,
+            topics,
+        }
+    }
 }
 
 impl ProduceRequest {
@@ -119,6 +136,14 @@ impl TopicProduceData {
     }
 }
 
+impl FromBytes for TopicProduceData {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        let partitions = Vec::<PartitionProduceData>::deserialize(version, bytes);
+        TopicProduceData { name, partitions }
+    }
+}
+
 impl ToBytes for PartitionProduceData {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -138,5 +163,16 @@ impl PartitionProduceData {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for PartitionProduceData {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let partition_index = i32::deserialize(version, bytes);
+        let records = Option::<Vec<u8>>::deserialize(version, bytes);
+        PartitionProduceData {
+            partition_index,
+            records,
+        }
     }
 }

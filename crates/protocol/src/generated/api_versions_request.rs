@@ -33,6 +33,10 @@ impl ApiRequest for ApiVersionsRequest {
         header.serialize(0, bytes)?;
         Ok(())
     }
+
+    fn deserialize(_version: i16, _bytes: &mut BytesMut) -> Self {
+        ApiVersionsRequest {}
+    }
 }
 
 impl ApiVersionsRequest {

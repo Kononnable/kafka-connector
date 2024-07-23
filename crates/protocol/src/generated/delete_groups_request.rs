@@ -37,6 +37,11 @@ impl ApiRequest for DeleteGroupsRequest {
         self.groups_names.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let groups_names = Vec::<String>::deserialize(version, bytes);
+        DeleteGroupsRequest { groups_names }
+    }
 }
 
 impl DeleteGroupsRequest {

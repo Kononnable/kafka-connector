@@ -94,6 +94,44 @@ pub struct MetadataResponsePartition {
 }
 
 impl ApiResponse for MetadataResponse {
+    type Request = super::metadata_request::MetadataRequest;
+
+    fn get_api_key() -> i16 {
+        3
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        7
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        if version >= 3 {
+            self.throttle_time_ms.serialize(version, bytes)?;
+        }
+        self.brokers.serialize(version, bytes)?;
+        if version >= 2 {
+            self.cluster_id.serialize(version, bytes)?;
+        }
+        if version >= 1 {
+            self.controller_id.serialize(version, bytes)?;
+        }
+        self.topics.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 3 {
@@ -130,6 +168,26 @@ impl ApiResponse for MetadataResponse {
     }
 }
 
+impl MetadataResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.cluster_id.is_none() && !_version >= 2 {
+            return Err(SerializationError::NullValue(
+                "cluster_id",
+                _version,
+                "MetadataResponse",
+            ));
+        }
+        if self.throttle_time_ms != i32::default() && _version >= 3 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "throttle_time_ms",
+                _version,
+                "MetadataResponse",
+            ));
+        }
+        Ok(())
+    }
+}
+
 impl Default for MetadataResponse {
     fn default() -> Self {
         Self {
@@ -142,10 +200,49 @@ impl Default for MetadataResponse {
     }
 }
 
+impl ToBytes for MetadataResponseBrokerKey {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.node_id.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl MetadataResponseBrokerKey {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
 impl FromBytes for MetadataResponseBrokerKey {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let node_id = i32::deserialize(version, bytes);
         MetadataResponseBrokerKey { node_id }
+    }
+}
+
+impl ToBytes for MetadataResponseBroker {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.host.serialize(version, bytes)?;
+        self.port.serialize(version, bytes)?;
+        if version >= 1 {
+            self.rack.serialize(version, bytes)?;
+        }
+        Ok(())
+    }
+}
+
+impl MetadataResponseBroker {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.rack.is_none() && !_version >= 1 {
+            return Err(SerializationError::NullValue(
+                "rack",
+                _version,
+                "MetadataResponseBroker",
+            ));
+        }
+        Ok(())
     }
 }
 
@@ -162,10 +259,42 @@ impl FromBytes for MetadataResponseBroker {
     }
 }
 
+impl ToBytes for MetadataResponseTopicKey {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.name.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl MetadataResponseTopicKey {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
 impl FromBytes for MetadataResponseTopicKey {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         MetadataResponseTopicKey { name }
+    }
+}
+
+impl ToBytes for MetadataResponseTopic {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.error_code.serialize(version, bytes)?;
+        if version >= 1 {
+            self.is_internal.serialize(version, bytes)?;
+        }
+        self.partitions.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl MetadataResponseTopic {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
@@ -183,6 +312,30 @@ impl FromBytes for MetadataResponseTopic {
             is_internal,
             partitions,
         }
+    }
+}
+
+impl ToBytes for MetadataResponsePartition {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.error_code.serialize(version, bytes)?;
+        self.partition_index.serialize(version, bytes)?;
+        self.leader_id.serialize(version, bytes)?;
+        if version >= 7 {
+            self.leader_epoch.serialize(version, bytes)?;
+        }
+        self.replica_nodes.serialize(version, bytes)?;
+        self.isr_nodes.serialize(version, bytes)?;
+        if version >= 5 {
+            self.offline_replicas.serialize(version, bytes)?;
+        }
+        Ok(())
+    }
+}
+
+impl MetadataResponsePartition {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 

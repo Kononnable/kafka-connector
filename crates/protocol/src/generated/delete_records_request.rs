@@ -59,6 +59,12 @@ impl ApiRequest for DeleteRecordsRequest {
         self.timeout_ms.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topics = Vec::<DeleteRecordsTopic>::deserialize(version, bytes);
+        let timeout_ms = i32::deserialize(version, bytes);
+        DeleteRecordsRequest { topics, timeout_ms }
+    }
 }
 
 impl DeleteRecordsRequest {
@@ -82,6 +88,14 @@ impl DeleteRecordsTopic {
     }
 }
 
+impl FromBytes for DeleteRecordsTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        let partitions = Vec::<DeleteRecordsPartition>::deserialize(version, bytes);
+        DeleteRecordsTopic { name, partitions }
+    }
+}
+
 impl ToBytes for DeleteRecordsPartition {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -94,5 +108,16 @@ impl ToBytes for DeleteRecordsPartition {
 impl DeleteRecordsPartition {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for DeleteRecordsPartition {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let partition_index = i32::deserialize(version, bytes);
+        let offset = i64::deserialize(version, bytes);
+        DeleteRecordsPartition {
+            partition_index,
+            offset,
+        }
     }
 }

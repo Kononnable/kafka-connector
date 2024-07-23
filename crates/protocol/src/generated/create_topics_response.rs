@@ -28,6 +28,37 @@ pub struct CreatableTopicResult {
 }
 
 impl ApiResponse for CreateTopicsResponse {
+    type Request = super::create_topics_request::CreateTopicsRequest;
+
+    fn get_api_key() -> i16 {
+        19
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        3
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        if version >= 2 {
+            self.throttle_time_ms.serialize(version, bytes)?;
+        }
+        self.topics.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 2 {
@@ -47,10 +78,54 @@ impl ApiResponse for CreateTopicsResponse {
     }
 }
 
+impl CreateTopicsResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for CreatableTopicResultKey {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.name.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl CreatableTopicResultKey {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
 impl FromBytes for CreatableTopicResultKey {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         CreatableTopicResultKey { name }
+    }
+}
+
+impl ToBytes for CreatableTopicResult {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.error_code.serialize(version, bytes)?;
+        if version >= 1 {
+            self.error_message.serialize(version, bytes)?;
+        }
+        Ok(())
+    }
+}
+
+impl CreatableTopicResult {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.error_message.is_none() && !_version >= 1 {
+            return Err(SerializationError::NullValue(
+                "error_message",
+                _version,
+                "CreatableTopicResult",
+            ));
+        }
+        Ok(())
     }
 }
 

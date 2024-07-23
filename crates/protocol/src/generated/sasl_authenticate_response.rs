@@ -17,6 +17,39 @@ pub struct SaslAuthenticateResponse {
 }
 
 impl ApiResponse for SaslAuthenticateResponse {
+    type Request = super::sasl_authenticate_request::SaslAuthenticateRequest;
+
+    fn get_api_key() -> i16 {
+        36
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        1
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        self.error_code.serialize(version, bytes)?;
+        self.error_message.serialize(version, bytes)?;
+        self.auth_bytes.serialize(version, bytes)?;
+        if version >= 1 {
+            self.session_lifetime_ms.serialize(version, bytes)?;
+        }
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let error_code = i16::deserialize(version, bytes);
@@ -36,5 +69,25 @@ impl ApiResponse for SaslAuthenticateResponse {
                 session_lifetime_ms,
             },
         )
+    }
+}
+
+impl SaslAuthenticateResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.error_message.is_none() {
+            return Err(SerializationError::NullValue(
+                "error_message",
+                _version,
+                "SaslAuthenticateResponse",
+            ));
+        }
+        if self.session_lifetime_ms != i64::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "session_lifetime_ms",
+                _version,
+                "SaslAuthenticateResponse",
+            ));
+        }
+        Ok(())
     }
 }

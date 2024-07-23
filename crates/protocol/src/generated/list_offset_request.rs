@@ -76,6 +76,21 @@ impl ApiRequest for ListOffsetRequest {
         self.topics.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let replica_id = i32::deserialize(version, bytes);
+        let isolation_level = if version >= 2 {
+            i8::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let topics = Vec::<ListOffsetTopic>::deserialize(version, bytes);
+        ListOffsetRequest {
+            replica_id,
+            isolation_level,
+            topics,
+        }
+    }
 }
 
 impl ListOffsetRequest {
@@ -103,6 +118,14 @@ impl ToBytes for ListOffsetTopic {
 impl ListOffsetTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for ListOffsetTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        let partitions = Vec::<ListOffsetPartition>::deserialize(version, bytes);
+        ListOffsetTopic { name, partitions }
     }
 }
 
@@ -138,5 +161,28 @@ impl ListOffsetPartition {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for ListOffsetPartition {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let partition_index = i32::deserialize(version, bytes);
+        let current_leader_epoch = if version >= 4 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let timestamp = i64::deserialize(version, bytes);
+        let max_num_offsets = if version >= 0 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        ListOffsetPartition {
+            partition_index,
+            current_leader_epoch,
+            timestamp,
+            max_num_offsets,
+        }
     }
 }

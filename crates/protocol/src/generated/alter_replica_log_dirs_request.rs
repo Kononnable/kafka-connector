@@ -61,6 +61,12 @@ impl ApiRequest for AlterReplicaLogDirsRequest {
         self.dirs.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let dirs =
+            IndexMap::<AlterReplicaLogDirKey, AlterReplicaLogDir>::deserialize(version, bytes);
+        AlterReplicaLogDirsRequest { dirs }
+    }
 }
 
 impl AlterReplicaLogDirsRequest {
@@ -83,6 +89,13 @@ impl AlterReplicaLogDirKey {
     }
 }
 
+impl FromBytes for AlterReplicaLogDirKey {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let path = String::deserialize(version, bytes);
+        AlterReplicaLogDirKey { path }
+    }
+}
+
 impl ToBytes for AlterReplicaLogDir {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -94,6 +107,15 @@ impl ToBytes for AlterReplicaLogDir {
 impl AlterReplicaLogDir {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for AlterReplicaLogDir {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topics = IndexMap::<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic>::deserialize(
+            version, bytes,
+        );
+        AlterReplicaLogDir { topics }
     }
 }
 
@@ -111,6 +133,13 @@ impl AlterReplicaLogDirTopicKey {
     }
 }
 
+impl FromBytes for AlterReplicaLogDirTopicKey {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        AlterReplicaLogDirTopicKey { name }
+    }
+}
+
 impl ToBytes for AlterReplicaLogDirTopic {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -122,5 +151,12 @@ impl ToBytes for AlterReplicaLogDirTopic {
 impl AlterReplicaLogDirTopic {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for AlterReplicaLogDirTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let partitions = Vec::<i32>::deserialize(version, bytes);
+        AlterReplicaLogDirTopic { partitions }
     }
 }

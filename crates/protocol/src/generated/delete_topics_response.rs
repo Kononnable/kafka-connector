@@ -22,6 +22,37 @@ pub struct DeletableTopicResult {
 }
 
 impl ApiResponse for DeleteTopicsResponse {
+    type Request = super::delete_topics_request::DeleteTopicsRequest;
+
+    fn get_api_key() -> i16 {
+        20
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        3
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        if version >= 1 {
+            self.throttle_time_ms.serialize(version, bytes)?;
+        }
+        self.responses.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = if version >= 1 {
@@ -37,6 +68,34 @@ impl ApiResponse for DeleteTopicsResponse {
                 responses,
             },
         )
+    }
+}
+
+impl DeleteTopicsResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.throttle_time_ms != i32::default() && _version >= 1 {
+            return Err(SerializationError::NonIgnorableFieldSet(
+                "throttle_time_ms",
+                _version,
+                "DeleteTopicsResponse",
+            ));
+        }
+        Ok(())
+    }
+}
+
+impl ToBytes for DeletableTopicResult {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.name.serialize(version, bytes)?;
+        self.error_code.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl DeletableTopicResult {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 

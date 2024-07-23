@@ -34,10 +34,59 @@ pub struct WritableTxnMarkerPartitionResult {
 }
 
 impl ApiResponse for WriteTxnMarkersResponse {
+    type Request = super::write_txn_markers_request::WriteTxnMarkersRequest;
+
+    fn get_api_key() -> i16 {
+        27
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        0
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        self.markers.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let markers = Vec::<WritableTxnMarkerResult>::deserialize(version, bytes);
         (header, WriteTxnMarkersResponse { markers })
+    }
+}
+
+impl WriteTxnMarkersResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for WritableTxnMarkerResult {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.producer_id.serialize(version, bytes)?;
+        self.topics.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl WritableTxnMarkerResult {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 
@@ -52,11 +101,41 @@ impl FromBytes for WritableTxnMarkerResult {
     }
 }
 
+impl ToBytes for WritableTxnMarkerTopicResult {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.name.serialize(version, bytes)?;
+        self.partitions.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl WritableTxnMarkerTopicResult {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
 impl FromBytes for WritableTxnMarkerTopicResult {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<WritableTxnMarkerPartitionResult>::deserialize(version, bytes);
         WritableTxnMarkerTopicResult { name, partitions }
+    }
+}
+
+impl ToBytes for WritableTxnMarkerPartitionResult {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.partition_index.serialize(version, bytes)?;
+        self.error_code.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl WritableTxnMarkerPartitionResult {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
     }
 }
 

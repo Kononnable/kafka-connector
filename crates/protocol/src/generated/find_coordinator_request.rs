@@ -44,6 +44,16 @@ impl ApiRequest for FindCoordinatorRequest {
         }
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let key = String::deserialize(version, bytes);
+        let key_type = if version >= 1 {
+            i8::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        FindCoordinatorRequest { key, key_type }
+    }
 }
 
 impl FindCoordinatorRequest {

@@ -34,6 +34,19 @@ impl RequestHeader {
         self.client_id.serialize(version, bytes)?;
         Ok(())
     }
+
+    pub fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let request_api_key = i16::deserialize(version, bytes);
+        let request_api_version = i16::deserialize(version, bytes);
+        let correlation_id = i32::deserialize(version, bytes);
+        let client_id = String::deserialize(version, bytes);
+        RequestHeader {
+            request_api_key,
+            request_api_version,
+            correlation_id,
+            client_id,
+        }
+    }
 }
 
 impl RequestHeader {

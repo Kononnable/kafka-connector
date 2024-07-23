@@ -49,6 +49,19 @@ impl ApiRequest for EndTxnRequest {
         self.committed.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let transactional_id = String::deserialize(version, bytes);
+        let producer_id = i64::deserialize(version, bytes);
+        let producer_epoch = i16::deserialize(version, bytes);
+        let committed = bool::deserialize(version, bytes);
+        EndTxnRequest {
+            transactional_id,
+            producer_id,
+            producer_epoch,
+            committed,
+        }
+    }
 }
 
 impl EndTxnRequest {

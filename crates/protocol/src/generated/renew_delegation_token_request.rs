@@ -41,6 +41,15 @@ impl ApiRequest for RenewDelegationTokenRequest {
         self.renew_period_ms.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let hmac = Vec::<u8>::deserialize(version, bytes);
+        let renew_period_ms = i64::deserialize(version, bytes);
+        RenewDelegationTokenRequest {
+            hmac,
+            renew_period_ms,
+        }
+    }
 }
 
 impl RenewDelegationTokenRequest {

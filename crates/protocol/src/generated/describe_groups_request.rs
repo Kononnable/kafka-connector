@@ -37,6 +37,11 @@ impl ApiRequest for DescribeGroupsRequest {
         self.groups.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let groups = Vec::<String>::deserialize(version, bytes);
+        DescribeGroupsRequest { groups }
+    }
 }
 
 impl DescribeGroupsRequest {

@@ -26,6 +26,35 @@ pub struct AlterConfigsResourceResponse {
 }
 
 impl ApiResponse for AlterConfigsResponse {
+    type Request = super::alter_configs_request::AlterConfigsRequest;
+
+    fn get_api_key() -> i16 {
+        33
+    }
+
+    fn get_min_supported_version() -> i16 {
+        0
+    }
+
+    fn get_max_supported_version() -> i16 {
+        1
+    }
+
+    fn serialize(
+        &self,
+        version: i16,
+        bytes: &mut BytesMut,
+        header: &ResponseHeader,
+    ) -> Result<(), SerializationError> {
+        debug_assert!(version >= Self::get_min_supported_version());
+        debug_assert!(version <= Self::get_max_supported_version());
+        self.validate_fields(version)?;
+        header.serialize(0, bytes)?;
+        self.throttle_time_ms.serialize(version, bytes)?;
+        self.resources.serialize(version, bytes)?;
+        Ok(())
+    }
+
     fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
         let header = ResponseHeader::deserialize(0, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
@@ -37,6 +66,36 @@ impl ApiResponse for AlterConfigsResponse {
                 resources,
             },
         )
+    }
+}
+
+impl AlterConfigsResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        Ok(())
+    }
+}
+
+impl ToBytes for AlterConfigsResourceResponse {
+    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+        self.validate_fields(version)?;
+        self.error_code.serialize(version, bytes)?;
+        self.error_message.serialize(version, bytes)?;
+        self.resource_type.serialize(version, bytes)?;
+        self.resource_name.serialize(version, bytes)?;
+        Ok(())
+    }
+}
+
+impl AlterConfigsResourceResponse {
+    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+        if self.error_message.is_none() {
+            return Err(SerializationError::NullValue(
+                "error_message",
+                _version,
+                "AlterConfigsResourceResponse",
+            ));
+        }
+        Ok(())
     }
 }
 

@@ -60,6 +60,11 @@ impl ApiRequest for OffsetForLeaderEpochRequest {
         self.topics.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topics = Vec::<OffsetForLeaderTopic>::deserialize(version, bytes);
+        OffsetForLeaderEpochRequest { topics }
+    }
 }
 
 impl OffsetForLeaderEpochRequest {
@@ -83,6 +88,14 @@ impl OffsetForLeaderTopic {
     }
 }
 
+impl FromBytes for OffsetForLeaderTopic {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let name = String::deserialize(version, bytes);
+        let partitions = Vec::<OffsetForLeaderPartition>::deserialize(version, bytes);
+        OffsetForLeaderTopic { name, partitions }
+    }
+}
+
 impl ToBytes for OffsetForLeaderPartition {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
@@ -98,6 +111,23 @@ impl ToBytes for OffsetForLeaderPartition {
 impl OffsetForLeaderPartition {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for OffsetForLeaderPartition {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let partition_index = i32::deserialize(version, bytes);
+        let current_leader_epoch = if version >= 2 {
+            i32::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let leader_epoch = i32::deserialize(version, bytes);
+        OffsetForLeaderPartition {
+            partition_index,
+            current_leader_epoch,
+            leader_epoch,
+        }
     }
 }
 

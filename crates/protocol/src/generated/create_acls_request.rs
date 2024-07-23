@@ -61,6 +61,11 @@ impl ApiRequest for CreateAclsRequest {
         self.creations.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let creations = Vec::<CreatableAcl>::deserialize(version, bytes);
+        CreateAclsRequest { creations }
+    }
 }
 
 impl CreateAclsRequest {
@@ -95,6 +100,31 @@ impl CreatableAcl {
             ));
         }
         Ok(())
+    }
+}
+
+impl FromBytes for CreatableAcl {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let resource_type = i8::deserialize(version, bytes);
+        let resource_name = String::deserialize(version, bytes);
+        let resource_pattern_type = if version >= 1 {
+            i8::deserialize(version, bytes)
+        } else {
+            Default::default()
+        };
+        let principal = String::deserialize(version, bytes);
+        let host = String::deserialize(version, bytes);
+        let operation = i8::deserialize(version, bytes);
+        let permission_type = i8::deserialize(version, bytes);
+        CreatableAcl {
+            resource_type,
+            resource_name,
+            resource_pattern_type,
+            principal,
+            host,
+            operation,
+            permission_type,
+        }
     }
 }
 

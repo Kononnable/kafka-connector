@@ -49,6 +49,15 @@ impl ApiRequest for ElectPreferredLeadersRequest {
         self.timeout_ms.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topic_partitions = Option::<Vec<TopicPartitions>>::deserialize(version, bytes);
+        let timeout_ms = i32::deserialize(version, bytes);
+        ElectPreferredLeadersRequest {
+            topic_partitions,
+            timeout_ms,
+        }
+    }
 }
 
 impl ElectPreferredLeadersRequest {
@@ -85,5 +94,16 @@ impl ToBytes for TopicPartitions {
 impl TopicPartitions {
     fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
         Ok(())
+    }
+}
+
+impl FromBytes for TopicPartitions {
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let topic = String::deserialize(version, bytes);
+        let partition_id = Vec::<i32>::deserialize(version, bytes);
+        TopicPartitions {
+            topic,
+            partition_id,
+        }
     }
 }

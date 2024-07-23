@@ -49,6 +49,19 @@ impl ApiRequest for AddOffsetsToTxnRequest {
         self.group_id.serialize(version, bytes)?;
         Ok(())
     }
+
+    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+        let transactional_id = String::deserialize(version, bytes);
+        let producer_id = i64::deserialize(version, bytes);
+        let producer_epoch = i16::deserialize(version, bytes);
+        let group_id = String::deserialize(version, bytes);
+        AddOffsetsToTxnRequest {
+            transactional_id,
+            producer_id,
+            producer_epoch,
+            group_id,
+        }
+    }
 }
 
 impl AddOffsetsToTxnRequest {
