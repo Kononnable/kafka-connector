@@ -7,9 +7,9 @@ pub trait ToBytes {
 }
 
 impl<K, V> ToBytes for IndexMap<K, V>
-    where
-        K: ToBytes,
-        V: ToBytes,
+where
+    K: ToBytes,
+    V: ToBytes,
 {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_i32(self.len() as i32);
@@ -23,8 +23,8 @@ impl<K, V> ToBytes for IndexMap<K, V>
 }
 
 impl<K> ToBytes for IndexSet<K>
-    where
-        K: ToBytes,
+where
+    K: ToBytes,
 {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_i32(self.len() as i32);
@@ -37,8 +37,9 @@ impl<K> ToBytes for IndexSet<K>
 }
 
 impl<T> ToBytes for Option<Vec<T>>
-    where
-        T: ToBytes {
+where
+    T: ToBytes,
+{
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         match self {
             Some(val) => val.serialize(version, bytes),
@@ -51,8 +52,8 @@ impl<T> ToBytes for Option<Vec<T>>
 }
 
 impl<T> ToBytes for Vec<T>
-    where
-        T: ToBytes,
+where
+    T: ToBytes,
 {
     fn serialize(&self, _version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         bytes.put_i32(self.len() as i32);
@@ -64,8 +65,7 @@ impl<T> ToBytes for Vec<T>
     }
 }
 
-impl ToBytes for Option<Vec<u8>>
-{
+impl ToBytes for Option<Vec<u8>> {
     fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
         match self {
             Some(val) => val.serialize(version, bytes),
@@ -153,4 +153,3 @@ impl ToBytes for f64 {
         Ok(())
     }
 }
-

@@ -1,19 +1,23 @@
-use crate::broker::controller::{BrokerController, BrokerStatus};
-use crate::cluster::error::{ClusterControllerCreationError, ClusterControllerInitializationError};
-use crate::cluster::options::ClusterControllerOptions;
-use crate::cluster::send_api_request::send_api_request;
+use crate::{
+    broker::controller::{BrokerController, BrokerStatus},
+    cluster::{
+        error::{ClusterControllerCreationError, ClusterControllerInitializationError},
+        options::ClusterControllerOptions,
+        send_api_request::send_api_request,
+    },
+};
 use bytes::BytesMut;
 use indexmap::IndexMap;
-use kafka_connector_protocol::api_versions_request::ApiVersionsRequest;
-use kafka_connector_protocol::api_versions_response::ApiVersionsResponseKeyKey;
-use kafka_connector_protocol::metadata_request::MetadataRequest;
-use kafka_connector_protocol::metadata_response::MetadataResponse;
-use kafka_connector_protocol::request_header::RequestHeader;
-use kafka_connector_protocol::ApiRequest;
-use std::fmt::Debug;
-use std::net::{SocketAddr, ToSocketAddrs};
-use tokio::net::TcpStream;
-use tokio::time::timeout;
+use kafka_connector_protocol::{
+    api_versions_request::ApiVersionsRequest, api_versions_response::ApiVersionsResponseKeyKey,
+    metadata_request::MetadataRequest, metadata_response::MetadataResponse,
+    request_header::RequestHeader, ApiRequest,
+};
+use std::{
+    fmt::Debug,
+    net::{SocketAddr, ToSocketAddrs},
+};
+use tokio::{net::TcpStream, time::timeout};
 use tracing::{debug, instrument};
 
 /// Main entrypoint for communication with Kafka cluster.

@@ -1,7 +1,8 @@
-pub use crate::from_bytes::FromBytes;
-pub use crate::generated::request_header::RequestHeader;
-pub use crate::generated::response_header::ResponseHeader;
-pub use crate::to_bytes::ToBytes;
+pub use crate::{
+    from_bytes::FromBytes,
+    generated::{request_header::RequestHeader, response_header::ResponseHeader},
+    to_bytes::ToBytes,
+};
 pub use bytes::BytesMut;
 pub use indexmap::{IndexMap, IndexSet};
 pub use std::fmt::Debug;

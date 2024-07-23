@@ -1,10 +1,6 @@
 use crate::generator::structs::ApiSpec;
 use anyhow::Context;
-use std::fmt::Write;
-use std::fs;
-use std::fs::read_dir;
-use std::path::Path;
-use std::string::String;
+use std::{fmt::Write, fs, fs::read_dir, path::Path, string::String};
 
 pub fn get_api_specs() -> anyhow::Result<Vec<ApiSpec>> {
     let mut message_specs_path = Path::new(env!("CARGO_MANIFEST_DIR")).to_owned();

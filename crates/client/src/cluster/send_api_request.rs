@@ -1,11 +1,12 @@
 use bytes::BytesMut;
-use kafka_connector_protocol::request_header::RequestHeader;
-use kafka_connector_protocol::{ApiRequest, ApiResponse};
+use kafka_connector_protocol::{request_header::RequestHeader, ApiRequest, ApiResponse};
 use std::time::Duration;
 use thiserror::Error as DeriveError;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::TcpStream;
-use tokio::time::timeout;
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::TcpStream,
+    time::timeout,
+};
 
 #[non_exhaustive]
 #[derive(Debug, DeriveError)]

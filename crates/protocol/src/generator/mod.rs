@@ -1,9 +1,11 @@
 use crate::generator::structs::{ApiSpec, ApiSpecField, ApiSpecFieldSubtype};
 use anyhow::{bail, Context};
 use convert_case::{Case, Casing};
-use std::env;
-use std::io::Write;
-use std::process::{Command, Stdio};
+use std::{
+    env,
+    io::Write,
+    process::{Command, Stdio},
+};
 
 mod codegen;
 mod parse;

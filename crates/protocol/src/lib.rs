@@ -9,6 +9,5 @@ mod prelude;
 
 pub use from_bytes::FromBytes;
 pub use generated::*;
-pub use prelude::ApiRequest;
-pub use prelude::ApiResponse;
+pub use prelude::{ApiRequest, ApiResponse};
 pub use to_bytes::ToBytes;

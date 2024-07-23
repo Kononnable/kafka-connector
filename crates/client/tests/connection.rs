@@ -1,5 +1,6 @@
-use kafka_connector_client::cluster::controller::ClusterController;
-use kafka_connector_client::cluster::options::ClusterControllerOptions;
+use kafka_connector_client::cluster::{
+    controller::ClusterController, options::ClusterControllerOptions,
+};
 
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;

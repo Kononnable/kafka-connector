@@ -1,16 +1,15 @@
 use bytes::BytesMut;
 use indexmap::{IndexMap, IndexSet};
-use std::hash::Hash;
-use std::mem::size_of;
+use std::{hash::Hash, mem::size_of};
 
 pub trait FromBytes {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self;
 }
 
 impl<K, V> FromBytes for IndexMap<K, V>
-    where
-        K: FromBytes + Hash + Eq,
-        V: FromBytes,
+where
+    K: FromBytes + Hash + Eq,
+    V: FromBytes,
 {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let cap: i32 = FromBytes::deserialize(version, bytes);
@@ -25,8 +24,8 @@ impl<K, V> FromBytes for IndexMap<K, V>
 }
 
 impl<K> FromBytes for IndexSet<K>
-    where
-        K: FromBytes + Hash + Eq,
+where
+    K: FromBytes + Hash + Eq,
 {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let cap: i32 = FromBytes::deserialize(version, bytes);
@@ -40,8 +39,8 @@ impl<K> FromBytes for IndexSet<K>
 }
 
 impl<T> FromBytes for Vec<T>
-    where
-        T: FromBytes,
+where
+    T: FromBytes,
 {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         Option::<Vec<T>>::deserialize(version, bytes)
@@ -50,8 +49,8 @@ impl<T> FromBytes for Vec<T>
 }
 
 impl<T> FromBytes for Option<Vec<T>>
-    where
-        T: FromBytes,
+where
+    T: FromBytes,
 {
     fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
         let cap: i32 = FromBytes::deserialize(version, bytes);
@@ -84,7 +83,7 @@ impl FromBytes for Option<Vec<u8>> {
             -1 => None,
             0 => Some(vec![]),
             // TODO: zero-copy, consider BytesMut growth on non-unique BytesMut
-            _ => Some(bytes.split_to(len as usize).into_iter().collect())
+            _ => Some(bytes.split_to(len as usize).into_iter().collect()),
         }
     }
 }
