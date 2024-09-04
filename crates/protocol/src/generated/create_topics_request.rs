@@ -58,42 +58,38 @@ pub struct CreateableTopicConfig {
 impl ApiRequest for CreateTopicsRequest {
     type Response = super::create_topics_response::CreateTopicsResponse;
 
-    fn get_api_key() -> i16 {
-        19
+    fn get_api_key() -> ApiKey {
+        ApiKey(19)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        3
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(3)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.topics.serialize(version, bytes)?;
-        self.timeout_ms.serialize(version, bytes)?;
-        if version >= 1 {
-            self.validate_only.serialize(version, bytes)?;
+        self.topics.serialize(version, _bytes)?;
+        self.timeout_ms.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.validate_only.serialize(version, _bytes)?;
         }
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let topics = Vec::<CreatableTopic>::deserialize(version, bytes);
         let timeout_ms = i32::deserialize(version, bytes);
-        let validate_only = if version >= 1 {
+        let validate_only = if version >= ApiVersion(1) {
             bool::deserialize(version, bytes)
         } else {
             Default::default()
@@ -107,11 +103,11 @@ impl ApiRequest for CreateTopicsRequest {
 }
 
 impl CreateTopicsRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.validate_only != bool::default() && _version >= 1 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.validate_only != bool::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "validate_only",
-                _version,
+                *_version,
                 "CreateTopicsRequest",
             ));
         }
@@ -120,25 +116,29 @@ impl CreateTopicsRequest {
 }
 
 impl ToBytes for CreatableTopic {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
-        self.num_partitions.serialize(version, bytes)?;
-        self.replication_factor.serialize(version, bytes)?;
-        self.assignments.serialize(version, bytes)?;
-        self.configs.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
+        self.num_partitions.serialize(version, _bytes)?;
+        self.replication_factor.serialize(version, _bytes)?;
+        self.assignments.serialize(version, _bytes)?;
+        self.configs.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl CreatableTopic {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for CreatableTopic {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let num_partitions = i32::deserialize(version, bytes);
         let replication_factor = i16::deserialize(version, bytes);
@@ -160,82 +160,98 @@ impl FromBytes for CreatableTopic {
 }
 
 impl ToBytes for CreatableReplicaAssignmentKey {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.partition_index.serialize(version, bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl CreatableReplicaAssignmentKey {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for CreatableReplicaAssignmentKey {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         CreatableReplicaAssignmentKey { partition_index }
     }
 }
 
 impl ToBytes for CreatableReplicaAssignment {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.broker_ids.serialize(version, bytes)?;
+        self.broker_ids.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl CreatableReplicaAssignment {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for CreatableReplicaAssignment {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let broker_ids = Vec::<i32>::deserialize(version, bytes);
         CreatableReplicaAssignment { broker_ids }
     }
 }
 
 impl ToBytes for CreateableTopicConfigKey {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl CreateableTopicConfigKey {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for CreateableTopicConfigKey {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         CreateableTopicConfigKey { name }
     }
 }
 
 impl ToBytes for CreateableTopicConfig {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.value.serialize(version, bytes)?;
+        self.value.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl CreateableTopicConfig {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.value.is_none() {
             return Err(SerializationError::NullValue(
                 "value",
-                _version,
+                *_version,
                 "CreateableTopicConfig",
             ));
         }
@@ -244,7 +260,7 @@ impl CreateableTopicConfig {
 }
 
 impl FromBytes for CreateableTopicConfig {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let value = Option::<String>::deserialize(version, bytes);
         CreateableTopicConfig { value }
     }

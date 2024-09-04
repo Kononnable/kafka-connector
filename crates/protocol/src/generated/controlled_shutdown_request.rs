@@ -19,40 +19,36 @@ pub struct ControlledShutdownRequest {
 impl ApiRequest for ControlledShutdownRequest {
     type Response = super::controlled_shutdown_response::ControlledShutdownResponse;
 
-    fn get_api_key() -> i16 {
-        7
+    fn get_api_key() -> ApiKey {
+        ApiKey(7)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        2
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(2)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.broker_id.serialize(version, bytes)?;
-        if version >= 2 {
-            self.broker_epoch.serialize(version, bytes)?;
+        self.broker_id.serialize(version, _bytes)?;
+        if version >= ApiVersion(2) {
+            self.broker_epoch.serialize(version, _bytes)?;
         }
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let broker_id = i32::deserialize(version, bytes);
-        let broker_epoch = if version >= 2 {
+        let broker_epoch = if version >= ApiVersion(2) {
             i64::deserialize(version, bytes)
         } else {
             Default::default()
@@ -65,7 +61,7 @@ impl ApiRequest for ControlledShutdownRequest {
 }
 
 impl ControlledShutdownRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }

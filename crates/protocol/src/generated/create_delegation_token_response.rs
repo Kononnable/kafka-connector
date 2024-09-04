@@ -34,42 +34,39 @@ pub struct CreateDelegationTokenResponse {
 impl ApiResponse for CreateDelegationTokenResponse {
     type Request = super::create_delegation_token_request::CreateDelegationTokenRequest;
 
-    fn get_api_key() -> i16 {
-        38
+    fn get_api_key() -> ApiKey {
+        ApiKey(38)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.error_code.serialize(version, bytes)?;
-        self.principal_type.serialize(version, bytes)?;
-        self.principal_name.serialize(version, bytes)?;
-        self.issue_timestamp_ms.serialize(version, bytes)?;
-        self.expiry_timestamp_ms.serialize(version, bytes)?;
-        self.max_timestamp_ms.serialize(version, bytes)?;
-        self.token_id.serialize(version, bytes)?;
-        self.hmac.serialize(version, bytes)?;
-        self.throttle_time_ms.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        self.principal_type.serialize(version, _bytes)?;
+        self.principal_name.serialize(version, _bytes)?;
+        self.issue_timestamp_ms.serialize(version, _bytes)?;
+        self.expiry_timestamp_ms.serialize(version, _bytes)?;
+        self.max_timestamp_ms.serialize(version, _bytes)?;
+        self.token_id.serialize(version, _bytes)?;
+        self.hmac.serialize(version, _bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let principal_type = String::deserialize(version, bytes);
         let principal_name = String::deserialize(version, bytes);
@@ -79,25 +76,22 @@ impl ApiResponse for CreateDelegationTokenResponse {
         let token_id = String::deserialize(version, bytes);
         let hmac = Vec::<u8>::deserialize(version, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
-        (
-            header,
-            CreateDelegationTokenResponse {
-                error_code,
-                principal_type,
-                principal_name,
-                issue_timestamp_ms,
-                expiry_timestamp_ms,
-                max_timestamp_ms,
-                token_id,
-                hmac,
-                throttle_time_ms,
-            },
-        )
+        CreateDelegationTokenResponse {
+            error_code,
+            principal_type,
+            principal_name,
+            issue_timestamp_ms,
+            expiry_timestamp_ms,
+            max_timestamp_ms,
+            token_id,
+            hmac,
+            throttle_time_ms,
+        }
     }
 }
 
 impl CreateDelegationTokenResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }

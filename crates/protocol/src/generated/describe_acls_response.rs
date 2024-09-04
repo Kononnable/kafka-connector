@@ -50,59 +50,53 @@ pub struct AclDescription {
 impl ApiResponse for DescribeAclsResponse {
     type Request = super::describe_acls_request::DescribeAclsRequest;
 
-    fn get_api_key() -> i16 {
-        29
+    fn get_api_key() -> ApiKey {
+        ApiKey(29)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.throttle_time_ms.serialize(version, bytes)?;
-        self.error_code.serialize(version, bytes)?;
-        self.error_message.serialize(version, bytes)?;
-        self.resources.serialize(version, bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        self.error_message.serialize(version, _bytes)?;
+        self.resources.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let throttle_time_ms = i32::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         let resources = Vec::<DescribeAclsResource>::deserialize(version, bytes);
-        (
-            header,
-            DescribeAclsResponse {
-                throttle_time_ms,
-                error_code,
-                error_message,
-                resources,
-            },
-        )
+        DescribeAclsResponse {
+            throttle_time_ms,
+            error_code,
+            error_message,
+            resources,
+        }
     }
 }
 
 impl DescribeAclsResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.error_message.is_none() {
             return Err(SerializationError::NullValue(
                 "error_message",
-                _version,
+                *_version,
                 "DescribeAclsResponse",
             ));
         }
@@ -111,24 +105,28 @@ impl DescribeAclsResponse {
 }
 
 impl ToBytes for DescribeAclsResource {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.r#type.serialize(version, bytes)?;
-        self.name.serialize(version, bytes)?;
-        if version >= 1 {
-            self.pattern_type.serialize(version, bytes)?;
+        self.r#type.serialize(version, _bytes)?;
+        self.name.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.pattern_type.serialize(version, _bytes)?;
         }
-        self.acls.serialize(version, bytes)?;
+        self.acls.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl DescribeAclsResource {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.pattern_type != i8::default() && _version >= 1 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.pattern_type != i8::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "pattern_type",
-                _version,
+                *_version,
                 "DescribeAclsResource",
             ));
         }
@@ -137,10 +135,10 @@ impl DescribeAclsResource {
 }
 
 impl FromBytes for DescribeAclsResource {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let r#type = i8::deserialize(version, bytes);
         let name = String::deserialize(version, bytes);
-        let pattern_type = if version >= 1 {
+        let pattern_type = if version >= ApiVersion(1) {
             i8::deserialize(version, bytes)
         } else {
             Default::default()
@@ -167,24 +165,28 @@ impl Default for DescribeAclsResource {
 }
 
 impl ToBytes for AclDescription {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.principal.serialize(version, bytes)?;
-        self.host.serialize(version, bytes)?;
-        self.operation.serialize(version, bytes)?;
-        self.permission_type.serialize(version, bytes)?;
+        self.principal.serialize(version, _bytes)?;
+        self.host.serialize(version, _bytes)?;
+        self.operation.serialize(version, _bytes)?;
+        self.permission_type.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl AclDescription {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for AclDescription {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let principal = String::deserialize(version, bytes);
         let host = String::deserialize(version, bytes);
         let operation = i8::deserialize(version, bytes);

@@ -34,89 +34,89 @@ pub struct DeleteAclsFilter {
 impl ApiRequest for DeleteAclsRequest {
     type Response = super::delete_acls_response::DeleteAclsResponse;
 
-    fn get_api_key() -> i16 {
-        31
+    fn get_api_key() -> ApiKey {
+        ApiKey(31)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.filters.serialize(version, bytes)?;
+        self.filters.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let filters = Vec::<DeleteAclsFilter>::deserialize(version, bytes);
         DeleteAclsRequest { filters }
     }
 }
 
 impl DeleteAclsRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for DeleteAclsFilter {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.resource_type_filter.serialize(version, bytes)?;
-        self.resource_name_filter.serialize(version, bytes)?;
-        if version >= 1 {
-            self.pattern_type_filter.serialize(version, bytes)?;
+        self.resource_type_filter.serialize(version, _bytes)?;
+        self.resource_name_filter.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.pattern_type_filter.serialize(version, _bytes)?;
         }
-        self.principal_filter.serialize(version, bytes)?;
-        self.host_filter.serialize(version, bytes)?;
-        self.operation.serialize(version, bytes)?;
-        self.permission_type.serialize(version, bytes)?;
+        self.principal_filter.serialize(version, _bytes)?;
+        self.host_filter.serialize(version, _bytes)?;
+        self.operation.serialize(version, _bytes)?;
+        self.permission_type.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl DeleteAclsFilter {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.resource_name_filter.is_none() {
             return Err(SerializationError::NullValue(
                 "resource_name_filter",
-                _version,
+                *_version,
                 "DeleteAclsFilter",
             ));
         }
         if self.principal_filter.is_none() {
             return Err(SerializationError::NullValue(
                 "principal_filter",
-                _version,
+                *_version,
                 "DeleteAclsFilter",
             ));
         }
         if self.host_filter.is_none() {
             return Err(SerializationError::NullValue(
                 "host_filter",
-                _version,
+                *_version,
                 "DeleteAclsFilter",
             ));
         }
-        if self.pattern_type_filter != i8::default() && _version >= 1 {
+        if self.pattern_type_filter != i8::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "pattern_type_filter",
-                _version,
+                *_version,
                 "DeleteAclsFilter",
             ));
         }
@@ -125,10 +125,10 @@ impl DeleteAclsFilter {
 }
 
 impl FromBytes for DeleteAclsFilter {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let resource_type_filter = i8::deserialize(version, bytes);
         let resource_name_filter = Option::<String>::deserialize(version, bytes);
-        let pattern_type_filter = if version >= 1 {
+        let pattern_type_filter = if version >= ApiVersion(1) {
             i8::deserialize(version, bytes)
         } else {
             Default::default()

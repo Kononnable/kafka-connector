@@ -10,41 +10,38 @@ pub struct UpdateMetadataResponse {
 impl ApiResponse for UpdateMetadataResponse {
     type Request = super::update_metadata_request::UpdateMetadataRequest;
 
-    fn get_api_key() -> i16 {
-        6
+    fn get_api_key() -> ApiKey {
+        ApiKey(6)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        5
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(5)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.error_code.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
-        (header, UpdateMetadataResponse { error_code })
+        UpdateMetadataResponse { error_code }
     }
 }
 
 impl UpdateMetadataResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }

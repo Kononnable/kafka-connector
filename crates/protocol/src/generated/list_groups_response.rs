@@ -26,79 +26,77 @@ pub struct ListedGroup {
 impl ApiResponse for ListGroupsResponse {
     type Request = super::list_groups_request::ListGroupsRequest;
 
-    fn get_api_key() -> i16 {
-        16
+    fn get_api_key() -> ApiKey {
+        ApiKey(16)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        2
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(2)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        if version >= 1 {
-            self.throttle_time_ms.serialize(version, bytes)?;
+        if version >= ApiVersion(1) {
+            self.throttle_time_ms.serialize(version, _bytes)?;
         }
-        self.error_code.serialize(version, bytes)?;
-        self.groups.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        self.groups.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 1 {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
+        let throttle_time_ms = if version >= ApiVersion(1) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
         let error_code = i16::deserialize(version, bytes);
         let groups = Vec::<ListedGroup>::deserialize(version, bytes);
-        (
-            header,
-            ListGroupsResponse {
-                throttle_time_ms,
-                error_code,
-                groups,
-            },
-        )
+        ListGroupsResponse {
+            throttle_time_ms,
+            error_code,
+            groups,
+        }
     }
 }
 
 impl ListGroupsResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for ListedGroup {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.group_id.serialize(version, bytes)?;
-        self.protocol_type.serialize(version, bytes)?;
+        self.group_id.serialize(version, _bytes)?;
+        self.protocol_type.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl ListedGroup {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for ListedGroup {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let group_id = String::deserialize(version, bytes);
         let protocol_type = String::deserialize(version, bytes);
         ListedGroup {

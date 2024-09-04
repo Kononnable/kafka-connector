@@ -26,50 +26,47 @@ pub struct FindCoordinatorResponse {
 impl ApiResponse for FindCoordinatorResponse {
     type Request = super::find_coordinator_request::FindCoordinatorRequest;
 
-    fn get_api_key() -> i16 {
-        10
+    fn get_api_key() -> ApiKey {
+        ApiKey(10)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        2
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(2)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        if version >= 1 {
-            self.throttle_time_ms.serialize(version, bytes)?;
+        if version >= ApiVersion(1) {
+            self.throttle_time_ms.serialize(version, _bytes)?;
         }
-        self.error_code.serialize(version, bytes)?;
-        if version >= 1 {
-            self.error_message.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.error_message.serialize(version, _bytes)?;
         }
-        self.node_id.serialize(version, bytes)?;
-        self.host.serialize(version, bytes)?;
-        self.port.serialize(version, bytes)?;
+        self.node_id.serialize(version, _bytes)?;
+        self.host.serialize(version, _bytes)?;
+        self.port.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 1 {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
+        let throttle_time_ms = if version >= ApiVersion(1) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
         let error_code = i16::deserialize(version, bytes);
-        let error_message = if version >= 1 {
+        let error_message = if version >= ApiVersion(1) {
             Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
@@ -77,26 +74,23 @@ impl ApiResponse for FindCoordinatorResponse {
         let node_id = i32::deserialize(version, bytes);
         let host = String::deserialize(version, bytes);
         let port = i32::deserialize(version, bytes);
-        (
-            header,
-            FindCoordinatorResponse {
-                throttle_time_ms,
-                error_code,
-                error_message,
-                node_id,
-                host,
-                port,
-            },
-        )
+        FindCoordinatorResponse {
+            throttle_time_ms,
+            error_code,
+            error_message,
+            node_id,
+            host,
+            port,
+        }
     }
 }
 
 impl FindCoordinatorResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.error_message.is_none() && !_version >= 1 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.error_message.is_none() && !_version.0 >= 1 {
             return Err(SerializationError::NullValue(
                 "error_message",
-                _version,
+                *_version,
                 "FindCoordinatorResponse",
             ));
         }

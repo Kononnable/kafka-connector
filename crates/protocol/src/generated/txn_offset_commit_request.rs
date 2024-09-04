@@ -48,39 +48,35 @@ pub struct TxnOffsetCommitRequestPartition {
 impl ApiRequest for TxnOffsetCommitRequest {
     type Response = super::txn_offset_commit_response::TxnOffsetCommitResponse;
 
-    fn get_api_key() -> i16 {
-        28
+    fn get_api_key() -> ApiKey {
+        ApiKey(28)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        2
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(2)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.transactional_id.serialize(version, bytes)?;
-        self.group_id.serialize(version, bytes)?;
-        self.producer_id.serialize(version, bytes)?;
-        self.producer_epoch.serialize(version, bytes)?;
-        self.topics.serialize(version, bytes)?;
+        self.transactional_id.serialize(version, _bytes)?;
+        self.group_id.serialize(version, _bytes)?;
+        self.producer_id.serialize(version, _bytes)?;
+        self.producer_epoch.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let transactional_id = String::deserialize(version, bytes);
         let group_id = String::deserialize(version, bytes);
         let producer_id = i64::deserialize(version, bytes);
@@ -97,28 +93,32 @@ impl ApiRequest for TxnOffsetCommitRequest {
 }
 
 impl TxnOffsetCommitRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for TxnOffsetCommitRequestTopic {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
-        self.partitions.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
+        self.partitions.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl TxnOffsetCommitRequestTopic {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for TxnOffsetCommitRequestTopic {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<TxnOffsetCommitRequestPartition>::deserialize(version, bytes);
         TxnOffsetCommitRequestTopic { name, partitions }
@@ -126,24 +126,28 @@ impl FromBytes for TxnOffsetCommitRequestTopic {
 }
 
 impl ToBytes for TxnOffsetCommitRequestPartition {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.partition_index.serialize(version, bytes)?;
-        self.committed_offset.serialize(version, bytes)?;
-        if version >= 2 {
-            self.committed_leader_epoch.serialize(version, bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
+        self.committed_offset.serialize(version, _bytes)?;
+        if version >= ApiVersion(2) {
+            self.committed_leader_epoch.serialize(version, _bytes)?;
         }
-        self.committed_metadata.serialize(version, bytes)?;
+        self.committed_metadata.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl TxnOffsetCommitRequestPartition {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.committed_metadata.is_none() {
             return Err(SerializationError::NullValue(
                 "committed_metadata",
-                _version,
+                *_version,
                 "TxnOffsetCommitRequestPartition",
             ));
         }
@@ -152,10 +156,10 @@ impl TxnOffsetCommitRequestPartition {
 }
 
 impl FromBytes for TxnOffsetCommitRequestPartition {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let committed_offset = i64::deserialize(version, bytes);
-        let committed_leader_epoch = if version >= 2 {
+        let committed_leader_epoch = if version >= ApiVersion(2) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()

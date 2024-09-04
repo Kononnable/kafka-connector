@@ -19,72 +19,66 @@ pub struct SaslAuthenticateResponse {
 impl ApiResponse for SaslAuthenticateResponse {
     type Request = super::sasl_authenticate_request::SaslAuthenticateRequest;
 
-    fn get_api_key() -> i16 {
-        36
+    fn get_api_key() -> ApiKey {
+        ApiKey(36)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.error_code.serialize(version, bytes)?;
-        self.error_message.serialize(version, bytes)?;
-        self.auth_bytes.serialize(version, bytes)?;
-        if version >= 1 {
-            self.session_lifetime_ms.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        self.error_message.serialize(version, _bytes)?;
+        self.auth_bytes.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.session_lifetime_ms.serialize(version, _bytes)?;
         }
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         let auth_bytes = Vec::<u8>::deserialize(version, bytes);
-        let session_lifetime_ms = if version >= 1 {
+        let session_lifetime_ms = if version >= ApiVersion(1) {
             i64::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        (
-            header,
-            SaslAuthenticateResponse {
-                error_code,
-                error_message,
-                auth_bytes,
-                session_lifetime_ms,
-            },
-        )
+        SaslAuthenticateResponse {
+            error_code,
+            error_message,
+            auth_bytes,
+            session_lifetime_ms,
+        }
     }
 }
 
 impl SaslAuthenticateResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.error_message.is_none() {
             return Err(SerializationError::NullValue(
                 "error_message",
-                _version,
+                *_version,
                 "SaslAuthenticateResponse",
             ));
         }
-        if self.session_lifetime_ms != i64::default() && _version >= 1 {
+        if self.session_lifetime_ms != i64::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "session_lifetime_ms",
-                _version,
+                *_version,
                 "SaslAuthenticateResponse",
             ));
         }

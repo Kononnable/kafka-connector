@@ -32,102 +32,104 @@ pub struct ApiVersionsResponseKey {
 impl ApiResponse for ApiVersionsResponse {
     type Request = super::api_versions_request::ApiVersionsRequest;
 
-    fn get_api_key() -> i16 {
-        18
+    fn get_api_key() -> ApiKey {
+        ApiKey(18)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        2
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(2)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.error_code.serialize(version, bytes)?;
-        self.api_keys.serialize(version, bytes)?;
-        if version >= 1 {
-            self.throttle_time_ms.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        self.api_keys.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.throttle_time_ms.serialize(version, _bytes)?;
         }
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let api_keys = IndexMap::<ApiVersionsResponseKeyKey, ApiVersionsResponseKey>::deserialize(
             version, bytes,
         );
-        let throttle_time_ms = if version >= 1 {
+        let throttle_time_ms = if version >= ApiVersion(1) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        (
-            header,
-            ApiVersionsResponse {
-                error_code,
-                api_keys,
-                throttle_time_ms,
-            },
-        )
+        ApiVersionsResponse {
+            error_code,
+            api_keys,
+            throttle_time_ms,
+        }
     }
 }
 
 impl ApiVersionsResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for ApiVersionsResponseKeyKey {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.index.serialize(version, bytes)?;
+        self.index.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl ApiVersionsResponseKeyKey {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for ApiVersionsResponseKeyKey {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let index = i16::deserialize(version, bytes);
         ApiVersionsResponseKeyKey { index }
     }
 }
 
 impl ToBytes for ApiVersionsResponseKey {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.min_version.serialize(version, bytes)?;
-        self.max_version.serialize(version, bytes)?;
+        self.min_version.serialize(version, _bytes)?;
+        self.max_version.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl ApiVersionsResponseKey {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for ApiVersionsResponseKey {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let min_version = i16::deserialize(version, bytes);
         let max_version = i16::deserialize(version, bytes);
         ApiVersionsResponseKey {

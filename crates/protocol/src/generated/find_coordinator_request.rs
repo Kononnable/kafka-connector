@@ -14,40 +14,36 @@ pub struct FindCoordinatorRequest {
 impl ApiRequest for FindCoordinatorRequest {
     type Response = super::find_coordinator_response::FindCoordinatorResponse;
 
-    fn get_api_key() -> i16 {
-        10
+    fn get_api_key() -> ApiKey {
+        ApiKey(10)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        2
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(2)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.key.serialize(version, bytes)?;
-        if version >= 1 {
-            self.key_type.serialize(version, bytes)?;
+        self.key.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.key_type.serialize(version, _bytes)?;
         }
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let key = String::deserialize(version, bytes);
-        let key_type = if version >= 1 {
+        let key_type = if version >= ApiVersion(1) {
             i8::deserialize(version, bytes)
         } else {
             Default::default()
@@ -57,11 +53,11 @@ impl ApiRequest for FindCoordinatorRequest {
 }
 
 impl FindCoordinatorRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.key_type != i8::default() && _version >= 1 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.key_type != i8::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "key_type",
-                _version,
+                *_version,
                 "FindCoordinatorRequest",
             ));
         }

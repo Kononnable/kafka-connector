@@ -27,71 +27,69 @@ pub struct LeaderAndIsrResponsePartition {
 impl ApiResponse for LeaderAndIsrResponse {
     type Request = super::leader_and_isr_request::LeaderAndIsrRequest;
 
-    fn get_api_key() -> i16 {
-        4
+    fn get_api_key() -> ApiKey {
+        ApiKey(4)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        2
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(2)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.error_code.serialize(version, bytes)?;
-        self.partitions.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        self.partitions.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let partitions = Vec::<LeaderAndIsrResponsePartition>::deserialize(version, bytes);
-        (
-            header,
-            LeaderAndIsrResponse {
-                error_code,
-                partitions,
-            },
-        )
+        LeaderAndIsrResponse {
+            error_code,
+            partitions,
+        }
     }
 }
 
 impl LeaderAndIsrResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for LeaderAndIsrResponsePartition {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.topic_name.serialize(version, bytes)?;
-        self.partition_index.serialize(version, bytes)?;
-        self.error_code.serialize(version, bytes)?;
+        self.topic_name.serialize(version, _bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl LeaderAndIsrResponsePartition {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for LeaderAndIsrResponsePartition {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let topic_name = String::deserialize(version, bytes);
         let partition_index = i32::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);

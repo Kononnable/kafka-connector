@@ -17,58 +17,52 @@ pub struct SyncGroupResponse {
 impl ApiResponse for SyncGroupResponse {
     type Request = super::sync_group_request::SyncGroupRequest;
 
-    fn get_api_key() -> i16 {
-        14
+    fn get_api_key() -> ApiKey {
+        ApiKey(14)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        2
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(2)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        if version >= 1 {
-            self.throttle_time_ms.serialize(version, bytes)?;
+        if version >= ApiVersion(1) {
+            self.throttle_time_ms.serialize(version, _bytes)?;
         }
-        self.error_code.serialize(version, bytes)?;
-        self.assignment.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        self.assignment.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 1 {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
+        let throttle_time_ms = if version >= ApiVersion(1) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
         let error_code = i16::deserialize(version, bytes);
         let assignment = Vec::<u8>::deserialize(version, bytes);
-        (
-            header,
-            SyncGroupResponse {
-                throttle_time_ms,
-                error_code,
-                assignment,
-            },
-        )
+        SyncGroupResponse {
+            throttle_time_ms,
+            error_code,
+            assignment,
+        }
     }
 }
 
 impl SyncGroupResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }

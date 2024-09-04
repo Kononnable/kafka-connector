@@ -26,36 +26,32 @@ pub struct OffsetFetchRequestTopic {
 impl ApiRequest for OffsetFetchRequest {
     type Response = super::offset_fetch_response::OffsetFetchResponse;
 
-    fn get_api_key() -> i16 {
-        9
+    fn get_api_key() -> ApiKey {
+        ApiKey(9)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        5
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(5)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.group_id.serialize(version, bytes)?;
-        self.topics.serialize(version, bytes)?;
+        self.group_id.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let group_id = String::deserialize(version, bytes);
         let topics = Option::<Vec<OffsetFetchRequestTopic>>::deserialize(version, bytes);
         OffsetFetchRequest { group_id, topics }
@@ -63,11 +59,11 @@ impl ApiRequest for OffsetFetchRequest {
 }
 
 impl OffsetFetchRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.topics.is_none() {
             return Err(SerializationError::NullValue(
                 "topics",
-                _version,
+                *_version,
                 "OffsetFetchRequest",
             ));
         }
@@ -76,22 +72,26 @@ impl OffsetFetchRequest {
 }
 
 impl ToBytes for OffsetFetchRequestTopic {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
-        self.partition_indexes.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
+        self.partition_indexes.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl OffsetFetchRequestTopic {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for OffsetFetchRequestTopic {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partition_indexes = Vec::<i32>::deserialize(version, bytes);
         OffsetFetchRequestTopic {

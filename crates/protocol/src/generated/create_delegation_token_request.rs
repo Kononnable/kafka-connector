@@ -22,36 +22,32 @@ pub struct CreatableRenewers {
 impl ApiRequest for CreateDelegationTokenRequest {
     type Response = super::create_delegation_token_response::CreateDelegationTokenResponse;
 
-    fn get_api_key() -> i16 {
-        38
+    fn get_api_key() -> ApiKey {
+        ApiKey(38)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.renewers.serialize(version, bytes)?;
-        self.max_lifetime_ms.serialize(version, bytes)?;
+        self.renewers.serialize(version, _bytes)?;
+        self.max_lifetime_ms.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let renewers = Vec::<CreatableRenewers>::deserialize(version, bytes);
         let max_lifetime_ms = i64::deserialize(version, bytes);
         CreateDelegationTokenRequest {
@@ -62,28 +58,32 @@ impl ApiRequest for CreateDelegationTokenRequest {
 }
 
 impl CreateDelegationTokenRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for CreatableRenewers {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.principal_type.serialize(version, bytes)?;
-        self.principal_name.serialize(version, bytes)?;
+        self.principal_type.serialize(version, _bytes)?;
+        self.principal_name.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl CreatableRenewers {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for CreatableRenewers {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let principal_type = String::deserialize(version, bytes);
         let principal_name = String::deserialize(version, bytes);
         CreatableRenewers {

@@ -58,57 +58,53 @@ pub struct OffsetCommitRequestPartition {
 impl ApiRequest for OffsetCommitRequest {
     type Response = super::offset_commit_response::OffsetCommitResponse;
 
-    fn get_api_key() -> i16 {
-        8
+    fn get_api_key() -> ApiKey {
+        ApiKey(8)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        6
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(6)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.group_id.serialize(version, bytes)?;
-        if version >= 1 {
-            self.generation_id.serialize(version, bytes)?;
+        self.group_id.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.generation_id.serialize(version, _bytes)?;
         }
-        if version >= 1 {
-            self.member_id.serialize(version, bytes)?;
+        if version >= ApiVersion(1) {
+            self.member_id.serialize(version, _bytes)?;
         }
-        if (2..=4).contains(&version) {
-            self.retention_time_ms.serialize(version, bytes)?;
+        if (2..=4).contains(&version.0) {
+            self.retention_time_ms.serialize(version, _bytes)?;
         }
-        self.topics.serialize(version, bytes)?;
+        self.topics.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let group_id = String::deserialize(version, bytes);
-        let generation_id = if version >= 1 {
+        let generation_id = if version >= ApiVersion(1) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let member_id = if version >= 1 {
+        let member_id = if version >= ApiVersion(1) {
             String::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let retention_time_ms = if (2..=4).contains(&version) {
+        let retention_time_ms = if (2..=4).contains(&version.0) {
             i64::deserialize(version, bytes)
         } else {
             Default::default()
@@ -125,7 +121,7 @@ impl ApiRequest for OffsetCommitRequest {
 }
 
 impl OffsetCommitRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
@@ -143,22 +139,26 @@ impl Default for OffsetCommitRequest {
 }
 
 impl ToBytes for OffsetCommitRequestTopic {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
-        self.partitions.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
+        self.partitions.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl OffsetCommitRequestTopic {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for OffsetCommitRequestTopic {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<OffsetCommitRequestPartition>::deserialize(version, bytes);
         OffsetCommitRequestTopic { name, partitions }
@@ -166,34 +166,38 @@ impl FromBytes for OffsetCommitRequestTopic {
 }
 
 impl ToBytes for OffsetCommitRequestPartition {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.partition_index.serialize(version, bytes)?;
-        self.committed_offset.serialize(version, bytes)?;
-        if version >= 6 {
-            self.committed_leader_epoch.serialize(version, bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
+        self.committed_offset.serialize(version, _bytes)?;
+        if version >= ApiVersion(6) {
+            self.committed_leader_epoch.serialize(version, _bytes)?;
         }
-        if version >= 1 {
-            self.commit_timestamp.serialize(version, bytes)?;
+        if version >= ApiVersion(1) {
+            self.commit_timestamp.serialize(version, _bytes)?;
         }
-        self.committed_metadata.serialize(version, bytes)?;
+        self.committed_metadata.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl OffsetCommitRequestPartition {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.committed_metadata.is_none() {
             return Err(SerializationError::NullValue(
                 "committed_metadata",
-                _version,
+                *_version,
                 "OffsetCommitRequestPartition",
             ));
         }
-        if self.commit_timestamp != i64::default() && _version >= 1 {
+        if self.commit_timestamp != i64::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "commit_timestamp",
-                _version,
+                *_version,
                 "OffsetCommitRequestPartition",
             ));
         }
@@ -202,15 +206,15 @@ impl OffsetCommitRequestPartition {
 }
 
 impl FromBytes for OffsetCommitRequestPartition {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let committed_offset = i64::deserialize(version, bytes);
-        let committed_leader_epoch = if version >= 6 {
+        let committed_leader_epoch = if version >= ApiVersion(6) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let commit_timestamp = if version >= 1 {
+        let commit_timestamp = if version >= ApiVersion(1) {
             i64::deserialize(version, bytes)
         } else {
             Default::default()

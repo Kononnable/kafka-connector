@@ -42,45 +42,41 @@ pub struct JoinGroupRequestProtocol {
 impl ApiRequest for JoinGroupRequest {
     type Response = super::join_group_response::JoinGroupResponse;
 
-    fn get_api_key() -> i16 {
-        11
+    fn get_api_key() -> ApiKey {
+        ApiKey(11)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        4
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(4)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.group_id.serialize(version, bytes)?;
-        self.session_timeout_ms.serialize(version, bytes)?;
-        if version >= 1 {
-            self.rebalance_timeout_ms.serialize(version, bytes)?;
+        self.group_id.serialize(version, _bytes)?;
+        self.session_timeout_ms.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.rebalance_timeout_ms.serialize(version, _bytes)?;
         }
-        self.member_id.serialize(version, bytes)?;
-        self.protocol_type.serialize(version, bytes)?;
-        self.protocols.serialize(version, bytes)?;
+        self.member_id.serialize(version, _bytes)?;
+        self.protocol_type.serialize(version, _bytes)?;
+        self.protocols.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let group_id = String::deserialize(version, bytes);
         let session_timeout_ms = i32::deserialize(version, bytes);
-        let rebalance_timeout_ms = if version >= 1 {
+        let rebalance_timeout_ms = if version >= ApiVersion(1) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
@@ -103,7 +99,7 @@ impl ApiRequest for JoinGroupRequest {
 }
 
 impl JoinGroupRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
@@ -122,42 +118,50 @@ impl Default for JoinGroupRequest {
 }
 
 impl ToBytes for JoinGroupRequestProtocolKey {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl JoinGroupRequestProtocolKey {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for JoinGroupRequestProtocolKey {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         JoinGroupRequestProtocolKey { name }
     }
 }
 
 impl ToBytes for JoinGroupRequestProtocol {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.metadata.serialize(version, bytes)?;
+        self.metadata.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl JoinGroupRequestProtocol {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for JoinGroupRequestProtocol {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let metadata = Vec::<u8>::deserialize(version, bytes);
         JoinGroupRequestProtocol { metadata }
     }

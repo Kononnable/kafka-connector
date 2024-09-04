@@ -3,6 +3,7 @@ use crate::{
     cluster::options::ClusterControllerOptions,
 };
 use bytes::BytesMut;
+use kafka_connector_protocol::{ApiKey, ApiVersion};
 use std::{future::Future, sync::Arc};
 use thiserror::Error as DeriveError;
 use tokio::sync::{mpsc, mpsc::UnboundedSender, oneshot};
@@ -29,8 +30,8 @@ pub struct BrokerController {
     // TODO: Change type (make alias or more likely extract to struct)
     request_tx: mpsc::Sender<(
         oneshot::Sender<Result<BytesMut, ApiCallError>>,
-        i16,
-        i16,
+        ApiKey,
+        ApiVersion,
         BytesMut,
     )>,
     node_id: i32,
@@ -75,13 +76,13 @@ impl BrokerController {
     #[instrument(level = "debug", skip_all)]
     pub async fn api_call(
         &self,
-        api_key: i16,
-        api_version: i16,
+        key: ApiKey,
+        version: ApiVersion,
         request: BytesMut,
-    ) -> impl Future<Output=Result<BytesMut, ApiCallError>> {
+    ) -> impl Future<Output = Result<BytesMut, ApiCallError>> {
         let (tx, rx) = oneshot::channel();
         self.request_tx
-            .send((tx, api_key, api_version, request))
+            .send((tx, key, version, request))
             .await
             .expect("Broker loop channel should be open");
         async {

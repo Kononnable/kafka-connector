@@ -74,16 +74,10 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
 
             match spec.type_ {
                 ApiSpecType::Request => {
-                    content.push_str("    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &RequestHeader) -> Result<(),SerializationError>{\n");
-                    content.push_str(
-                        "        debug_assert!(header.request_api_key == Self::get_api_key());\n",
-                    );
-                    content.push_str(
-                        "        debug_assert!(header.request_api_version == version);\n",
-                    );
+                    content.push_str("    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) -> Result<(),SerializationError>{\n");
                 }
                 ApiSpecType::Response => {
-                    content.push_str("    fn serialize(&self, version: i16, bytes: &mut BytesMut, header: &ResponseHeader) -> Result<(),SerializationError>{\n");
+                    content.push_str("    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) -> Result<(),SerializationError>{\n");
                 }
                 ApiSpecType::Header => {
                     unreachable!()
@@ -94,7 +88,6 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
             content
                 .push_str("        debug_assert!(version <= Self::get_max_supported_version());\n");
             content.push_str("        self.validate_fields(version)?;\n");
-            content.push_str("        header.serialize(0, bytes)?;\n");
             for field in &spec.fields {
                 content.push_str(&serialize_field(field));
             }
@@ -105,7 +98,7 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
             match spec.type_ {
                 ApiSpecType::Request => {
                     content.push_str(
-                        &format!("    fn deserialize({no_fields_marker}version: i16, {no_fields_marker}bytes: &mut BytesMut) -> Self {{\n"),
+                        &format!("    fn deserialize({no_fields_marker}version: ApiVersion, {no_fields_marker}bytes: &mut BytesMut) -> Self {{\n"),
                     );
                     for field in &spec.fields {
                         content.push_str(&deserialize_field(field));
@@ -122,21 +115,19 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
                 }
                 ApiSpecType::Response => {
                     content.push_str(
-                        &format!("    fn deserialize({no_fields_marker}version: i16, {no_fields_marker}bytes: &mut BytesMut) -> (ResponseHeader, Self) {{\n"),
+                        &format!("    fn deserialize({no_fields_marker}version: ApiVersion, {no_fields_marker}bytes: &mut BytesMut) -> Self {{\n"),
                     );
-                    content
-                        .push_str("        let header = ResponseHeader::deserialize(0, bytes);\n");
                     for field in &spec.fields {
                         content.push_str(&deserialize_field(field));
                     }
-                    content.push_str(&format!("        (header, {} {{\n", spec.name));
+                    content.push_str(&format!("        {} {{\n", spec.name));
                     for field in &spec.fields {
                         content.push_str(&format!(
                             "            {},\n",
                             field.name.to_case(Case::Snake)
                         ));
                     }
-                    content.push_str("        })\n\n");
+                    content.push_str("        }\n\n");
                     content.push_str("    }\n\n");
                 }
 
@@ -152,7 +143,7 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
 
             for substruct in sub_structs {
                 content.push_str(&format!("impl ToBytes for {}{{\n", substruct.name));
-                content.push_str("    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(),SerializationError> {\n");
+                content.push_str("    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) -> Result<(),SerializationError> {\n");
                 content.push_str("        self.validate_fields(version)?;\n");
                 for field in &substruct.fields {
                     content.push_str(&serialize_field(field));
@@ -166,8 +157,9 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
                 ));
 
                 content.push_str(&format!("impl  FromBytes for {}{{\n", substruct.name));
-                content
-                    .push_str("    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {\n");
+                content.push_str(
+                    "    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {\n",
+                );
                 for field in &substruct.fields {
                     content.push_str(&deserialize_field(field));
                 }
@@ -189,7 +181,7 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
             content.push_str(&format!("impl {}{{\n", spec.name));
             content.push_str(&get_min_max_supported_version(&spec));
             content.push_str(
-                        "    pub fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(),SerializationError> {\n",
+                        "    pub fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) -> Result<(),SerializationError> {\n",
                     );
             content
                 .push_str("        debug_assert!(version >= Self::get_min_supported_version());\n");
@@ -201,8 +193,9 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
             }
             content.push_str("    Ok(())\n");
             content.push_str("    }\n\n");
-            content
-                .push_str("    pub fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {\n");
+            content.push_str(
+                "    pub fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {\n",
+            );
             for field in &spec.fields {
                 content.push_str(&deserialize_field(field));
             }
@@ -230,7 +223,7 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
 
     content.push_str(&format!("impl {}{{\n", struct_name));
     content.push_str(
-        "    fn validate_fields(&self, _version: i16) -> Result<(),SerializationError>{\n",
+        "    fn validate_fields(&self, _version: ApiVersion) -> Result<(),SerializationError>{\n",
     );
     for field in fields.iter().filter(|x| x.nullable_versions.is_some()) {
         let nullable_versions = field.nullable_versions.clone().unwrap();
@@ -240,7 +233,7 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
             let min = split.next().unwrap().to_owned();
             let max = split.next().unwrap().to_owned();
             content.push_str(&format!(
-                "    if self.{}.is_none() && !({min}..={max}).contains(_version){{\n",
+                "    if self.{}.is_none() && !({min}..={max}).contains(&_version.0){{\n",
                 field.name.to_case(Case::Snake)
             ));
         } else if field.versions == "0+" {
@@ -251,12 +244,12 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
         } else {
             let min = field.versions.replace('+', "");
             content.push_str(&format!(
-                "        if self.{}.is_none() && !_version >= {min} {{\n",
+                "        if self.{}.is_none() && !_version.0 >= {min} {{\n",
                 field.name.to_case(Case::Snake)
             ));
         };
         content.push_str(&format!(
-            "        return Err(SerializationError::NullValue(\"{}\", _version, \"{}\"))\n",
+            "        return Err(SerializationError::NullValue(\"{}\", *_version, \"{}\"))\n",
             field.name.to_case(Case::Snake),
             struct_name
         ));
@@ -289,18 +282,18 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
             let min = split.next().unwrap().to_owned();
             let max = split.next().unwrap().to_owned();
             content.push_str(&format!(
-                "    if {nullable_filter} && !({min}..={max}).contains(&_version){{\n",
+                "    if {nullable_filter} && !({min}..={max}).contains(&_version.0){{\n",
             ));
         } else if field.versions == "0+" {
             continue;
         } else {
             let min = field.versions.replace('+', "");
             content.push_str(&format!(
-                "        if {nullable_filter} && _version >= {min}{{\n",
+                "        if {nullable_filter} && _version >= ApiVersion({min}){{\n",
             ));
         };
         content.push_str(&format!(
-            "        return Err(SerializationError::NonIgnorableFieldSet(\"{}\", _version, \"{}\"))\n",
+            "        return Err(SerializationError::NonIgnorableFieldSet(\"{}\", *_version, \"{}\"))\n",
             field.name.to_case(Case::Snake),
             struct_name
         ));
@@ -315,8 +308,8 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
 fn get_api_key(spec: &ApiSpec) -> String {
     let mut content = "".to_owned();
 
-    content.push_str("    fn get_api_key() -> i16 {\n");
-    content.push_str(&format!("        {}\n", spec.api_key.unwrap()));
+    content.push_str("    fn get_api_key() -> ApiKey {\n");
+    content.push_str(&format!("        ApiKey({})\n", spec.api_key.unwrap()));
     content.push_str("    }\n\n");
 
     content
@@ -327,11 +320,11 @@ fn get_min_max_supported_version(spec: &ApiSpec) -> String {
 
     let min_supported_version = spec.valid_versions.split('-').next().unwrap();
     let max_supported_version = spec.valid_versions.split('-').last().unwrap();
-    content.push_str("    fn get_min_supported_version() -> i16 {\n");
-    content.push_str(&format!("        {}\n", min_supported_version));
+    content.push_str("    fn get_min_supported_version() -> ApiVersion {\n");
+    content.push_str(&format!("        ApiVersion({})\n", min_supported_version));
     content.push_str("    }\n\n");
-    content.push_str("    fn get_max_supported_version() -> i16 {\n");
-    content.push_str(&format!("        {}\n", max_supported_version));
+    content.push_str("    fn get_max_supported_version() -> ApiVersion {\n");
+    content.push_str(&format!("        ApiVersion({})\n", max_supported_version));
     content.push_str("    }\n\n");
     content
 }
@@ -378,7 +371,7 @@ fn impl_default_trait(name: &str, fields: &Vec<ApiSpecField>) -> String {
 fn serialize_field(field: &ApiSpecField) -> String {
     let mut content = "".to_owned();
     let serialize = format!(
-        "self.{}.serialize(version, bytes)?;",
+        "self.{}.serialize(version, _bytes)?;",
         field.name.to_case(Case::Snake)
     );
 
@@ -387,7 +380,7 @@ fn serialize_field(field: &ApiSpecField) -> String {
         let min = split.next().unwrap().to_owned();
         let max = split.next().unwrap().to_owned();
         content.push_str(&format!(
-            "        if ({min}..={max}).contains(&version) {{\n"
+            "        if ({min}..={max}).contains(&version.0) {{\n"
         ));
         content.push_str(&format!("            {serialize}\n"));
         content.push_str("        }\n");
@@ -395,7 +388,7 @@ fn serialize_field(field: &ApiSpecField) -> String {
         content.push_str(&format!("        {serialize}\n"));
     } else {
         let min = field.versions.replace('+', "");
-        content.push_str(&format!("        if version >= {min} {{\n"));
+        content.push_str(&format!("        if version >= ApiVersion({min}) {{\n"));
         content.push_str(&format!("            {serialize}\n"));
         content.push_str("        }\n");
     };
@@ -415,7 +408,7 @@ fn deserialize_field(field: &ApiSpecField) -> String {
         let min = split.next().unwrap().to_owned();
         let max = split.next().unwrap().to_owned();
         content.push_str(&format!(
-            "        let {} = if ({min}..={max}).contains(&version) {{\n",
+            "        let {} = if ({min}..={max}).contains(&version.0) {{\n",
             field.name.to_case(Case::Snake)
         ));
         content.push_str(&format!("            {deserialize}\n"));
@@ -430,7 +423,7 @@ fn deserialize_field(field: &ApiSpecField) -> String {
     } else {
         let min = field.versions.replace('+', "");
         content.push_str(&format!(
-            "        let {} = if version >= {min} {{\n",
+            "        let {} = if version >= ApiVersion({min}) {{\n",
             field.name.to_case(Case::Snake)
         ));
         content.push_str(&format!("            {deserialize}\n"));

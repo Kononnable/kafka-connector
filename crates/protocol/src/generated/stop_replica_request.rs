@@ -44,60 +44,56 @@ pub struct StopReplicaRequestTopic {
 impl ApiRequest for StopReplicaRequest {
     type Response = super::stop_replica_response::StopReplicaResponse;
 
-    fn get_api_key() -> i16 {
-        5
+    fn get_api_key() -> ApiKey {
+        ApiKey(5)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.controller_id.serialize(version, bytes)?;
-        self.controller_epoch.serialize(version, bytes)?;
-        if version >= 1 {
-            self.broker_epoch.serialize(version, bytes)?;
+        self.controller_id.serialize(version, _bytes)?;
+        self.controller_epoch.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.broker_epoch.serialize(version, _bytes)?;
         }
-        self.delete_partitions.serialize(version, bytes)?;
-        if version >= 0 {
-            self.partitions_v_0.serialize(version, bytes)?;
+        self.delete_partitions.serialize(version, _bytes)?;
+        if version >= ApiVersion(0) {
+            self.partitions_v_0.serialize(version, _bytes)?;
         }
-        if version >= 1 {
-            self.topics.serialize(version, bytes)?;
+        if version >= ApiVersion(1) {
+            self.topics.serialize(version, _bytes)?;
         }
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let controller_id = i32::deserialize(version, bytes);
         let controller_epoch = i32::deserialize(version, bytes);
-        let broker_epoch = if version >= 1 {
+        let broker_epoch = if version >= ApiVersion(1) {
             i64::deserialize(version, bytes)
         } else {
             Default::default()
         };
         let delete_partitions = bool::deserialize(version, bytes);
-        let partitions_v_0 = if version >= 0 {
+        let partitions_v_0 = if version >= ApiVersion(0) {
             Vec::<StopReplicaRequestPartitionV0>::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let topics = if version >= 1 {
+        let topics = if version >= ApiVersion(1) {
             Vec::<StopReplicaRequestTopic>::deserialize(version, bytes)
         } else {
             Default::default()
@@ -114,18 +110,20 @@ impl ApiRequest for StopReplicaRequest {
 }
 
 impl StopReplicaRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.partitions_v_0 != Vec::<StopReplicaRequestPartitionV0>::default() && _version >= 0 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.partitions_v_0 != Vec::<StopReplicaRequestPartitionV0>::default()
+            && _version >= ApiVersion(0)
+        {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partitions_v_0",
-                _version,
+                *_version,
                 "StopReplicaRequest",
             ));
         }
-        if self.topics != Vec::<StopReplicaRequestTopic>::default() && _version >= 1 {
+        if self.topics != Vec::<StopReplicaRequestTopic>::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "topics",
-                _version,
+                *_version,
                 "StopReplicaRequest",
             ));
         }
@@ -147,31 +145,35 @@ impl Default for StopReplicaRequest {
 }
 
 impl ToBytes for StopReplicaRequestPartitionV0 {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 0 {
-            self.topic_name.serialize(version, bytes)?;
+        if version >= ApiVersion(0) {
+            self.topic_name.serialize(version, _bytes)?;
         }
-        if version >= 0 {
-            self.partition_index.serialize(version, bytes)?;
+        if version >= ApiVersion(0) {
+            self.partition_index.serialize(version, _bytes)?;
         }
         Ok(())
     }
 }
 
 impl StopReplicaRequestPartitionV0 {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.topic_name != String::default() && _version >= 0 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.topic_name != String::default() && _version >= ApiVersion(0) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "topic_name",
-                _version,
+                *_version,
                 "StopReplicaRequestPartitionV0",
             ));
         }
-        if self.partition_index != i32::default() && _version >= 0 {
+        if self.partition_index != i32::default() && _version >= ApiVersion(0) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partition_index",
-                _version,
+                *_version,
                 "StopReplicaRequestPartitionV0",
             ));
         }
@@ -180,13 +182,13 @@ impl StopReplicaRequestPartitionV0 {
 }
 
 impl FromBytes for StopReplicaRequestPartitionV0 {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
-        let topic_name = if version >= 0 {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
+        let topic_name = if version >= ApiVersion(0) {
             String::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let partition_index = if version >= 0 {
+        let partition_index = if version >= ApiVersion(0) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
@@ -199,31 +201,35 @@ impl FromBytes for StopReplicaRequestPartitionV0 {
 }
 
 impl ToBytes for StopReplicaRequestTopic {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 1 {
-            self.name.serialize(version, bytes)?;
+        if version >= ApiVersion(1) {
+            self.name.serialize(version, _bytes)?;
         }
-        if version >= 1 {
-            self.partition_indexes.serialize(version, bytes)?;
+        if version >= ApiVersion(1) {
+            self.partition_indexes.serialize(version, _bytes)?;
         }
         Ok(())
     }
 }
 
 impl StopReplicaRequestTopic {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.name != String::default() && _version >= 1 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.name != String::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "name",
-                _version,
+                *_version,
                 "StopReplicaRequestTopic",
             ));
         }
-        if self.partition_indexes != Vec::<i32>::default() && _version >= 1 {
+        if self.partition_indexes != Vec::<i32>::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partition_indexes",
-                _version,
+                *_version,
                 "StopReplicaRequestTopic",
             ));
         }
@@ -232,13 +238,13 @@ impl StopReplicaRequestTopic {
 }
 
 impl FromBytes for StopReplicaRequestTopic {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
-        let name = if version >= 1 {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
+        let name = if version >= ApiVersion(1) {
             String::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let partition_indexes = if version >= 1 {
+        let partition_indexes = if version >= ApiVersion(1) {
             Vec::<i32>::deserialize(version, bytes)
         } else {
             Default::default()

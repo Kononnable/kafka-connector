@@ -81,84 +81,78 @@ pub struct AbortedTransaction {
 impl ApiResponse for FetchResponse {
     type Request = super::fetch_request::FetchRequest;
 
-    fn get_api_key() -> i16 {
-        1
+    fn get_api_key() -> ApiKey {
+        ApiKey(1)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        10
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(10)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        if version >= 1 {
-            self.throttle_time_ms.serialize(version, bytes)?;
+        if version >= ApiVersion(1) {
+            self.throttle_time_ms.serialize(version, _bytes)?;
         }
-        if version >= 7 {
-            self.error_code.serialize(version, bytes)?;
+        if version >= ApiVersion(7) {
+            self.error_code.serialize(version, _bytes)?;
         }
-        if version >= 7 {
-            self.session_id.serialize(version, bytes)?;
+        if version >= ApiVersion(7) {
+            self.session_id.serialize(version, _bytes)?;
         }
-        self.topics.serialize(version, bytes)?;
+        self.topics.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 1 {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
+        let throttle_time_ms = if version >= ApiVersion(1) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let error_code = if version >= 7 {
+        let error_code = if version >= ApiVersion(7) {
             i16::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let session_id = if version >= 7 {
+        let session_id = if version >= ApiVersion(7) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
         let topics = Vec::<FetchableTopicResponse>::deserialize(version, bytes);
-        (
-            header,
-            FetchResponse {
-                throttle_time_ms,
-                error_code,
-                session_id,
-                topics,
-            },
-        )
+        FetchResponse {
+            throttle_time_ms,
+            error_code,
+            session_id,
+            topics,
+        }
     }
 }
 
 impl FetchResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.error_code != i16::default() && _version >= 7 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.error_code != i16::default() && _version >= ApiVersion(7) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "error_code",
-                _version,
+                *_version,
                 "FetchResponse",
             ));
         }
-        if self.session_id != i32::default() && _version >= 7 {
+        if self.session_id != i32::default() && _version >= ApiVersion(7) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "session_id",
-                _version,
+                *_version,
                 "FetchResponse",
             ));
         }
@@ -167,22 +161,26 @@ impl FetchResponse {
 }
 
 impl ToBytes for FetchableTopicResponse {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
-        self.partitions.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
+        self.partitions.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl FetchableTopicResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for FetchableTopicResponse {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<FetchablePartitionResponse>::deserialize(version, bytes);
         FetchableTopicResponse { name, partitions }
@@ -190,48 +188,52 @@ impl FromBytes for FetchableTopicResponse {
 }
 
 impl ToBytes for FetchablePartitionResponse {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.partition_index.serialize(version, bytes)?;
-        self.error_code.serialize(version, bytes)?;
-        self.high_watermark.serialize(version, bytes)?;
-        if version >= 4 {
-            self.last_stable_offset.serialize(version, bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        self.high_watermark.serialize(version, _bytes)?;
+        if version >= ApiVersion(4) {
+            self.last_stable_offset.serialize(version, _bytes)?;
         }
-        if version >= 5 {
-            self.log_start_offset.serialize(version, bytes)?;
+        if version >= ApiVersion(5) {
+            self.log_start_offset.serialize(version, _bytes)?;
         }
-        if version >= 4 {
-            self.aborted.serialize(version, bytes)?;
+        if version >= ApiVersion(4) {
+            self.aborted.serialize(version, _bytes)?;
         }
-        self.records.serialize(version, bytes)?;
+        self.records.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl FetchablePartitionResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.aborted.is_none() && !_version >= 4 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.aborted.is_none() && !_version.0 >= 4 {
             return Err(SerializationError::NullValue(
                 "aborted",
-                _version,
+                *_version,
                 "FetchablePartitionResponse",
             ));
         }
         if self.records.is_none() {
             return Err(SerializationError::NullValue(
                 "records",
-                _version,
+                *_version,
                 "FetchablePartitionResponse",
             ));
         }
         if self.aborted.is_some()
             && self.aborted != Some(Vec::<AbortedTransaction>::default())
-            && _version >= 4
+            && _version >= ApiVersion(4)
         {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "aborted",
-                _version,
+                *_version,
                 "FetchablePartitionResponse",
             ));
         }
@@ -240,21 +242,21 @@ impl FetchablePartitionResponse {
 }
 
 impl FromBytes for FetchablePartitionResponse {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);
         let high_watermark = i64::deserialize(version, bytes);
-        let last_stable_offset = if version >= 4 {
+        let last_stable_offset = if version >= ApiVersion(4) {
             i64::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let log_start_offset = if version >= 5 {
+        let log_start_offset = if version >= ApiVersion(5) {
             i64::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let aborted = if version >= 4 {
+        let aborted = if version >= ApiVersion(4) {
             Option::<Vec<AbortedTransaction>>::deserialize(version, bytes)
         } else {
             Default::default()
@@ -287,31 +289,35 @@ impl Default for FetchablePartitionResponse {
 }
 
 impl ToBytes for AbortedTransaction {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        if version >= 4 {
-            self.producer_id.serialize(version, bytes)?;
+        if version >= ApiVersion(4) {
+            self.producer_id.serialize(version, _bytes)?;
         }
-        if version >= 4 {
-            self.first_offset.serialize(version, bytes)?;
+        if version >= ApiVersion(4) {
+            self.first_offset.serialize(version, _bytes)?;
         }
         Ok(())
     }
 }
 
 impl AbortedTransaction {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.producer_id != i64::default() && _version >= 4 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.producer_id != i64::default() && _version >= ApiVersion(4) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "producer_id",
-                _version,
+                *_version,
                 "AbortedTransaction",
             ));
         }
-        if self.first_offset != i64::default() && _version >= 4 {
+        if self.first_offset != i64::default() && _version >= ApiVersion(4) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "first_offset",
-                _version,
+                *_version,
                 "AbortedTransaction",
             ));
         }
@@ -320,13 +326,13 @@ impl AbortedTransaction {
 }
 
 impl FromBytes for AbortedTransaction {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
-        let producer_id = if version >= 4 {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
+        let producer_id = if version >= ApiVersion(4) {
             i64::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let first_offset = if version >= 4 {
+        let first_offset = if version >= ApiVersion(4) {
             i64::deserialize(version, bytes)
         } else {
             Default::default()

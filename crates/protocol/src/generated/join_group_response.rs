@@ -40,43 +40,40 @@ pub struct JoinGroupResponseMember {
 impl ApiResponse for JoinGroupResponse {
     type Request = super::join_group_request::JoinGroupRequest;
 
-    fn get_api_key() -> i16 {
-        11
+    fn get_api_key() -> ApiKey {
+        ApiKey(11)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        4
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(4)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        if version >= 2 {
-            self.throttle_time_ms.serialize(version, bytes)?;
+        if version >= ApiVersion(2) {
+            self.throttle_time_ms.serialize(version, _bytes)?;
         }
-        self.error_code.serialize(version, bytes)?;
-        self.generation_id.serialize(version, bytes)?;
-        self.protocol_name.serialize(version, bytes)?;
-        self.leader.serialize(version, bytes)?;
-        self.member_id.serialize(version, bytes)?;
-        self.members.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        self.generation_id.serialize(version, _bytes)?;
+        self.protocol_name.serialize(version, _bytes)?;
+        self.leader.serialize(version, _bytes)?;
+        self.member_id.serialize(version, _bytes)?;
+        self.members.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 2 {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
+        let throttle_time_ms = if version >= ApiVersion(2) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
@@ -87,44 +84,45 @@ impl ApiResponse for JoinGroupResponse {
         let leader = String::deserialize(version, bytes);
         let member_id = String::deserialize(version, bytes);
         let members = Vec::<JoinGroupResponseMember>::deserialize(version, bytes);
-        (
-            header,
-            JoinGroupResponse {
-                throttle_time_ms,
-                error_code,
-                generation_id,
-                protocol_name,
-                leader,
-                member_id,
-                members,
-            },
-        )
+        JoinGroupResponse {
+            throttle_time_ms,
+            error_code,
+            generation_id,
+            protocol_name,
+            leader,
+            member_id,
+            members,
+        }
     }
 }
 
 impl JoinGroupResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for JoinGroupResponseMember {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.member_id.serialize(version, bytes)?;
-        self.metadata.serialize(version, bytes)?;
+        self.member_id.serialize(version, _bytes)?;
+        self.metadata.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl JoinGroupResponseMember {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for JoinGroupResponseMember {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let member_id = String::deserialize(version, bytes);
         let metadata = Vec::<u8>::deserialize(version, bytes);
         JoinGroupResponseMember {

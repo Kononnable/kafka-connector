@@ -33,63 +33,63 @@ pub struct OffsetForLeaderPartition {
 impl ApiRequest for OffsetForLeaderEpochRequest {
     type Response = super::offset_for_leader_epoch_response::OffsetForLeaderEpochResponse;
 
-    fn get_api_key() -> i16 {
-        23
+    fn get_api_key() -> ApiKey {
+        ApiKey(23)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        2
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(2)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.topics.serialize(version, bytes)?;
+        self.topics.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let topics = Vec::<OffsetForLeaderTopic>::deserialize(version, bytes);
         OffsetForLeaderEpochRequest { topics }
     }
 }
 
 impl OffsetForLeaderEpochRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for OffsetForLeaderTopic {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
-        self.partitions.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
+        self.partitions.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl OffsetForLeaderTopic {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for OffsetForLeaderTopic {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<OffsetForLeaderPartition>::deserialize(version, bytes);
         OffsetForLeaderTopic { name, partitions }
@@ -97,27 +97,31 @@ impl FromBytes for OffsetForLeaderTopic {
 }
 
 impl ToBytes for OffsetForLeaderPartition {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.partition_index.serialize(version, bytes)?;
-        if version >= 2 {
-            self.current_leader_epoch.serialize(version, bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
+        if version >= ApiVersion(2) {
+            self.current_leader_epoch.serialize(version, _bytes)?;
         }
-        self.leader_epoch.serialize(version, bytes)?;
+        self.leader_epoch.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl OffsetForLeaderPartition {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for OffsetForLeaderPartition {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
-        let current_leader_epoch = if version >= 2 {
+        let current_leader_epoch = if version >= ApiVersion(2) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()

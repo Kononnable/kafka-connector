@@ -47,41 +47,37 @@ pub struct PartitionProduceData {
 impl ApiRequest for ProduceRequest {
     type Response = super::produce_response::ProduceResponse;
 
-    fn get_api_key() -> i16 {
-        0
+    fn get_api_key() -> ApiKey {
+        ApiKey(0)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        7
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(7)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        if version >= 3 {
-            self.transactional_id.serialize(version, bytes)?;
+        if version >= ApiVersion(3) {
+            self.transactional_id.serialize(version, _bytes)?;
         }
-        self.acks.serialize(version, bytes)?;
-        self.timeout_ms.serialize(version, bytes)?;
-        self.topics.serialize(version, bytes)?;
+        self.acks.serialize(version, _bytes)?;
+        self.timeout_ms.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
-        let transactional_id = if version >= 3 {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
+        let transactional_id = if version >= ApiVersion(3) {
             Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
@@ -99,21 +95,21 @@ impl ApiRequest for ProduceRequest {
 }
 
 impl ProduceRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.transactional_id.is_none() && !_version >= 3 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.transactional_id.is_none() && !_version.0 >= 3 {
             return Err(SerializationError::NullValue(
                 "transactional_id",
-                _version,
+                *_version,
                 "ProduceRequest",
             ));
         }
         if self.transactional_id.is_some()
             && self.transactional_id != Some(String::default())
-            && _version >= 3
+            && _version >= ApiVersion(3)
         {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "transactional_id",
-                _version,
+                *_version,
                 "ProduceRequest",
             ));
         }
@@ -122,22 +118,26 @@ impl ProduceRequest {
 }
 
 impl ToBytes for TopicProduceData {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
-        self.partitions.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
+        self.partitions.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl TopicProduceData {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for TopicProduceData {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<PartitionProduceData>::deserialize(version, bytes);
         TopicProduceData { name, partitions }
@@ -145,20 +145,24 @@ impl FromBytes for TopicProduceData {
 }
 
 impl ToBytes for PartitionProduceData {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.partition_index.serialize(version, bytes)?;
-        self.records.serialize(version, bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
+        self.records.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl PartitionProduceData {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.records.is_none() {
             return Err(SerializationError::NullValue(
                 "records",
-                _version,
+                *_version,
                 "PartitionProduceData",
             ));
         }
@@ -167,7 +171,7 @@ impl PartitionProduceData {
 }
 
 impl FromBytes for PartitionProduceData {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let records = Option::<Vec<u8>>::deserialize(version, bytes);
         PartitionProduceData {

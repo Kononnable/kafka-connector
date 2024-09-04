@@ -37,91 +37,93 @@ pub struct AddPartitionsToTxnPartitionResult {
 impl ApiResponse for AddPartitionsToTxnResponse {
     type Request = super::add_partitions_to_txn_request::AddPartitionsToTxnRequest;
 
-    fn get_api_key() -> i16 {
-        24
+    fn get_api_key() -> ApiKey {
+        ApiKey(24)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.throttle_time_ms.serialize(version, bytes)?;
-        self.results.serialize(version, bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes)?;
+        self.results.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let throttle_time_ms = i32::deserialize(version, bytes);
         let results = IndexMap::<AddPartitionsToTxnTopicResultKey,AddPartitionsToTxnTopicResult>::deserialize(version, bytes)
 ;
-        (
-            header,
-            AddPartitionsToTxnResponse {
-                throttle_time_ms,
-                results,
-            },
-        )
+        AddPartitionsToTxnResponse {
+            throttle_time_ms,
+            results,
+        }
     }
 }
 
 impl AddPartitionsToTxnResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for AddPartitionsToTxnTopicResultKey {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl AddPartitionsToTxnTopicResultKey {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for AddPartitionsToTxnTopicResultKey {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         AddPartitionsToTxnTopicResultKey { name }
     }
 }
 
 impl ToBytes for AddPartitionsToTxnTopicResult {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.results.serialize(version, bytes)?;
+        self.results.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl AddPartitionsToTxnTopicResult {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for AddPartitionsToTxnTopicResult {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let results = IndexMap::<
             AddPartitionsToTxnPartitionResultKey,
             AddPartitionsToTxnPartitionResult,
@@ -131,42 +133,50 @@ impl FromBytes for AddPartitionsToTxnTopicResult {
 }
 
 impl ToBytes for AddPartitionsToTxnPartitionResultKey {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.partition_index.serialize(version, bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl AddPartitionsToTxnPartitionResultKey {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for AddPartitionsToTxnPartitionResultKey {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         AddPartitionsToTxnPartitionResultKey { partition_index }
     }
 }
 
 impl ToBytes for AddPartitionsToTxnPartitionResult {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.error_code.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl AddPartitionsToTxnPartitionResult {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for AddPartitionsToTxnPartitionResult {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         AddPartitionsToTxnPartitionResult { error_code }
     }

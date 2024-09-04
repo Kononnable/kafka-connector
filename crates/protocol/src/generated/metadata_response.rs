@@ -96,45 +96,42 @@ pub struct MetadataResponsePartition {
 impl ApiResponse for MetadataResponse {
     type Request = super::metadata_request::MetadataRequest;
 
-    fn get_api_key() -> i16 {
-        3
+    fn get_api_key() -> ApiKey {
+        ApiKey(3)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        7
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(7)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        if version >= 3 {
-            self.throttle_time_ms.serialize(version, bytes)?;
+        if version >= ApiVersion(3) {
+            self.throttle_time_ms.serialize(version, _bytes)?;
         }
-        self.brokers.serialize(version, bytes)?;
-        if version >= 2 {
-            self.cluster_id.serialize(version, bytes)?;
+        self.brokers.serialize(version, _bytes)?;
+        if version >= ApiVersion(2) {
+            self.cluster_id.serialize(version, _bytes)?;
         }
-        if version >= 1 {
-            self.controller_id.serialize(version, bytes)?;
+        if version >= ApiVersion(1) {
+            self.controller_id.serialize(version, _bytes)?;
         }
-        self.topics.serialize(version, bytes)?;
+        self.topics.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 3 {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
+        let throttle_time_ms = if version >= ApiVersion(3) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
@@ -142,12 +139,12 @@ impl ApiResponse for MetadataResponse {
         let brokers = IndexMap::<MetadataResponseBrokerKey, MetadataResponseBroker>::deserialize(
             version, bytes,
         );
-        let cluster_id = if version >= 2 {
+        let cluster_id = if version >= ApiVersion(2) {
             Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let controller_id = if version >= 1 {
+        let controller_id = if version >= ApiVersion(1) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
@@ -155,32 +152,29 @@ impl ApiResponse for MetadataResponse {
         let topics = IndexMap::<MetadataResponseTopicKey, MetadataResponseTopic>::deserialize(
             version, bytes,
         );
-        (
-            header,
-            MetadataResponse {
-                throttle_time_ms,
-                brokers,
-                cluster_id,
-                controller_id,
-                topics,
-            },
-        )
+        MetadataResponse {
+            throttle_time_ms,
+            brokers,
+            cluster_id,
+            controller_id,
+            topics,
+        }
     }
 }
 
 impl MetadataResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.cluster_id.is_none() && !_version >= 2 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.cluster_id.is_none() && !_version.0 >= 2 {
             return Err(SerializationError::NullValue(
                 "cluster_id",
-                _version,
+                *_version,
                 "MetadataResponse",
             ));
         }
-        if self.throttle_time_ms != i32::default() && _version >= 3 {
+        if self.throttle_time_ms != i32::default() && _version >= ApiVersion(3) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "throttle_time_ms",
-                _version,
+                *_version,
                 "MetadataResponse",
             ));
         }
@@ -201,44 +195,52 @@ impl Default for MetadataResponse {
 }
 
 impl ToBytes for MetadataResponseBrokerKey {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.node_id.serialize(version, bytes)?;
+        self.node_id.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl MetadataResponseBrokerKey {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for MetadataResponseBrokerKey {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let node_id = i32::deserialize(version, bytes);
         MetadataResponseBrokerKey { node_id }
     }
 }
 
 impl ToBytes for MetadataResponseBroker {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.host.serialize(version, bytes)?;
-        self.port.serialize(version, bytes)?;
-        if version >= 1 {
-            self.rack.serialize(version, bytes)?;
+        self.host.serialize(version, _bytes)?;
+        self.port.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.rack.serialize(version, _bytes)?;
         }
         Ok(())
     }
 }
 
 impl MetadataResponseBroker {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.rack.is_none() && !_version >= 1 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.rack.is_none() && !_version.0 >= 1 {
             return Err(SerializationError::NullValue(
                 "rack",
-                _version,
+                *_version,
                 "MetadataResponseBroker",
             ));
         }
@@ -247,10 +249,10 @@ impl MetadataResponseBroker {
 }
 
 impl FromBytes for MetadataResponseBroker {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let host = String::deserialize(version, bytes);
         let port = i32::deserialize(version, bytes);
-        let rack = if version >= 1 {
+        let rack = if version >= ApiVersion(1) {
             Option::<String>::deserialize(version, bytes)
         } else {
             Default::default()
@@ -260,48 +262,56 @@ impl FromBytes for MetadataResponseBroker {
 }
 
 impl ToBytes for MetadataResponseTopicKey {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl MetadataResponseTopicKey {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for MetadataResponseTopicKey {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         MetadataResponseTopicKey { name }
     }
 }
 
 impl ToBytes for MetadataResponseTopic {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.error_code.serialize(version, bytes)?;
-        if version >= 1 {
-            self.is_internal.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.is_internal.serialize(version, _bytes)?;
         }
-        self.partitions.serialize(version, bytes)?;
+        self.partitions.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl MetadataResponseTopic {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for MetadataResponseTopic {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
-        let is_internal = if version >= 1 {
+        let is_internal = if version >= ApiVersion(1) {
             bool::deserialize(version, bytes)
         } else {
             Default::default()
@@ -316,42 +326,46 @@ impl FromBytes for MetadataResponseTopic {
 }
 
 impl ToBytes for MetadataResponsePartition {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.error_code.serialize(version, bytes)?;
-        self.partition_index.serialize(version, bytes)?;
-        self.leader_id.serialize(version, bytes)?;
-        if version >= 7 {
-            self.leader_epoch.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
+        self.leader_id.serialize(version, _bytes)?;
+        if version >= ApiVersion(7) {
+            self.leader_epoch.serialize(version, _bytes)?;
         }
-        self.replica_nodes.serialize(version, bytes)?;
-        self.isr_nodes.serialize(version, bytes)?;
-        if version >= 5 {
-            self.offline_replicas.serialize(version, bytes)?;
+        self.replica_nodes.serialize(version, _bytes)?;
+        self.isr_nodes.serialize(version, _bytes)?;
+        if version >= ApiVersion(5) {
+            self.offline_replicas.serialize(version, _bytes)?;
         }
         Ok(())
     }
 }
 
 impl MetadataResponsePartition {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for MetadataResponsePartition {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let partition_index = i32::deserialize(version, bytes);
         let leader_id = i32::deserialize(version, bytes);
-        let leader_epoch = if version >= 7 {
+        let leader_epoch = if version >= ApiVersion(7) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
         let replica_nodes = Vec::<i32>::deserialize(version, bytes);
         let isr_nodes = Vec::<i32>::deserialize(version, bytes);
-        let offline_replicas = if version >= 5 {
+        let offline_replicas = if version >= ApiVersion(5) {
             Vec::<i32>::deserialize(version, bytes)
         } else {
             Default::default()

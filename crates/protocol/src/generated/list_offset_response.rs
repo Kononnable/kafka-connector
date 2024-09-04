@@ -47,76 +47,74 @@ pub struct ListOffsetPartitionResponse {
 impl ApiResponse for ListOffsetResponse {
     type Request = super::list_offset_request::ListOffsetRequest;
 
-    fn get_api_key() -> i16 {
-        2
+    fn get_api_key() -> ApiKey {
+        ApiKey(2)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        5
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(5)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        if version >= 2 {
-            self.throttle_time_ms.serialize(version, bytes)?;
+        if version >= ApiVersion(2) {
+            self.throttle_time_ms.serialize(version, _bytes)?;
         }
-        self.topics.serialize(version, bytes)?;
+        self.topics.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 2 {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
+        let throttle_time_ms = if version >= ApiVersion(2) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
         let topics = Vec::<ListOffsetTopicResponse>::deserialize(version, bytes);
-        (
-            header,
-            ListOffsetResponse {
-                throttle_time_ms,
-                topics,
-            },
-        )
+        ListOffsetResponse {
+            throttle_time_ms,
+            topics,
+        }
     }
 }
 
 impl ListOffsetResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for ListOffsetTopicResponse {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
-        self.partitions.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
+        self.partitions.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl ListOffsetTopicResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for ListOffsetTopicResponse {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<ListOffsetPartitionResponse>::deserialize(version, bytes);
         ListOffsetTopicResponse { name, partitions }
@@ -124,53 +122,57 @@ impl FromBytes for ListOffsetTopicResponse {
 }
 
 impl ToBytes for ListOffsetPartitionResponse {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.partition_index.serialize(version, bytes)?;
-        self.error_code.serialize(version, bytes)?;
-        if version >= 0 {
-            self.old_style_offsets.serialize(version, bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        if version >= ApiVersion(0) {
+            self.old_style_offsets.serialize(version, _bytes)?;
         }
-        if version >= 1 {
-            self.timestamp.serialize(version, bytes)?;
+        if version >= ApiVersion(1) {
+            self.timestamp.serialize(version, _bytes)?;
         }
-        if version >= 1 {
-            self.offset.serialize(version, bytes)?;
+        if version >= ApiVersion(1) {
+            self.offset.serialize(version, _bytes)?;
         }
-        if version >= 4 {
-            self.leader_epoch.serialize(version, bytes)?;
+        if version >= ApiVersion(4) {
+            self.leader_epoch.serialize(version, _bytes)?;
         }
         Ok(())
     }
 }
 
 impl ListOffsetPartitionResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.old_style_offsets != Vec::<i64>::default() && _version >= 0 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.old_style_offsets != Vec::<i64>::default() && _version >= ApiVersion(0) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "old_style_offsets",
-                _version,
+                *_version,
                 "ListOffsetPartitionResponse",
             ));
         }
-        if self.timestamp != i64::default() && _version >= 1 {
+        if self.timestamp != i64::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "timestamp",
-                _version,
+                *_version,
                 "ListOffsetPartitionResponse",
             ));
         }
-        if self.offset != i64::default() && _version >= 1 {
+        if self.offset != i64::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "offset",
-                _version,
+                *_version,
                 "ListOffsetPartitionResponse",
             ));
         }
-        if self.leader_epoch != i32::default() && _version >= 4 {
+        if self.leader_epoch != i32::default() && _version >= ApiVersion(4) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "leader_epoch",
-                _version,
+                *_version,
                 "ListOffsetPartitionResponse",
             ));
         }
@@ -179,25 +181,25 @@ impl ListOffsetPartitionResponse {
 }
 
 impl FromBytes for ListOffsetPartitionResponse {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);
-        let old_style_offsets = if version >= 0 {
+        let old_style_offsets = if version >= ApiVersion(0) {
             Vec::<i64>::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let timestamp = if version >= 1 {
+        let timestamp = if version >= ApiVersion(1) {
             i64::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let offset = if version >= 1 {
+        let offset = if version >= ApiVersion(1) {
             i64::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let leader_epoch = if version >= 4 {
+        let leader_epoch = if version >= ApiVersion(4) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()

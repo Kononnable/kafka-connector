@@ -34,68 +34,68 @@ pub struct CreatableAcl {
 impl ApiRequest for CreateAclsRequest {
     type Response = super::create_acls_response::CreateAclsResponse;
 
-    fn get_api_key() -> i16 {
-        30
+    fn get_api_key() -> ApiKey {
+        ApiKey(30)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.creations.serialize(version, bytes)?;
+        self.creations.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let creations = Vec::<CreatableAcl>::deserialize(version, bytes);
         CreateAclsRequest { creations }
     }
 }
 
 impl CreateAclsRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for CreatableAcl {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.resource_type.serialize(version, bytes)?;
-        self.resource_name.serialize(version, bytes)?;
-        if version >= 1 {
-            self.resource_pattern_type.serialize(version, bytes)?;
+        self.resource_type.serialize(version, _bytes)?;
+        self.resource_name.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.resource_pattern_type.serialize(version, _bytes)?;
         }
-        self.principal.serialize(version, bytes)?;
-        self.host.serialize(version, bytes)?;
-        self.operation.serialize(version, bytes)?;
-        self.permission_type.serialize(version, bytes)?;
+        self.principal.serialize(version, _bytes)?;
+        self.host.serialize(version, _bytes)?;
+        self.operation.serialize(version, _bytes)?;
+        self.permission_type.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl CreatableAcl {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.resource_pattern_type != i8::default() && _version >= 1 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.resource_pattern_type != i8::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "resource_pattern_type",
-                _version,
+                *_version,
                 "CreatableAcl",
             ));
         }
@@ -104,10 +104,10 @@ impl CreatableAcl {
 }
 
 impl FromBytes for CreatableAcl {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let resource_type = i8::deserialize(version, bytes);
         let resource_name = String::deserialize(version, bytes);
-        let resource_pattern_type = if version >= 1 {
+        let resource_pattern_type = if version >= ApiVersion(1) {
             i8::deserialize(version, bytes)
         } else {
             Default::default()

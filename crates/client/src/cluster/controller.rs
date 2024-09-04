@@ -10,7 +10,7 @@ use tokio_stream as stream;
 use tokio_stream::StreamExt;
 
 use crate::broker::connection::fetch_initial_broker_list_from_broker;
-use kafka_connector_protocol::metadata_response::MetadataResponse;
+use kafka_connector_protocol::{metadata_response::MetadataResponse, ApiKey, ApiVersion};
 use tracing::{debug, instrument};
 
 /// Main entrypoint for communication with Kafka cluster.
@@ -76,7 +76,7 @@ impl ClusterController {
                 debug!(?address, "Connecting to kafka broker");
                 match fetch_initial_broker_list_from_broker(options, address).await {
                     Ok(resp) => {
-                        return Ok(resp.metadata);
+                        return Ok(resp.1);
                     }
                     Err(err) => {
                         debug!(?address, ?err, "Failed to connect to broker");
@@ -105,17 +105,13 @@ impl ClusterController {
     pub async fn api_call(
         &self,
         broker_id: i32,
-        api_key: i16,
-        api_version: i16,
+        key: ApiKey,
+        version: ApiVersion,
         request: BytesMut,
     ) -> BytesMut {
         // TODO: Error handling
         let broker = self.broker_list.get(&broker_id).unwrap();
-        broker
-            .api_call(api_key, api_version, request)
-            .await
-            .await
-            .unwrap()
+        broker.api_call(key, version, request).await.await.unwrap()
     }
 }
 
@@ -326,7 +322,7 @@ mod tests {
             ));
         }
 
-        // TODO: Minor: This test fails on windows with standard config - connecting to 255.255.255.0 results in NetworkUnreachable error  
+        // TODO: Minor: This test fails on windows with standard config - connecting to 255.255.255.0 results in NetworkUnreachable error
         #[tokio::test(start_paused = true)]
         async fn handles_timeout_on_connect_operation() {
             setup_tracing();
@@ -358,7 +354,7 @@ mod tests {
                 Err(ClusterControllerCreationError::OutOfConnectionAttempts(1))
             ));
         }
-        
+
         // TODO: Minor: This test fails on windows with default settings - connections on 127.0.0.2 are rejected(windows thing or firewall related)
         #[tokio::test]
         async fn handles_rejection_of_tcp_connection() {

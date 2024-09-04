@@ -16,37 +16,33 @@ pub struct HeartbeatRequest {
 impl ApiRequest for HeartbeatRequest {
     type Response = super::heartbeat_response::HeartbeatResponse;
 
-    fn get_api_key() -> i16 {
-        12
+    fn get_api_key() -> ApiKey {
+        ApiKey(12)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        2
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(2)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.group_id.serialize(version, bytes)?;
-        self.generationid.serialize(version, bytes)?;
-        self.member_id.serialize(version, bytes)?;
+        self.group_id.serialize(version, _bytes)?;
+        self.generationid.serialize(version, _bytes)?;
+        self.member_id.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let group_id = String::deserialize(version, bytes);
         let generationid = i32::deserialize(version, bytes);
         let member_id = String::deserialize(version, bytes);
@@ -59,7 +55,7 @@ impl ApiRequest for HeartbeatRequest {
 }
 
 impl HeartbeatRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }

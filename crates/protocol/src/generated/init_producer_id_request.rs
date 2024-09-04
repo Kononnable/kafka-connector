@@ -13,36 +13,32 @@ pub struct InitProducerIdRequest {
 impl ApiRequest for InitProducerIdRequest {
     type Response = super::init_producer_id_response::InitProducerIdResponse;
 
-    fn get_api_key() -> i16 {
-        22
+    fn get_api_key() -> ApiKey {
+        ApiKey(22)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.transactional_id.serialize(version, bytes)?;
-        self.transaction_timeout_ms.serialize(version, bytes)?;
+        self.transactional_id.serialize(version, _bytes)?;
+        self.transaction_timeout_ms.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let transactional_id = Option::<String>::deserialize(version, bytes);
         let transaction_timeout_ms = i32::deserialize(version, bytes);
         InitProducerIdRequest {
@@ -53,11 +49,11 @@ impl ApiRequest for InitProducerIdRequest {
 }
 
 impl InitProducerIdRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.transactional_id.is_none() {
             return Err(SerializationError::NullValue(
                 "transactional_id",
-                _version,
+                *_version,
                 "InitProducerIdRequest",
             ));
         }

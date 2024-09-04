@@ -36,62 +36,63 @@ pub struct WritableTxnMarkerPartitionResult {
 impl ApiResponse for WriteTxnMarkersResponse {
     type Request = super::write_txn_markers_request::WriteTxnMarkersRequest;
 
-    fn get_api_key() -> i16 {
-        27
+    fn get_api_key() -> ApiKey {
+        ApiKey(27)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        0
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.markers.serialize(version, bytes)?;
+        self.markers.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let markers = Vec::<WritableTxnMarkerResult>::deserialize(version, bytes);
-        (header, WriteTxnMarkersResponse { markers })
+        WriteTxnMarkersResponse { markers }
     }
 }
 
 impl WriteTxnMarkersResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for WritableTxnMarkerResult {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.producer_id.serialize(version, bytes)?;
-        self.topics.serialize(version, bytes)?;
+        self.producer_id.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl WritableTxnMarkerResult {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for WritableTxnMarkerResult {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let producer_id = i64::deserialize(version, bytes);
         let topics = Vec::<WritableTxnMarkerTopicResult>::deserialize(version, bytes);
         WritableTxnMarkerResult {
@@ -102,22 +103,26 @@ impl FromBytes for WritableTxnMarkerResult {
 }
 
 impl ToBytes for WritableTxnMarkerTopicResult {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
-        self.partitions.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
+        self.partitions.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl WritableTxnMarkerTopicResult {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for WritableTxnMarkerTopicResult {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<WritableTxnMarkerPartitionResult>::deserialize(version, bytes);
         WritableTxnMarkerTopicResult { name, partitions }
@@ -125,22 +130,26 @@ impl FromBytes for WritableTxnMarkerTopicResult {
 }
 
 impl ToBytes for WritableTxnMarkerPartitionResult {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.partition_index.serialize(version, bytes)?;
-        self.error_code.serialize(version, bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl WritableTxnMarkerPartitionResult {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for WritableTxnMarkerPartitionResult {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);
         WritableTxnMarkerPartitionResult {

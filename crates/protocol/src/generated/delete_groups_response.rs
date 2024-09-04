@@ -25,91 +25,93 @@ pub struct DeletableGroupResult {
 impl ApiResponse for DeleteGroupsResponse {
     type Request = super::delete_groups_request::DeleteGroupsRequest;
 
-    fn get_api_key() -> i16 {
-        42
+    fn get_api_key() -> ApiKey {
+        ApiKey(42)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.throttle_time_ms.serialize(version, bytes)?;
-        self.results.serialize(version, bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes)?;
+        self.results.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let throttle_time_ms = i32::deserialize(version, bytes);
         let results =
             IndexMap::<DeletableGroupResultKey, DeletableGroupResult>::deserialize(version, bytes);
-        (
-            header,
-            DeleteGroupsResponse {
-                throttle_time_ms,
-                results,
-            },
-        )
+        DeleteGroupsResponse {
+            throttle_time_ms,
+            results,
+        }
     }
 }
 
 impl DeleteGroupsResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for DeletableGroupResultKey {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.group_id.serialize(version, bytes)?;
+        self.group_id.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl DeletableGroupResultKey {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for DeletableGroupResultKey {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let group_id = String::deserialize(version, bytes);
         DeletableGroupResultKey { group_id }
     }
 }
 
 impl ToBytes for DeletableGroupResult {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.error_code.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl DeletableGroupResult {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for DeletableGroupResult {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         DeletableGroupResult { error_code }
     }

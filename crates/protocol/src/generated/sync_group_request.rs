@@ -28,38 +28,34 @@ pub struct SyncGroupRequestAssignment {
 impl ApiRequest for SyncGroupRequest {
     type Response = super::sync_group_response::SyncGroupResponse;
 
-    fn get_api_key() -> i16 {
-        14
+    fn get_api_key() -> ApiKey {
+        ApiKey(14)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        2
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(2)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.group_id.serialize(version, bytes)?;
-        self.generation_id.serialize(version, bytes)?;
-        self.member_id.serialize(version, bytes)?;
-        self.assignments.serialize(version, bytes)?;
+        self.group_id.serialize(version, _bytes)?;
+        self.generation_id.serialize(version, _bytes)?;
+        self.member_id.serialize(version, _bytes)?;
+        self.assignments.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let group_id = String::deserialize(version, bytes);
         let generation_id = i32::deserialize(version, bytes);
         let member_id = String::deserialize(version, bytes);
@@ -74,28 +70,32 @@ impl ApiRequest for SyncGroupRequest {
 }
 
 impl SyncGroupRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for SyncGroupRequestAssignment {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.member_id.serialize(version, bytes)?;
-        self.assignment.serialize(version, bytes)?;
+        self.member_id.serialize(version, _bytes)?;
+        self.assignment.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl SyncGroupRequestAssignment {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for SyncGroupRequestAssignment {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let member_id = String::deserialize(version, bytes);
         let assignment = Vec::<u8>::deserialize(version, bytes);
         SyncGroupRequestAssignment {

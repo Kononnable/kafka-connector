@@ -19,46 +19,42 @@ pub struct DescribableLogDirTopic {
 impl ApiRequest for DescribeLogDirsRequest {
     type Response = super::describe_log_dirs_response::DescribeLogDirsResponse;
 
-    fn get_api_key() -> i16 {
-        35
+    fn get_api_key() -> ApiKey {
+        ApiKey(35)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.topics.serialize(version, bytes)?;
+        self.topics.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let topics = Option::<Vec<DescribableLogDirTopic>>::deserialize(version, bytes);
         DescribeLogDirsRequest { topics }
     }
 }
 
 impl DescribeLogDirsRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.topics.is_none() {
             return Err(SerializationError::NullValue(
                 "topics",
-                _version,
+                *_version,
                 "DescribeLogDirsRequest",
             ));
         }
@@ -67,22 +63,26 @@ impl DescribeLogDirsRequest {
 }
 
 impl ToBytes for DescribableLogDirTopic {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.topic.serialize(version, bytes)?;
-        self.partition_index.serialize(version, bytes)?;
+        self.topic.serialize(version, _bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl DescribableLogDirTopic {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for DescribableLogDirTopic {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let topic = String::deserialize(version, bytes);
         let partition_index = Vec::<i32>::deserialize(version, bytes);
         DescribableLogDirTopic {

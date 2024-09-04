@@ -56,69 +56,67 @@ pub struct DeleteAclsMatchingAcl {
 impl ApiResponse for DeleteAclsResponse {
     type Request = super::delete_acls_request::DeleteAclsRequest;
 
-    fn get_api_key() -> i16 {
-        31
+    fn get_api_key() -> ApiKey {
+        ApiKey(31)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.throttle_time_ms.serialize(version, bytes)?;
-        self.filter_results.serialize(version, bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes)?;
+        self.filter_results.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let throttle_time_ms = i32::deserialize(version, bytes);
         let filter_results = Vec::<DeleteAclsFilterResult>::deserialize(version, bytes);
-        (
-            header,
-            DeleteAclsResponse {
-                throttle_time_ms,
-                filter_results,
-            },
-        )
+        DeleteAclsResponse {
+            throttle_time_ms,
+            filter_results,
+        }
     }
 }
 
 impl DeleteAclsResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for DeleteAclsFilterResult {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.error_code.serialize(version, bytes)?;
-        self.error_message.serialize(version, bytes)?;
-        self.matching_acls.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        self.error_message.serialize(version, _bytes)?;
+        self.matching_acls.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl DeleteAclsFilterResult {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.error_message.is_none() {
             return Err(SerializationError::NullValue(
                 "error_message",
-                _version,
+                *_version,
                 "DeleteAclsFilterResult",
             ));
         }
@@ -127,7 +125,7 @@ impl DeleteAclsFilterResult {
 }
 
 impl FromBytes for DeleteAclsFilterResult {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         let matching_acls = Vec::<DeleteAclsMatchingAcl>::deserialize(version, bytes);
@@ -140,36 +138,40 @@ impl FromBytes for DeleteAclsFilterResult {
 }
 
 impl ToBytes for DeleteAclsMatchingAcl {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.error_code.serialize(version, bytes)?;
-        self.error_message.serialize(version, bytes)?;
-        self.resource_type.serialize(version, bytes)?;
-        self.resource_name.serialize(version, bytes)?;
-        if version >= 1 {
-            self.pattern_type.serialize(version, bytes)?;
+        self.error_code.serialize(version, _bytes)?;
+        self.error_message.serialize(version, _bytes)?;
+        self.resource_type.serialize(version, _bytes)?;
+        self.resource_name.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.pattern_type.serialize(version, _bytes)?;
         }
-        self.principal.serialize(version, bytes)?;
-        self.host.serialize(version, bytes)?;
-        self.operation.serialize(version, bytes)?;
-        self.permission_type.serialize(version, bytes)?;
+        self.principal.serialize(version, _bytes)?;
+        self.host.serialize(version, _bytes)?;
+        self.operation.serialize(version, _bytes)?;
+        self.permission_type.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl DeleteAclsMatchingAcl {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.error_message.is_none() {
             return Err(SerializationError::NullValue(
                 "error_message",
-                _version,
+                *_version,
                 "DeleteAclsMatchingAcl",
             ));
         }
-        if self.pattern_type != i8::default() && _version >= 1 {
+        if self.pattern_type != i8::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "pattern_type",
-                _version,
+                *_version,
                 "DeleteAclsMatchingAcl",
             ));
         }
@@ -178,12 +180,12 @@ impl DeleteAclsMatchingAcl {
 }
 
 impl FromBytes for DeleteAclsMatchingAcl {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let error_code = i16::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         let resource_type = i8::deserialize(version, bytes);
         let resource_name = String::deserialize(version, bytes);
-        let pattern_type = if version >= 1 {
+        let pattern_type = if version >= ApiVersion(1) {
             i8::deserialize(version, bytes)
         } else {
             Default::default()

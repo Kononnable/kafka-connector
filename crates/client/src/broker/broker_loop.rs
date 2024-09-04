@@ -6,12 +6,11 @@ use crate::{
     cluster::options::ClusterControllerOptions,
 };
 use bytes::BytesMut;
+use kafka_connector_protocol::{ApiKey, ApiVersion};
 use std::{collections::HashMap, sync::Arc};
-use tokio::{
-    sync::{
-        mpsc::{Receiver, UnboundedReceiver},
-        oneshot,
-    },
+use tokio::sync::{
+    mpsc::{Receiver, UnboundedReceiver},
+    oneshot,
 };
 use tracing::{debug, instrument};
 
@@ -26,8 +25,8 @@ pub async fn broker_loop(
     mut signal_receiver: UnboundedReceiver<BrokerLoopSignal>,
     mut api_request_receiver: Receiver<(
         oneshot::Sender<Result<BytesMut, ApiCallError>>,
-        i16,
-        i16,
+        ApiKey,
+        ApiVersion,
         BytesMut,
     )>,
     options: Arc<ClusterControllerOptions>,
@@ -48,7 +47,7 @@ pub async fn broker_loop(
                 async move { fetch_initial_broker_list_from_broker(&options, &address).await },
             );
 
-        let mut connection = loop {
+        let (mut connection, metadata) = loop {
             tokio::select! {
                 signal = signal_receiver.recv() => {
                     match signal {

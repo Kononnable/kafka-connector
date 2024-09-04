@@ -13,36 +13,32 @@ pub struct RenewDelegationTokenRequest {
 impl ApiRequest for RenewDelegationTokenRequest {
     type Response = super::renew_delegation_token_response::RenewDelegationTokenResponse;
 
-    fn get_api_key() -> i16 {
-        39
+    fn get_api_key() -> ApiKey {
+        ApiKey(39)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.hmac.serialize(version, bytes)?;
-        self.renew_period_ms.serialize(version, bytes)?;
+        self.hmac.serialize(version, _bytes)?;
+        self.renew_period_ms.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let hmac = Vec::<u8>::deserialize(version, bytes);
         let renew_period_ms = i64::deserialize(version, bytes);
         RenewDelegationTokenRequest {
@@ -53,7 +49,7 @@ impl ApiRequest for RenewDelegationTokenRequest {
 }
 
 impl RenewDelegationTokenRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }

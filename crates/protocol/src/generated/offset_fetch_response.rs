@@ -51,68 +51,62 @@ pub struct OffsetFetchResponsePartition {
 impl ApiResponse for OffsetFetchResponse {
     type Request = super::offset_fetch_request::OffsetFetchRequest;
 
-    fn get_api_key() -> i16 {
-        9
+    fn get_api_key() -> ApiKey {
+        ApiKey(9)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        5
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(5)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &ResponseHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        if version >= 3 {
-            self.throttle_time_ms.serialize(version, bytes)?;
+        if version >= ApiVersion(3) {
+            self.throttle_time_ms.serialize(version, _bytes)?;
         }
-        self.topics.serialize(version, bytes)?;
-        if version >= 2 {
-            self.error_code.serialize(version, bytes)?;
+        self.topics.serialize(version, _bytes)?;
+        if version >= ApiVersion(2) {
+            self.error_code.serialize(version, _bytes)?;
         }
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> (ResponseHeader, Self) {
-        let header = ResponseHeader::deserialize(0, bytes);
-        let throttle_time_ms = if version >= 3 {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
+        let throttle_time_ms = if version >= ApiVersion(3) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()
         };
         let topics = Vec::<OffsetFetchResponseTopic>::deserialize(version, bytes);
-        let error_code = if version >= 2 {
+        let error_code = if version >= ApiVersion(2) {
             i16::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        (
-            header,
-            OffsetFetchResponse {
-                throttle_time_ms,
-                topics,
-                error_code,
-            },
-        )
+        OffsetFetchResponse {
+            throttle_time_ms,
+            topics,
+            error_code,
+        }
     }
 }
 
 impl OffsetFetchResponse {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.error_code != i16::default() && _version >= 2 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.error_code != i16::default() && _version >= ApiVersion(2) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "error_code",
-                _version,
+                *_version,
                 "OffsetFetchResponse",
             ));
         }
@@ -121,22 +115,26 @@ impl OffsetFetchResponse {
 }
 
 impl ToBytes for OffsetFetchResponseTopic {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
-        self.partitions.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
+        self.partitions.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl OffsetFetchResponseTopic {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for OffsetFetchResponseTopic {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let partitions = Vec::<OffsetFetchResponsePartition>::deserialize(version, bytes);
         OffsetFetchResponseTopic { name, partitions }
@@ -144,32 +142,36 @@ impl FromBytes for OffsetFetchResponseTopic {
 }
 
 impl ToBytes for OffsetFetchResponsePartition {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.partition_index.serialize(version, bytes)?;
-        self.committed_offset.serialize(version, bytes)?;
-        if version >= 5 {
-            self.committed_leader_epoch.serialize(version, bytes)?;
+        self.partition_index.serialize(version, _bytes)?;
+        self.committed_offset.serialize(version, _bytes)?;
+        if version >= ApiVersion(5) {
+            self.committed_leader_epoch.serialize(version, _bytes)?;
         }
-        self.metadata.serialize(version, bytes)?;
-        self.error_code.serialize(version, bytes)?;
+        self.metadata.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl OffsetFetchResponsePartition {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.metadata.is_none() {
             return Err(SerializationError::NullValue(
                 "metadata",
-                _version,
+                *_version,
                 "OffsetFetchResponsePartition",
             ));
         }
-        if self.committed_leader_epoch != i32::default() && _version >= 5 {
+        if self.committed_leader_epoch != i32::default() && _version >= ApiVersion(5) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "committed_leader_epoch",
-                _version,
+                *_version,
                 "OffsetFetchResponsePartition",
             ));
         }
@@ -178,10 +180,10 @@ impl OffsetFetchResponsePartition {
 }
 
 impl FromBytes for OffsetFetchResponsePartition {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let committed_offset = i64::deserialize(version, bytes);
-        let committed_leader_epoch = if version >= 5 {
+        let committed_leader_epoch = if version >= ApiVersion(5) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()

@@ -26,40 +26,36 @@ pub struct DescribeConfigsResource {
 impl ApiRequest for DescribeConfigsRequest {
     type Response = super::describe_configs_response::DescribeConfigsResponse;
 
-    fn get_api_key() -> i16 {
-        32
+    fn get_api_key() -> ApiKey {
+        ApiKey(32)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        2
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(2)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.resources.serialize(version, bytes)?;
-        if version >= 1 {
-            self.include_synoyms.serialize(version, bytes)?;
+        self.resources.serialize(version, _bytes)?;
+        if version >= ApiVersion(1) {
+            self.include_synoyms.serialize(version, _bytes)?;
         }
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let resources = Vec::<DescribeConfigsResource>::deserialize(version, bytes);
-        let include_synoyms = if version >= 1 {
+        let include_synoyms = if version >= ApiVersion(1) {
             bool::deserialize(version, bytes)
         } else {
             Default::default()
@@ -72,11 +68,11 @@ impl ApiRequest for DescribeConfigsRequest {
 }
 
 impl DescribeConfigsRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
-        if self.include_synoyms != bool::default() && _version >= 1 {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        if self.include_synoyms != bool::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "include_synoyms",
-                _version,
+                *_version,
                 "DescribeConfigsRequest",
             ));
         }
@@ -85,21 +81,25 @@ impl DescribeConfigsRequest {
 }
 
 impl ToBytes for DescribeConfigsResource {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.resource_type.serialize(version, bytes)?;
-        self.resource_name.serialize(version, bytes)?;
-        self.configuration_keys.serialize(version, bytes)?;
+        self.resource_type.serialize(version, _bytes)?;
+        self.resource_name.serialize(version, _bytes)?;
+        self.configuration_keys.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl DescribeConfigsResource {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.configuration_keys.is_none() {
             return Err(SerializationError::NullValue(
                 "configuration_keys",
-                _version,
+                *_version,
                 "DescribeConfigsResource",
             ));
         }
@@ -108,7 +108,7 @@ impl DescribeConfigsResource {
 }
 
 impl FromBytes for DescribeConfigsResource {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let resource_type = i8::deserialize(version, bytes);
         let resource_name = String::deserialize(version, bytes);
         let configuration_keys = Option::<Vec<String>>::deserialize(version, bytes);

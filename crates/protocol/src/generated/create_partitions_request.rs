@@ -34,37 +34,33 @@ pub struct CreatePartitionsAssignment {
 impl ApiRequest for CreatePartitionsRequest {
     type Response = super::create_partitions_response::CreatePartitionsResponse;
 
-    fn get_api_key() -> i16 {
-        37
+    fn get_api_key() -> ApiKey {
+        ApiKey(37)
     }
 
-    fn get_min_supported_version() -> i16 {
-        0
+    fn get_min_supported_version() -> ApiVersion {
+        ApiVersion(0)
     }
 
-    fn get_max_supported_version() -> i16 {
-        1
+    fn get_max_supported_version() -> ApiVersion {
+        ApiVersion(1)
     }
 
     fn serialize(
         &self,
-        version: i16,
-        bytes: &mut BytesMut,
-        header: &RequestHeader,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
     ) -> Result<(), SerializationError> {
-        debug_assert!(header.request_api_key == Self::get_api_key());
-        debug_assert!(header.request_api_version == version);
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        header.serialize(0, bytes)?;
-        self.topics.serialize(version, bytes)?;
-        self.timeout_ms.serialize(version, bytes)?;
-        self.validate_only.serialize(version, bytes)?;
+        self.topics.serialize(version, _bytes)?;
+        self.timeout_ms.serialize(version, _bytes)?;
+        self.validate_only.serialize(version, _bytes)?;
         Ok(())
     }
 
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let topics = Vec::<CreatePartitionsTopic>::deserialize(version, bytes);
         let timeout_ms = i32::deserialize(version, bytes);
         let validate_only = bool::deserialize(version, bytes);
@@ -77,27 +73,31 @@ impl ApiRequest for CreatePartitionsRequest {
 }
 
 impl CreatePartitionsRequest {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl ToBytes for CreatePartitionsTopic {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.name.serialize(version, bytes)?;
-        self.count.serialize(version, bytes)?;
-        self.assignments.serialize(version, bytes)?;
+        self.name.serialize(version, _bytes)?;
+        self.count.serialize(version, _bytes)?;
+        self.assignments.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl CreatePartitionsTopic {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         if self.assignments.is_none() {
             return Err(SerializationError::NullValue(
                 "assignments",
-                _version,
+                *_version,
                 "CreatePartitionsTopic",
             ));
         }
@@ -106,7 +106,7 @@ impl CreatePartitionsTopic {
 }
 
 impl FromBytes for CreatePartitionsTopic {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
         let count = i32::deserialize(version, bytes);
         let assignments = Option::<Vec<CreatePartitionsAssignment>>::deserialize(version, bytes);
@@ -119,21 +119,25 @@ impl FromBytes for CreatePartitionsTopic {
 }
 
 impl ToBytes for CreatePartitionsAssignment {
-    fn serialize(&self, version: i16, bytes: &mut BytesMut) -> Result<(), SerializationError> {
+    fn serialize(
+        &self,
+        version: ApiVersion,
+        _bytes: &mut BytesMut,
+    ) -> Result<(), SerializationError> {
         self.validate_fields(version)?;
-        self.broker_ids.serialize(version, bytes)?;
+        self.broker_ids.serialize(version, _bytes)?;
         Ok(())
     }
 }
 
 impl CreatePartitionsAssignment {
-    fn validate_fields(&self, _version: i16) -> Result<(), SerializationError> {
+    fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
 impl FromBytes for CreatePartitionsAssignment {
-    fn deserialize(version: i16, bytes: &mut BytesMut) -> Self {
+    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let broker_ids = Vec::<i32>::deserialize(version, bytes);
         CreatePartitionsAssignment { broker_ids }
     }
