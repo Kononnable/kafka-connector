@@ -11,7 +11,7 @@ mod common;
 
 #[tokio::test]
 pub async fn main() {
-    // TODO" extract, consider if logging should be enabled by default in tests (probably yes, or through env filter)
+    // TODO: extract, consider if logging should be enabled by default in tests (probably yes, or through env filter)
     let my_subscriber = FmtSubscriber::builder()
         .with_max_level(Level::DEBUG)
         .finish();
@@ -23,6 +23,6 @@ pub async fn main() {
     )
     .await
     .unwrap();
-    let broker_list = cluster.get_broker_list();
+    let broker_list = cluster.get_broker_list().await;
     assert!(!broker_list.is_empty())
 }

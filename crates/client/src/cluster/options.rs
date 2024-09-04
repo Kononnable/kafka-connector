@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 // TODO: Rename fields?
+// TODO: add all options (from 1.0, without ones introduced later in KIPs to be implemented)
 #[derive(Clone, Debug)]
 pub struct ClusterControllerOptions {
     pub connection_retires: u8,
@@ -11,6 +12,7 @@ pub struct ClusterControllerOptions {
 }
 
 // TODO: Set proper defaults
+// TODO: Use derivative or something similar? (for more readability)
 impl Default for ClusterControllerOptions {
     fn default() -> Self {
         ClusterControllerOptions {

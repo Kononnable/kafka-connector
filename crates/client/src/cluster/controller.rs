@@ -1,33 +1,22 @@
 use crate::{
-    broker::controller::{BrokerController, BrokerStatus},
-    cluster::{
-        error::{ClusterControllerCreationError, ClusterControllerInitializationError},
-        options::ClusterControllerOptions,
-    },
+    broker::controller::{BrokerController, BrokerControllerStatus},
+    cluster::{error::ClusterControllerCreationError, options::ClusterControllerOptions},
 };
 use bytes::BytesMut;
 use indexmap::IndexMap;
-use kafka_connector_protocol::{
-    api_versions_request::ApiVersionsRequest, api_versions_response::ApiVersionsResponseKeyKey,
-    metadata_request::MetadataRequest, metadata_response::MetadataResponse,
-    request_header::RequestHeader, ApiRequest, ApiResponse,
-};
-use std::{
-    fmt::Debug,
-    net::{SocketAddr, ToSocketAddrs},
-    time::Duration,
-};
-use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt},
-    net::TcpStream,
-    time::timeout,
-};
+use std::{fmt::Debug, sync::Arc};
+use tokio::net::ToSocketAddrs;
+use tokio_stream as stream;
+use tokio_stream::StreamExt;
+
+use crate::broker::connection::fetch_initial_broker_list_from_broker;
+use kafka_connector_protocol::metadata_response::MetadataResponse;
 use tracing::{debug, instrument};
 
 /// Main entrypoint for communication with Kafka cluster.
 pub struct ClusterController {
     broker_list: IndexMap<i32, BrokerController>,
-    options: ClusterControllerOptions,
+    options: Arc<ClusterControllerOptions>,
 }
 
 impl ClusterController {
@@ -38,13 +27,21 @@ impl ClusterController {
         bootstrap_servers: Vec<impl ToSocketAddrs + Debug>,
         options: ClusterControllerOptions,
     ) -> Result<ClusterController, ClusterControllerCreationError> {
+        let options = Arc::new(options);
         let metadata = Self::fetch_initial_broker_list(bootstrap_servers, &options).await?;
 
         let broker_list = metadata
             .brokers
             .iter()
             .map(|(k, v)| {
-                (k.node_id, BrokerController::new(&v.host, v.port)) // TODO: setup broker controllers
+                (
+                    k.node_id,
+                    BrokerController::new(
+                        format!("{}:{}", v.host, v.port),
+                        options.clone(),
+                        k.node_id,
+                    ),
+                )
             })
             .collect();
         Ok(Self {
@@ -75,26 +72,15 @@ impl ClusterController {
                 i + 1,
                 options.connection_retires + 1
             );
-            for server in &bootstrap_servers {
-                let addresses = {
-                    match server.to_socket_addrs() {
-                        Ok(addr) => addr,
-                        Err(err) => {
-                            debug!(?server, ?err, "Failed to resolve bootstrap address");
-                            continue;
-                        }
+            for address in &bootstrap_servers {
+                debug!(?address, "Connecting to kafka broker");
+                match fetch_initial_broker_list_from_broker(options, address).await {
+                    Ok(resp) => {
+                        return Ok(resp.metadata);
                     }
-                };
-                for address in addresses {
-                    debug!(?address, "Connecting to kafka broker");
-                    match Self::fetch_initial_broker_list_from_broker(options, address).await {
-                        Ok(resp) => {
-                            return Ok(resp);
-                        }
-                        Err(err) => {
-                            debug!(?address, ?err, "Failed to connect to broker");
-                            continue;
-                        }
+                    Err(err) => {
+                        debug!(?address, ?err, "Failed to connect to broker");
+                        continue;
                     }
                 }
             }
@@ -104,115 +90,32 @@ impl ClusterController {
         ))
     }
 
-    async fn fetch_initial_broker_list_from_broker(
-        options: &ClusterControllerOptions,
-        address: SocketAddr,
-    ) -> Result<MetadataResponse, ClusterControllerInitializationError> {
-        let mut connection = timeout(options.connection_timeout, TcpStream::connect(address))
-            .await
-            .map_err(|_| ClusterControllerInitializationError::ConnectionTimeoutReached)?
-            .map_err(ClusterControllerInitializationError::ConnectionError)?;
-
-        let mut buffer = BytesMut::with_capacity(1_024);
-
-        let api_versions_request = ApiVersionsRequest::default();
-        let mut request_header = RequestHeader {
-            client_id: options.client_name.to_owned(),
-            ..Default::default()
-        };
-
-        let api_versions_response = Self::send_api_request(
-            &api_versions_request,
-            &mut buffer,
-            0,
-            &mut request_header,
-            &mut connection,
-            options.request_timeout,
-        )
-        .await?;
-
-        let mut metadata_request_version = api_versions_response
-            .api_keys
-            .get(&ApiVersionsResponseKeyKey {
-                index: MetadataRequest::get_api_key(),
-            })
-            .expect("Server should support metadata requests")
-            .max_version;
-        if metadata_request_version > MetadataRequest::get_max_supported_version() {
-            metadata_request_version = MetadataRequest::get_max_supported_version();
-        }
-        let metadata_request = MetadataRequest {
-            topics: Some(vec![]),
-            allow_auto_topic_creation: false,
-        };
-        Self::send_api_request(
-            &metadata_request,
-            &mut buffer,
-            metadata_request_version,
-            &mut request_header,
-            &mut connection,
-            options.request_timeout,
-        )
-        .await
-    }
-
-    /// Used only for initial cluster metadata fetch, outside of that `BrokerController` is solely responsible for direct communication with kafka brokers
-    async fn send_api_request<R: ApiRequest>(
-        request: &R,
-        buffer: &mut BytesMut,
-        api_version: i16,
-        request_header: &mut RequestHeader,
-        connection: &mut TcpStream,
-        request_timeout: Duration,
-    ) -> Result<R::Response, ClusterControllerInitializationError> {
-        timeout(request_timeout, async {
-            request_header.request_api_key = R::get_api_key();
-            request_header.request_api_version = api_version;
-            request_header.correlation_id += 1;
-
-            request
-                .serialize(api_version, buffer, request_header)
-                .expect("Failed to serialize initial Api Request");
-            let len = buffer.len() as i32;
-            connection
-                .write_all(&len.to_be_bytes())
-                .await
-                .map_err(ClusterControllerInitializationError::NetworkError)?;
-            connection
-                .write_all(buffer)
-                .await
-                .map_err(ClusterControllerInitializationError::NetworkError)?;
-            buffer.clear();
-
-            let mut buffer_size = [0; 4];
-            connection
-                .read_exact(&mut buffer_size)
-                .await
-                .map_err(ClusterControllerInitializationError::NetworkError)?;
-            let message_size = i32::from_be_bytes(buffer_size);
-
-            buffer.reserve(message_size as usize);
-            unsafe {
-                buffer.set_len(message_size as usize);
-            }
-            connection
-                .read_exact(buffer)
-                .await
-                .map_err(ClusterControllerInitializationError::NetworkError)?;
-            Ok(R::Response::deserialize(api_version, buffer).1)
-        })
-        .await
-        .map_err(|_| ClusterControllerInitializationError::ApiCallTimeoutReached)?
-    }
-
     /// Returns known broker list with their statuses
     // TODO: Check if needed for 'production', or if rename is needed
     // TODO: should it be tested?
-    pub fn get_broker_list(&self) -> IndexMap<i32, (String, BrokerStatus)> {
-        self.broker_list
-            .iter()
-            .map(|(k, v)| (*k, (v.get_address().to_owned(), v.get_status())))
+    pub async fn get_broker_list(&self) -> Vec<(i32, (String, BrokerControllerStatus))> {
+        stream::iter(self.broker_list.iter())
+            .then(|(k, v)| async { (*k, (v.get_address().to_owned(), v.get_status().await)) })
             .collect()
+            .await
+    }
+
+    // TODO: Document when it may block
+    // TODO: Change to generic
+    pub async fn api_call(
+        &self,
+        broker_id: i32,
+        api_key: i16,
+        api_version: i16,
+        request: BytesMut,
+    ) -> BytesMut {
+        // TODO: Error handling
+        let broker = self.broker_list.get(&broker_id).unwrap();
+        broker
+            .api_call(api_key, api_version, request)
+            .await
+            .await
+            .unwrap()
     }
 }
 
@@ -222,16 +125,21 @@ mod tests {
 
     mod creating_and_initializing {
         use super::*;
+        use bytes::BytesMut;
         use kafka_connector_protocol::{
-            api_versions_response::{ApiVersionsResponse, ApiVersionsResponseKey},
+            api_versions_response::{
+                ApiVersionsResponse, ApiVersionsResponseKey, ApiVersionsResponseKeyKey,
+            },
+            metadata_request::MetadataRequest,
             metadata_response::{MetadataResponseBroker, MetadataResponseBrokerKey},
+            request_header::RequestHeader,
             response_header::ResponseHeader,
-            ApiResponse,
+            ApiRequest, ApiResponse,
         };
         use std::{ops::Sub, time::Duration};
         use tokio::{
             io::{AsyncReadExt, AsyncWriteExt},
-            net::TcpListener,
+            net::{TcpListener, TcpStream},
             time::Instant,
         };
         use tracing::Level;
@@ -310,9 +218,7 @@ mod tests {
             setup_tracing();
 
             let timeout_start = Instant::now();
-            let result =
-                ClusterController::new(Vec::<String>::new(), ClusterControllerOptions::default())
-                    .await;
+            let result = ClusterController::new(Vec::<String>::new(), Default::default()).await;
             let connection_delay = Instant::now().sub(timeout_start);
             debug!(?connection_delay);
             assert!(connection_delay.as_millis() < 5);
@@ -332,11 +238,9 @@ mod tests {
                 initialize_as_single_broker_cluster(&server).await;
             });
 
-            let result =
-                ClusterController::new(bootstrap_servers, ClusterControllerOptions::default())
-                    .await;
+            let result = ClusterController::new(bootstrap_servers, Default::default()).await;
             assert!(result.is_ok());
-            assert_eq!(result.unwrap().get_broker_list().len(), 1);
+            assert_eq!(result.unwrap().get_broker_list().await.len(), 1);
         }
 
         #[tokio::test]
@@ -367,7 +271,7 @@ mod tests {
             .await;
             assert!(result.is_ok());
             assert_eq!(
-                result.unwrap().get_broker_list()[0].0,
+                result.unwrap().get_broker_list().await[0].1 .0,
                 bootstrap_servers[1].to_string()
             );
         }
@@ -422,6 +326,7 @@ mod tests {
             ));
         }
 
+        // TODO: Minor: This test fails on windows with standard config - connecting to 255.255.255.0 results in NetworkUnreachable error  
         #[tokio::test(start_paused = true)]
         async fn handles_timeout_on_connect_operation() {
             setup_tracing();
@@ -453,6 +358,8 @@ mod tests {
                 Err(ClusterControllerCreationError::OutOfConnectionAttempts(1))
             ));
         }
+        
+        // TODO: Minor: This test fails on windows with default settings - connections on 127.0.0.2 are rejected(windows thing or firewall related)
         #[tokio::test]
         async fn handles_rejection_of_tcp_connection() {
             setup_tracing();
