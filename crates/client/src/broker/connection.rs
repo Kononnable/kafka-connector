@@ -20,11 +20,9 @@ use tracing::instrument;
 pub(crate) enum BrokerConnectionInitializationError {
     #[error("Error encountered during network communication. {0}")]
     NetworkError(std::io::Error),
-    #[error("Broker did not respond within specified time")]
-    ApiCallTimeoutReached,
     #[error("Failed to connect with the broker. {0}")]
     ConnectionError(std::io::Error),
-    #[error("Connection not established within specified time")]
+    #[error("Failed to initialize broker connection within specified time")]
     ConnectionTimeoutReached,
 }
 
@@ -108,55 +106,52 @@ pub(crate) async fn fetch_initial_broker_list_from_broker(
     options: &ClusterControllerOptions,
     address: impl ToSocketAddrs + Debug,
 ) -> Result<(BrokerConnection, MetadataResponse), BrokerConnectionInitializationError> {
-    let stream = timeout(options.connection_timeout, TcpStream::connect(address))
-        .await
-        .map_err(|_| BrokerConnectionInitializationError::ConnectionTimeoutReached)?
-        .map_err(BrokerConnectionInitializationError::ConnectionError)?;
+    timeout(options.connection_timeout, async {
+        let stream = TcpStream::connect(address)
+            .await
+            .map_err(BrokerConnectionInitializationError::ConnectionError)?;
 
-    let buffer = BytesMut::with_capacity(1_024); // TODO: Size
-    let header = RequestHeader {
-        client_id: options.client_name.to_owned(),
-        ..Default::default()
-    };
+        let buffer = BytesMut::with_capacity(1_024); // TODO: Size
+        let header = RequestHeader {
+            client_id: options.client_name.to_owned(),
+            ..Default::default()
+        };
 
-    let mut connection = BrokerConnection {
-        buffer,
-        stream,
-        header,
-    };
+        let mut connection = BrokerConnection {
+            buffer,
+            stream,
+            header,
+        };
 
-    let api_versions_response = call_api_inline(
-        &mut connection,
-        ApiVersionsRequest::default(),
-        ApiVersionsRequest::get_min_supported_version(),
-        options,
-    )
-    .await?;
+        let api_versions_response = call_api_inline(
+            &mut connection,
+            ApiVersionsRequest::default(),
+            ApiVersionsRequest::get_min_supported_version(),
+        )
+        .await?;
 
-    let mut metadata_request_version = ApiVersion(
-        api_versions_response
-            .api_keys
-            .get(&ApiVersionsResponseKeyKey {
-                index: *MetadataRequest::get_api_key(),
-            })
-            .expect("Server should support metadata requests")
-            .max_version,
-    );
-    if metadata_request_version > MetadataRequest::get_max_supported_version() {
-        metadata_request_version = MetadataRequest::get_max_supported_version();
-    }
-    let metadata_request = MetadataRequest {
-        topics: Some(vec![]),
-        allow_auto_topic_creation: false,
-    };
-    let metadata = call_api_inline(
-        &mut connection,
-        metadata_request,
-        metadata_request_version,
-        options,
-    )
-    .await?;
-    Ok((connection, metadata))
+        let mut metadata_request_version = ApiVersion(
+            api_versions_response
+                .api_keys
+                .get(&ApiVersionsResponseKeyKey {
+                    index: *MetadataRequest::get_api_key(),
+                })
+                .expect("Server should support metadata requests")
+                .max_version,
+        );
+        if metadata_request_version > MetadataRequest::get_max_supported_version() {
+            metadata_request_version = MetadataRequest::get_max_supported_version();
+        }
+        let metadata_request = MetadataRequest {
+            topics: Some(vec![]),
+            allow_auto_topic_creation: false,
+        };
+        let metadata =
+            call_api_inline(&mut connection, metadata_request, metadata_request_version).await?;
+        Ok((connection, metadata))
+    })
+    .await
+    .map_err(|_| BrokerConnectionInitializationError::ConnectionTimeoutReached)?
 }
 
 /// Used only for initial cluster metadata fetch, outside of that `BrokerController` is solely responsible for direct communication with kafka brokers
@@ -165,29 +160,24 @@ async fn call_api_inline<R: ApiRequest>(
     mut connection: &mut BrokerConnection,
     request: R,
     version: ApiVersion,
-    options: &ClusterControllerOptions,
 ) -> Result<R::Response, BrokerConnectionInitializationError> {
-    timeout(options.request_timeout, async {
-        request
-            .serialize(version, &mut connection.buffer)
-            .expect("Serialization failure during establishing broker connection");
+    request
+        .serialize(version, &mut connection.buffer)
+        .expect("Serialization failure during establishing broker connection");
 
-        let request = connection.buffer.split();
-        let correlation_id = connection
-            .send(R::get_api_key(), version, request)
-            .await
-            .map_err(map_error_inline)?;
-        loop {
-            if let Some(result) = connection.try_recv().await {
-                let (header, mut response) = result.map_err(map_error_inline)?;
-                if header.correlation_id == correlation_id {
-                    break Ok(R::Response::deserialize(version, &mut response));
-                }
+    let request = connection.buffer.split();
+    let correlation_id = connection
+        .send(R::get_api_key(), version, request)
+        .await
+        .map_err(map_error_inline)?;
+    loop {
+        if let Some(result) = connection.try_recv().await {
+            let (header, mut response) = result.map_err(map_error_inline)?;
+            if header.correlation_id == correlation_id {
+                break Ok(R::Response::deserialize(version, &mut response));
             }
         }
-    })
-    .await
-    .map_err(|_| BrokerConnectionInitializationError::ApiCallTimeoutReached)?
+    }
 }
 fn map_error_inline(value: ApiCallError) -> BrokerConnectionInitializationError {
     match value {

@@ -329,7 +329,7 @@ mod tests {
 
         // TODO: Minor: This test fails on windows with standard config - connecting to 255.255.255.0 results in NetworkUnreachable error
         #[tokio::test(start_paused = true)]
-        async fn handles_timeout_on_connect_operation() {
+        async fn handles_timeout_during_connect_operation() {
             setup_tracing();
 
             let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -393,7 +393,7 @@ mod tests {
         }
 
         #[tokio::test(start_paused = true)]
-        async fn handles_timeout_on_api_call() {
+        async fn handles_timeout_during_metadata_initialization() {
             setup_tracing();
 
             let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -404,7 +404,7 @@ mod tests {
                 bootstrap_servers,
                 ClusterControllerOptions {
                     connection_retires: 0,
-                    request_timeout: Duration::from_millis(29_000),
+                    connection_timeout: Duration::from_millis(29_000),
                     ..Default::default()
                 },
             )
