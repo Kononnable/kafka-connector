@@ -11,11 +11,13 @@ use tracing::{error, instrument};
 
 #[non_exhaustive]
 #[derive(Debug, DeriveError)]
-pub enum ApiCallError {
+pub(crate) enum ApiCallError {
     #[error("Broker connection closed before api response was received")]
     BrokerConnectionClosing,
-    #[error("Broker communication error: {0}")]
-    IoError(std::io::Error),
+    #[error("Error encountered during network communication. {0}")]
+    IoError(#[from] std::io::Error),
+    #[error("Serialization error {0}")]
+    SerializationError(#[from] kafka_connector_protocol::SerializationError),
 }
 
 #[derive(Copy, Clone, Debug)]

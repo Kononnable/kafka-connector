@@ -28,15 +28,6 @@ pub(crate) enum BrokerConnectionInitializationError {
     ConnectionTimeoutReached,
 }
 
-#[non_exhaustive]
-#[derive(Debug, DeriveError)]
-pub(crate) enum SendRequestError {
-    #[error("Error encountered during network communication. {0}")]
-    NetworkError(#[from] std::io::Error),
-    #[error("Serialization error {0}")]
-    SerializationError(#[from] kafka_connector_protocol::SerializationError),
-}
-
 // TODO: Proper documentation (whole file)
 
 // TODO: Rename?
@@ -82,8 +73,9 @@ impl BrokerConnection {
             let resp_len = i32::from_be_bytes((&self.buffer[0..4]).try_into().unwrap()) as usize;
             if self.buffer.len() >= resp_len + 4 {
                 let _ = self.buffer.split_to(4);
-                let header = ResponseHeader::deserialize(ApiVersion(0), &mut self.buffer);
-                return Some(Ok((header, self.buffer.split_to(resp_len))));
+                let mut resp = self.buffer.split_to(resp_len);
+                let header = ResponseHeader::deserialize(ApiVersion(0), &mut resp);
+                return Some(Ok((header, resp)));
             }
         }
         None
@@ -94,12 +86,12 @@ impl BrokerConnection {
         api_key: ApiKey,
         api_version: ApiVersion,
         buf: BytesMut,
-    ) -> Result<i32, SendRequestError> {
+    ) -> Result<i32, ApiCallError> {
         self.header.request_api_key = *api_key;
         self.header.request_api_version = *api_version;
         self.header.correlation_id += 1;
 
-        self.header.serialize(api_version, &mut self.buffer)?;
+        self.header.serialize(ApiVersion(0), &mut self.buffer)?;
         let request_len = (self.buffer.len() + buf.len()) as i32;
         self.stream.write_all(&request_len.to_be_bytes()).await?;
         self.stream.write_all(&self.buffer).await?;
@@ -137,8 +129,9 @@ pub(crate) async fn fetch_initial_broker_list_from_broker(
         &mut connection,
         ApiVersionsRequest::default(),
         ApiVersionsRequest::get_min_supported_version(),
+        options,
     )
-    .await;
+    .await?;
 
     let mut metadata_request_version = ApiVersion(
         api_versions_response
@@ -156,34 +149,57 @@ pub(crate) async fn fetch_initial_broker_list_from_broker(
         topics: Some(vec![]),
         allow_auto_topic_creation: false,
     };
-    let metadata =
-        call_api_inline(&mut connection, metadata_request, metadata_request_version).await;
+    let metadata = call_api_inline(
+        &mut connection,
+        metadata_request,
+        metadata_request_version,
+        options,
+    )
+    .await?;
     Ok((connection, metadata))
 }
 
-// TODO: Error handling
-// TODO: Timeout
 /// Used only for initial cluster metadata fetch, outside of that `BrokerController` is solely responsible for direct communication with kafka brokers
+/// If it fails(e.g. timeout) whole connection needs to be reseted
 async fn call_api_inline<R: ApiRequest>(
     mut connection: &mut BrokerConnection,
     request: R,
     version: ApiVersion,
-) -> R::Response {
-    request
-        .serialize(version, &mut connection.buffer)
-        .expect("TODO");
+    options: &ClusterControllerOptions,
+) -> Result<R::Response, BrokerConnectionInitializationError> {
+    timeout(options.request_timeout, async {
+        request
+            .serialize(version, &mut connection.buffer)
+            .expect("Serialization failure during establishing broker connection");
 
-    let request = connection.buffer.split();
-    let correlation_id = connection
-        .send(ApiVersionsRequest::get_api_key(), version, request)
-        .await
-        .expect("TODO");
-    loop {
-        if let Some(result) = connection.try_recv().await {
-            let (header, mut response) = result.expect("TODO:");
-            if header.correlation_id == correlation_id {
-                break R::Response::deserialize(version, &mut response);
+        let request = connection.buffer.split();
+        let correlation_id = connection
+            .send(R::get_api_key(), version, request)
+            .await
+            .map_err(map_error_inline)?;
+        loop {
+            if let Some(result) = connection.try_recv().await {
+                let (header, mut response) = result.map_err(map_error_inline)?;
+                if header.correlation_id == correlation_id {
+                    break Ok(R::Response::deserialize(version, &mut response));
+                }
             }
+        }
+    })
+    .await
+    .map_err(|_| BrokerConnectionInitializationError::ApiCallTimeoutReached)?
+}
+fn map_error_inline(value: ApiCallError) -> BrokerConnectionInitializationError {
+    match value {
+        ApiCallError::BrokerConnectionClosing => {
+            BrokerConnectionInitializationError::NetworkError(std::io::Error::new(
+                std::io::ErrorKind::ConnectionAborted,
+                "Connection closed during initialization",
+            ))
+        }
+        ApiCallError::IoError(e) => BrokerConnectionInitializationError::NetworkError(e),
+        ApiCallError::SerializationError(e) => {
+            panic!("Serialization failure during broker connection. {:?}", e)
         }
     }
 }

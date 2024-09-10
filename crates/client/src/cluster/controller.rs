@@ -163,20 +163,25 @@ mod tests {
             }
             connection.read_exact(&mut buffer).await.unwrap();
 
-            let request_header = RequestHeader::deserialize(0, &mut buffer);
-            assert_eq!(request_header.request_api_key, R::Request::get_api_key());
-            let _ = R::Request::deserialize(request_header.request_api_version, &mut buffer);
+            let request_header = RequestHeader::deserialize(ApiVersion(0), &mut buffer);
+            assert_eq!(
+                ApiKey(request_header.request_api_key),
+                R::Request::get_api_key()
+            );
+            let _ = R::Request::deserialize(
+                ApiVersion(request_header.request_api_version),
+                &mut buffer,
+            );
 
             let response_header = ResponseHeader {
                 correlation_id: request_header.correlation_id,
             };
+            response_header
+                .serialize(ApiVersion(0), &mut buffer)
+                .expect("Failed to serialize initial Api Version Response Header");
             response
-                .serialize(
-                    request_header.request_api_version,
-                    &mut buffer,
-                    &response_header,
-                )
-                .expect("Failed to serialize initial Api Request");
+                .serialize(ApiVersion(request_header.request_api_version), &mut buffer)
+                .expect("Failed to serialize initial Api Version Response");
             let len = buffer.len() as i32;
             connection.write_all(&len.to_be_bytes()).await.unwrap();
             connection.write_all(&buffer).await.unwrap();
@@ -188,11 +193,11 @@ mod tests {
             let mut api_versions_response = ApiVersionsResponse::default();
             api_versions_response.api_keys.insert(
                 ApiVersionsResponseKeyKey {
-                    index: MetadataRequest::get_api_key(),
+                    index: MetadataRequest::get_api_key().0,
                 },
                 ApiVersionsResponseKey {
-                    min_version: ApiVersionsResponse::get_min_supported_version(),
-                    max_version: ApiVersionsResponse::get_max_supported_version(),
+                    min_version: ApiVersionsResponse::get_min_supported_version().0,
+                    max_version: ApiVersionsResponse::get_max_supported_version().0,
                 },
             );
             send_server_response(&mut connection, api_versions_response).await;

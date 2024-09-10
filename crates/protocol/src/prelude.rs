@@ -44,7 +44,7 @@ pub enum SerializationError {
     NonIgnorableFieldSet(&'static str, i16, &'static str),
 }
 
-#[derive(PartialOrd, PartialEq, Copy, Clone)]
+#[derive(PartialOrd, PartialEq, Copy, Clone, Eq, Ord, Debug)]
 pub struct ApiVersion(pub i16);
 impl Deref for ApiVersion {
     type Target = i16;
@@ -54,7 +54,7 @@ impl Deref for ApiVersion {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct ApiKey(pub i16);
 
 impl Deref for ApiKey {
