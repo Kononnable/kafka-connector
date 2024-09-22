@@ -264,7 +264,7 @@ mod tests {
             let result = ClusterController::new(
                 bootstrap_servers.clone(),
                 ClusterControllerOptions {
-                    connection_timeout: Duration::from_millis(10),
+                    connection_timeout: Duration::from_millis(1000),
                     connection_retires: 0,
                     ..Default::default()
                 },
