@@ -3,10 +3,10 @@ use crate::{
     cluster::options::ClusterControllerOptions,
 };
 use bytes::BytesMut;
-use kafka_connector_protocol::{ApiKey, ApiVersion};
+use kafka_connector_protocol::{ApiKey, ApiRequest, ApiResponse, ApiVersion};
 use std::{future::Future, sync::Arc};
 use thiserror::Error as DeriveError;
-use tokio::sync::{mpsc, mpsc::UnboundedSender, oneshot};
+use tokio::sync::{mpsc, oneshot};
 use tracing::{error, instrument};
 
 #[non_exhaustive]
@@ -35,9 +35,9 @@ pub(super) struct ApiRequestMessage {
 
 pub struct BrokerController {
     address: String,
-    loop_tx: UnboundedSender<BrokerLoopSignal>,
+    loop_tx: mpsc::UnboundedSender<BrokerLoopSignal>,
     // TODO: Change type (make alias or more likely extract to struct)
-    request_tx: mpsc::Sender<ApiRequestMessage>,
+    request_tx: mpsc::UnboundedSender<ApiRequestMessage>,
     node_id: i32,
 }
 
@@ -49,7 +49,7 @@ impl BrokerController {
         node_id: i32,
     ) -> BrokerController {
         let (loop_tx, loop_rx) = mpsc::unbounded_channel();
-        let (request_tx, request_rx) = mpsc::channel(10); // TODO: Size from options
+        let (request_tx, request_rx) = mpsc::unbounded_channel();
         tokio::spawn(broker_loop(
             address.clone(),
             loop_rx,
@@ -74,29 +74,36 @@ impl BrokerController {
         rx.await.expect("Broker loop channel should be open")
     }
 
-    // TODO: Document when it may block
-    // TODO: Should there be double future (async + returned future) - more robust - or just one - simpler api
-    #[allow(clippy::async_yields_async)]
     #[instrument(level = "debug", skip_all)]
-    pub async fn api_call(
+    pub fn make_api_call<R: ApiRequest>(
         &self,
-        key: ApiKey,
         version: ApiVersion,
-        request: BytesMut,
-    ) -> impl Future<Output = Result<BytesMut, ApiCallError>> {
+        request: R,
+    ) -> impl Future<Output = Result<R::Response, ApiCallError>> {
         let (tx, rx) = oneshot::channel();
-        self.request_tx
-            .send(ApiRequestMessage {
-                response_sender: tx,
-                api_key: key,
-                api_version: version,
-                request: request,
-            })
-            .await
-            .expect("Broker loop channel should be open");
-        async {
-            rx.await
-                .map_err(|_| ApiCallError::BrokerConnectionClosing)?
+        // TODO: reuse bytes, set the size
+        let mut serialized_request = BytesMut::with_capacity(1_024);
+        let serialization_result = request
+            .serialize(version, &mut serialized_request)
+            .map(|_| {
+                self.request_tx
+                    .send(ApiRequestMessage {
+                        response_sender: tx,
+                        api_key: R::get_api_key(),
+                        api_version: version,
+                        request: serialized_request,
+                    })
+                    .expect("Broker loop channel should be open");
+            });
+
+        async move {
+            if let Err(err) = serialization_result {
+                Result::<R::Response, ApiCallError>::Err(ApiCallError::SerializationError(err))
+            } else {
+                rx.await
+                    .map_err(|_| ApiCallError::BrokerConnectionClosing)?
+                    .map(|mut resp| R::Response::deserialize(version, &mut resp))
+            }
         }
     }
 

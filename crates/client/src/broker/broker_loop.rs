@@ -7,10 +7,7 @@ use crate::{
 };
 use rustc_hash::FxBuildHasher;
 use std::{collections::HashMap, sync::Arc};
-use tokio::sync::{
-    mpsc::{Receiver, UnboundedReceiver},
-    oneshot,
-};
+use tokio::sync::{mpsc, oneshot};
 use tracing::{debug, instrument};
 
 #[derive(Debug)]
@@ -21,13 +18,14 @@ pub enum BrokerLoopSignal {
 #[instrument(level = "debug", skip_all)]
 pub async fn broker_loop(
     address: String,
-    mut signal_receiver: UnboundedReceiver<BrokerLoopSignal>,
-    mut api_request_receiver: Receiver<ApiRequestMessage>,
+    mut signal_receiver: mpsc::UnboundedReceiver<BrokerLoopSignal>,
+    mut api_request_receiver: mpsc::UnboundedReceiver<ApiRequestMessage>,
     options: Arc<ClusterControllerOptions>,
     node_id: i32,
 ) {
     // TODO: Proper handle of timeouts
     // TODO: Proper handle of retries
+    // TODO: Where to handle api calls in transit limit(?)
 
     // TODO: Set capacity to max requests in transit
     let mut calls_in_transit = HashMap::with_capacity_and_hasher(10, FxBuildHasher);

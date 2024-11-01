@@ -2,7 +2,6 @@ use crate::{
     broker::controller::{BrokerController, BrokerControllerStatus},
     cluster::{error::ClusterControllerCreationError, options::ClusterControllerOptions},
 };
-use bytes::BytesMut;
 use indexmap::IndexMap;
 use std::{fmt::Debug, sync::Arc};
 use tokio::net::ToSocketAddrs;
@@ -10,7 +9,9 @@ use tokio_stream as stream;
 use tokio_stream::StreamExt;
 
 use crate::broker::connection::fetch_initial_broker_list_from_broker;
-use kafka_connector_protocol::{metadata_response::MetadataResponse, ApiKey, ApiVersion};
+use kafka_connector_protocol::{
+    metadata_response::MetadataResponse, ApiKey, ApiRequest, ApiVersion,
+};
 use tracing::{debug, instrument};
 
 /// Main entrypoint for communication with Kafka cluster.
@@ -100,18 +101,16 @@ impl ClusterController {
             .await
     }
 
-    // TODO: Document when it may block
-    // TODO: Change to generic
-    pub async fn api_call(
+    // TODO: async with return R:Response, or sync with return Future (?)
+    pub async fn make_api_call<R: ApiRequest>(
         &self,
         broker_id: i32,
-        key: ApiKey,
         version: ApiVersion,
-        request: BytesMut,
-    ) -> BytesMut {
+        request: R,
+    ) -> R::Response {
         // TODO: Error handling
         let broker = self.broker_list.get(&broker_id).unwrap();
-        broker.api_call(key, version, request).await.await.unwrap()
+        broker.make_api_call(version, request).await.unwrap()
     }
 }
 
