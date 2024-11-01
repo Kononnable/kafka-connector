@@ -12,6 +12,7 @@ version = "0.1.0"
 
 [dependencies]
 bytes = "1.6.0"
+derivative = "2.2.0"
 indexmap = "2.2.5"
 kafka-connector-protocol = { version = "0.1.0", path = "./../protocol" }
 thiserror = "1.0.56"
