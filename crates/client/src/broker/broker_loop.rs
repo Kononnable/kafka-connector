@@ -1,12 +1,11 @@
 use crate::{
     broker::{
         connection::fetch_initial_broker_list_from_broker,
-        controller::{ApiCallError, BrokerControllerStatus},
+        controller::{ApiRequestMessage, BrokerControllerStatus},
     },
     cluster::options::ClusterControllerOptions,
 };
-use bytes::BytesMut;
-use kafka_connector_protocol::{ApiKey, ApiVersion};
+use rustc_hash::FxBuildHasher;
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::{
     mpsc::{Receiver, UnboundedReceiver},
@@ -23,20 +22,16 @@ pub enum BrokerLoopSignal {
 pub async fn broker_loop(
     address: String,
     mut signal_receiver: UnboundedReceiver<BrokerLoopSignal>,
-    mut api_request_receiver: Receiver<(
-        oneshot::Sender<Result<BytesMut, ApiCallError>>,
-        ApiKey,
-        ApiVersion,
-        BytesMut,
-    )>,
+    mut api_request_receiver: Receiver<ApiRequestMessage>,
     options: Arc<ClusterControllerOptions>,
     node_id: i32,
 ) {
     // TODO: Proper handle of timeouts
     // TODO: Proper handle of retries
 
-    // TODO: Check if there is a better collection
-    let mut calls_in_transit = HashMap::new();
+    // TODO: Set capacity to max requests in transit
+    let mut calls_in_transit = HashMap::with_capacity_and_hasher(10, FxBuildHasher);
+
     loop {
         let options = options.clone();
         let address = address.clone();
@@ -87,9 +82,9 @@ pub async fn broker_loop(
                             debug!(node_id, "BrokerController main loop is closing");
                             return;
                         }
-                        Some((response_channel, api_key, api_version, request)) => {
+                        Some(ApiRequestMessage{response_sender, api_key, api_version, request}) => {
                             if let Ok(correlation_id) = connection.send(api_key, api_version, request).await {
-                                calls_in_transit.insert(correlation_id,response_channel);
+                                calls_in_transit.insert(correlation_id,response_sender);
                             } else {
                                 todo_on_tcp_stream_error();
                             }

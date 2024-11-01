@@ -19,6 +19,7 @@ thiserror = "1.0.56"
 tokio = { version = "1.36.0", features = ["net", "io-util", "rt", "sync", "time", "macros"] }
 tokio-stream = "0.1.15"
 tracing = { version = "0.1.40", features = ["log"] }
+rustc-hash = "2.0.0"
 
 [dev-dependencies]
 tracing-subscriber = "0.3.18"

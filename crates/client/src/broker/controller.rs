@@ -25,17 +25,19 @@ pub enum BrokerControllerStatus {
     Connecting,
     Connected,
 }
+// TODO: Extract to separate file?
+pub(super) struct ApiRequestMessage {
+    pub response_sender: oneshot::Sender<Result<BytesMut, ApiCallError>>,
+    pub api_key: ApiKey,
+    pub api_version: ApiVersion,
+    pub request: BytesMut,
+}
 
 pub struct BrokerController {
     address: String,
     loop_tx: UnboundedSender<BrokerLoopSignal>,
     // TODO: Change type (make alias or more likely extract to struct)
-    request_tx: mpsc::Sender<(
-        oneshot::Sender<Result<BytesMut, ApiCallError>>,
-        ApiKey,
-        ApiVersion,
-        BytesMut,
-    )>,
+    request_tx: mpsc::Sender<ApiRequestMessage>,
     node_id: i32,
 }
 
@@ -84,7 +86,12 @@ impl BrokerController {
     ) -> impl Future<Output = Result<BytesMut, ApiCallError>> {
         let (tx, rx) = oneshot::channel();
         self.request_tx
-            .send((tx, key, version, request))
+            .send(ApiRequestMessage {
+                response_sender: tx,
+                api_key: key,
+                api_version: version,
+                request: request,
+            })
             .await
             .expect("Broker loop channel should be open");
         async {
