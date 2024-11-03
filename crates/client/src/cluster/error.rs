@@ -8,3 +8,16 @@ pub enum ClusterControllerCreationError {
     #[error("No connection established within {0} attempts")]
     OutOfConnectionAttempts(u16),
 }
+
+#[non_exhaustive]
+#[derive(Debug, DeriveError)]
+pub enum ApiCallError {
+    #[error("Broker connection closed before api response was received")]
+    BrokerConnectionClosing,
+    #[error("No broker with id {0} found")]
+    BrokerNotFound(i32),
+    #[error("Error encountered during network communication. {0}")]
+    IoError(#[from] std::io::Error),
+    #[error("Serialization error {0}")]
+    SerializationError(#[from] kafka_connector_protocol::SerializationError),
+}

@@ -1,4 +1,4 @@
-use crate::{broker::controller::ApiCallError, cluster::options::ClusterControllerOptions};
+use crate::cluster::{error::ApiCallError, options::ClusterControllerOptions};
 use bytes::BytesMut;
 use kafka_connector_protocol::{
     api_versions_request::ApiVersionsRequest, api_versions_response::ApiVersionsResponseKeyKey,
@@ -29,25 +29,32 @@ pub(crate) enum BrokerConnectionInitializationError {
 // TODO: Proper documentation (whole file)
 
 // TODO: Rename?
-// TODO: remove pub from fields?
 pub(crate) struct BrokerConnection {
-    pub buffer: BytesMut,
-    pub stream: TcpStream,
-    pub header: RequestHeader,
+    buffer: BytesMut,
+    stream: TcpStream,
+    header: RequestHeader,
 }
 
 impl BrokerConnection {
-    // TODO: Docs - cancellation safe
+    pub fn new(buffer: BytesMut, stream: TcpStream, header: RequestHeader) -> BrokerConnection {
+        BrokerConnection {
+            buffer,
+            stream,
+            header,
+        }
+    }
+
+    /// Reads broker response from TCP stream.
+    /// Returns `None` if there is not enough data to read whole response.
+    ///
+    /// This method is cancel safe
     pub async fn try_recv(&mut self) -> Option<Result<(ResponseHeader, BytesMut), ApiCallError>> {
         if let Some(value) = self.try_read_next_response() {
             return Some(value);
         }
-        // TODO: Value from config
-        if self.buffer.capacity() < 100 {
-            // TODO: Value from config, one third of the buffer size?
-            self.buffer.reserve(1024);
+        if self.buffer.capacity() < 4 {
+            self.buffer.reserve(4);
         }
-        // TODO: More advanced logic on reserve(?) so same buffer is reused more often
 
         let read_bytes_len = self.stream.read_buf(&mut self.buffer).await;
         match read_bytes_len {
@@ -74,6 +81,11 @@ impl BrokerConnection {
                 let mut resp = self.buffer.split_to(resp_len);
                 let header = ResponseHeader::deserialize(ApiVersion(0), &mut resp);
                 return Some(Ok((header, resp)));
+            } else {
+                let bytes_missing = resp_len + 4 - self.buffer.len();
+                if self.buffer.capacity() < bytes_missing {
+                    self.buffer.reserve(bytes_missing);
+                }
             }
         }
         None
@@ -117,11 +129,7 @@ pub(crate) async fn fetch_initial_broker_list_from_broker(
             ..Default::default()
         };
 
-        let mut connection = BrokerConnection {
-            buffer,
-            stream,
-            header,
-        };
+        let mut connection = BrokerConnection::new(buffer, stream, header);
 
         let api_versions_response = call_api_inline(
             &mut connection,
@@ -157,7 +165,7 @@ pub(crate) async fn fetch_initial_broker_list_from_broker(
 /// Used only for initial cluster metadata fetch, outside of that `BrokerController` is solely responsible for direct communication with kafka brokers
 /// If it fails(e.g. timeout) whole connection needs to be reseted
 async fn call_api_inline<R: ApiRequest>(
-    mut connection: &mut BrokerConnection,
+    connection: &mut BrokerConnection,
     request: R,
     version: ApiVersion,
 ) -> Result<R::Response, BrokerConnectionInitializationError> {
@@ -190,6 +198,9 @@ fn map_error_inline(value: ApiCallError) -> BrokerConnectionInitializationError 
         ApiCallError::IoError(e) => BrokerConnectionInitializationError::NetworkError(e),
         ApiCallError::SerializationError(e) => {
             panic!("Serialization failure during broker connection. {:?}", e)
+        }
+        ApiCallError::BrokerNotFound(_) => {
+            unreachable!();
         }
     }
 }

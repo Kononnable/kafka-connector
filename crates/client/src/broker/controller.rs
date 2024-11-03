@@ -1,24 +1,12 @@
 use crate::{
     broker::broker_loop::{broker_loop, BrokerLoopSignal},
-    cluster::options::ClusterControllerOptions,
+    cluster::{error::ApiCallError, options::ClusterControllerOptions},
 };
 use bytes::BytesMut;
 use kafka_connector_protocol::{ApiKey, ApiRequest, ApiResponse, ApiVersion};
 use std::{future::Future, sync::Arc};
-use thiserror::Error as DeriveError;
 use tokio::sync::{mpsc, oneshot};
-use tracing::{error, instrument};
-
-#[non_exhaustive]
-#[derive(Debug, DeriveError)]
-pub(crate) enum ApiCallError {
-    #[error("Broker connection closed before api response was received")]
-    BrokerConnectionClosing,
-    #[error("Error encountered during network communication. {0}")]
-    IoError(#[from] std::io::Error),
-    #[error("Serialization error {0}")]
-    SerializationError(#[from] kafka_connector_protocol::SerializationError),
-}
+use tracing::instrument;
 
 #[derive(Copy, Clone, Debug)]
 pub enum BrokerControllerStatus {
@@ -36,9 +24,8 @@ pub(super) struct ApiRequestMessage {
 pub struct BrokerController {
     address: String,
     loop_tx: mpsc::UnboundedSender<BrokerLoopSignal>,
-    // TODO: Change type (make alias or more likely extract to struct)
     request_tx: mpsc::UnboundedSender<ApiRequestMessage>,
-    node_id: i32,
+    _node_id: i32,
 }
 
 impl BrokerController {
@@ -61,7 +48,7 @@ impl BrokerController {
             address,
             loop_tx,
             request_tx,
-            node_id,
+            _node_id: node_id,
         }
     }
 

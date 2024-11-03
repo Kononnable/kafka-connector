@@ -8,7 +8,9 @@ use tokio::net::ToSocketAddrs;
 use tokio_stream as stream;
 use tokio_stream::StreamExt;
 
-use crate::broker::connection::fetch_initial_broker_list_from_broker;
+use crate::{
+    broker::connection::fetch_initial_broker_list_from_broker, cluster::error::ApiCallError,
+};
 use kafka_connector_protocol::{
     metadata_response::MetadataResponse, ApiKey, ApiRequest, ApiVersion,
 };
@@ -101,16 +103,17 @@ impl ClusterController {
             .await
     }
 
-    // TODO: async with return R:Response, or sync with return Future (?)
     pub async fn make_api_call<R: ApiRequest>(
         &self,
         broker_id: i32,
         version: ApiVersion,
         request: R,
-    ) -> R::Response {
-        // TODO: Error handling
-        let broker = self.broker_list.get(&broker_id).unwrap();
-        broker.make_api_call(version, request).await.unwrap()
+    ) -> Result<R::Response, ApiCallError> {
+        self.broker_list
+            .get(&broker_id)
+            .ok_or(ApiCallError::BrokerNotFound(broker_id))?
+            .make_api_call(version, request)
+            .await
     }
 }
 
