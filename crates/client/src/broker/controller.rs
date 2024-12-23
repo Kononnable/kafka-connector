@@ -4,7 +4,10 @@ use crate::{
 };
 use bytes::BytesMut;
 use kafka_connector_protocol::{ApiKey, ApiRequest, ApiResponse, ApiVersion};
-use std::{future::Future, sync::Arc};
+use std::{
+    future::Future,
+    sync::{Arc, Mutex},
+};
 use tokio::sync::{mpsc, oneshot};
 use tracing::instrument;
 
@@ -25,6 +28,8 @@ pub struct BrokerController {
     address: String,
     loop_tx: mpsc::UnboundedSender<BrokerLoopSignal>,
     request_tx: mpsc::UnboundedSender<ApiRequestMessage>,
+    buffer: Mutex<BytesMut>,
+    options: Arc<ClusterControllerOptions>,
     _node_id: i32,
 }
 
@@ -32,7 +37,7 @@ impl BrokerController {
     #[instrument(level = "debug")]
     pub fn new(
         address: String,
-        options: Arc<ClusterControllerOptions>,
+        options: &Arc<ClusterControllerOptions>,
         node_id: i32,
     ) -> BrokerController {
         let (loop_tx, loop_rx) = mpsc::unbounded_channel();
@@ -41,13 +46,15 @@ impl BrokerController {
             address.clone(),
             loop_rx,
             request_rx,
-            options,
+            options.clone(),
             node_id,
         ));
         BrokerController {
             address,
             loop_tx,
             request_tx,
+            buffer: Mutex::new(BytesMut::with_capacity(options.buffer_size)),
+            options: options.clone(),
             _node_id: node_id,
         }
     }
@@ -68,20 +75,22 @@ impl BrokerController {
         request: R,
     ) -> impl Future<Output = Result<R::Response, ApiCallError>> {
         let (tx, rx) = oneshot::channel();
-        // TODO: reuse bytes, set the size
-        let mut serialized_request = BytesMut::with_capacity(1_024);
-        let serialization_result = request
-            .serialize(version, &mut serialized_request)
-            .map(|_| {
-                self.request_tx
-                    .send(ApiRequestMessage {
-                        response_sender: tx,
-                        api_key: R::get_api_key(),
-                        api_version: version,
-                        request: serialized_request,
-                    })
-                    .expect("Broker loop channel should be open");
-            });
+
+        let mut buffer = self.buffer.lock().expect("Poisoned lock");
+        if buffer.capacity() < self.options.buffer_size {
+            buffer.reserve(self.options.buffer_size);
+        }
+        let serialization_result = request.serialize(version, &mut buffer).map(|_| {
+            let request_buf = &mut (*buffer);
+            self.request_tx
+                .send(ApiRequestMessage {
+                    response_sender: tx,
+                    api_key: R::get_api_key(),
+                    api_version: version,
+                    request: request_buf.split_to(request_buf.len()),
+                })
+                .expect("Broker loop channel should be open");
+        });
 
         async move {
             if let Err(err) = serialization_result {
@@ -98,5 +107,3 @@ impl BrokerController {
         &self.address
     }
 }
-
-// TODO: Tests

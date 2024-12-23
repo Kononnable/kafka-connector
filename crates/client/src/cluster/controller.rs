@@ -39,11 +39,7 @@ impl ClusterController {
             .map(|(k, v)| {
                 (
                     k.node_id,
-                    BrokerController::new(
-                        format!("{}:{}", v.host, v.port),
-                        options.clone(),
-                        k.node_id,
-                    ),
+                    BrokerController::new(format!("{}:{}", v.host, v.port), &options, k.node_id),
                 )
             })
             .collect();
