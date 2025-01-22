@@ -11,9 +11,7 @@ use tokio_stream::StreamExt;
 use crate::{
     broker::connection::fetch_initial_broker_list_from_broker, cluster::error::ApiCallError,
 };
-use kafka_connector_protocol::{
-    metadata_response::MetadataResponse, ApiKey, ApiRequest, ApiVersion,
-};
+use kafka_connector_protocol::{metadata_response::MetadataResponse, ApiRequest, ApiVersion};
 use tracing::{debug, instrument};
 
 /// Main entrypoint for communication with Kafka cluster.
@@ -128,7 +126,7 @@ mod tests {
             metadata_response::{MetadataResponseBroker, MetadataResponseBrokerKey},
             request_header::RequestHeader,
             response_header::ResponseHeader,
-            ApiRequest, ApiResponse,
+            ApiKey, ApiRequest, ApiResponse,
         };
         use std::{ops::Sub, time::Duration};
         use tokio::{
@@ -136,19 +134,7 @@ mod tests {
             net::{TcpListener, TcpStream},
             time::Instant,
         };
-        use tracing::Level;
-        use tracing_subscriber::FmtSubscriber;
 
-        // TODO: Remove from start of every test(before all)
-        fn setup_tracing() {
-            let my_subscriber = FmtSubscriber::builder()
-                .with_max_level(Level::DEBUG)
-                .with_test_writer()
-                .compact()
-                .finish();
-            let _ = tracing::subscriber::set_global_default(my_subscriber);
-            // .expect("setting tracing default failed");
-        }
         async fn send_server_response<R: ApiResponse>(connection: &mut TcpStream, response: R) {
             let mut buffer = BytesMut::with_capacity(1_024);
 
@@ -212,10 +198,8 @@ mod tests {
             send_server_response(&mut connection, metadata_response).await;
         }
 
-        #[tokio::test]
+        #[test_log::test(tokio::test)]
         async fn errors_if_bootstrap_servers_is_empty() {
-            setup_tracing();
-
             let timeout_start = Instant::now();
             let result = ClusterController::new(Vec::<String>::new(), Default::default()).await;
             let connection_delay = Instant::now().sub(timeout_start);
@@ -227,9 +211,8 @@ mod tests {
                 Err(ClusterControllerCreationError::NoClusterAddressFound)
             ));
         }
-        #[tokio::test]
+        #[test_log::test(tokio::test)]
         async fn connects_and_initializes_broker_clients_successfully() {
-            setup_tracing();
             let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
             let bootstrap_servers = vec![server.local_addr().unwrap()];
 
@@ -242,9 +225,8 @@ mod tests {
             assert_eq!(result.unwrap().get_broker_list().await.len(), 1);
         }
 
-        #[tokio::test]
+        #[test_log::test(tokio::test)]
         async fn connects_first_available_broker() {
-            setup_tracing();
             let first_server = TcpListener::bind("127.0.0.1:0").await.unwrap();
             let second_server = TcpListener::bind("127.0.0.2:0").await.unwrap();
             let bootstrap_servers = vec![
@@ -275,10 +257,8 @@ mod tests {
             );
         }
 
-        #[tokio::test(start_paused = true)]
+        #[test_log::test(tokio::test(start_paused = true))]
         async fn retries_with_specified_amount_of_times_and_delay() {
-            setup_tracing();
-
             let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
             let bootstrap_servers = vec![server.local_addr().unwrap()];
 
@@ -326,10 +306,8 @@ mod tests {
         }
 
         // TODO: Minor: This test fails on windows with standard config - connecting to 255.255.255.0 results in NetworkUnreachable error
-        #[tokio::test(start_paused = true)]
+        #[test_log::test(tokio::test(start_paused = true))]
         async fn handles_timeout_during_connect_operation() {
-            setup_tracing();
-
             let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
             let mut bootstrap_servers = vec![server.local_addr().unwrap()];
             //255.255.255.0 is a class E address, reserved for research, so it can act as a black hole
@@ -359,10 +337,8 @@ mod tests {
         }
 
         // TODO: Minor: This test fails on windows with default settings - connections on 127.0.0.2 are rejected(windows thing or firewall related)
-        #[tokio::test]
+        #[test_log::test(tokio::test)]
         async fn handles_rejection_of_tcp_connection() {
-            setup_tracing();
-
             let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
             let mut bootstrap_servers = vec![server.local_addr().unwrap()];
             // 127.0.0.2 is a loopback address
@@ -390,10 +366,8 @@ mod tests {
             ));
         }
 
-        #[tokio::test(start_paused = true)]
+        #[test_log::test(tokio::test(start_paused = true))]
         async fn handles_timeout_during_metadata_initialization() {
-            setup_tracing();
-
             let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
             let bootstrap_servers = vec![server.local_addr().unwrap()];
 
@@ -420,10 +394,8 @@ mod tests {
             ));
         }
 
-        #[tokio::test]
+        #[test_log::test(tokio::test)]
         async fn errors_if_connection_closed_during_communication() {
-            setup_tracing();
-
             let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
             let bootstrap_servers = vec![server.local_addr().unwrap()];
 

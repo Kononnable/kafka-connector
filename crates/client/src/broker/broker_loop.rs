@@ -41,7 +41,7 @@ pub async fn broker_loop(
                 async move { fetch_initial_broker_list_from_broker(&options, &address).await },
             );
 
-        let (mut connection, metadata) = loop {
+        let (mut connection, _metadata) = loop {
             tokio::select! {
                 signal = signal_receiver.recv() => {
                     match signal {
