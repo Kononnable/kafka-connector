@@ -25,9 +25,11 @@ pub async fn broker_loop(
 ) {
     // TODO: Proper handle of timeouts
     // TODO: Proper handle of retries
+    // TODO: any cancel cannot be done mid-send (sending request partially will break a connection)
     // TODO: Where to handle api calls in transit limit(?)
 
-    let mut calls_in_transit = HashMap::with_capacity_and_hasher(options.max_requests_per_connection, FxBuildHasher);
+    let mut calls_in_transit =
+        HashMap::with_capacity_and_hasher(options.max_requests_per_connection, FxBuildHasher);
 
     loop {
         let options = options.clone();

@@ -64,6 +64,7 @@ impl BrokerConnection {
                 }
             }
             Err(err) => {
+                // TODO: if ErrorKind::Interrupted - retry (or recursive call?)
                 return Some(Err(ApiCallError::IoError(err)));
             }
         }
@@ -91,6 +92,7 @@ impl BrokerConnection {
         None
     }
 
+    // TODO: docs + mention not cancellation safety
     pub async fn send(
         &mut self,
         api_key: ApiKey,
@@ -123,7 +125,7 @@ pub(crate) async fn fetch_initial_broker_list_from_broker(
             .await
             .map_err(BrokerConnectionInitializationError::ConnectionError)?;
 
-        let buffer = BytesMut::with_capacity(options.buffer_size); 
+        let buffer = BytesMut::with_capacity(options.buffer_size);
         let header = RequestHeader {
             client_id: options.client_name.to_owned(),
             ..Default::default()
@@ -196,9 +198,11 @@ fn map_error_inline(value: ApiCallError) -> BrokerConnectionInitializationError 
             ))
         }
         ApiCallError::IoError(e) => BrokerConnectionInitializationError::NetworkError(e),
+        // TODO: check if needed
         ApiCallError::SerializationError(e) => {
             panic!("Serialization failure during broker connection. {:?}", e)
         }
+        // TODO: check if needed
         ApiCallError::BrokerNotFound(_) => {
             unreachable!();
         }
