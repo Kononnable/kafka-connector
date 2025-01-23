@@ -68,6 +68,7 @@ impl BrokerController {
         rx.await.expect("Broker loop channel should be open")
     }
 
+    // TODO: Test
     #[instrument(level = "debug", skip_all)]
     pub fn make_api_call<R: ApiRequest>(
         &self,
@@ -97,7 +98,7 @@ impl BrokerController {
                 Result::<R::Response, ApiCallError>::Err(ApiCallError::SerializationError(err))
             } else {
                 rx.await
-                    .map_err(|_| ApiCallError::BrokerConnectionClosing)?
+                    .map_err(|_| ApiCallError::BrokerConnectionClosed)?
                     .map(|mut resp| R::Response::deserialize(version, &mut resp))
             }
         }

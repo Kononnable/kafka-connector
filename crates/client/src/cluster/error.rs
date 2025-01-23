@@ -13,7 +13,7 @@ pub enum ClusterControllerCreationError {
 #[derive(Debug, DeriveError)]
 pub enum ApiCallError {
     #[error("Broker connection closed before api response was received")]
-    BrokerConnectionClosing, // TODO: Closing or closed?
+    BrokerConnectionClosed,
     #[error("No broker with id {0} found")]
     BrokerNotFound(i32),
     #[error("Error encountered during network communication. {0}")]

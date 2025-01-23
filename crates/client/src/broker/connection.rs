@@ -60,7 +60,7 @@ impl BrokerConnection {
         match read_bytes_len {
             Ok(read_bytes_len) => {
                 if read_bytes_len == 0 {
-                    return Some(Err(ApiCallError::BrokerConnectionClosing));
+                    return Some(Err(ApiCallError::BrokerConnectionClosed));
                 }
             }
             Err(err) => {
@@ -191,7 +191,7 @@ async fn call_api_inline<R: ApiRequest>(
 }
 fn map_error_inline(value: ApiCallError) -> BrokerConnectionInitializationError {
     match value {
-        ApiCallError::BrokerConnectionClosing => {
+        ApiCallError::BrokerConnectionClosed => {
             BrokerConnectionInitializationError::NetworkError(std::io::Error::new(
                 std::io::ErrorKind::ConnectionAborted,
                 "Connection closed during initialization",
@@ -208,5 +208,3 @@ fn map_error_inline(value: ApiCallError) -> BrokerConnectionInitializationError 
         }
     }
 }
-
-// TODO: Tests

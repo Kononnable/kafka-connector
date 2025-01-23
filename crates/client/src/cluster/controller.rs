@@ -171,6 +171,7 @@ mod tests {
             connection.write_all(&buffer).await.unwrap();
             buffer.clear();
         }
+
         async fn initialize_as_single_broker_cluster(server: &TcpListener) {
             let (mut connection, _) = server.accept().await.unwrap();
 
