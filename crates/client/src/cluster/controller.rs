@@ -306,7 +306,8 @@ mod tests {
             ));
         }
 
-        // TODO: Minor: This test fails on windows with standard config - connecting to 255.255.255.0 results in NetworkUnreachable error
+        // Fails on windows with default settings - connecting to 255.255.255.0 results in NetworkUnreachable error
+        #[cfg(not(target_family = "windows"))]
         #[test_log::test(tokio::test(start_paused = true))]
         async fn handles_timeout_during_connect_operation() {
             let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -337,7 +338,8 @@ mod tests {
             ));
         }
 
-        // TODO: Minor: This test fails on windows with default settings - connections on 127.0.0.2 are rejected(windows thing or firewall related)
+        // Fails on Windows with default settings - connections on 127.0.0.2 are rejected
+        #[cfg(not(target_family = "windows"))]
         #[test_log::test(tokio::test)]
         async fn handles_rejection_of_tcp_connection() {
             let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
