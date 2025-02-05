@@ -68,7 +68,7 @@ impl ApiRequest for MetadataRequest {
 
 impl MetadataRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.topics.is_none() {
+        if self.topics.is_none() && !_version.0 < 1 {
             return Err(SerializationError::NullValue(
                 "topics",
                 *_version,

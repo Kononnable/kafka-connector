@@ -161,13 +161,6 @@ impl ToBytes for OffsetFetchResponsePartition {
 
 impl OffsetFetchResponsePartition {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.metadata.is_none() {
-            return Err(SerializationError::NullValue(
-                "metadata",
-                *_version,
-                "OffsetFetchResponsePartition",
-            ));
-        }
         if self.committed_leader_epoch != i32::default() && _version >= ApiVersion(5) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "committed_leader_epoch",

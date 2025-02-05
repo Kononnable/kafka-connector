@@ -51,13 +51,6 @@ impl ApiRequest for DescribeDelegationTokenRequest {
 
 impl DescribeDelegationTokenRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.owners.is_none() {
-            return Err(SerializationError::NullValue(
-                "owners",
-                *_version,
-                "DescribeDelegationTokenRequest",
-            ));
-        }
         Ok(())
     }
 }

@@ -144,13 +144,6 @@ impl ToBytes for TxnOffsetCommitRequestPartition {
 
 impl TxnOffsetCommitRequestPartition {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.committed_metadata.is_none() {
-            return Err(SerializationError::NullValue(
-                "committed_metadata",
-                *_version,
-                "TxnOffsetCommitRequestPartition",
-            ));
-        }
         Ok(())
     }
 }

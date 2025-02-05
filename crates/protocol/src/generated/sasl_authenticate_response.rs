@@ -68,13 +68,6 @@ impl ApiResponse for SaslAuthenticateResponse {
 
 impl SaslAuthenticateResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.error_message.is_none() {
-            return Err(SerializationError::NullValue(
-                "error_message",
-                *_version,
-                "SaslAuthenticateResponse",
-            ));
-        }
         if self.session_lifetime_ms != i64::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "session_lifetime_ms",

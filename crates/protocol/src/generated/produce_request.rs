@@ -96,13 +96,6 @@ impl ApiRequest for ProduceRequest {
 
 impl ProduceRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.transactional_id.is_none() && !_version.0 >= 3 {
-            return Err(SerializationError::NullValue(
-                "transactional_id",
-                *_version,
-                "ProduceRequest",
-            ));
-        }
         if self.transactional_id.is_some()
             && self.transactional_id != Some(String::default())
             && _version >= ApiVersion(3)
@@ -159,13 +152,6 @@ impl ToBytes for PartitionProduceData {
 
 impl PartitionProduceData {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.records.is_none() {
-            return Err(SerializationError::NullValue(
-                "records",
-                *_version,
-                "PartitionProduceData",
-            ));
-        }
         Ok(())
     }
 }

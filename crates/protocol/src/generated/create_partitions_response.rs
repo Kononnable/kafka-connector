@@ -82,13 +82,6 @@ impl ToBytes for CreatePartitionsTopicResult {
 
 impl CreatePartitionsTopicResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.error_message.is_none() {
-            return Err(SerializationError::NullValue(
-                "error_message",
-                *_version,
-                "CreatePartitionsTopicResult",
-            ));
-        }
         Ok(())
     }
 }

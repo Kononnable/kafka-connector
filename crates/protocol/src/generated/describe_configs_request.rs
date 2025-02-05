@@ -96,13 +96,6 @@ impl ToBytes for DescribeConfigsResource {
 
 impl DescribeConfigsResource {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.configuration_keys.is_none() {
-            return Err(SerializationError::NullValue(
-                "configuration_keys",
-                *_version,
-                "DescribeConfigsResource",
-            ));
-        }
         Ok(())
     }
 }

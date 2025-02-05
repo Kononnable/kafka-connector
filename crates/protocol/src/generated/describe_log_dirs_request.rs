@@ -51,13 +51,6 @@ impl ApiRequest for DescribeLogDirsRequest {
 
 impl DescribeLogDirsRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.topics.is_none() {
-            return Err(SerializationError::NullValue(
-                "topics",
-                *_version,
-                "DescribeLogDirsRequest",
-            ));
-        }
         Ok(())
     }
 }

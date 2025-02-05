@@ -113,13 +113,6 @@ impl ToBytes for DeleteAclsFilterResult {
 
 impl DeleteAclsFilterResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.error_message.is_none() {
-            return Err(SerializationError::NullValue(
-                "error_message",
-                *_version,
-                "DeleteAclsFilterResult",
-            ));
-        }
         Ok(())
     }
 }
@@ -161,13 +154,6 @@ impl ToBytes for DeleteAclsMatchingAcl {
 
 impl DeleteAclsMatchingAcl {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.error_message.is_none() {
-            return Err(SerializationError::NullValue(
-                "error_message",
-                *_version,
-                "DeleteAclsMatchingAcl",
-            ));
-        }
         if self.pattern_type != i8::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "pattern_type",

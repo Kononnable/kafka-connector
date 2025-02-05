@@ -86,27 +86,6 @@ impl ApiRequest for DescribeAclsRequest {
 
 impl DescribeAclsRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.resource_name_filter.is_none() {
-            return Err(SerializationError::NullValue(
-                "resource_name_filter",
-                *_version,
-                "DescribeAclsRequest",
-            ));
-        }
-        if self.principal_filter.is_none() {
-            return Err(SerializationError::NullValue(
-                "principal_filter",
-                *_version,
-                "DescribeAclsRequest",
-            ));
-        }
-        if self.host_filter.is_none() {
-            return Err(SerializationError::NullValue(
-                "host_filter",
-                *_version,
-                "DescribeAclsRequest",
-            ));
-        }
         if self.resource_pattern_type != i8::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "resource_pattern_type",

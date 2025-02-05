@@ -58,13 +58,6 @@ impl ApiRequest for ElectPreferredLeadersRequest {
 
 impl ElectPreferredLeadersRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.topic_partitions.is_none() {
-            return Err(SerializationError::NullValue(
-                "topic_partitions",
-                *_version,
-                "ElectPreferredLeadersRequest",
-            ));
-        }
         Ok(())
     }
 }

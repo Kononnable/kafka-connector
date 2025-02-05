@@ -50,13 +50,6 @@ impl ApiRequest for InitProducerIdRequest {
 
 impl InitProducerIdRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.transactional_id.is_none() {
-            return Err(SerializationError::NullValue(
-                "transactional_id",
-                *_version,
-                "InitProducerIdRequest",
-            ));
-        }
         Ok(())
     }
 }

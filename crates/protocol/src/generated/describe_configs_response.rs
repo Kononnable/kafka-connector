@@ -130,13 +130,6 @@ impl ToBytes for DescribeConfigsResult {
 
 impl DescribeConfigsResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.error_message.is_none() {
-            return Err(SerializationError::NullValue(
-                "error_message",
-                *_version,
-                "DescribeConfigsResult",
-            ));
-        }
         Ok(())
     }
 }
@@ -184,13 +177,6 @@ impl ToBytes for DescribeConfigsResourceResult {
 
 impl DescribeConfigsResourceResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.value.is_none() {
-            return Err(SerializationError::NullValue(
-                "value",
-                *_version,
-                "DescribeConfigsResourceResult",
-            ));
-        }
         if self.is_default != bool::default() && _version >= ApiVersion(0) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "is_default",
@@ -271,13 +257,6 @@ impl ToBytes for DescribeConfigsSynonym {
 
 impl DescribeConfigsSynonym {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.value.is_none() && !_version.0 >= 1 {
-            return Err(SerializationError::NullValue(
-                "value",
-                *_version,
-                "DescribeConfigsSynonym",
-            ));
-        }
         if self.name != String::default() && _version >= ApiVersion(1) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "name",

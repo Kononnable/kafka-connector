@@ -473,13 +473,6 @@ impl ToBytes for UpdateMetadataRequestBroker {
 
 impl UpdateMetadataRequestBroker {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.rack.is_none() && !_version.0 >= 2 {
-            return Err(SerializationError::NullValue(
-                "rack",
-                *_version,
-                "UpdateMetadataRequestBroker",
-            ));
-        }
         if self.endpoints != Vec::<UpdateMetadataRequestEndpoint>::default()
             && _version >= ApiVersion(1)
         {

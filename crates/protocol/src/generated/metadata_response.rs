@@ -164,13 +164,6 @@ impl ApiResponse for MetadataResponse {
 
 impl MetadataResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.cluster_id.is_none() && !_version.0 >= 2 {
-            return Err(SerializationError::NullValue(
-                "cluster_id",
-                *_version,
-                "MetadataResponse",
-            ));
-        }
         if self.throttle_time_ms != i32::default() && _version >= ApiVersion(3) {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "throttle_time_ms",
@@ -237,13 +230,6 @@ impl ToBytes for MetadataResponseBroker {
 
 impl MetadataResponseBroker {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.rack.is_none() && !_version.0 >= 1 {
-            return Err(SerializationError::NullValue(
-                "rack",
-                *_version,
-                "MetadataResponseBroker",
-            ));
-        }
         Ok(())
     }
 }

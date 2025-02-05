@@ -213,20 +213,6 @@ impl ToBytes for FetchablePartitionResponse {
 
 impl FetchablePartitionResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.aborted.is_none() && !_version.0 >= 4 {
-            return Err(SerializationError::NullValue(
-                "aborted",
-                *_version,
-                "FetchablePartitionResponse",
-            ));
-        }
-        if self.records.is_none() {
-            return Err(SerializationError::NullValue(
-                "records",
-                *_version,
-                "FetchablePartitionResponse",
-            ));
-        }
         if self.aborted.is_some()
             && self.aborted != Some(Vec::<AbortedTransaction>::default())
             && _version >= ApiVersion(4)

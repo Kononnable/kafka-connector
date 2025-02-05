@@ -236,24 +236,28 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
                 "    if self.{}.is_none() && !({min}..={max}).contains(&_version.0){{\n",
                 field.name.to_case(Case::Snake)
             ));
-        } else if field.versions == "0+" {
             content.push_str(&format!(
-                "        if self.{}.is_none() {{\n",
-                field.name.to_case(Case::Snake)
+                "        return Err(SerializationError::NullValue(\"{}\", *_version, \"{}\"))\n",
+                field.name.to_case(Case::Snake),
+                struct_name
             ));
+            content.push_str("        }\n");
         } else {
-            let min = field.versions.replace('+', "");
-            content.push_str(&format!(
-                "        if self.{}.is_none() && !_version.0 >= {min} {{\n",
-                field.name.to_case(Case::Snake)
-            ));
-        };
-        content.push_str(&format!(
-            "        return Err(SerializationError::NullValue(\"{}\", *_version, \"{}\"))\n",
-            field.name.to_case(Case::Snake),
-            struct_name
-        ));
-        content.push_str("        }\n");
+            let min_null_version: u8 = nullable_versions.replace('+', "").parse().unwrap();
+            let field_min_version: u8 = field.versions.replace('+', "").parse().unwrap();
+            if field_min_version < min_null_version {
+                content.push_str(&format!(
+                    "        if self.{}.is_none() && !_version.0 < {min_null_version} {{\n",
+                    field.name.to_case(Case::Snake)
+                ));
+                content.push_str(&format!(
+                    "        return Err(SerializationError::NullValue(\"{}\", *_version, \"{}\"))\n",
+                    field.name.to_case(Case::Snake),
+                    struct_name
+                ));
+                content.push_str("        }\n");
+            };
+        }
     }
     for field in fields.iter().filter(|x| !x.ignorable) {
         let field_non_option_type = {

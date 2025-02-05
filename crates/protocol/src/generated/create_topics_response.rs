@@ -120,13 +120,6 @@ impl ToBytes for CreatableTopicResult {
 
 impl CreatableTopicResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.error_message.is_none() && !_version.0 >= 1 {
-            return Err(SerializationError::NullValue(
-                "error_message",
-                *_version,
-                "CreatableTopicResult",
-            ));
-        }
         Ok(())
     }
 }

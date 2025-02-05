@@ -176,13 +176,6 @@ impl ToBytes for AlterableConfig {
 
 impl AlterableConfig {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.value.is_none() {
-            return Err(SerializationError::NullValue(
-                "value",
-                *_version,
-                "AlterableConfig",
-            ));
-        }
         Ok(())
     }
 }
