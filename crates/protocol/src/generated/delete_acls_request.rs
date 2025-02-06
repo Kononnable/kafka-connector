@@ -92,7 +92,7 @@ impl ToBytes for DeleteAclsFilter {
 
 impl DeleteAclsFilter {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.pattern_type_filter != i8::default() && _version >= ApiVersion(1) {
+        if self.pattern_type_filter != 3 && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "pattern_type_filter",
                 *_version,

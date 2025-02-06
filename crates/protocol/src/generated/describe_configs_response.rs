@@ -177,7 +177,7 @@ impl ToBytes for DescribeConfigsResourceResult {
 
 impl DescribeConfigsResourceResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.is_default != bool::default() && _version >= ApiVersion(0) {
+        if self.is_default != bool::default() && _version.0 < 0 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "is_default",
                 *_version,
@@ -257,24 +257,21 @@ impl ToBytes for DescribeConfigsSynonym {
 
 impl DescribeConfigsSynonym {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.name != String::default() && _version >= ApiVersion(1) {
+        if self.name != String::default() && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "name",
                 *_version,
                 "DescribeConfigsSynonym",
             ));
         }
-        if self.value.is_some()
-            && self.value != Some(String::default())
-            && _version >= ApiVersion(1)
-        {
+        if self.value != Some(String::default()) && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "value",
                 *_version,
                 "DescribeConfigsSynonym",
             ));
         }
-        if self.source != i8::default() && _version >= ApiVersion(1) {
+        if self.source != i8::default() && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "source",
                 *_version,

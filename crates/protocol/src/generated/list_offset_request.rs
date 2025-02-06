@@ -91,7 +91,7 @@ impl ApiRequest for ListOffsetRequest {
 
 impl ListOffsetRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.isolation_level != i8::default() && _version >= ApiVersion(2) {
+        if self.isolation_level != i8::default() && _version.0 < 2 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "isolation_level",
                 *_version,
@@ -150,14 +150,14 @@ impl ToBytes for ListOffsetPartition {
 
 impl ListOffsetPartition {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.current_leader_epoch != i32::default() && _version >= ApiVersion(4) {
+        if self.current_leader_epoch != i32::default() && _version.0 < 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "current_leader_epoch",
                 *_version,
                 "ListOffsetPartition",
             ));
         }
-        if self.max_num_offsets != i32::default() && _version >= ApiVersion(0) {
+        if self.max_num_offsets != i32::default() && _version.0 < 0 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "max_num_offsets",
                 *_version,

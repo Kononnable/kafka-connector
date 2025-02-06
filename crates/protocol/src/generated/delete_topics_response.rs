@@ -67,7 +67,7 @@ impl ApiResponse for DeleteTopicsResponse {
 
 impl DeleteTopicsResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.throttle_time_ms != i32::default() && _version >= ApiVersion(1) {
+        if self.throttle_time_ms != i32::default() && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "throttle_time_ms",
                 *_version,

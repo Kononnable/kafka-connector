@@ -104,7 +104,7 @@ impl ApiRequest for CreateTopicsRequest {
 
 impl CreateTopicsRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.validate_only != bool::default() && _version >= ApiVersion(1) {
+        if self.validate_only != false && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "validate_only",
                 *_version,

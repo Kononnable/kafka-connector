@@ -92,7 +92,7 @@ impl ToBytes for CreatableAcl {
 
 impl CreatableAcl {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.resource_pattern_type != i8::default() && _version >= ApiVersion(1) {
+        if self.resource_pattern_type != 3 && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "resource_pattern_type",
                 *_version,

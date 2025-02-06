@@ -199,8 +199,7 @@ impl ApiRequest for UpdateMetadataRequest {
 
 impl UpdateMetadataRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.topic_states != Vec::<UpdateMetadataRequestTopicState>::default()
-            && _version >= ApiVersion(5)
+        if self.topic_states != Vec::<UpdateMetadataRequestTopicState>::default() && _version.0 < 5
         {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "topic_states",
@@ -251,8 +250,7 @@ impl ToBytes for UpdateMetadataRequestTopicState {
 
 impl UpdateMetadataRequestTopicState {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.partition_states != Vec::<UpdateMetadataPartitionState>::default()
-            && _version >= ApiVersion(5)
+        if self.partition_states != Vec::<UpdateMetadataPartitionState>::default() && _version.0 < 5
         {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partition_states",
@@ -375,7 +373,7 @@ impl UpdateMetadataRequestPartitionStateV0 {
                 "UpdateMetadataRequestPartitionStateV0",
             ));
         }
-        if self.offline_replicas != Vec::<i32>::default() && _version >= ApiVersion(4) {
+        if self.offline_replicas != Vec::<i32>::default() && _version.0 < 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "offline_replicas",
                 *_version,
@@ -473,9 +471,7 @@ impl ToBytes for UpdateMetadataRequestBroker {
 
 impl UpdateMetadataRequestBroker {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.endpoints != Vec::<UpdateMetadataRequestEndpoint>::default()
-            && _version >= ApiVersion(1)
-        {
+        if self.endpoints != Vec::<UpdateMetadataRequestEndpoint>::default() && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "endpoints",
                 *_version,
@@ -556,56 +552,56 @@ impl ToBytes for UpdateMetadataPartitionState {
 
 impl UpdateMetadataPartitionState {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.partition_index != i32::default() && _version >= ApiVersion(5) {
+        if self.partition_index != i32::default() && _version.0 < 5 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partition_index",
                 *_version,
                 "UpdateMetadataPartitionState",
             ));
         }
-        if self.controller_epoch != i32::default() && _version >= ApiVersion(5) {
+        if self.controller_epoch != i32::default() && _version.0 < 5 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "controller_epoch",
                 *_version,
                 "UpdateMetadataPartitionState",
             ));
         }
-        if self.leader != i32::default() && _version >= ApiVersion(5) {
+        if self.leader != i32::default() && _version.0 < 5 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "leader",
                 *_version,
                 "UpdateMetadataPartitionState",
             ));
         }
-        if self.leader_epoch != i32::default() && _version >= ApiVersion(5) {
+        if self.leader_epoch != i32::default() && _version.0 < 5 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "leader_epoch",
                 *_version,
                 "UpdateMetadataPartitionState",
             ));
         }
-        if self.isr != Vec::<i32>::default() && _version >= ApiVersion(5) {
+        if self.isr != Vec::<i32>::default() && _version.0 < 5 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "isr",
                 *_version,
                 "UpdateMetadataPartitionState",
             ));
         }
-        if self.zk_version != i32::default() && _version >= ApiVersion(5) {
+        if self.zk_version != i32::default() && _version.0 < 5 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "zk_version",
                 *_version,
                 "UpdateMetadataPartitionState",
             ));
         }
-        if self.replicas != Vec::<i32>::default() && _version >= ApiVersion(5) {
+        if self.replicas != Vec::<i32>::default() && _version.0 < 5 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "replicas",
                 *_version,
                 "UpdateMetadataPartitionState",
             ));
         }
-        if self.offline_replicas != Vec::<i32>::default() && _version >= ApiVersion(5) {
+        if self.offline_replicas != Vec::<i32>::default() && _version.0 < 5 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "offline_replicas",
                 *_version,
@@ -696,28 +692,28 @@ impl ToBytes for UpdateMetadataRequestEndpoint {
 
 impl UpdateMetadataRequestEndpoint {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.port != i32::default() && _version >= ApiVersion(1) {
+        if self.port != i32::default() && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "port",
                 *_version,
                 "UpdateMetadataRequestEndpoint",
             ));
         }
-        if self.host != String::default() && _version >= ApiVersion(1) {
+        if self.host != String::default() && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "host",
                 *_version,
                 "UpdateMetadataRequestEndpoint",
             ));
         }
-        if self.listener != String::default() && _version >= ApiVersion(3) {
+        if self.listener != String::default() && _version.0 < 3 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "listener",
                 *_version,
                 "UpdateMetadataRequestEndpoint",
             ));
         }
-        if self.security_protocol != i16::default() && _version >= ApiVersion(1) {
+        if self.security_protocol != i16::default() && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "security_protocol",
                 *_version,

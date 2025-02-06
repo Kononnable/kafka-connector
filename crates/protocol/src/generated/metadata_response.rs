@@ -164,7 +164,7 @@ impl ApiResponse for MetadataResponse {
 
 impl MetadataResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.throttle_time_ms != i32::default() && _version >= ApiVersion(3) {
+        if self.throttle_time_ms != i32::default() && _version.0 < 3 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "throttle_time_ms",
                 *_version,

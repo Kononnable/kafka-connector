@@ -142,14 +142,14 @@ impl ApiResponse for FetchResponse {
 
 impl FetchResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.error_code != i16::default() && _version >= ApiVersion(7) {
+        if self.error_code != i16::default() && _version.0 < 7 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "error_code",
                 *_version,
                 "FetchResponse",
             ));
         }
-        if self.session_id != i32::default() && _version >= ApiVersion(7) {
+        if self.session_id != 0 && _version.0 < 7 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "session_id",
                 *_version,
@@ -213,10 +213,7 @@ impl ToBytes for FetchablePartitionResponse {
 
 impl FetchablePartitionResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.aborted.is_some()
-            && self.aborted != Some(Vec::<AbortedTransaction>::default())
-            && _version >= ApiVersion(4)
-        {
+        if self.aborted != Some(Vec::<AbortedTransaction>::default()) && _version.0 < 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "aborted",
                 *_version,
@@ -293,14 +290,14 @@ impl ToBytes for AbortedTransaction {
 
 impl AbortedTransaction {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.producer_id != i64::default() && _version >= ApiVersion(4) {
+        if self.producer_id != i64::default() && _version.0 < 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "producer_id",
                 *_version,
                 "AbortedTransaction",
             ));
         }
-        if self.first_offset != i64::default() && _version >= ApiVersion(4) {
+        if self.first_offset != i64::default() && _version.0 < 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "first_offset",
                 *_version,

@@ -267,18 +267,18 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
             }
             field_type
         };
+        let default_value = field.default.clone().unwrap_or( format!("{}::default()",apply_turbo_fish(field_non_option_type)));
         let nullable_filter = if field.nullable_versions.is_some() {
             format!(
-                "self.{}.is_some() && self.{} != Some({}::default())",
+                "self.{} != Some({})",
                 field.name.to_case(Case::Snake),
-                field.name.to_case(Case::Snake),
-                apply_turbo_fish(field_non_option_type)
+                default_value
             )
         } else {
             format!(
-                "self.{} != {}::default()",
+                "self.{} != {}",
                 field.name.to_case(Case::Snake),
-                apply_turbo_fish(field_non_option_type)
+                default_value
             )
         };
         if field.versions.contains('-') {
@@ -293,7 +293,7 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
         } else {
             let min = field.versions.replace('+', "");
             content.push_str(&format!(
-                "        if {nullable_filter} && _version >= ApiVersion({min}){{\n",
+                "        if {nullable_filter} && _version.0 < {min}{{\n",
             ));
         };
         content.push_str(&format!(

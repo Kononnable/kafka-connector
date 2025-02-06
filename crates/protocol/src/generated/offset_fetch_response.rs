@@ -103,7 +103,7 @@ impl ApiResponse for OffsetFetchResponse {
 
 impl OffsetFetchResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.error_code != i16::default() && _version >= ApiVersion(2) {
+        if self.error_code != 0 && _version.0 < 2 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "error_code",
                 *_version,
@@ -161,7 +161,7 @@ impl ToBytes for OffsetFetchResponsePartition {
 
 impl OffsetFetchResponsePartition {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.committed_leader_epoch != i32::default() && _version >= ApiVersion(5) {
+        if self.committed_leader_epoch != i32::default() && _version.0 < 5 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "committed_leader_epoch",
                 *_version,

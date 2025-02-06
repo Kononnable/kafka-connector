@@ -75,7 +75,7 @@ impl MetadataRequest {
                 "MetadataRequest",
             ));
         }
-        if self.allow_auto_topic_creation != bool::default() && _version >= ApiVersion(4) {
+        if self.allow_auto_topic_creation != true && _version.0 < 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "allow_auto_topic_creation",
                 *_version,

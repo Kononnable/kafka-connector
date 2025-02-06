@@ -187,7 +187,7 @@ impl ToBytes for OffsetCommitRequestPartition {
 
 impl OffsetCommitRequestPartition {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.commit_timestamp != i64::default() && _version >= ApiVersion(1) {
+        if self.commit_timestamp != -1 && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "commit_timestamp",
                 *_version,

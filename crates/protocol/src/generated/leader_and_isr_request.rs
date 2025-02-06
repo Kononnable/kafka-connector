@@ -172,9 +172,7 @@ impl ApiRequest for LeaderAndIsrRequest {
 
 impl LeaderAndIsrRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.topic_states != Vec::<LeaderAndIsrRequestTopicState>::default()
-            && _version >= ApiVersion(2)
-        {
+        if self.topic_states != Vec::<LeaderAndIsrRequestTopicState>::default() && _version.0 < 2 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "topic_states",
                 *_version,
@@ -224,7 +222,7 @@ impl ToBytes for LeaderAndIsrRequestTopicState {
 
 impl LeaderAndIsrRequestTopicState {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.name != String::default() && _version >= ApiVersion(2) {
+        if self.name != String::default() && _version.0 < 2 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "name",
                 *_version,

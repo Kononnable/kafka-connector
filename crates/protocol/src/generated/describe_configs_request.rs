@@ -69,7 +69,7 @@ impl ApiRequest for DescribeConfigsRequest {
 
 impl DescribeConfigsRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.include_synoyms != bool::default() && _version >= ApiVersion(1) {
+        if self.include_synoyms != false && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "include_synoyms",
                 *_version,

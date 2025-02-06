@@ -111,8 +111,7 @@ impl ApiRequest for StopReplicaRequest {
 
 impl StopReplicaRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.partitions_v_0 != Vec::<StopReplicaRequestPartitionV0>::default()
-            && _version >= ApiVersion(0)
+        if self.partitions_v_0 != Vec::<StopReplicaRequestPartitionV0>::default() && _version.0 < 0
         {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partitions_v_0",
@@ -120,7 +119,7 @@ impl StopReplicaRequest {
                 "StopReplicaRequest",
             ));
         }
-        if self.topics != Vec::<StopReplicaRequestTopic>::default() && _version >= ApiVersion(1) {
+        if self.topics != Vec::<StopReplicaRequestTopic>::default() && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "topics",
                 *_version,
@@ -163,14 +162,14 @@ impl ToBytes for StopReplicaRequestPartitionV0 {
 
 impl StopReplicaRequestPartitionV0 {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.topic_name != String::default() && _version >= ApiVersion(0) {
+        if self.topic_name != String::default() && _version.0 < 0 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "topic_name",
                 *_version,
                 "StopReplicaRequestPartitionV0",
             ));
         }
-        if self.partition_index != i32::default() && _version >= ApiVersion(0) {
+        if self.partition_index != i32::default() && _version.0 < 0 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partition_index",
                 *_version,
@@ -219,14 +218,14 @@ impl ToBytes for StopReplicaRequestTopic {
 
 impl StopReplicaRequestTopic {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.name != String::default() && _version >= ApiVersion(1) {
+        if self.name != String::default() && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "name",
                 *_version,
                 "StopReplicaRequestTopic",
             ));
         }
-        if self.partition_indexes != Vec::<i32>::default() && _version >= ApiVersion(1) {
+        if self.partition_indexes != Vec::<i32>::default() && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partition_indexes",
                 *_version,

@@ -184,28 +184,28 @@ impl ApiRequest for FetchRequest {
 
 impl FetchRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.isolation_level != i8::default() && _version >= ApiVersion(4) {
+        if self.isolation_level != 0 && _version.0 < 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "isolation_level",
                 *_version,
                 "FetchRequest",
             ));
         }
-        if self.session_id != i32::default() && _version >= ApiVersion(7) {
+        if self.session_id != 0 && _version.0 < 7 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "session_id",
                 *_version,
                 "FetchRequest",
             ));
         }
-        if self.epoch != i32::default() && _version >= ApiVersion(7) {
+        if self.epoch != -1 && _version.0 < 7 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "epoch",
                 *_version,
                 "FetchRequest",
             ));
         }
-        if self.forgotten != Vec::<ForgottenTopic>::default() && _version >= ApiVersion(7) {
+        if self.forgotten != Vec::<ForgottenTopic>::default() && _version.0 < 7 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "forgotten",
                 *_version,
@@ -282,14 +282,14 @@ impl ToBytes for ForgottenTopic {
 
 impl ForgottenTopic {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.name != String::default() && _version >= ApiVersion(7) {
+        if self.name != String::default() && _version.0 < 7 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "name",
                 *_version,
                 "ForgottenTopic",
             ));
         }
-        if self.forgotten_partition_indexes != Vec::<i32>::default() && _version >= ApiVersion(7) {
+        if self.forgotten_partition_indexes != Vec::<i32>::default() && _version.0 < 7 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "forgotten_partition_indexes",
                 *_version,
@@ -341,7 +341,7 @@ impl ToBytes for FetchPartition {
 
 impl FetchPartition {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.log_start_offset != i64::default() && _version >= ApiVersion(5) {
+        if self.log_start_offset != -1 && _version.0 < 5 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "log_start_offset",
                 *_version,

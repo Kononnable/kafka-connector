@@ -148,28 +148,28 @@ impl ToBytes for ListOffsetPartitionResponse {
 
 impl ListOffsetPartitionResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.old_style_offsets != Vec::<i64>::default() && _version >= ApiVersion(0) {
+        if self.old_style_offsets != Vec::<i64>::default() && _version.0 < 0 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "old_style_offsets",
                 *_version,
                 "ListOffsetPartitionResponse",
             ));
         }
-        if self.timestamp != i64::default() && _version >= ApiVersion(1) {
+        if self.timestamp != -1 && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "timestamp",
                 *_version,
                 "ListOffsetPartitionResponse",
             ));
         }
-        if self.offset != i64::default() && _version >= ApiVersion(1) {
+        if self.offset != -1 && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "offset",
                 *_version,
                 "ListOffsetPartitionResponse",
             ));
         }
-        if self.leader_epoch != i32::default() && _version >= ApiVersion(4) {
+        if self.leader_epoch != i32::default() && _version.0 < 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "leader_epoch",
                 *_version,
