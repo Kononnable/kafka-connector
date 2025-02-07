@@ -154,7 +154,7 @@ pub(crate) async fn fetch_initial_broker_list_from_broker(
         }
         let metadata_request = MetadataRequest {
             topics: Some(vec![]),
-            allow_auto_topic_creation: false,
+            ..Default::default()
         };
         let metadata =
             call_api_inline(&mut connection, metadata_request, metadata_request_version).await?;

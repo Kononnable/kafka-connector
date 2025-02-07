@@ -65,11 +65,11 @@ impl ApiRequest for ListOffsetRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.replica_id.serialize(version, _bytes)?;
+        self.replica_id.serialize(version, _bytes);
         if version >= ApiVersion(2) {
-            self.isolation_level.serialize(version, _bytes)?;
+            self.isolation_level.serialize(version, _bytes);
         }
-        self.topics.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes);
         Ok(())
     }
 
@@ -91,6 +91,9 @@ impl ApiRequest for ListOffsetRequest {
 
 impl ListOffsetRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topics.iter() {
+            item.validate_fields(_version)?;
+        }
         if self.isolation_level != i8::default() && _version.0 < 2 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "isolation_level",
@@ -103,20 +106,17 @@ impl ListOffsetRequest {
 }
 
 impl ToBytes for ListOffsetTopic {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.partitions.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.partitions.serialize(version, _bytes);
     }
 }
 
 impl ListOffsetTopic {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.partitions.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -130,21 +130,15 @@ impl FromBytes for ListOffsetTopic {
 }
 
 impl ToBytes for ListOffsetPartition {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partition_index.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partition_index.serialize(version, _bytes);
         if version >= ApiVersion(4) {
-            self.current_leader_epoch.serialize(version, _bytes)?;
+            self.current_leader_epoch.serialize(version, _bytes);
         }
-        self.timestamp.serialize(version, _bytes)?;
+        self.timestamp.serialize(version, _bytes);
         if version >= ApiVersion(0) {
-            self.max_num_offsets.serialize(version, _bytes)?;
+            self.max_num_offsets.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 

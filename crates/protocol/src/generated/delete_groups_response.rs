@@ -45,8 +45,8 @@ impl ApiResponse for DeleteGroupsResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.throttle_time_ms.serialize(version, _bytes)?;
-        self.results.serialize(version, _bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes);
+        self.results.serialize(version, _bytes);
         Ok(())
     }
 
@@ -63,19 +63,17 @@ impl ApiResponse for DeleteGroupsResponse {
 
 impl DeleteGroupsResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.results.iter() {
+            item.0.validate_fields(_version)?;
+            item.1.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for DeletableGroupResultKey {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.group_id.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.group_id.serialize(version, _bytes);
     }
 }
 
@@ -93,14 +91,8 @@ impl FromBytes for DeletableGroupResultKey {
 }
 
 impl ToBytes for DeletableGroupResult {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.error_code.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.error_code.serialize(version, _bytes);
     }
 }
 

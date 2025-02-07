@@ -78,10 +78,10 @@ impl ApiRequest for CreateTopicsRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.topics.serialize(version, _bytes)?;
-        self.timeout_ms.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes);
+        self.timeout_ms.serialize(version, _bytes);
         if version >= ApiVersion(1) {
-            self.validate_only.serialize(version, _bytes)?;
+            self.validate_only.serialize(version, _bytes);
         }
         Ok(())
     }
@@ -104,6 +104,9 @@ impl ApiRequest for CreateTopicsRequest {
 
 impl CreateTopicsRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topics.iter() {
+            item.validate_fields(_version)?;
+        }
         if self.validate_only != false && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "validate_only",
@@ -116,23 +119,25 @@ impl CreateTopicsRequest {
 }
 
 impl ToBytes for CreatableTopic {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.num_partitions.serialize(version, _bytes)?;
-        self.replication_factor.serialize(version, _bytes)?;
-        self.assignments.serialize(version, _bytes)?;
-        self.configs.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.num_partitions.serialize(version, _bytes);
+        self.replication_factor.serialize(version, _bytes);
+        self.assignments.serialize(version, _bytes);
+        self.configs.serialize(version, _bytes);
     }
 }
 
 impl CreatableTopic {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.assignments.iter() {
+            item.0.validate_fields(_version)?;
+            item.1.validate_fields(_version)?;
+        }
+        for item in self.configs.iter() {
+            item.0.validate_fields(_version)?;
+            item.1.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -160,14 +165,8 @@ impl FromBytes for CreatableTopic {
 }
 
 impl ToBytes for CreatableReplicaAssignmentKey {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partition_index.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partition_index.serialize(version, _bytes);
     }
 }
 
@@ -185,14 +184,8 @@ impl FromBytes for CreatableReplicaAssignmentKey {
 }
 
 impl ToBytes for CreatableReplicaAssignment {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.broker_ids.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.broker_ids.serialize(version, _bytes);
     }
 }
 
@@ -210,14 +203,8 @@ impl FromBytes for CreatableReplicaAssignment {
 }
 
 impl ToBytes for CreateableTopicConfigKey {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
     }
 }
 
@@ -235,14 +222,8 @@ impl FromBytes for CreateableTopicConfigKey {
 }
 
 impl ToBytes for CreateableTopicConfig {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.value.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.value.serialize(version, _bytes);
     }
 }
 

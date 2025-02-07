@@ -64,17 +64,17 @@ impl ApiRequest for StopReplicaRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.controller_id.serialize(version, _bytes)?;
-        self.controller_epoch.serialize(version, _bytes)?;
+        self.controller_id.serialize(version, _bytes);
+        self.controller_epoch.serialize(version, _bytes);
         if version >= ApiVersion(1) {
-            self.broker_epoch.serialize(version, _bytes)?;
+            self.broker_epoch.serialize(version, _bytes);
         }
-        self.delete_partitions.serialize(version, _bytes)?;
+        self.delete_partitions.serialize(version, _bytes);
         if version >= ApiVersion(0) {
-            self.partitions_v_0.serialize(version, _bytes)?;
+            self.partitions_v_0.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
-            self.topics.serialize(version, _bytes)?;
+            self.topics.serialize(version, _bytes);
         }
         Ok(())
     }
@@ -111,6 +111,12 @@ impl ApiRequest for StopReplicaRequest {
 
 impl StopReplicaRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.partitions_v_0.iter() {
+            item.validate_fields(_version)?;
+        }
+        for item in self.topics.iter() {
+            item.validate_fields(_version)?;
+        }
         if self.partitions_v_0 != Vec::<StopReplicaRequestPartitionV0>::default() && _version.0 < 0
         {
             return Err(SerializationError::NonIgnorableFieldSet(
@@ -144,19 +150,13 @@ impl Default for StopReplicaRequest {
 }
 
 impl ToBytes for StopReplicaRequestPartitionV0 {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
         if version >= ApiVersion(0) {
-            self.topic_name.serialize(version, _bytes)?;
+            self.topic_name.serialize(version, _bytes);
         }
         if version >= ApiVersion(0) {
-            self.partition_index.serialize(version, _bytes)?;
+            self.partition_index.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 
@@ -200,19 +200,13 @@ impl FromBytes for StopReplicaRequestPartitionV0 {
 }
 
 impl ToBytes for StopReplicaRequestTopic {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
         if version >= ApiVersion(1) {
-            self.name.serialize(version, _bytes)?;
+            self.name.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
-            self.partition_indexes.serialize(version, _bytes)?;
+            self.partition_indexes.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 

@@ -61,14 +61,14 @@ impl ApiResponse for JoinGroupResponse {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         if version >= ApiVersion(2) {
-            self.throttle_time_ms.serialize(version, _bytes)?;
+            self.throttle_time_ms.serialize(version, _bytes);
         }
-        self.error_code.serialize(version, _bytes)?;
-        self.generation_id.serialize(version, _bytes)?;
-        self.protocol_name.serialize(version, _bytes)?;
-        self.leader.serialize(version, _bytes)?;
-        self.member_id.serialize(version, _bytes)?;
-        self.members.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes);
+        self.generation_id.serialize(version, _bytes);
+        self.protocol_name.serialize(version, _bytes);
+        self.leader.serialize(version, _bytes);
+        self.member_id.serialize(version, _bytes);
+        self.members.serialize(version, _bytes);
         Ok(())
     }
 
@@ -98,20 +98,17 @@ impl ApiResponse for JoinGroupResponse {
 
 impl JoinGroupResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.members.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for JoinGroupResponseMember {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.member_id.serialize(version, _bytes)?;
-        self.metadata.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.member_id.serialize(version, _bytes);
+        self.metadata.serialize(version, _bytes);
     }
 }
 

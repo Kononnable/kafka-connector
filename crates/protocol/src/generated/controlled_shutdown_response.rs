@@ -42,8 +42,8 @@ impl ApiResponse for ControlledShutdownResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.remaining_partitions.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes);
+        self.remaining_partitions.serialize(version, _bytes);
         Ok(())
     }
 
@@ -59,20 +59,17 @@ impl ApiResponse for ControlledShutdownResponse {
 
 impl ControlledShutdownResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.remaining_partitions.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for RemainingPartition {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.topic_name.serialize(version, _bytes)?;
-        self.partition_index.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.topic_name.serialize(version, _bytes);
+        self.partition_index.serialize(version, _bytes);
     }
 }
 

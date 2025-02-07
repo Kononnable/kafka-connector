@@ -68,11 +68,11 @@ impl ApiRequest for TxnOffsetCommitRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.transactional_id.serialize(version, _bytes)?;
-        self.group_id.serialize(version, _bytes)?;
-        self.producer_id.serialize(version, _bytes)?;
-        self.producer_epoch.serialize(version, _bytes)?;
-        self.topics.serialize(version, _bytes)?;
+        self.transactional_id.serialize(version, _bytes);
+        self.group_id.serialize(version, _bytes);
+        self.producer_id.serialize(version, _bytes);
+        self.producer_epoch.serialize(version, _bytes);
+        self.topics.serialize(version, _bytes);
         Ok(())
     }
 
@@ -94,25 +94,25 @@ impl ApiRequest for TxnOffsetCommitRequest {
 
 impl TxnOffsetCommitRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topics.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for TxnOffsetCommitRequestTopic {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.partitions.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.partitions.serialize(version, _bytes);
     }
 }
 
 impl TxnOffsetCommitRequestTopic {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.partitions.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -126,19 +126,13 @@ impl FromBytes for TxnOffsetCommitRequestTopic {
 }
 
 impl ToBytes for TxnOffsetCommitRequestPartition {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partition_index.serialize(version, _bytes)?;
-        self.committed_offset.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partition_index.serialize(version, _bytes);
+        self.committed_offset.serialize(version, _bytes);
         if version >= ApiVersion(2) {
-            self.committed_leader_epoch.serialize(version, _bytes)?;
+            self.committed_leader_epoch.serialize(version, _bytes);
         }
-        self.committed_metadata.serialize(version, _bytes)?;
-        Ok(())
+        self.committed_metadata.serialize(version, _bytes);
     }
 }
 

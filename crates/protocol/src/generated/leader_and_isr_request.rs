@@ -125,18 +125,18 @@ impl ApiRequest for LeaderAndIsrRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.controller_id.serialize(version, _bytes)?;
-        self.controller_epoch.serialize(version, _bytes)?;
+        self.controller_id.serialize(version, _bytes);
+        self.controller_epoch.serialize(version, _bytes);
         if version >= ApiVersion(2) {
-            self.broker_epoch.serialize(version, _bytes)?;
+            self.broker_epoch.serialize(version, _bytes);
         }
         if version >= ApiVersion(2) {
-            self.topic_states.serialize(version, _bytes)?;
+            self.topic_states.serialize(version, _bytes);
         }
         if (0..=1).contains(&version.0) {
-            self.partition_states_v_0.serialize(version, _bytes)?;
+            self.partition_states_v_0.serialize(version, _bytes);
         }
-        self.live_leaders.serialize(version, _bytes)?;
+        self.live_leaders.serialize(version, _bytes);
         Ok(())
     }
 
@@ -172,6 +172,15 @@ impl ApiRequest for LeaderAndIsrRequest {
 
 impl LeaderAndIsrRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topic_states.iter() {
+            item.validate_fields(_version)?;
+        }
+        for item in self.partition_states_v_0.iter() {
+            item.validate_fields(_version)?;
+        }
+        for item in self.live_leaders.iter() {
+            item.validate_fields(_version)?;
+        }
         if self.topic_states != Vec::<LeaderAndIsrRequestTopicState>::default() && _version.0 < 2 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "topic_states",
@@ -206,22 +215,19 @@ impl Default for LeaderAndIsrRequest {
 }
 
 impl ToBytes for LeaderAndIsrRequestTopicState {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
         if version >= ApiVersion(2) {
-            self.name.serialize(version, _bytes)?;
+            self.name.serialize(version, _bytes);
         }
-        self.partition_states.serialize(version, _bytes)?;
-        Ok(())
+        self.partition_states.serialize(version, _bytes);
     }
 }
 
 impl LeaderAndIsrRequestTopicState {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.partition_states.iter() {
+            item.validate_fields(_version)?;
+        }
         if self.name != String::default() && _version.0 < 2 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "name",
@@ -250,40 +256,34 @@ impl FromBytes for LeaderAndIsrRequestTopicState {
 }
 
 impl ToBytes for LeaderAndIsrRequestPartitionStateV0 {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
         if (0..=1).contains(&version.0) {
-            self.topic_name.serialize(version, _bytes)?;
+            self.topic_name.serialize(version, _bytes);
         }
         if (0..=1).contains(&version.0) {
-            self.partition_index.serialize(version, _bytes)?;
+            self.partition_index.serialize(version, _bytes);
         }
         if (0..=1).contains(&version.0) {
-            self.controller_epoch.serialize(version, _bytes)?;
+            self.controller_epoch.serialize(version, _bytes);
         }
         if (0..=1).contains(&version.0) {
-            self.leader_key.serialize(version, _bytes)?;
+            self.leader_key.serialize(version, _bytes);
         }
         if (0..=1).contains(&version.0) {
-            self.leader_epoch.serialize(version, _bytes)?;
+            self.leader_epoch.serialize(version, _bytes);
         }
         if (0..=1).contains(&version.0) {
-            self.isr_replicas.serialize(version, _bytes)?;
+            self.isr_replicas.serialize(version, _bytes);
         }
         if (0..=1).contains(&version.0) {
-            self.zk_version.serialize(version, _bytes)?;
+            self.zk_version.serialize(version, _bytes);
         }
         if (0..=1).contains(&version.0) {
-            self.replicas.serialize(version, _bytes)?;
+            self.replicas.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
-            self.is_new.serialize(version, _bytes)?;
+            self.is_new.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 
@@ -411,16 +411,10 @@ impl FromBytes for LeaderAndIsrRequestPartitionStateV0 {
 }
 
 impl ToBytes for LeaderAndIsrLiveLeader {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.broker_id.serialize(version, _bytes)?;
-        self.host_name.serialize(version, _bytes)?;
-        self.port.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.broker_id.serialize(version, _bytes);
+        self.host_name.serialize(version, _bytes);
+        self.port.serialize(version, _bytes);
     }
 }
 
@@ -444,23 +438,17 @@ impl FromBytes for LeaderAndIsrLiveLeader {
 }
 
 impl ToBytes for LeaderAndIsrRequestPartitionState {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partition_index.serialize(version, _bytes)?;
-        self.controller_epoch.serialize(version, _bytes)?;
-        self.leader_key.serialize(version, _bytes)?;
-        self.leader_epoch.serialize(version, _bytes)?;
-        self.isr_replicas.serialize(version, _bytes)?;
-        self.zk_version.serialize(version, _bytes)?;
-        self.replicas.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partition_index.serialize(version, _bytes);
+        self.controller_epoch.serialize(version, _bytes);
+        self.leader_key.serialize(version, _bytes);
+        self.leader_epoch.serialize(version, _bytes);
+        self.isr_replicas.serialize(version, _bytes);
+        self.zk_version.serialize(version, _bytes);
+        self.replicas.serialize(version, _bytes);
         if version >= ApiVersion(1) {
-            self.is_new.serialize(version, _bytes)?;
+            self.is_new.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 

@@ -39,7 +39,7 @@ impl ApiRequest for DescribeLogDirsRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.topics.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes);
         Ok(())
     }
 
@@ -51,20 +51,17 @@ impl ApiRequest for DescribeLogDirsRequest {
 
 impl DescribeLogDirsRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topics.iter().flatten() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for DescribableLogDirTopic {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.topic.serialize(version, _bytes)?;
-        self.partition_index.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.topic.serialize(version, _bytes);
+        self.partition_index.serialize(version, _bytes);
     }
 }
 

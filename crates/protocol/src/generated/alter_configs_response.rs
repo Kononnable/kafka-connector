@@ -48,8 +48,8 @@ impl ApiResponse for AlterConfigsResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.throttle_time_ms.serialize(version, _bytes)?;
-        self.resources.serialize(version, _bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes);
+        self.resources.serialize(version, _bytes);
         Ok(())
     }
 
@@ -65,22 +65,19 @@ impl ApiResponse for AlterConfigsResponse {
 
 impl AlterConfigsResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.resources.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for AlterConfigsResourceResponse {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.error_message.serialize(version, _bytes)?;
-        self.resource_type.serialize(version, _bytes)?;
-        self.resource_name.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.error_code.serialize(version, _bytes);
+        self.error_message.serialize(version, _bytes);
+        self.resource_type.serialize(version, _bytes);
+        self.resource_name.serialize(version, _bytes);
     }
 }
 

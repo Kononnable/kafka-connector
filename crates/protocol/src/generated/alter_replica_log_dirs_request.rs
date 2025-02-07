@@ -54,7 +54,7 @@ impl ApiRequest for AlterReplicaLogDirsRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.dirs.serialize(version, _bytes)?;
+        self.dirs.serialize(version, _bytes);
         Ok(())
     }
 
@@ -67,19 +67,17 @@ impl ApiRequest for AlterReplicaLogDirsRequest {
 
 impl AlterReplicaLogDirsRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.dirs.iter() {
+            item.0.validate_fields(_version)?;
+            item.1.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for AlterReplicaLogDirKey {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.path.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.path.serialize(version, _bytes);
     }
 }
 
@@ -97,19 +95,17 @@ impl FromBytes for AlterReplicaLogDirKey {
 }
 
 impl ToBytes for AlterReplicaLogDir {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.topics.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.topics.serialize(version, _bytes);
     }
 }
 
 impl AlterReplicaLogDir {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topics.iter() {
+            item.0.validate_fields(_version)?;
+            item.1.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -124,14 +120,8 @@ impl FromBytes for AlterReplicaLogDir {
 }
 
 impl ToBytes for AlterReplicaLogDirTopicKey {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
     }
 }
 
@@ -149,14 +139,8 @@ impl FromBytes for AlterReplicaLogDirTopicKey {
 }
 
 impl ToBytes for AlterReplicaLogDirTopic {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partitions.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partitions.serialize(version, _bytes);
     }
 }
 

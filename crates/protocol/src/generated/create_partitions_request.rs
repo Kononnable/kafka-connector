@@ -54,9 +54,9 @@ impl ApiRequest for CreatePartitionsRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.topics.serialize(version, _bytes)?;
-        self.timeout_ms.serialize(version, _bytes)?;
-        self.validate_only.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes);
+        self.timeout_ms.serialize(version, _bytes);
+        self.validate_only.serialize(version, _bytes);
         Ok(())
     }
 
@@ -74,26 +74,26 @@ impl ApiRequest for CreatePartitionsRequest {
 
 impl CreatePartitionsRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topics.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for CreatePartitionsTopic {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.count.serialize(version, _bytes)?;
-        self.assignments.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.count.serialize(version, _bytes);
+        self.assignments.serialize(version, _bytes);
     }
 }
 
 impl CreatePartitionsTopic {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.assignments.iter().flatten() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -112,14 +112,8 @@ impl FromBytes for CreatePartitionsTopic {
 }
 
 impl ToBytes for CreatePartitionsAssignment {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.broker_ids.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.broker_ids.serialize(version, _bytes);
     }
 }
 

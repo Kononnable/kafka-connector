@@ -23,7 +23,7 @@ impl ResponseHeader {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.correlation_id.serialize(version, _bytes)?;
+        self.correlation_id.serialize(version, _bytes);
         Ok(())
     }
 

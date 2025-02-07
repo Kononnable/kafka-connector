@@ -39,7 +39,7 @@ impl ApiRequest for DescribeDelegationTokenRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.owners.serialize(version, _bytes)?;
+        self.owners.serialize(version, _bytes);
         Ok(())
     }
 
@@ -51,20 +51,17 @@ impl ApiRequest for DescribeDelegationTokenRequest {
 
 impl DescribeDelegationTokenRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.owners.iter().flatten() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for DescribeDelegationTokenOwner {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.principal_type.serialize(version, _bytes)?;
-        self.principal_name.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.principal_type.serialize(version, _bytes);
+        self.principal_name.serialize(version, _bytes);
     }
 }
 

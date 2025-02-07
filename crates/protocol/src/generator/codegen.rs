@@ -143,12 +143,10 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
 
             for substruct in sub_structs {
                 content.push_str(&format!("impl ToBytes for {}{{\n", substruct.name));
-                content.push_str("    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) -> Result<(),SerializationError> {\n");
-                content.push_str("        self.validate_fields(version)?;\n");
+                content.push_str("    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {\n");
                 for field in &substruct.fields {
                     content.push_str(&serialize_field(field));
                 }
-                content.push_str("    Ok(())\n");
                 content.push_str("    }\n\n");
                 content.push_str("}\n\n");
                 content.push_str(&generate_validate_fields(
@@ -219,12 +217,42 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
 }
 
 fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> String {
-    let mut content = "".to_owned();
-
-    content.push_str(&format!("impl {}{{\n", struct_name));
+    let mut content = format!("impl {}{{\n", struct_name);
     content.push_str(
         "    fn validate_fields(&self, _version: ApiVersion) -> Result<(),SerializationError>{\n",
     );
+
+    for field in fields.iter() {
+        let flatten = if field.nullable_versions.is_some(){
+            ".flatten()".to_owned()
+        }else{
+            "".to_owned()
+        };
+        match &field.type_.type_{
+            ApiSpecFieldSubtype::Map {..} => {
+
+                content.push_str(&format!("      for item in self.{}.iter(){} {{\n", field.name.to_case(Case::Snake), flatten));
+                if field.fields.is_empty(){
+                    content.push_str(&"        item.validate_fields(_version)?;\n");
+                }else {
+                    content.push_str(&"        item.0.validate_fields(_version)?;\n");
+                    content.push_str(&"        item.1.validate_fields(_version)?;\n");
+                }
+                content.push_str("      }\n");
+            }
+            ApiSpecFieldSubtype::SubObject(_) => {
+                if field.type_.is_array {
+                    content.push_str(&format!("      for item in self.{}.iter(){} {{\n", field.name.to_case(Case::Snake), flatten));
+                    content.push_str(&"        item.validate_fields(_version)?;\n");
+                    content.push_str("      }\n");
+                }else {
+                    content.push_str(&format!("      self.{}.validate_fields(_version)?;\n", field.name.to_case(Case::Snake)));
+                }
+            }
+            _ => {}
+        }
+
+    }
     for field in fields.iter().filter(|x| x.nullable_versions.is_some()) {
         let nullable_versions = field.nullable_versions.clone().unwrap();
 
@@ -303,10 +331,12 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
         ));
         content.push_str("        }\n");
     }
+
     content.push_str("    Ok(())\n");
     content.push_str("    }\n\n");
     content.push_str("}\n\n");
     content
+
 }
 
 fn get_api_key(spec: &ApiSpec) -> String {
@@ -375,7 +405,7 @@ fn impl_default_trait(name: &str, fields: &Vec<ApiSpecField>) -> String {
 fn serialize_field(field: &ApiSpecField) -> String {
     let mut content = "".to_owned();
     let serialize = format!(
-        "self.{}.serialize(version, _bytes)?;",
+        "self.{}.serialize(version, _bytes);",
         field.name.to_case(Case::Snake)
     );
 

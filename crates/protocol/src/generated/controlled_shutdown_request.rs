@@ -39,9 +39,9 @@ impl ApiRequest for ControlledShutdownRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.broker_id.serialize(version, _bytes)?;
+        self.broker_id.serialize(version, _bytes);
         if version >= ApiVersion(2) {
-            self.broker_epoch.serialize(version, _bytes)?;
+            self.broker_epoch.serialize(version, _bytes);
         }
         Ok(())
     }

@@ -53,7 +53,7 @@ impl ApiRequest for OffsetForLeaderEpochRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.topics.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes);
         Ok(())
     }
 
@@ -65,25 +65,25 @@ impl ApiRequest for OffsetForLeaderEpochRequest {
 
 impl OffsetForLeaderEpochRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topics.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for OffsetForLeaderTopic {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.partitions.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.partitions.serialize(version, _bytes);
     }
 }
 
 impl OffsetForLeaderTopic {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.partitions.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -97,18 +97,12 @@ impl FromBytes for OffsetForLeaderTopic {
 }
 
 impl ToBytes for OffsetForLeaderPartition {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partition_index.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partition_index.serialize(version, _bytes);
         if version >= ApiVersion(2) {
-            self.current_leader_epoch.serialize(version, _bytes)?;
+            self.current_leader_epoch.serialize(version, _bytes);
         }
-        self.leader_epoch.serialize(version, _bytes)?;
-        Ok(())
+        self.leader_epoch.serialize(version, _bytes);
     }
 }
 

@@ -69,9 +69,9 @@ impl ApiResponse for ProduceResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.responses.serialize(version, _bytes)?;
+        self.responses.serialize(version, _bytes);
         if version >= ApiVersion(1) {
-            self.throttle_time_ms.serialize(version, _bytes)?;
+            self.throttle_time_ms.serialize(version, _bytes);
         }
         Ok(())
     }
@@ -92,25 +92,25 @@ impl ApiResponse for ProduceResponse {
 
 impl ProduceResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.responses.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for TopicProduceResponse {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.partitions.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.partitions.serialize(version, _bytes);
     }
 }
 
 impl TopicProduceResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.partitions.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -124,22 +124,16 @@ impl FromBytes for TopicProduceResponse {
 }
 
 impl ToBytes for PartitionProduceResponse {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partition_index.serialize(version, _bytes)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.base_offset.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partition_index.serialize(version, _bytes);
+        self.error_code.serialize(version, _bytes);
+        self.base_offset.serialize(version, _bytes);
         if version >= ApiVersion(2) {
-            self.log_append_time_ms.serialize(version, _bytes)?;
+            self.log_append_time_ms.serialize(version, _bytes);
         }
         if version >= ApiVersion(5) {
-            self.log_start_offset.serialize(version, _bytes)?;
+            self.log_start_offset.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 

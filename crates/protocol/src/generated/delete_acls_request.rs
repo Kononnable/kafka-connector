@@ -54,7 +54,7 @@ impl ApiRequest for DeleteAclsRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.filters.serialize(version, _bytes)?;
+        self.filters.serialize(version, _bytes);
         Ok(())
     }
 
@@ -66,27 +66,24 @@ impl ApiRequest for DeleteAclsRequest {
 
 impl DeleteAclsRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.filters.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for DeleteAclsFilter {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.resource_type_filter.serialize(version, _bytes)?;
-        self.resource_name_filter.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.resource_type_filter.serialize(version, _bytes);
+        self.resource_name_filter.serialize(version, _bytes);
         if version >= ApiVersion(1) {
-            self.pattern_type_filter.serialize(version, _bytes)?;
+            self.pattern_type_filter.serialize(version, _bytes);
         }
-        self.principal_filter.serialize(version, _bytes)?;
-        self.host_filter.serialize(version, _bytes)?;
-        self.operation.serialize(version, _bytes)?;
-        self.permission_type.serialize(version, _bytes)?;
-        Ok(())
+        self.principal_filter.serialize(version, _bytes);
+        self.host_filter.serialize(version, _bytes);
+        self.operation.serialize(version, _bytes);
+        self.permission_type.serialize(version, _bytes);
     }
 }
 

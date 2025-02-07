@@ -47,10 +47,10 @@ impl ApiResponse for ListGroupsResponse {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         if version >= ApiVersion(1) {
-            self.throttle_time_ms.serialize(version, _bytes)?;
+            self.throttle_time_ms.serialize(version, _bytes);
         }
-        self.error_code.serialize(version, _bytes)?;
-        self.groups.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes);
+        self.groups.serialize(version, _bytes);
         Ok(())
     }
 
@@ -72,20 +72,17 @@ impl ApiResponse for ListGroupsResponse {
 
 impl ListGroupsResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.groups.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for ListedGroup {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.group_id.serialize(version, _bytes)?;
-        self.protocol_type.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.group_id.serialize(version, _bytes);
+        self.protocol_type.serialize(version, _bytes);
     }
 }
 

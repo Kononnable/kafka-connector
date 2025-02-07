@@ -54,7 +54,7 @@ impl ApiRequest for CreateAclsRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.creations.serialize(version, _bytes)?;
+        self.creations.serialize(version, _bytes);
         Ok(())
     }
 
@@ -66,27 +66,24 @@ impl ApiRequest for CreateAclsRequest {
 
 impl CreateAclsRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.creations.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for CreatableAcl {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.resource_type.serialize(version, _bytes)?;
-        self.resource_name.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.resource_type.serialize(version, _bytes);
+        self.resource_name.serialize(version, _bytes);
         if version >= ApiVersion(1) {
-            self.resource_pattern_type.serialize(version, _bytes)?;
+            self.resource_pattern_type.serialize(version, _bytes);
         }
-        self.principal.serialize(version, _bytes)?;
-        self.host.serialize(version, _bytes)?;
-        self.operation.serialize(version, _bytes)?;
-        self.permission_type.serialize(version, _bytes)?;
-        Ok(())
+        self.principal.serialize(version, _bytes);
+        self.host.serialize(version, _bytes);
+        self.operation.serialize(version, _bytes);
+        self.permission_type.serialize(version, _bytes);
     }
 }
 

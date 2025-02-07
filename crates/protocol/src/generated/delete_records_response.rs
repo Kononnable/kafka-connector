@@ -54,8 +54,8 @@ impl ApiResponse for DeleteRecordsResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.throttle_time_ms.serialize(version, _bytes)?;
-        self.topics.serialize(version, _bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes);
+        self.topics.serialize(version, _bytes);
         Ok(())
     }
 
@@ -71,25 +71,25 @@ impl ApiResponse for DeleteRecordsResponse {
 
 impl DeleteRecordsResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topics.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for DeleteRecordsTopicResult {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.partitions.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.partitions.serialize(version, _bytes);
     }
 }
 
 impl DeleteRecordsTopicResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.partitions.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -103,16 +103,10 @@ impl FromBytes for DeleteRecordsTopicResult {
 }
 
 impl ToBytes for DeleteRecordsPartitionResult {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partition_index.serialize(version, _bytes)?;
-        self.low_watermark.serialize(version, _bytes)?;
-        self.error_code.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partition_index.serialize(version, _bytes);
+        self.low_watermark.serialize(version, _bytes);
+        self.error_code.serialize(version, _bytes);
     }
 }
 

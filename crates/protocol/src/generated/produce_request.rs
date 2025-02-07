@@ -68,11 +68,11 @@ impl ApiRequest for ProduceRequest {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         if version >= ApiVersion(3) {
-            self.transactional_id.serialize(version, _bytes)?;
+            self.transactional_id.serialize(version, _bytes);
         }
-        self.acks.serialize(version, _bytes)?;
-        self.timeout_ms.serialize(version, _bytes)?;
-        self.topics.serialize(version, _bytes)?;
+        self.acks.serialize(version, _bytes);
+        self.timeout_ms.serialize(version, _bytes);
+        self.topics.serialize(version, _bytes);
         Ok(())
     }
 
@@ -96,6 +96,9 @@ impl ApiRequest for ProduceRequest {
 
 impl ProduceRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topics.iter() {
+            item.validate_fields(_version)?;
+        }
         if self.transactional_id != Some(String::default()) && _version.0 < 3 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "transactional_id",
@@ -108,20 +111,17 @@ impl ProduceRequest {
 }
 
 impl ToBytes for TopicProduceData {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.partitions.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.partitions.serialize(version, _bytes);
     }
 }
 
 impl TopicProduceData {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.partitions.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -135,15 +135,9 @@ impl FromBytes for TopicProduceData {
 }
 
 impl ToBytes for PartitionProduceData {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partition_index.serialize(version, _bytes)?;
-        self.records.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partition_index.serialize(version, _bytes);
+        self.records.serialize(version, _bytes);
     }
 }
 

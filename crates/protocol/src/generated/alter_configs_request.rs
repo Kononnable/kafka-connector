@@ -60,8 +60,8 @@ impl ApiRequest for AlterConfigsRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.resources.serialize(version, _bytes)?;
-        self.validate_only.serialize(version, _bytes)?;
+        self.resources.serialize(version, _bytes);
+        self.validate_only.serialize(version, _bytes);
         Ok(())
     }
 
@@ -78,20 +78,18 @@ impl ApiRequest for AlterConfigsRequest {
 
 impl AlterConfigsRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.resources.iter() {
+            item.0.validate_fields(_version)?;
+            item.1.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for AlterConfigsResourceKey {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.resource_type.serialize(version, _bytes)?;
-        self.resource_name.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.resource_type.serialize(version, _bytes);
+        self.resource_name.serialize(version, _bytes);
     }
 }
 
@@ -113,19 +111,17 @@ impl FromBytes for AlterConfigsResourceKey {
 }
 
 impl ToBytes for AlterConfigsResource {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.configs.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.configs.serialize(version, _bytes);
     }
 }
 
 impl AlterConfigsResource {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.configs.iter() {
+            item.0.validate_fields(_version)?;
+            item.1.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -138,14 +134,8 @@ impl FromBytes for AlterConfigsResource {
 }
 
 impl ToBytes for AlterableConfigKey {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
     }
 }
 
@@ -163,14 +153,8 @@ impl FromBytes for AlterableConfigKey {
 }
 
 impl ToBytes for AlterableConfig {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.value.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.value.serialize(version, _bytes);
     }
 }
 

@@ -57,8 +57,8 @@ impl ApiResponse for AddPartitionsToTxnResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.throttle_time_ms.serialize(version, _bytes)?;
-        self.results.serialize(version, _bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes);
+        self.results.serialize(version, _bytes);
         Ok(())
     }
 
@@ -75,19 +75,17 @@ impl ApiResponse for AddPartitionsToTxnResponse {
 
 impl AddPartitionsToTxnResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.results.iter() {
+            item.0.validate_fields(_version)?;
+            item.1.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for AddPartitionsToTxnTopicResultKey {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
     }
 }
 
@@ -105,19 +103,17 @@ impl FromBytes for AddPartitionsToTxnTopicResultKey {
 }
 
 impl ToBytes for AddPartitionsToTxnTopicResult {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.results.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.results.serialize(version, _bytes);
     }
 }
 
 impl AddPartitionsToTxnTopicResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.results.iter() {
+            item.0.validate_fields(_version)?;
+            item.1.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -133,14 +129,8 @@ impl FromBytes for AddPartitionsToTxnTopicResult {
 }
 
 impl ToBytes for AddPartitionsToTxnPartitionResultKey {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partition_index.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partition_index.serialize(version, _bytes);
     }
 }
 
@@ -158,14 +148,8 @@ impl FromBytes for AddPartitionsToTxnPartitionResultKey {
 }
 
 impl ToBytes for AddPartitionsToTxnPartitionResult {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.error_code.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.error_code.serialize(version, _bytes);
     }
 }
 

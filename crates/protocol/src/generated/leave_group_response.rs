@@ -35,9 +35,9 @@ impl ApiResponse for LeaveGroupResponse {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         if version >= ApiVersion(1) {
-            self.throttle_time_ms.serialize(version, _bytes)?;
+            self.throttle_time_ms.serialize(version, _bytes);
         }
-        self.error_code.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes);
         Ok(())
     }
 

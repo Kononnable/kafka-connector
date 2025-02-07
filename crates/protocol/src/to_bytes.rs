@@ -1,4 +1,4 @@
-use crate::prelude::{ApiVersion, SerializationError};
+use crate::prelude::{ApiVersion};
 use bytes::{BufMut, BytesMut};
 use indexmap::{IndexMap, IndexSet};
 
@@ -7,7 +7,7 @@ pub trait ToBytes {
         &self,
         version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError>;
+    );
 }
 
 impl<K, V> ToBytes for IndexMap<K, V>
@@ -19,14 +19,13 @@ where
         &self,
         _version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    ){
         bytes.put_i32(self.len() as i32);
 
         for (key, value) in self {
-            key.serialize(_version, bytes)?;
-            value.serialize(_version, bytes)?;
+            key.serialize(_version, bytes);
+            value.serialize(_version, bytes);
         }
-        Ok(())
     }
 }
 
@@ -38,13 +37,12 @@ where
         &self,
         _version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    ) {
         bytes.put_i32(self.len() as i32);
 
         for key in self {
-            key.serialize(_version, bytes)?;
+            key.serialize(_version, bytes);
         }
-        Ok(())
     }
 }
 
@@ -56,12 +54,11 @@ where
         &self,
         version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    )  {
         match self {
             Some(val) => val.serialize(version, bytes),
             None => {
                 bytes.put_i32(-1);
-                Ok(())
             }
         }
     }
@@ -75,13 +72,12 @@ where
         &self,
         _version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    )  {
         bytes.put_i32(self.len() as i32);
 
         for element in self {
-            element.serialize(_version, bytes)?;
+            element.serialize(_version, bytes);
         }
-        Ok(())
     }
 }
 
@@ -90,12 +86,11 @@ impl ToBytes for Option<Vec<u8>> {
         &self,
         version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    ){
         match self {
             Some(val) => val.serialize(version, bytes),
             None => {
                 bytes.put_i32(-1);
-                Ok(())
             }
         }
     }
@@ -106,10 +101,9 @@ impl ToBytes for Vec<u8> {
         &self,
         _version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    )  {
         bytes.put_i32(self.len() as i32);
         bytes.put_slice(self.as_slice());
-        Ok(())
     }
 }
 
@@ -118,12 +112,11 @@ impl ToBytes for Option<String> {
         &self,
         version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    )  {
         match self {
             Some(val) => val.serialize(version, bytes),
             None => {
                 bytes.put_i16(-1);
-                Ok(())
             }
         }
     }
@@ -134,10 +127,9 @@ impl ToBytes for String {
         &self,
         _version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    )  {
         bytes.put_i16(self.len() as i16);
         bytes.put_slice(self.as_bytes());
-        Ok(())
     }
 }
 
@@ -146,9 +138,8 @@ impl ToBytes for bool {
         &self,
         _version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    ) {
         bytes.put_i8(*self as i8);
-        Ok(())
     }
 }
 
@@ -157,9 +148,8 @@ impl ToBytes for i8 {
         &self,
         _version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    )  {
         bytes.put_i8(*self);
-        Ok(())
     }
 }
 
@@ -168,9 +158,8 @@ impl ToBytes for i16 {
         &self,
         _version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    ) {
         bytes.put_i16(*self);
-        Ok(())
     }
 }
 
@@ -179,9 +168,8 @@ impl ToBytes for i32 {
         &self,
         _version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    )  {
         bytes.put_i32(*self);
-        Ok(())
     }
 }
 
@@ -190,9 +178,8 @@ impl ToBytes for u32 {
         &self,
         _version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    ) {
         bytes.put_u32(*self);
-        Ok(())
     }
 }
 
@@ -201,9 +188,8 @@ impl ToBytes for i64 {
         &self,
         _version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    )  {
         bytes.put_i64(*self);
-        Ok(())
     }
 }
 
@@ -212,8 +198,7 @@ impl ToBytes for f64 {
         &self,
         _version: ApiVersion,
         bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
+    ) {
         bytes.put_f64(*self);
-        Ok(())
     }
 }

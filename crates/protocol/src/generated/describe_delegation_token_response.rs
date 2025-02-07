@@ -72,9 +72,9 @@ impl ApiResponse for DescribeDelegationTokenResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.tokens.serialize(version, _bytes)?;
-        self.throttle_time_ms.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes);
+        self.tokens.serialize(version, _bytes);
+        self.throttle_time_ms.serialize(version, _bytes);
         Ok(())
     }
 
@@ -92,31 +92,31 @@ impl ApiResponse for DescribeDelegationTokenResponse {
 
 impl DescribeDelegationTokenResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.tokens.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for DescribedDelegationToken {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.principal_type.serialize(version, _bytes)?;
-        self.principal_name.serialize(version, _bytes)?;
-        self.issue_timestamp.serialize(version, _bytes)?;
-        self.expiry_timestamp.serialize(version, _bytes)?;
-        self.max_timestamp.serialize(version, _bytes)?;
-        self.token_id.serialize(version, _bytes)?;
-        self.hmac.serialize(version, _bytes)?;
-        self.renewers.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.principal_type.serialize(version, _bytes);
+        self.principal_name.serialize(version, _bytes);
+        self.issue_timestamp.serialize(version, _bytes);
+        self.expiry_timestamp.serialize(version, _bytes);
+        self.max_timestamp.serialize(version, _bytes);
+        self.token_id.serialize(version, _bytes);
+        self.hmac.serialize(version, _bytes);
+        self.renewers.serialize(version, _bytes);
     }
 }
 
 impl DescribedDelegationToken {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.renewers.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -145,15 +145,9 @@ impl FromBytes for DescribedDelegationToken {
 }
 
 impl ToBytes for DescribedDelegationTokenRenewer {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.principal_type.serialize(version, _bytes)?;
-        self.principal_name.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.principal_type.serialize(version, _bytes);
+        self.principal_name.serialize(version, _bytes);
     }
 }
 

@@ -30,7 +30,7 @@ impl ApiRequest for SaslAuthenticateRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.auth_bytes.serialize(version, _bytes)?;
+        self.auth_bytes.serialize(version, _bytes);
         Ok(())
     }
 

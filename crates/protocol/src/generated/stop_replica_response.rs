@@ -45,8 +45,8 @@ impl ApiResponse for StopReplicaResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.partitions.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes);
+        self.partitions.serialize(version, _bytes);
         Ok(())
     }
 
@@ -62,21 +62,18 @@ impl ApiResponse for StopReplicaResponse {
 
 impl StopReplicaResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.partitions.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for StopReplicaResponsePartition {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.topic_name.serialize(version, _bytes)?;
-        self.partition_index.serialize(version, _bytes)?;
-        self.error_code.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.topic_name.serialize(version, _bytes);
+        self.partition_index.serialize(version, _bytes);
+        self.error_code.serialize(version, _bytes);
     }
 }
 

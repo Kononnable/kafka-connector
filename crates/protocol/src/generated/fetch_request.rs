@@ -116,24 +116,24 @@ impl ApiRequest for FetchRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.replica_id.serialize(version, _bytes)?;
-        self.max_wait.serialize(version, _bytes)?;
-        self.min_bytes.serialize(version, _bytes)?;
+        self.replica_id.serialize(version, _bytes);
+        self.max_wait.serialize(version, _bytes);
+        self.min_bytes.serialize(version, _bytes);
         if version >= ApiVersion(3) {
-            self.max_bytes.serialize(version, _bytes)?;
+            self.max_bytes.serialize(version, _bytes);
         }
         if version >= ApiVersion(4) {
-            self.isolation_level.serialize(version, _bytes)?;
+            self.isolation_level.serialize(version, _bytes);
         }
         if version >= ApiVersion(7) {
-            self.session_id.serialize(version, _bytes)?;
+            self.session_id.serialize(version, _bytes);
         }
         if version >= ApiVersion(7) {
-            self.epoch.serialize(version, _bytes)?;
+            self.epoch.serialize(version, _bytes);
         }
-        self.topics.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes);
         if version >= ApiVersion(7) {
-            self.forgotten.serialize(version, _bytes)?;
+            self.forgotten.serialize(version, _bytes);
         }
         Ok(())
     }
@@ -184,6 +184,12 @@ impl ApiRequest for FetchRequest {
 
 impl FetchRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topics.iter() {
+            item.validate_fields(_version)?;
+        }
+        for item in self.forgotten.iter() {
+            item.validate_fields(_version)?;
+        }
         if self.isolation_level != 0 && _version.0 < 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "isolation_level",
@@ -233,20 +239,17 @@ impl Default for FetchRequest {
 }
 
 impl ToBytes for FetchableTopic {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.fetch_partitions.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.fetch_partitions.serialize(version, _bytes);
     }
 }
 
 impl FetchableTopic {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.fetch_partitions.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -263,20 +266,13 @@ impl FromBytes for FetchableTopic {
 }
 
 impl ToBytes for ForgottenTopic {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
         if version >= ApiVersion(7) {
-            self.name.serialize(version, _bytes)?;
+            self.name.serialize(version, _bytes);
         }
         if version >= ApiVersion(7) {
-            self.forgotten_partition_indexes
-                .serialize(version, _bytes)?;
+            self.forgotten_partition_indexes.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 
@@ -320,22 +316,16 @@ impl FromBytes for ForgottenTopic {
 }
 
 impl ToBytes for FetchPartition {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partition_index.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partition_index.serialize(version, _bytes);
         if version >= ApiVersion(9) {
-            self.current_leader_epoch.serialize(version, _bytes)?;
+            self.current_leader_epoch.serialize(version, _bytes);
         }
-        self.fetch_offset.serialize(version, _bytes)?;
+        self.fetch_offset.serialize(version, _bytes);
         if version >= ApiVersion(5) {
-            self.log_start_offset.serialize(version, _bytes)?;
+            self.log_start_offset.serialize(version, _bytes);
         }
-        self.max_bytes.serialize(version, _bytes)?;
-        Ok(())
+        self.max_bytes.serialize(version, _bytes);
     }
 }
 

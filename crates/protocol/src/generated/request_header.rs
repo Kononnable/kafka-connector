@@ -32,10 +32,10 @@ impl RequestHeader {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.request_api_key.serialize(version, _bytes)?;
-        self.request_api_version.serialize(version, _bytes)?;
-        self.correlation_id.serialize(version, _bytes)?;
-        self.client_id.serialize(version, _bytes)?;
+        self.request_api_key.serialize(version, _bytes);
+        self.request_api_version.serialize(version, _bytes);
+        self.correlation_id.serialize(version, _bytes);
+        self.client_id.serialize(version, _bytes);
         Ok(())
     }
 

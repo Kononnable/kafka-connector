@@ -78,9 +78,9 @@ impl ApiResponse for DescribeGroupsResponse {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         if version >= ApiVersion(1) {
-            self.throttle_time_ms.serialize(version, _bytes)?;
+            self.throttle_time_ms.serialize(version, _bytes);
         }
-        self.groups.serialize(version, _bytes)?;
+        self.groups.serialize(version, _bytes);
         Ok(())
     }
 
@@ -100,29 +100,29 @@ impl ApiResponse for DescribeGroupsResponse {
 
 impl DescribeGroupsResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.groups.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for DescribedGroup {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.group_id.serialize(version, _bytes)?;
-        self.group_state.serialize(version, _bytes)?;
-        self.protocol_type.serialize(version, _bytes)?;
-        self.protocol_data.serialize(version, _bytes)?;
-        self.members.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.error_code.serialize(version, _bytes);
+        self.group_id.serialize(version, _bytes);
+        self.group_state.serialize(version, _bytes);
+        self.protocol_type.serialize(version, _bytes);
+        self.protocol_data.serialize(version, _bytes);
+        self.members.serialize(version, _bytes);
     }
 }
 
 impl DescribedGroup {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.members.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -147,18 +147,12 @@ impl FromBytes for DescribedGroup {
 }
 
 impl ToBytes for DescribedGroupMember {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.member_id.serialize(version, _bytes)?;
-        self.client_id.serialize(version, _bytes)?;
-        self.client_host.serialize(version, _bytes)?;
-        self.member_metadata.serialize(version, _bytes)?;
-        self.member_assignment.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.member_id.serialize(version, _bytes);
+        self.client_id.serialize(version, _bytes);
+        self.client_host.serialize(version, _bytes);
+        self.member_metadata.serialize(version, _bytes);
+        self.member_assignment.serialize(version, _bytes);
     }
 }
 

@@ -45,9 +45,9 @@ impl ApiResponse for DeleteTopicsResponse {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         if version >= ApiVersion(1) {
-            self.throttle_time_ms.serialize(version, _bytes)?;
+            self.throttle_time_ms.serialize(version, _bytes);
         }
-        self.responses.serialize(version, _bytes)?;
+        self.responses.serialize(version, _bytes);
         Ok(())
     }
 
@@ -67,6 +67,9 @@ impl ApiResponse for DeleteTopicsResponse {
 
 impl DeleteTopicsResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.responses.iter() {
+            item.validate_fields(_version)?;
+        }
         if self.throttle_time_ms != i32::default() && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "throttle_time_ms",
@@ -79,15 +82,9 @@ impl DeleteTopicsResponse {
 }
 
 impl ToBytes for DeletableTopicResult {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.error_code.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.error_code.serialize(version, _bytes);
     }
 }
 

@@ -33,8 +33,8 @@ impl ApiResponse for EndTxnResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.throttle_time_ms.serialize(version, _bytes)?;
-        self.error_code.serialize(version, _bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes);
+        self.error_code.serialize(version, _bytes);
         Ok(())
     }
 

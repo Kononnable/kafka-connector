@@ -91,8 +91,8 @@ impl ApiResponse for DescribeConfigsResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.throttle_time_ms.serialize(version, _bytes)?;
-        self.results.serialize(version, _bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes);
+        self.results.serialize(version, _bytes);
         Ok(())
     }
 
@@ -108,28 +108,28 @@ impl ApiResponse for DescribeConfigsResponse {
 
 impl DescribeConfigsResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.results.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for DescribeConfigsResult {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.error_message.serialize(version, _bytes)?;
-        self.resource_type.serialize(version, _bytes)?;
-        self.resource_name.serialize(version, _bytes)?;
-        self.configs.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.error_code.serialize(version, _bytes);
+        self.error_message.serialize(version, _bytes);
+        self.resource_type.serialize(version, _bytes);
+        self.resource_name.serialize(version, _bytes);
+        self.configs.serialize(version, _bytes);
     }
 }
 
 impl DescribeConfigsResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.configs.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -152,31 +152,28 @@ impl FromBytes for DescribeConfigsResult {
 }
 
 impl ToBytes for DescribeConfigsResourceResult {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.value.serialize(version, _bytes)?;
-        self.read_only.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.value.serialize(version, _bytes);
+        self.read_only.serialize(version, _bytes);
         if version >= ApiVersion(0) {
-            self.is_default.serialize(version, _bytes)?;
+            self.is_default.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
-            self.config_source.serialize(version, _bytes)?;
+            self.config_source.serialize(version, _bytes);
         }
-        self.is_sensitive.serialize(version, _bytes)?;
+        self.is_sensitive.serialize(version, _bytes);
         if version >= ApiVersion(1) {
-            self.synonyms.serialize(version, _bytes)?;
+            self.synonyms.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 
 impl DescribeConfigsResourceResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.synonyms.iter() {
+            item.validate_fields(_version)?;
+        }
         if self.is_default != bool::default() && _version.0 < 0 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "is_default",
@@ -236,22 +233,16 @@ impl Default for DescribeConfigsResourceResult {
 }
 
 impl ToBytes for DescribeConfigsSynonym {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
         if version >= ApiVersion(1) {
-            self.name.serialize(version, _bytes)?;
+            self.name.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
-            self.value.serialize(version, _bytes)?;
+            self.value.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
-            self.source.serialize(version, _bytes)?;
+            self.source.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 

@@ -36,9 +36,9 @@ impl ApiRequest for HeartbeatRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.group_id.serialize(version, _bytes)?;
-        self.generationid.serialize(version, _bytes)?;
-        self.member_id.serialize(version, _bytes)?;
+        self.group_id.serialize(version, _bytes);
+        self.generationid.serialize(version, _bytes);
+        self.member_id.serialize(version, _bytes);
         Ok(())
     }
 

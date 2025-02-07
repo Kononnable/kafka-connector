@@ -68,9 +68,9 @@ impl ApiResponse for ListOffsetResponse {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         if version >= ApiVersion(2) {
-            self.throttle_time_ms.serialize(version, _bytes)?;
+            self.throttle_time_ms.serialize(version, _bytes);
         }
-        self.topics.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes);
         Ok(())
     }
 
@@ -90,25 +90,25 @@ impl ApiResponse for ListOffsetResponse {
 
 impl ListOffsetResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topics.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for ListOffsetTopicResponse {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.partitions.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.partitions.serialize(version, _bytes);
     }
 }
 
 impl ListOffsetTopicResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.partitions.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -122,27 +122,21 @@ impl FromBytes for ListOffsetTopicResponse {
 }
 
 impl ToBytes for ListOffsetPartitionResponse {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partition_index.serialize(version, _bytes)?;
-        self.error_code.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partition_index.serialize(version, _bytes);
+        self.error_code.serialize(version, _bytes);
         if version >= ApiVersion(0) {
-            self.old_style_offsets.serialize(version, _bytes)?;
+            self.old_style_offsets.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
-            self.timestamp.serialize(version, _bytes)?;
+            self.timestamp.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
-            self.offset.serialize(version, _bytes)?;
+            self.offset.serialize(version, _bytes);
         }
         if version >= ApiVersion(4) {
-            self.leader_epoch.serialize(version, _bytes)?;
+            self.leader_epoch.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 

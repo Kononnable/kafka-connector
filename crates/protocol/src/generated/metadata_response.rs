@@ -117,16 +117,16 @@ impl ApiResponse for MetadataResponse {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         if version >= ApiVersion(3) {
-            self.throttle_time_ms.serialize(version, _bytes)?;
+            self.throttle_time_ms.serialize(version, _bytes);
         }
-        self.brokers.serialize(version, _bytes)?;
+        self.brokers.serialize(version, _bytes);
         if version >= ApiVersion(2) {
-            self.cluster_id.serialize(version, _bytes)?;
+            self.cluster_id.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
-            self.controller_id.serialize(version, _bytes)?;
+            self.controller_id.serialize(version, _bytes);
         }
-        self.topics.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes);
         Ok(())
     }
 
@@ -164,6 +164,14 @@ impl ApiResponse for MetadataResponse {
 
 impl MetadataResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.brokers.iter() {
+            item.0.validate_fields(_version)?;
+            item.1.validate_fields(_version)?;
+        }
+        for item in self.topics.iter() {
+            item.0.validate_fields(_version)?;
+            item.1.validate_fields(_version)?;
+        }
         if self.throttle_time_ms != i32::default() && _version.0 < 3 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "throttle_time_ms",
@@ -188,14 +196,8 @@ impl Default for MetadataResponse {
 }
 
 impl ToBytes for MetadataResponseBrokerKey {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.node_id.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.node_id.serialize(version, _bytes);
     }
 }
 
@@ -213,18 +215,12 @@ impl FromBytes for MetadataResponseBrokerKey {
 }
 
 impl ToBytes for MetadataResponseBroker {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.host.serialize(version, _bytes)?;
-        self.port.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.host.serialize(version, _bytes);
+        self.port.serialize(version, _bytes);
         if version >= ApiVersion(1) {
-            self.rack.serialize(version, _bytes)?;
+            self.rack.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 
@@ -248,14 +244,8 @@ impl FromBytes for MetadataResponseBroker {
 }
 
 impl ToBytes for MetadataResponseTopicKey {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
     }
 }
 
@@ -273,23 +263,20 @@ impl FromBytes for MetadataResponseTopicKey {
 }
 
 impl ToBytes for MetadataResponseTopic {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.error_code.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.error_code.serialize(version, _bytes);
         if version >= ApiVersion(1) {
-            self.is_internal.serialize(version, _bytes)?;
+            self.is_internal.serialize(version, _bytes);
         }
-        self.partitions.serialize(version, _bytes)?;
-        Ok(())
+        self.partitions.serialize(version, _bytes);
     }
 }
 
 impl MetadataResponseTopic {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.partitions.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -312,24 +299,18 @@ impl FromBytes for MetadataResponseTopic {
 }
 
 impl ToBytes for MetadataResponsePartition {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.partition_index.serialize(version, _bytes)?;
-        self.leader_id.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.error_code.serialize(version, _bytes);
+        self.partition_index.serialize(version, _bytes);
+        self.leader_id.serialize(version, _bytes);
         if version >= ApiVersion(7) {
-            self.leader_epoch.serialize(version, _bytes)?;
+            self.leader_epoch.serialize(version, _bytes);
         }
-        self.replica_nodes.serialize(version, _bytes)?;
-        self.isr_nodes.serialize(version, _bytes)?;
+        self.replica_nodes.serialize(version, _bytes);
+        self.isr_nodes.serialize(version, _bytes);
         if version >= ApiVersion(5) {
-            self.offline_replicas.serialize(version, _bytes)?;
+            self.offline_replicas.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 

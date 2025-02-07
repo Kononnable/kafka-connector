@@ -46,9 +46,9 @@ impl ApiRequest for DescribeConfigsRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.resources.serialize(version, _bytes)?;
+        self.resources.serialize(version, _bytes);
         if version >= ApiVersion(1) {
-            self.include_synoyms.serialize(version, _bytes)?;
+            self.include_synoyms.serialize(version, _bytes);
         }
         Ok(())
     }
@@ -69,6 +69,9 @@ impl ApiRequest for DescribeConfigsRequest {
 
 impl DescribeConfigsRequest {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.resources.iter() {
+            item.validate_fields(_version)?;
+        }
         if self.include_synoyms != false && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "include_synoyms",
@@ -81,16 +84,10 @@ impl DescribeConfigsRequest {
 }
 
 impl ToBytes for DescribeConfigsResource {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.resource_type.serialize(version, _bytes)?;
-        self.resource_name.serialize(version, _bytes)?;
-        self.configuration_keys.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.resource_type.serialize(version, _bytes);
+        self.resource_name.serialize(version, _bytes);
+        self.configuration_keys.serialize(version, _bytes);
     }
 }
 

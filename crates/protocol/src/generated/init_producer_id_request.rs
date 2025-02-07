@@ -33,8 +33,8 @@ impl ApiRequest for InitProducerIdRequest {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.transactional_id.serialize(version, _bytes)?;
-        self.transaction_timeout_ms.serialize(version, _bytes)?;
+        self.transactional_id.serialize(version, _bytes);
+        self.transaction_timeout_ms.serialize(version, _bytes);
         Ok(())
     }
 

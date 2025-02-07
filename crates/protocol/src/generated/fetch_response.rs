@@ -102,15 +102,15 @@ impl ApiResponse for FetchResponse {
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
         if version >= ApiVersion(1) {
-            self.throttle_time_ms.serialize(version, _bytes)?;
+            self.throttle_time_ms.serialize(version, _bytes);
         }
         if version >= ApiVersion(7) {
-            self.error_code.serialize(version, _bytes)?;
+            self.error_code.serialize(version, _bytes);
         }
         if version >= ApiVersion(7) {
-            self.session_id.serialize(version, _bytes)?;
+            self.session_id.serialize(version, _bytes);
         }
-        self.topics.serialize(version, _bytes)?;
+        self.topics.serialize(version, _bytes);
         Ok(())
     }
 
@@ -142,6 +142,9 @@ impl ApiResponse for FetchResponse {
 
 impl FetchResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.topics.iter() {
+            item.validate_fields(_version)?;
+        }
         if self.error_code != i16::default() && _version.0 < 7 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "error_code",
@@ -161,20 +164,17 @@ impl FetchResponse {
 }
 
 impl ToBytes for FetchableTopicResponse {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.partitions.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.partitions.serialize(version, _bytes);
     }
 }
 
 impl FetchableTopicResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.partitions.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
@@ -188,31 +188,28 @@ impl FromBytes for FetchableTopicResponse {
 }
 
 impl ToBytes for FetchablePartitionResponse {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.partition_index.serialize(version, _bytes)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.high_watermark.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.partition_index.serialize(version, _bytes);
+        self.error_code.serialize(version, _bytes);
+        self.high_watermark.serialize(version, _bytes);
         if version >= ApiVersion(4) {
-            self.last_stable_offset.serialize(version, _bytes)?;
+            self.last_stable_offset.serialize(version, _bytes);
         }
         if version >= ApiVersion(5) {
-            self.log_start_offset.serialize(version, _bytes)?;
+            self.log_start_offset.serialize(version, _bytes);
         }
         if version >= ApiVersion(4) {
-            self.aborted.serialize(version, _bytes)?;
+            self.aborted.serialize(version, _bytes);
         }
-        self.records.serialize(version, _bytes)?;
-        Ok(())
+        self.records.serialize(version, _bytes);
     }
 }
 
 impl FetchablePartitionResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.aborted.iter().flatten() {
+            item.validate_fields(_version)?;
+        }
         if self.aborted != Some(Vec::<AbortedTransaction>::default()) && _version.0 < 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "aborted",
@@ -272,19 +269,13 @@ impl Default for FetchablePartitionResponse {
 }
 
 impl ToBytes for AbortedTransaction {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
         if version >= ApiVersion(4) {
-            self.producer_id.serialize(version, _bytes)?;
+            self.producer_id.serialize(version, _bytes);
         }
         if version >= ApiVersion(4) {
-            self.first_offset.serialize(version, _bytes)?;
+            self.first_offset.serialize(version, _bytes);
         }
-        Ok(())
     }
 }
 

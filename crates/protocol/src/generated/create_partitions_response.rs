@@ -45,8 +45,8 @@ impl ApiResponse for CreatePartitionsResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.throttle_time_ms.serialize(version, _bytes)?;
-        self.results.serialize(version, _bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes);
+        self.results.serialize(version, _bytes);
         Ok(())
     }
 
@@ -62,21 +62,18 @@ impl ApiResponse for CreatePartitionsResponse {
 
 impl CreatePartitionsResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.results.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for CreatePartitionsTopicResult {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.name.serialize(version, _bytes)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.error_message.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.name.serialize(version, _bytes);
+        self.error_code.serialize(version, _bytes);
+        self.error_message.serialize(version, _bytes);
     }
 }
 

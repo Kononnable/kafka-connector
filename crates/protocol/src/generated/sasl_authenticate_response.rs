@@ -39,11 +39,11 @@ impl ApiResponse for SaslAuthenticateResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.error_message.serialize(version, _bytes)?;
-        self.auth_bytes.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes);
+        self.error_message.serialize(version, _bytes);
+        self.auth_bytes.serialize(version, _bytes);
         if version >= ApiVersion(1) {
-            self.session_lifetime_ms.serialize(version, _bytes)?;
+            self.session_lifetime_ms.serialize(version, _bytes);
         }
         Ok(())
     }

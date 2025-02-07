@@ -70,10 +70,10 @@ impl ApiResponse for DescribeAclsResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.throttle_time_ms.serialize(version, _bytes)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.error_message.serialize(version, _bytes)?;
-        self.resources.serialize(version, _bytes)?;
+        self.throttle_time_ms.serialize(version, _bytes);
+        self.error_code.serialize(version, _bytes);
+        self.error_message.serialize(version, _bytes);
+        self.resources.serialize(version, _bytes);
         Ok(())
     }
 
@@ -93,29 +93,29 @@ impl ApiResponse for DescribeAclsResponse {
 
 impl DescribeAclsResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.resources.iter() {
+            item.validate_fields(_version)?;
+        }
         Ok(())
     }
 }
 
 impl ToBytes for DescribeAclsResource {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.r#type.serialize(version, _bytes)?;
-        self.name.serialize(version, _bytes)?;
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.r#type.serialize(version, _bytes);
+        self.name.serialize(version, _bytes);
         if version >= ApiVersion(1) {
-            self.pattern_type.serialize(version, _bytes)?;
+            self.pattern_type.serialize(version, _bytes);
         }
-        self.acls.serialize(version, _bytes)?;
-        Ok(())
+        self.acls.serialize(version, _bytes);
     }
 }
 
 impl DescribeAclsResource {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
+        for item in self.acls.iter() {
+            item.validate_fields(_version)?;
+        }
         if self.pattern_type != 3 && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "pattern_type",
@@ -158,17 +158,11 @@ impl Default for DescribeAclsResource {
 }
 
 impl ToBytes for AclDescription {
-    fn serialize(
-        &self,
-        version: ApiVersion,
-        _bytes: &mut BytesMut,
-    ) -> Result<(), SerializationError> {
-        self.validate_fields(version)?;
-        self.principal.serialize(version, _bytes)?;
-        self.host.serialize(version, _bytes)?;
-        self.operation.serialize(version, _bytes)?;
-        self.permission_type.serialize(version, _bytes)?;
-        Ok(())
+    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
+        self.principal.serialize(version, _bytes);
+        self.host.serialize(version, _bytes);
+        self.operation.serialize(version, _bytes);
+        self.permission_type.serialize(version, _bytes);
     }
 }
 

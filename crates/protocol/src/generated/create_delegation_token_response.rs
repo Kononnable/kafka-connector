@@ -54,15 +54,15 @@ impl ApiResponse for CreateDelegationTokenResponse {
         debug_assert!(version >= Self::get_min_supported_version());
         debug_assert!(version <= Self::get_max_supported_version());
         self.validate_fields(version)?;
-        self.error_code.serialize(version, _bytes)?;
-        self.principal_type.serialize(version, _bytes)?;
-        self.principal_name.serialize(version, _bytes)?;
-        self.issue_timestamp_ms.serialize(version, _bytes)?;
-        self.expiry_timestamp_ms.serialize(version, _bytes)?;
-        self.max_timestamp_ms.serialize(version, _bytes)?;
-        self.token_id.serialize(version, _bytes)?;
-        self.hmac.serialize(version, _bytes)?;
-        self.throttle_time_ms.serialize(version, _bytes)?;
+        self.error_code.serialize(version, _bytes);
+        self.principal_type.serialize(version, _bytes);
+        self.principal_name.serialize(version, _bytes);
+        self.issue_timestamp_ms.serialize(version, _bytes);
+        self.expiry_timestamp_ms.serialize(version, _bytes);
+        self.max_timestamp_ms.serialize(version, _bytes);
+        self.token_id.serialize(version, _bytes);
+        self.hmac.serialize(version, _bytes);
+        self.throttle_time_ms.serialize(version, _bytes);
         Ok(())
     }
 
