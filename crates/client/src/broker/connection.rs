@@ -1,10 +1,10 @@
 use crate::cluster::{error::ApiCallError, options::ClusterControllerOptions};
 use bytes::BytesMut;
 use kafka_connector_protocol::{
-    api_versions_request::ApiVersionsRequest, api_versions_response::ApiVersionsResponseKeyKey,
-    metadata_request::MetadataRequest, metadata_response::MetadataResponse,
-    request_header::RequestHeader, response_header::ResponseHeader, ApiKey, ApiRequest,
-    ApiResponse, ApiVersion,
+    ApiKey, ApiRequest, ApiResponse, ApiVersion, api_versions_request::ApiVersionsRequest,
+    api_versions_response::ApiVersionsResponseKeyKey, metadata_request::MetadataRequest,
+    metadata_response::MetadataResponse, request_header::RequestHeader,
+    response_header::ResponseHeader,
 };
 use std::fmt::Debug;
 use thiserror::Error as DeriveError;

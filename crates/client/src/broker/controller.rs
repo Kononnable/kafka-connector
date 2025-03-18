@@ -1,5 +1,5 @@
 use crate::{
-    broker::broker_loop::{broker_loop, BrokerLoopSignal},
+    broker::broker_loop::{BrokerLoopSignal, broker_loop},
     cluster::{error::ApiCallError, options::ClusterControllerOptions},
 };
 use bytes::BytesMut;
@@ -74,7 +74,7 @@ impl BrokerController {
         &self,
         version: ApiVersion,
         request: R,
-    ) -> impl Future<Output = Result<R::Response, ApiCallError>> {
+    ) -> impl Future<Output = Result<R::Response, ApiCallError>> + use<R> {
         let (tx, rx) = oneshot::channel();
 
         let mut buffer = self.buffer.lock().expect("Poisoned lock");

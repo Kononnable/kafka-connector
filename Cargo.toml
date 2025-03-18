@@ -1,3 +1,12 @@
 [workspace]
 members = ["crates/*"]
 resolver = "2"
+
+[workspace.package]
+authors = ["kononnable <kononnable@gmail.com>"]
+edition = "2024"
+keywords = ["kafka"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/kononnable/kafka-connector"
+rust-version = "1.85.0"
+version = "0.1.0"

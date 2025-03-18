@@ -11,7 +11,7 @@ use tokio_stream::StreamExt;
 use crate::{
     broker::connection::fetch_initial_broker_list_from_broker, cluster::error::ApiCallError,
 };
-use kafka_connector_protocol::{metadata_response::MetadataResponse, ApiRequest, ApiVersion};
+use kafka_connector_protocol::{ApiRequest, ApiVersion, metadata_response::MetadataResponse};
 use tracing::{debug, instrument};
 
 /// Main entrypoint for communication with Kafka cluster.
@@ -119,6 +119,7 @@ mod tests {
         use super::*;
         use bytes::BytesMut;
         use kafka_connector_protocol::{
+            ApiKey, ApiRequest, ApiResponse,
             api_versions_response::{
                 ApiVersionsResponse, ApiVersionsResponseKey, ApiVersionsResponseKeyKey,
             },
@@ -126,7 +127,6 @@ mod tests {
             metadata_response::{MetadataResponseBroker, MetadataResponseBrokerKey},
             request_header::RequestHeader,
             response_header::ResponseHeader,
-            ApiKey, ApiRequest, ApiResponse,
         };
         use std::{ops::Sub, time::Duration};
         use tokio::{
@@ -253,7 +253,7 @@ mod tests {
             .await;
             assert!(result.is_ok());
             assert_eq!(
-                result.unwrap().get_broker_list().await[0].1 .0,
+                result.unwrap().get_broker_list().await[0].1.0,
                 bootstrap_servers[1].to_string()
             );
         }

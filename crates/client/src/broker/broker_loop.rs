@@ -82,11 +82,11 @@ pub async fn broker_loop(
                             return;
                         }
                         Some(ApiRequestMessage{response_sender, api_key, api_version, request}) => {
-                            if let Ok(correlation_id) = connection.send(api_key, api_version, request).await {
+                            match connection.send(api_key, api_version, request).await { Ok(correlation_id) => {
                                 calls_in_transit.insert(correlation_id,response_sender);
-                            } else {
+                            } _ => {
                                 todo_on_tcp_stream_error();
-                            }
+                            }}
                         }
                     }
                 },

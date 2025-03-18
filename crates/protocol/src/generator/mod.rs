@@ -1,5 +1,5 @@
 use crate::generator::structs::{ApiSpec, ApiSpecField, ApiSpecFieldSubtype};
-use anyhow::{bail, Context};
+use anyhow::{Context, bail};
 use convert_case::{Case, Casing};
 use std::{
     env,
