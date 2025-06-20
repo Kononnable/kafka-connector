@@ -203,6 +203,10 @@ fn map_error_inline(value: ApiCallError) -> BrokerConnectionInitializationError 
             panic!("Serialization failure during broker connection. {:?}", e)
         }
         // TODO: check if needed
+        ApiCallError::TimeoutReached => {
+            panic!("TODO")
+        }
+        // TODO: check if needed
         ApiCallError::BrokerNotFound(_) => {
             unreachable!();
         }

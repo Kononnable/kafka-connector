@@ -18,11 +18,12 @@ pub enum BrokerControllerStatus {
 }
 // TODO: Extract to separate file?
 pub(super) struct ApiRequestMessage {
-    pub response_sender: oneshot::Sender<Result<BytesMut, ApiCallError>>,
+    pub response_sender: ResponseChannel,
     pub api_key: ApiKey,
     pub api_version: ApiVersion,
     pub request: BytesMut,
 }
+pub(super) type ResponseChannel = oneshot::Sender<Result<BytesMut, ApiCallError>>;
 
 pub struct BrokerController {
     address: String,

@@ -20,4 +20,6 @@ pub enum ApiCallError {
     IoError(#[from] std::io::Error),
     #[error("Serialization error {0}")]
     SerializationError(#[from] kafka_connector_protocol::SerializationError),
+    #[error("ApiCall timeout reached")]
+    TimeoutReached,
 }
