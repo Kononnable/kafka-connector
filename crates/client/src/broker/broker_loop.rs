@@ -2,25 +2,25 @@ use crate::broker::connection::{BrokerConnection, BrokerConnectionInitialization
 use crate::broker::controller::ResponseChannel;
 use crate::cluster::error::ApiCallError;
 use crate::{
-    broker::{
-        connection::fetch_initial_broker_list_from_broker,
-        controller::{ApiRequestMessage, BrokerControllerStatus},
-    },
+    broker::controller::{ApiRequestMessage, BrokerControllerStatus},
     cluster::options::ClusterControllerOptions,
 };
-use kafka_connector_protocol::metadata_response::MetadataResponse;
+use bytes::BytesMut;
+use indexmap::IndexMap;
+use kafka_connector_protocol::ApiRequest;
+use kafka_connector_protocol::api_versions_request::ApiVersionsRequest;
+use kafka_connector_protocol::api_versions_response::{
+    ApiVersionsResponse, ApiVersionsResponseKey,
+};
+use kafka_connector_protocol::request_header::RequestHeader;
+use kafka_connector_protocol::response_header::ResponseHeader;
 use std::collections::{HashMap, VecDeque};
-use std::sync::Arc;
-use tokio::sync::{mpsc, oneshot};
-use tokio::task::JoinHandle;
-use tokio::time::Instant;
+use std::sync::{Arc, RwLock};
+use tokio::net::TcpStream;
+use tokio::sync::mpsc;
+use tokio::task::{JoinError, JoinHandle};
+use tokio::time::{Instant, Sleep, sleep_until, timeout};
 use tracing::{debug, instrument};
-
-#[derive(Debug)]
-pub enum BrokerLoopSignal {
-    StatusRequest(oneshot::Sender<BrokerControllerStatus>),
-    // TODO: Wait for no requests in transit - can be used in clean shutdown
-}
 
 struct QueuedApiCall {
     pub timeout: Instant,
@@ -28,166 +28,334 @@ struct QueuedApiCall {
 }
 
 enum BrokerLoopStatus {
+    Disconnected {
+        backoff_timeout: Instant,
+    },
     Connecting {
         connection_establish_task: JoinHandle<
-            Result<(BrokerConnection, MetadataResponse), BrokerConnectionInitializationError>,
+            Result<(BrokerConnection, ApiVersionsResponse), BrokerConnectionInitializationError>,
         >,
     },
     Connected {
         connection: BrokerConnection,
-        api_calls_in_transit: HashMap<i32, ResponseChannel>,
     },
 }
 
-#[instrument(level = "debug", skip_all)]
-pub async fn broker_loop(
+pub struct BrokerLoop {
+    _node_id: i32,
     address: String,
-    mut signal_receiver: mpsc::UnboundedReceiver<BrokerLoopSignal>,
-    mut api_request_receiver: mpsc::UnboundedReceiver<ApiRequestMessage>,
     options: Arc<ClusterControllerOptions>,
-    node_id: i32,
-) {
-    debug!(?node_id, ?address, "Broker loop started.");
-    // TODO: Proper handle of retries - retries on client, not broker loop(?)
-    // TODO: any cancel cannot be done mid-send (sending request partially will break a connection)
-    // TODO: Trace logs
+    api_request_receiver: mpsc::UnboundedReceiver<ApiRequestMessage>,
+    api_call_queue: VecDeque<QueuedApiCall>,
+    api_calls_in_transit: HashMap<i32, (ResponseChannel, Instant)>,
+    supported_api_versions: Arc<RwLock<IndexMap<i16, ApiVersionsResponseKey>>>,
+    loop_status: BrokerLoopStatus,
+    status: Arc<RwLock<BrokerControllerStatus>>, // TODO: remove duplication - status, loop_status
+}
 
-    let mut api_call_queue = VecDeque::new();
+impl BrokerLoop {
+    #[instrument(level = "debug", skip(api_request_receiver))]
+    pub async fn start(
+        address: String,
+        api_request_receiver: mpsc::UnboundedReceiver<ApiRequestMessage>,
+        options: Arc<ClusterControllerOptions>,
+        node_id: i32,
+        supported_api_versions: Arc<RwLock<IndexMap<i16, ApiVersionsResponseKey>>>,
+        status: Arc<RwLock<BrokerControllerStatus>>,
+    ) {
+        BrokerLoop {
+            address,
+            api_request_receiver,
+            options,
+            _node_id: node_id,
+            api_call_queue: VecDeque::new(),
+            loop_status: BrokerLoopStatus::Disconnected {
+                backoff_timeout: Instant::now(),
+            },
+            api_calls_in_transit: HashMap::new(),
+            supported_api_versions,
+            status,
+        }
+        .run()
+        .await;
+    }
 
-    let mut broker_loop_status = BrokerLoopStatus::Connecting {
-        connection_establish_task: {
-            let options = options.clone();
-            let address = address.clone();
-            tokio::spawn(async move {
-                // TODO: normal method for broker connection, not fetch_initial_broker_list_from_broker
-                // fetch broker supported api versions
-                // should also fetch topic list periodically? (metadata refresh)
-                fetch_initial_broker_list_from_broker(&options, &address).await
-            })
-        },
-    };
+    #[instrument(level = "debug", skip(self))]
+    async fn run(&mut self) {
+        debug!("Broker loop started.");
 
-    loop {
-        // TODO: (?) user may specify custom timeout - making api_cal_queue not sorted (front, pop_front will be wrong)
-        // TODO: join api calls in progress
-        let next_timeout = if let Some(QueuedApiCall { timeout, .. }) = api_call_queue.front() {
-            if timeout <= &Instant::now() {
-                // Ignore error - request sender closed
-                _ = api_call_queue
-                    .pop_front()
-                    .unwrap()
-                    .request
-                    .response_sender
-                    .send(Err(ApiCallError::TimeoutReached));
-                continue;
-            } else {
-                Some(tokio::time::sleep_until(*timeout))
+        loop {
+            let next_timeout = self.handle_outdated_requests();
+
+            self.send_waiting_requests().await;
+
+            tokio::select! {
+                _ = next_timeout.unwrap(), if next_timeout.is_some()=> {
+                    // Handled in next loop iteration
+                },
+                signal =  self.api_request_receiver.recv() =>{
+                    match signal {
+                        Some(request) => {
+                             self.api_call_queue.push_back(QueuedApiCall{
+                                request,
+                                timeout: Instant::now() +  self.options.request_timeout,
+                            })
+                        }
+                        None => {
+                            break;
+                        }
+                    }
+                },
+                (reconnect, connection_establish_task, received_data) = async {
+                    match &mut  self.loop_status {
+                        BrokerLoopStatus::Disconnected { backoff_timeout} => {
+                            sleep_until(*backoff_timeout).await;
+                            (Some(()), None, None)
+                        }
+                        BrokerLoopStatus::Connecting{ connection_establish_task } => {
+                            (None, Some(connection_establish_task.await),None)
+                        }
+                        BrokerLoopStatus::Connected{ connection, ..} => {
+                            (None, None,  Some(connection.try_recv().await))
+                        }
+                    }
+                } => {
+                    match (reconnect, connection_establish_task, received_data)  {
+                        (Some(()), None, None) => {
+                             self.handle_connection_backoff_met();
+                        }
+                        (None, Some(resp), None) => {
+                            self.handle_connection_established(resp);
+
+                        }
+                        (None, None, Some(received_data)) => {
+                            self.handle_connection_data_received(received_data);
+
+                        }
+                        _ => unreachable!()
+                    }
+                }
             }
-        } else {
-            None
-        };
+        }
 
-        if let BrokerLoopStatus::Connected {
-            connection,
-            api_calls_in_transit,
-        } = &mut broker_loop_status
-        {
-            while api_calls_in_transit.len() <= options.max_requests_per_connection {
-                if let Some(call) = api_call_queue.pop_front() {
-                    let correlation_id = connection
+        for call in self.api_call_queue.drain(..) {
+            let _ = call
+                .request
+                .response_sender
+                .send(Err(ApiCallError::BrokerConnectionClosed));
+        }
+        for (_correlation_id, (response_sender, _timeout)) in self.api_calls_in_transit.drain() {
+            let _ = response_sender.send(Err(ApiCallError::BrokerConnectionClosed));
+        }
+        debug!("BrokerController main loop is closing");
+
+        // TODO: Make sure it closes when broker is dropped - test?
+    }
+
+    #[instrument(level = "debug", skip(self))]
+    fn handle_connection_backoff_met(&mut self) {
+        debug_assert!(self.api_calls_in_transit.is_empty());
+        let options = self.options.clone();
+        let address = self.address.clone();
+        let connection_task = timeout(options.connection_timeout, async move {
+            let stream = TcpStream::connect(address)
+                .await
+                .map_err(BrokerConnectionInitializationError::ConnectionError)?;
+
+            let buffer = BytesMut::with_capacity(options.buffer_size);
+            let header = RequestHeader {
+                client_id: options.client_name.to_owned(),
+                ..Default::default()
+            };
+
+            let mut connection = BrokerConnection::new(buffer, stream, header);
+
+            let api_versions_response = crate::broker::connection::call_api_inline(
+                &mut connection,
+                ApiVersionsRequest::default(),
+                ApiVersionsRequest::get_min_supported_version(),
+            )
+            .await?;
+
+            Ok((connection, api_versions_response))
+        });
+
+        let mut status = self.status.write().unwrap();
+        *status = BrokerControllerStatus::Connecting;
+        self.loop_status = BrokerLoopStatus::Connecting {
+            connection_establish_task: {
+                tokio::spawn(async move {
+                    connection_task
+                        .await
+                        .map_err(|_| BrokerConnectionInitializationError::ConnectionTimeoutReached)
+                        .unwrap()
+                })
+            },
+        }
+    }
+
+    #[instrument(level = "debug", skip(self))]
+    fn handle_connection_data_received(
+        &mut self,
+        received_data: Option<Result<(ResponseHeader, BytesMut), ApiCallError>>,
+    ) {
+        match received_data {
+            None => {
+                // Not enough data transferred to deserialize full response
+            }
+            Some(response) => {
+                match response {
+                    Err(err) => {
+                        debug!(?err, "Connection with kafka broker broken.");
+
+                        for (_correlation_id, (resp_channel, _timeout)) in
+                            self.api_calls_in_transit.drain()
+                        {
+                            let _ = resp_channel.send(Err(ApiCallError::BrokerConnectionClosed)); // Ignore error - client not waiting for ack/response
+                        }
+                        let mut status = self.status.write().unwrap();
+                        *status = BrokerControllerStatus::Disconnected;
+                        self.loop_status = BrokerLoopStatus::Disconnected {
+                            backoff_timeout: Instant::now(),
+                        }; // No delay for first try after connection was already established
+                    }
+                    Ok((header, payload)) => {
+                        if let Some((response_channel, _timeout)) =
+                            self.api_calls_in_transit.remove(&header.correlation_id)
+                        {
+                            let _ = response_channel.send(Ok(payload)); // Ignore error - client not waiting for ack/response
+                        } else {
+                            debug!(?header.correlation_id,"Received response for request that was already timed out on client side.");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[instrument(level = "debug", skip(self, resp))]
+    fn handle_connection_established(
+        &mut self,
+        resp: Result<
+            Result<(BrokerConnection, ApiVersionsResponse), BrokerConnectionInitializationError>,
+            JoinError,
+        >,
+    ) {
+        match resp {
+            Ok(Ok((connection, api_versions))) => {
+                let mut status = self.status.write().unwrap();
+                *status = BrokerControllerStatus::Connected;
+                self.loop_status = BrokerLoopStatus::Connected { connection };
+                let mut supported_apis = self.supported_api_versions.write().unwrap();
+                *supported_apis = api_versions
+                    .api_keys
+                    .into_iter()
+                    .map(|(k, v)| (k.index, v))
+                    .collect();
+                debug!("Connection with kafka broker established.");
+            }
+            Err(e) => {
+                debug!(?e, "Connecting to kafka broker failed.");
+                panic!("Error connecting to kafka broker {e:?}");
+            }
+            Ok(Err(e)) => {
+                debug!(?e, "Connecting to kafka broker failed.");
+                let mut status = self.status.write().unwrap();
+                *status = BrokerControllerStatus::Disconnected;
+                self.loop_status = BrokerLoopStatus::Disconnected {
+                    backoff_timeout: Instant::now() + self.options.connection_retry_delay,
+                }
+            }
+        }
+    }
+
+    #[instrument(level = "debug", skip(self))]
+    async fn send_waiting_requests(&mut self) {
+        if let BrokerLoopStatus::Connected { connection, .. } = &mut self.loop_status {
+            while self.api_calls_in_transit.len() <= self.options.max_requests_per_connection {
+                if let Some(call) = self.api_call_queue.pop_front() {
+                    let result = connection
                         .send(
                             call.request.api_key,
                             call.request.api_version,
                             call.request.request,
                         )
-                        .await
-                        .unwrap(); // TODO:unwrap
-                    api_calls_in_transit.insert(correlation_id, call.request.response_sender);
-                }
-            }
-        }
-
-        tokio::select! {
-            _ = next_timeout.unwrap(), if next_timeout.is_some()=> {},
-            signal = signal_receiver.recv() => {
-                match signal{
-                     Some(BrokerLoopSignal::StatusRequest(tx)) => {
-                            let _ = tx.send(match &broker_loop_status {
-                                BrokerLoopStatus::Connecting { .. } =>BrokerControllerStatus::Connecting,
-                                BrokerLoopStatus::Connected { .. } => BrokerControllerStatus::Connected,
-                            });
-                        },
-                        None => {
-                            break;
+                        .await;
+                    match result {
+                        Ok(correlation_id) => {
+                            self.api_calls_in_transit.insert(
+                                correlation_id,
+                                (call.request.response_sender, call.timeout),
+                            );
                         }
-                }
-            }
-            signal = api_request_receiver.recv() =>{
-                match signal {
-                    None => {
-                        break;
-                    }
-                    Some(request) => {
-                        api_call_queue.push_back(QueuedApiCall{
-                            request,
-                            timeout: Instant::now() + options.request_timeout,
-                        })
-                    }
-                }
-            },
-            (connection_establish_task, received_data) = async {
-                match &mut broker_loop_status {
-                    BrokerLoopStatus::Connecting{ connection_establish_task } => {
-                        (Some(connection_establish_task.await),None)
-                    }
-                    BrokerLoopStatus::Connected{ connection, api_calls_in_transit } => {
-                        (None, Some((connection.try_recv().await , api_calls_in_transit)))
-                    }}
-            } => {
-                match (connection_establish_task, received_data)  {
-                    (Some(resp), None) => {
-                        // TODO: Error handling - unwraps plus error codes(?)
-                        let (connection,  metadata)  = resp.unwrap().unwrap();
-                        broker_loop_status = BrokerLoopStatus::Connected {
-                            connection,
-                            api_calls_in_transit: HashMap::new()
-                        };
-                        debug!(?address, "Connection with kafka broker established.");
-                    }
-                    (None, Some((received_data,api_calls_in_transit))) => {
-                        match received_data {
-                            None => {
-                                // Not enough data transferred to deserialize full response
+                        Err(err) => {
+                            debug!(
+                                ?err,
+                                ?call.request.api_key,
+                                ?call.request.api_version,
+                                "Sending api request to kafka broker failed."
+                            );
+                            let _ = call.request.response_sender.send(Err(err)); // Ignore error - client not waiting for ack/response
+                            for (_correlation_id, (resp_channel, _timeout)) in
+                                self.api_calls_in_transit.drain()
+                            {
+                                let _ =
+                                    resp_channel.send(Err(ApiCallError::BrokerConnectionClosed)); // Ignore error - client not waiting for ack/response
                             }
-                            Some(response) => {
-                                match response {
-                                    Err(_) => {
-                                        debug!(?address, "Connection with kafka broker broken.");
-                                        // TODO: Cancel all requests in progress
-
-                                            // TODO: EOF or io error, send to all scheduled messages
-                                            // TODO: Retries should be done in order, so should be handled here?
-                                            // TODO: On break of broker connection cancel all ongoing api calls - return error
-                                            //       (will be retried by another layer if needed) - this may be a problem for message ordering
-                                            // TODO: Log error?
-                                    }
-                                    Ok((header,payload)) => {
-                                        let response_channel = api_calls_in_transit.remove(&header.correlation_id).unwrap(); // TODO: Unrwap
-                                        let _ = response_channel.send(Ok(payload)); // Ignore error - client not waiting for ack/response
-                                    }
-                                }
-                            }
+                            let mut status = self.status.write().unwrap();
+                            *status = BrokerControllerStatus::Disconnected;
+                            self.loop_status = BrokerLoopStatus::Disconnected {
+                                backoff_timeout: Instant::now(),
+                            }; // No delay for first try after connection was already 
+                            return;
                         }
                     }
-                    _ => unreachable!()
                 }
             }
         }
     }
-    // TODO: Close procedure
-    // TODO: Cancel all requests
-    // TODO: gracefully close tcp connection?
-    debug!(node_id, "BrokerController main loop is closing");
 
-    // TODO: Make sure it closes when broker is dropped - test?
+    #[instrument(level = "debug", skip(self))]
+    fn handle_outdated_requests(&mut self) -> Option<Sleep> {
+        let mut next_timeout = loop {
+            if let Some(QueuedApiCall { timeout, .. }) = self.api_call_queue.front() {
+                if timeout <= &Instant::now() {
+                    // Ignore error - request sender closed
+                    _ = self
+                        .api_call_queue
+                        .pop_front()
+                        .unwrap()
+                        .request
+                        .response_sender
+                        .send(Err(ApiCallError::TimeoutReached));
+                    continue;
+                } else {
+                    break Some(*timeout);
+                }
+            } else {
+                break None;
+            }
+        };
+
+        let mut timed_out = vec![];
+        for (k, v) in self.api_calls_in_transit.iter() {
+            if v.1 <= Instant::now() {
+                timed_out.push(*k);
+            } else {
+                if let Some(t1) = next_timeout {
+                    if v.1 < t1 {
+                        next_timeout = Some(v.1);
+                    }
+                } else {
+                    next_timeout = Some(v.1);
+                }
+            }
+        }
+        for k in timed_out {
+            let call = self.api_calls_in_transit.remove(&k).unwrap();
+            let _ = call.0.send(Err(ApiCallError::TimeoutReached));
+        }
+
+        next_timeout.map(sleep_until)
+    }
 }

@@ -11,6 +11,7 @@ use tokio_stream::StreamExt;
 use crate::{
     broker::connection::fetch_initial_broker_list_from_broker, cluster::error::ApiCallError,
 };
+use kafka_connector_protocol::api_versions_response::ApiVersionsResponseKey;
 use kafka_connector_protocol::{ApiRequest, ApiVersion, metadata_response::MetadataResponse};
 use tracing::{debug, instrument};
 
@@ -29,7 +30,8 @@ impl ClusterController {
         options: ClusterControllerOptions,
     ) -> Result<ClusterController, ClusterControllerCreationError> {
         let options = Arc::new(options);
-        let metadata = Self::fetch_initial_broker_list(bootstrap_servers, &options).await?;
+        let (supported_apis, metadata) =
+            Self::fetch_initial_broker_list(bootstrap_servers, &options).await?;
 
         let broker_list = metadata
             .brokers
@@ -37,7 +39,12 @@ impl ClusterController {
             .map(|(k, v)| {
                 (
                     k.node_id,
-                    BrokerController::new(format!("{}:{}", v.host, v.port), &options, k.node_id),
+                    BrokerController::new(
+                        format!("{}:{}", v.host, v.port),
+                        &options,
+                        k.node_id,
+                        supported_apis.clone(),
+                    ),
                 )
             })
             .collect();
@@ -52,7 +59,10 @@ impl ClusterController {
     async fn fetch_initial_broker_list(
         bootstrap_servers: Vec<impl ToSocketAddrs + Debug>,
         options: &ClusterControllerOptions,
-    ) -> Result<MetadataResponse, ClusterControllerCreationError> {
+    ) -> Result<
+        (IndexMap<i16, ApiVersionsResponseKey>, MetadataResponse),
+        ClusterControllerCreationError,
+    > {
         if bootstrap_servers.is_empty() {
             return Err(ClusterControllerCreationError::NoClusterAddressFound);
         }
@@ -73,7 +83,7 @@ impl ClusterController {
                 debug!(?address, "Connecting to kafka broker");
                 match fetch_initial_broker_list_from_broker(options, address).await {
                     Ok(resp) => {
-                        return Ok(resp.1);
+                        return Ok((resp.1, resp.2));
                     }
                     Err(err) => {
                         debug!(?address, ?err, "Failed to connect to broker");

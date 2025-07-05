@@ -1,9 +1,10 @@
-use crate::{
-    broker::broker_loop::{BrokerLoopSignal, broker_loop},
-    cluster::{error::ApiCallError, options::ClusterControllerOptions},
-};
+use crate::broker::broker_loop::BrokerLoop;
+use crate::cluster::{error::ApiCallError, options::ClusterControllerOptions};
 use bytes::BytesMut;
+use indexmap::IndexMap;
+use kafka_connector_protocol::api_versions_response::ApiVersionsResponseKey;
 use kafka_connector_protocol::{ApiKey, ApiRequest, ApiResponse, ApiVersion};
+use std::sync::RwLock;
 use std::{
     future::Future,
     sync::{Arc, Mutex},
@@ -11,10 +12,11 @@ use std::{
 use tokio::sync::{mpsc, oneshot};
 use tracing::instrument;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum BrokerControllerStatus {
     Connecting,
     Connected,
+    Disconnected,
 }
 // TODO: Extract to separate file?
 pub(super) struct ApiRequestMessage {
@@ -27,46 +29,50 @@ pub(super) type ResponseChannel = oneshot::Sender<Result<BytesMut, ApiCallError>
 
 pub struct BrokerController {
     address: String,
-    loop_tx: mpsc::UnboundedSender<BrokerLoopSignal>,
     request_tx: mpsc::UnboundedSender<ApiRequestMessage>,
     buffer: Mutex<BytesMut>,
     options: Arc<ClusterControllerOptions>,
     _node_id: i32,
+    pub(crate) supported_api_versions: Arc<RwLock<IndexMap<i16, ApiVersionsResponseKey>>>, // TODO: pub crate for api(?)
+    status: Arc<RwLock<BrokerControllerStatus>>,
 }
 
 impl BrokerController {
+    // TODO: Assumption - until connected supported api versions are the same as on other nodes (copy from initial connection to cluster)
+    // TODO: Document parameters - parent
+    // TODO: metadata refresh
     #[instrument(level = "debug")]
     pub fn new(
         address: String,
         options: &Arc<ClusterControllerOptions>,
         node_id: i32,
+        parent_supported_apis: IndexMap<i16, ApiVersionsResponseKey>,
     ) -> BrokerController {
-        let (loop_tx, loop_rx) = mpsc::unbounded_channel();
         let (request_tx, request_rx) = mpsc::unbounded_channel();
-        tokio::spawn(broker_loop(
+        let supported_api_versions = Arc::new(RwLock::new(parent_supported_apis));
+        let status = Arc::new(RwLock::new(BrokerControllerStatus::Disconnected));
+        tokio::spawn(BrokerLoop::start(
             address.clone(),
-            loop_rx,
             request_rx,
             options.clone(),
             node_id,
+            supported_api_versions.clone(),
+            status.clone(),
         ));
         BrokerController {
             address,
-            loop_tx,
             request_tx,
             buffer: Mutex::new(BytesMut::with_capacity(options.buffer_size)),
             options: options.clone(),
             _node_id: node_id,
+            supported_api_versions,
+            status,
         }
     }
 
     #[instrument(level = "debug", skip_all)]
     pub async fn get_status(&self) -> BrokerControllerStatus {
-        let (tx, rx) = oneshot::channel();
-        self.loop_tx
-            .send(BrokerLoopSignal::StatusRequest(tx))
-            .expect("Broker loop channel should be open");
-        rx.await.expect("Broker loop channel should be open")
+        self.status.read().unwrap().clone()
     }
 
     // TODO: Test
