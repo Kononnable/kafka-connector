@@ -27,7 +27,49 @@ struct QueuedApiCall {
     pub request: ApiRequestMessage,
 }
 
-enum BrokerLoopStatus {
+struct BrokerLoopStatus {
+    inner: BrokerLoopStatusInner,
+    status: Arc<RwLock<BrokerControllerStatus>>,
+}
+impl AsRef<BrokerLoopStatusInner> for BrokerLoopStatus {
+    fn as_ref(&self) -> &BrokerLoopStatusInner {
+        &self.inner
+    }
+}
+impl AsMut<BrokerLoopStatusInner> for BrokerLoopStatus {
+    fn as_mut(&mut self) -> &mut BrokerLoopStatusInner {
+        // TODO: Using writing to dereferenced as_mut may invalidate internal state (synchronization with status field)
+        &mut self.inner
+    }
+}
+impl BrokerLoopStatus {
+    pub fn new(status: Arc<RwLock<BrokerControllerStatus>>) -> BrokerLoopStatus {
+        let mut status = BrokerLoopStatus {
+            inner: BrokerLoopStatusInner::Disconnected {
+                backoff_timeout: Instant::now(),
+            },
+            status,
+        };
+        // Make sure internal state is in sync
+        status.set(BrokerLoopStatusInner::Disconnected {
+            backoff_timeout: Instant::now(),
+        });
+        status
+    }
+    pub fn set(&mut self, new_inner: BrokerLoopStatusInner) {
+        let status = match &new_inner {
+            BrokerLoopStatusInner::Disconnected { .. } => BrokerControllerStatus::Disconnected,
+            BrokerLoopStatusInner::Connecting { .. } => BrokerControllerStatus::Connecting,
+            BrokerLoopStatusInner::Connected { .. } => BrokerControllerStatus::Connected,
+        };
+
+        self.inner = new_inner;
+        let mut guard = self.status.write().unwrap();
+        *guard = status;
+    }
+}
+
+enum BrokerLoopStatusInner {
     Disconnected {
         backoff_timeout: Instant,
     },
@@ -50,7 +92,6 @@ pub struct BrokerLoop {
     api_calls_in_transit: HashMap<i32, (ResponseChannel, Instant)>,
     supported_api_versions: Arc<RwLock<IndexMap<i16, ApiVersionsResponseKey>>>,
     loop_status: BrokerLoopStatus,
-    status: Arc<RwLock<BrokerControllerStatus>>, // TODO: remove duplication - status, loop_status
 }
 
 impl BrokerLoop {
@@ -69,12 +110,9 @@ impl BrokerLoop {
             options,
             _node_id: node_id,
             api_call_queue: VecDeque::new(),
-            loop_status: BrokerLoopStatus::Disconnected {
-                backoff_timeout: Instant::now(),
-            },
+            loop_status: BrokerLoopStatus::new(status),
             api_calls_in_transit: HashMap::new(),
             supported_api_versions,
-            status,
         }
         .run()
         .await;
@@ -107,15 +145,15 @@ impl BrokerLoop {
                     }
                 },
                 (reconnect, connection_establish_task, received_data) = async {
-                    match &mut  self.loop_status {
-                        BrokerLoopStatus::Disconnected { backoff_timeout} => {
+                    match &mut self.loop_status.as_mut() {
+                        BrokerLoopStatusInner::Disconnected { backoff_timeout} => {
                             sleep_until(*backoff_timeout).await;
                             (Some(()), None, None)
                         }
-                        BrokerLoopStatus::Connecting{ connection_establish_task } => {
+                        BrokerLoopStatusInner::Connecting{ connection_establish_task } => {
                             (None, Some(connection_establish_task.await),None)
                         }
-                        BrokerLoopStatus::Connected{ connection, ..} => {
+                        BrokerLoopStatusInner::Connected{ connection, ..} => {
                             (None, None,  Some(connection.try_recv().await))
                         }
                     }
@@ -180,9 +218,7 @@ impl BrokerLoop {
             Ok((connection, api_versions_response))
         });
 
-        let mut status = self.status.write().unwrap();
-        *status = BrokerControllerStatus::Connecting;
-        self.loop_status = BrokerLoopStatus::Connecting {
+        self.loop_status.set(BrokerLoopStatusInner::Connecting {
             connection_establish_task: {
                 tokio::spawn(async move {
                     connection_task
@@ -191,7 +227,7 @@ impl BrokerLoop {
                         .unwrap()
                 })
             },
-        }
+        });
     }
 
     #[instrument(level = "debug", skip(self))]
@@ -213,11 +249,9 @@ impl BrokerLoop {
                         {
                             let _ = resp_channel.send(Err(ApiCallError::BrokerConnectionClosed)); // Ignore error - client not waiting for ack/response
                         }
-                        let mut status = self.status.write().unwrap();
-                        *status = BrokerControllerStatus::Disconnected;
-                        self.loop_status = BrokerLoopStatus::Disconnected {
+                        self.loop_status.set(BrokerLoopStatusInner::Disconnected {
                             backoff_timeout: Instant::now(),
-                        }; // No delay for first try after connection was already established
+                        }); // No delay for first try after connection was already established
                     }
                     Ok((header, payload)) => {
                         if let Some((response_channel, _timeout)) =
@@ -243,9 +277,8 @@ impl BrokerLoop {
     ) {
         match resp {
             Ok(Ok((connection, api_versions))) => {
-                let mut status = self.status.write().unwrap();
-                *status = BrokerControllerStatus::Connected;
-                self.loop_status = BrokerLoopStatus::Connected { connection };
+                self.loop_status
+                    .set(BrokerLoopStatusInner::Connected { connection });
                 let mut supported_apis = self.supported_api_versions.write().unwrap();
                 *supported_apis = api_versions
                     .api_keys
@@ -260,18 +293,17 @@ impl BrokerLoop {
             }
             Ok(Err(e)) => {
                 debug!(?e, "Connecting to kafka broker failed.");
-                let mut status = self.status.write().unwrap();
-                *status = BrokerControllerStatus::Disconnected;
-                self.loop_status = BrokerLoopStatus::Disconnected {
+                self.loop_status.set(BrokerLoopStatusInner::Disconnected {
                     backoff_timeout: Instant::now() + self.options.connection_retry_delay,
-                }
+                });
             }
         }
     }
 
     #[instrument(level = "debug", skip(self))]
     async fn send_waiting_requests(&mut self) {
-        if let BrokerLoopStatus::Connected { connection, .. } = &mut self.loop_status {
+        if let BrokerLoopStatusInner::Connected { connection, .. } = &mut self.loop_status.as_mut()
+        {
             while self.api_calls_in_transit.len() <= self.options.max_requests_per_connection {
                 if let Some(call) = self.api_call_queue.pop_front() {
                     let result = connection
@@ -302,11 +334,9 @@ impl BrokerLoop {
                                 let _ =
                                     resp_channel.send(Err(ApiCallError::BrokerConnectionClosed)); // Ignore error - client not waiting for ack/response
                             }
-                            let mut status = self.status.write().unwrap();
-                            *status = BrokerControllerStatus::Disconnected;
-                            self.loop_status = BrokerLoopStatus::Disconnected {
+                            self.loop_status.set(BrokerLoopStatusInner::Disconnected {
                                 backoff_timeout: Instant::now(),
-                            }; // No delay for first try after connection was already 
+                            }); // No delay for first try after connection was already
                             return;
                         }
                     }
