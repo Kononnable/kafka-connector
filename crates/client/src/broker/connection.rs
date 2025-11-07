@@ -117,6 +117,7 @@ impl BrokerConnection {
 }
 
 // TODO: Rename
+// TODO: Test(?)
 #[instrument(level = "debug", skip_all)]
 pub(crate) async fn fetch_initial_broker_list_from_broker(
     options: &ClusterControllerOptions,
@@ -181,6 +182,7 @@ pub(crate) async fn fetch_initial_broker_list_from_broker(
 
 /// Used only for initial cluster metadata fetch, outside of that `BrokerController` is solely responsible for direct communication with kafka brokers
 /// If it fails(e.g. timeout) whole connection needs to be reseted
+// TODO: Test(?)
 pub(super) async fn call_api_inline<R: ApiRequest>(
     connection: &mut BrokerConnection,
     request: R,
@@ -224,6 +226,196 @@ fn map_error_inline(value: ApiCallError) -> BrokerConnectionInitializationError 
         // TODO: check if needed
         ApiCallError::BrokerNotFound(_) => {
             unreachable!();
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tokio::net::TcpListener;
+
+    mod try_recv {
+        use crate::broker::connection::BrokerConnection;
+        use bytes::BytesMut;
+        use kafka_connector_protocol::api_versions_request::ApiVersionsRequest;
+        use kafka_connector_protocol::request_header::RequestHeader;
+        use kafka_connector_protocol::{ApiRequest, ApiVersion};
+        use tokio::io::AsyncWriteExt;
+        use tokio::net::{TcpListener, TcpStream};
+        use tokio::sync::mpsc::UnboundedSender;
+
+        async fn setup_connection() -> (BrokerConnection, UnboundedSender<Vec<u8>>) {
+            let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let addr = server.local_addr().unwrap();
+
+            let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<Vec<u8>>();
+
+            tokio::spawn(async move {
+                let (mut connection, _) = server.accept().await.unwrap();
+                while let Some(bytes) = rx.recv().await {
+                    connection.write_all(&bytes[..]).await.unwrap();
+                    connection.flush().await.unwrap();
+                }
+            });
+            let stream = TcpStream::connect(addr).await.unwrap();
+
+            let buffer = BytesMut::with_capacity(1024);
+            let header = RequestHeader::default();
+
+            let connection = BrokerConnection::new(buffer, stream, header);
+            (connection, tx)
+        }
+
+        #[test_log::test(tokio::test)]
+        async fn handles_partial_messages_correctly() {
+            let (mut connection, server_response_tx) = setup_connection().await;
+
+            let mut messages_to_be_sent = BytesMut::with_capacity(1024);
+
+            // empty buffer, buffer with < 4 bytes (len), buffer with less bytes then in resp.len(), buffer with more than one message
+
+            let mut tmp_buf = BytesMut::with_capacity(1024);
+            let header = RequestHeader {
+                request_api_key: ApiVersionsRequest::get_api_key().0,
+                request_api_version: 1,
+                correlation_id: 1,
+                client_id: "Some text to make message longer".to_owned(),
+            };
+            let request = ApiVersionsRequest {};
+            header.serialize(ApiVersion(0), &mut tmp_buf).unwrap();
+            request.serialize(ApiVersion(0), &mut tmp_buf).unwrap();
+            let request_len = tmp_buf.len();
+            const MSG_SIZE_LEN: usize = 4;
+
+            messages_to_be_sent.extend_from_slice(&(request_len as i32).to_be_bytes());
+            messages_to_be_sent.extend_from_slice(&tmp_buf);
+
+            messages_to_be_sent.extend_from_slice(&(request_len as i32).to_be_bytes());
+            messages_to_be_sent.extend_from_slice(&tmp_buf);
+
+            messages_to_be_sent.extend_from_slice(&(request_len as i32).to_be_bytes());
+            messages_to_be_sent.extend_from_slice(&tmp_buf);
+
+            // Not enough to see message length
+            server_response_tx
+                .send(messages_to_be_sent.split_to(1).to_vec())
+                .unwrap();
+            assert!(connection.try_recv().await.is_none());
+
+            // Enough only to see message length
+            server_response_tx
+                .send(messages_to_be_sent.split_to(MSG_SIZE_LEN - 1).to_vec())
+                .unwrap();
+            assert!(connection.try_recv().await.is_none());
+
+            // Not enough to decode first message
+            server_response_tx
+                .send(messages_to_be_sent.split_to(request_len - 1).to_vec())
+                .unwrap();
+            assert!(connection.try_recv().await.is_none());
+
+            // Exactly one message
+            server_response_tx
+                .send(messages_to_be_sent.split_to(1).to_vec())
+                .unwrap();
+            assert!(connection.try_recv().await.is_some());
+
+            // Not enough to see message length
+            server_response_tx
+                .send(messages_to_be_sent.split_to(1).to_vec())
+                .unwrap();
+            assert!(connection.try_recv().await.is_none());
+
+            // Two messages at once
+            server_response_tx
+                .send(
+                    messages_to_be_sent
+                        .split_to(2 * MSG_SIZE_LEN + 2 * request_len - 1)
+                        .to_vec(),
+                )
+                .unwrap();
+            assert!(connection.try_recv().await.is_some());
+            assert!(connection.try_recv().await.is_some());
+        }
+    }
+
+    mod send {
+        use super::*;
+
+        async fn read_message_as_server<T: ApiRequest>(
+            connection: &mut TcpStream,
+            api_version: ApiVersion,
+        ) -> (RequestHeader, T) {
+            let mut buffer = BytesMut::with_capacity(1_024);
+            let mut buffer_size = [0; 4];
+
+            connection.read_exact(&mut buffer_size).await.unwrap();
+            let message_size = i32::from_be_bytes(buffer_size) as usize;
+            buffer.reserve(message_size);
+            unsafe {
+                buffer.set_len(message_size);
+            }
+            connection.read_exact(&mut buffer).await.unwrap();
+            let header = RequestHeader::deserialize(ApiVersion(0), &mut buffer);
+            let payload = T::deserialize(api_version, &mut buffer);
+            (header, payload)
+        }
+        #[test_log::test(tokio::test)]
+        async fn sends_api_requests_correctly() {
+            let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let addr = server.local_addr().unwrap();
+
+            tokio::spawn(async move {
+                let (mut connection, _) = server.accept().await.unwrap();
+
+                let (header, _) =
+                    read_message_as_server::<ApiVersionsRequest>(&mut connection, ApiVersion(0))
+                        .await;
+                assert_eq!(
+                    ApiKey(header.request_api_key),
+                    ApiVersionsRequest::get_api_key()
+                );
+                assert_eq!(header.request_api_version, 1);
+                assert_eq!(header.request_api_key, ApiVersionsRequest::get_api_key().0);
+
+                let (header, _) =
+                    read_message_as_server::<ApiVersionsRequest>(&mut connection, ApiVersion(0))
+                        .await;
+                assert_eq!(
+                    ApiKey(header.request_api_key),
+                    ApiVersionsRequest::get_api_key()
+                );
+                assert_eq!(header.request_api_version, 2);
+                assert_eq!(header.request_api_key, ApiVersionsRequest::get_api_key().0);
+            });
+
+            let stream = TcpStream::connect(addr).await.unwrap();
+
+            let buffer = BytesMut::with_capacity(1024);
+            let header = RequestHeader::default();
+
+            let mut connection = BrokerConnection::new(buffer, stream, header);
+
+            let req1 = connection
+                .send(
+                    ApiVersionsRequest::get_api_key(),
+                    ApiVersion(1),
+                    BytesMut::with_capacity(0),
+                )
+                .await
+                .unwrap();
+            assert_eq!(req1, 1);
+            let req2 = connection
+                .send(
+                    ApiVersionsRequest::get_api_key(),
+                    ApiVersion(2),
+                    BytesMut::with_capacity(0),
+                )
+                .await
+                .unwrap();
+            assert_eq!(req2, 2);
+            assert_eq!(connection.header.correlation_id, 2);
         }
     }
 }

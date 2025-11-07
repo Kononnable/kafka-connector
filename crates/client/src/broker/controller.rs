@@ -72,7 +72,7 @@ impl BrokerController {
 
     #[instrument(level = "debug", skip_all)]
     pub async fn get_status(&self) -> BrokerControllerStatus {
-        self.status.read().unwrap().clone()
+        self.status.read().expect("Poisoned lock").clone()
     }
 
     // TODO: Test
