@@ -107,7 +107,7 @@ impl CreateTopicsRequest {
         for item in self.topics.iter() {
             item.validate_fields(_version)?;
         }
-        if self.validate_only != false && _version.0 < 1 {
+        if self.validate_only && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "validate_only",
                 *_version,

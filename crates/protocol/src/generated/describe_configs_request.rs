@@ -72,7 +72,7 @@ impl DescribeConfigsRequest {
         for item in self.resources.iter() {
             item.validate_fields(_version)?;
         }
-        if self.include_synoyms != false && _version.0 < 1 {
+        if self.include_synoyms && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "include_synoyms",
                 *_version,

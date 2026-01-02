@@ -317,11 +317,15 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
                 default_value
             )
         } else {
-            format!(
-                "self.{} != {}",
-                field.name.to_case(Case::Snake),
-                default_value
-            )
+            match default_value.as_str() {
+                "true" => format!("!self.{}", field.name.to_case(Case::Snake)),
+                "false" => format!("self.{}", field.name.to_case(Case::Snake)),
+                _ => format!(
+                    "self.{} != {}",
+                    field.name.to_case(Case::Snake),
+                    default_value
+                ),
+            }
         };
         if field.versions.contains('-') {
             let mut split = field.versions.split('-');
