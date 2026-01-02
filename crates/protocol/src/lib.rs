@@ -2,6 +2,7 @@
 mod generator;
 
 mod from_bytes;
+pub mod records;
 mod to_bytes;
 
 mod generated;

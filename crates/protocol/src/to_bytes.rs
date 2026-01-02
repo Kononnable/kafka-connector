@@ -2,6 +2,9 @@ use crate::prelude::ApiVersion;
 use bytes::{BufMut, BytesMut};
 use indexmap::{IndexMap, IndexSet};
 
+// TODO: BytesMut::put_X (all alternatives) will panic if there is not enough space,
+// should it be used, or should it check if buffer is large enough on each call
+// same problem in serialization of records
 pub trait ToBytes {
     fn serialize(&self, version: ApiVersion, bytes: &mut BytesMut);
 }
