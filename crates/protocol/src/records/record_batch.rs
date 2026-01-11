@@ -121,7 +121,7 @@ impl RecordBatch {
 
         // Calculate values
 
-        // last_offset_delta, max_timestamp
+        // last_offset_delta, max_timestamp, base_timestamp
         self.last_offset_delta = self
             .records
             .iter()
@@ -130,15 +130,26 @@ impl RecordBatch {
             .offset_delta
             .0;
 
-        self.max_timestamp = self.base_timestamp
-            + Duration::from_millis(
-                self.records
-                    .iter()
-                    .max_by_key(|x| x.timestamp_delta)
-                    .unwrap()
-                    .timestamp_delta
-                    .0 as u64,
-            );
+        let min_timestamp = self
+            .records
+            .iter()
+            .min_by_key(|x| x.timestamp_delta)
+            .unwrap()
+            .timestamp_delta
+            .0;
+        let max_timestamp = self
+            .records
+            .iter()
+            .max_by_key(|x| x.timestamp_delta)
+            .unwrap()
+            .timestamp_delta
+            .0;
+
+        self.base_timestamp = SystemTime::UNIX_EPOCH + Duration::from_millis(min_timestamp as u64);
+        self.records.iter_mut().for_each(|x| {
+            x.timestamp_delta.0 -= min_timestamp;
+        });
+        self.max_timestamp = SystemTime::UNIX_EPOCH + Duration::from_millis(max_timestamp as u64);
 
         // Values calculated later on, reserving space
         let mut buf_batch_length = bytes.split_off(bytes.len());
