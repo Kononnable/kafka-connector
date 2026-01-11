@@ -1,3 +1,4 @@
+use kafka_connector_protocol::ApiKey;
 use thiserror::Error as DeriveError;
 
 #[non_exhaustive]
@@ -22,4 +23,6 @@ pub enum ApiCallError {
     SerializationError(#[from] kafka_connector_protocol::SerializationError),
     #[error("ApiCall timeout reached")]
     TimeoutReached,
+    #[error("Broker does not support API {0:?}")]
+    UnsupportedApi(ApiKey),
 }

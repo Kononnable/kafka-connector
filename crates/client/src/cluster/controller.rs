@@ -110,14 +110,34 @@ impl ClusterController {
     pub async fn make_api_call<R: ApiRequest>(
         &self,
         broker_id: i32,
-        version: ApiVersion,
         request: R,
+        version: Option<ApiVersion>,
     ) -> Result<R::Response, ApiCallError> {
-        self.broker_list
+        let broker = self
+            .broker_list
             .get(&broker_id)
-            .ok_or(ApiCallError::BrokerNotFound(broker_id))?
-            .make_api_call(version, request)
-            .await
+            .ok_or(ApiCallError::BrokerNotFound(broker_id))?;
+        let version = if let Some(version) = version {
+            version
+        } else {
+            let supported_apis = broker.supported_api_versions.read().expect("Poisoned lock");
+            let broker_supported_versions = supported_apis
+                .get(&R::get_api_key().0)
+                .ok_or(ApiCallError::UnsupportedApi(R::get_api_key()))?;
+            let max_supported = i16::min(
+                broker_supported_versions.max_version,
+                R::get_max_supported_version().0,
+            );
+            let min_supported = i16::max(
+                broker_supported_versions.min_version,
+                R::get_min_supported_version().0,
+            );
+            if min_supported > max_supported {
+                return Err(ApiCallError::UnsupportedApi(R::get_api_key()));
+            }
+            ApiVersion(max_supported)
+        };
+        broker.make_api_call(version, request).await
     }
 }
 

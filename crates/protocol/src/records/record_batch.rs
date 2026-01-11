@@ -1,3 +1,4 @@
+use crate::records::base_types::VarInt;
 use crate::records::record::Record;
 use crate::{ApiVersion, FromBytes, ToBytes};
 use bitflags::bitflags;
@@ -64,7 +65,6 @@ impl Default for RecordBatch {
     }
 }
 
-// println!("{:#x?}", bytes.iter().as_slice());
 impl RecordBatch {
     pub fn decode(bytes: &mut BytesMut) -> RecordBatch {
         let base_offset = FromBytes::deserialize(ApiVersion(0), bytes);
@@ -120,36 +120,35 @@ impl RecordBatch {
         assert_eq!(self.magic, 2);
 
         // Calculate values
+        self.records
+            .iter_mut()
+            .enumerate()
+            .for_each(|(delta, record)| {
+                record.offset_delta = VarInt(delta as i32);
+            });
+        self.last_offset_delta = self.records.len() as i32 - 1;
 
-        // last_offset_delta, max_timestamp, base_timestamp
-        self.last_offset_delta = self
-            .records
-            .iter()
-            .max_by_key(|x| x.offset_delta)
-            .unwrap()
-            .offset_delta
-            .0;
-
-        let min_timestamp = self
+        let min_timestamp_diff = self
             .records
             .iter()
             .min_by_key(|x| x.timestamp_delta)
             .unwrap()
             .timestamp_delta
             .0;
-        let max_timestamp = self
+        self.base_timestamp += Duration::from_millis(min_timestamp_diff as u64);
+        self.records.iter_mut().for_each(|x| {
+            x.timestamp_delta.0 -= min_timestamp_diff;
+        });
+
+        let max_timestamp_diff = self
             .records
             .iter()
             .max_by_key(|x| x.timestamp_delta)
             .unwrap()
             .timestamp_delta
             .0;
-
-        self.base_timestamp = SystemTime::UNIX_EPOCH + Duration::from_millis(min_timestamp as u64);
-        self.records.iter_mut().for_each(|x| {
-            x.timestamp_delta.0 -= min_timestamp;
-        });
-        self.max_timestamp = SystemTime::UNIX_EPOCH + Duration::from_millis(max_timestamp as u64);
+        self.max_timestamp = self.base_timestamp + Duration::from_millis(max_timestamp_diff as u64);
+        dbg!(&self);
 
         // Values calculated later on, reserving space
         let mut buf_batch_length = bytes.split_off(bytes.len());
@@ -240,7 +239,6 @@ mod tests {
             producer_epoch: -1,
             base_sequence: -1,
             records: vec![Record {
-                attributes: 0,
                 timestamp_delta: VarLong(0),
                 offset_delta: VarInt(0),
                 key: VarIntBytes(

@@ -3,18 +3,18 @@ use bytes::BytesMut;
 
 // TODO: (?) move to FromBytes/ToBytes implementation, additional method argument format: old/flexible/record
 
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
+#[derive(Debug, Default, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
 pub struct VarInt(pub i32);
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
+#[derive(Debug, Default, Eq, PartialEq, Copy, Clone, Ord, PartialOrd)]
 pub struct VarLong(pub i64);
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Default, Eq, PartialEq, Clone)]
 pub struct VarIntBytes(pub Vec<u8>);
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Default, Eq, PartialEq, Clone)]
 pub struct VarIntString(pub String);
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Default, Eq, PartialEq, Clone)]
 pub struct VarIntVec<T: FromBytes + ToBytes>(pub Vec<T>);
 
 impl FromBytes for VarInt {

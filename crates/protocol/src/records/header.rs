@@ -2,7 +2,7 @@ use crate::records::base_types::{VarIntBytes, VarIntString};
 use crate::{ApiVersion, FromBytes, ToBytes};
 use bytes::BytesMut;
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Default, Eq, PartialEq, Clone)]
 pub struct Header {
     pub header_key: VarIntString,
     pub value: VarIntBytes,

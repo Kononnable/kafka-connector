@@ -3,10 +3,10 @@ use crate::records::header::Header;
 use crate::{ApiVersion, FromBytes, ToBytes};
 use bytes::{BufMut, BytesMut};
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Default, Eq, PartialEq, Clone)]
 pub struct Record {
-    pub attributes: i8,
     pub timestamp_delta: VarLong,
+    // Will be calculated automatically
     pub offset_delta: VarInt,
     pub key: VarIntBytes,
     pub value: VarIntBytes,
@@ -16,14 +16,17 @@ pub struct Record {
 impl FromBytes for Record {
     fn deserialize(_version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let _length: VarInt = FromBytes::deserialize(ApiVersion(0), bytes);
-        let attributes = FromBytes::deserialize(ApiVersion(0), bytes);
+        let attributes: i8 = FromBytes::deserialize(ApiVersion(0), bytes);
+        debug_assert_eq!(
+            attributes, 0,
+            "Kafka record attributes are reserved, but not utilized in any known version"
+        );
         let timestamp_delta = FromBytes::deserialize(ApiVersion(0), bytes);
         let offset_delta = FromBytes::deserialize(ApiVersion(0), bytes);
         let key = FromBytes::deserialize(ApiVersion(0), bytes);
         let value = FromBytes::deserialize(ApiVersion(0), bytes);
         let headers = FromBytes::deserialize(ApiVersion(0), bytes);
         Record {
-            attributes,
             timestamp_delta,
             offset_delta,
             key,
@@ -41,7 +44,7 @@ impl ToBytes for Record {
         let mut length_buf = buffer.split();
         length_buf.clear();
 
-        self.attributes.serialize(ApiVersion(0), &mut buffer);
+        0_i8.serialize(ApiVersion(0), &mut buffer);
         self.timestamp_delta.serialize(ApiVersion(0), &mut buffer);
         self.offset_delta.serialize(ApiVersion(0), &mut buffer);
         self.key.serialize(ApiVersion(0), &mut buffer);
