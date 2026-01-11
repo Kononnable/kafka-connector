@@ -75,28 +75,19 @@ impl AlterReplicaLogDirsRequest {
     }
 }
 
-impl ToBytes for AlterReplicaLogDirKey {
+impl ToBytes for IndexMap<AlterReplicaLogDirKey, AlterReplicaLogDir> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.path.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.path.serialize(version, _bytes);
+            value.topics.serialize(version, _bytes);
+        }
     }
 }
 
 impl AlterReplicaLogDirKey {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
-    }
-}
-
-impl FromBytes for AlterReplicaLogDirKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let path = String::deserialize(version, bytes);
-        AlterReplicaLogDirKey { path }
-    }
-}
-
-impl ToBytes for AlterReplicaLogDir {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.topics.serialize(version, _bytes);
     }
 }
 
@@ -110,18 +101,32 @@ impl AlterReplicaLogDir {
     }
 }
 
-impl FromBytes for AlterReplicaLogDir {
+impl FromBytes for IndexMap<AlterReplicaLogDirKey, AlterReplicaLogDir> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let topics = IndexMap::<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic>::deserialize(
-            version, bytes,
-        );
-        AlterReplicaLogDir { topics }
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let path = String::deserialize(version, bytes);
+            let topics =
+                IndexMap::<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic>::deserialize(
+                    version, bytes,
+                );
+            let key = AlterReplicaLogDirKey { path };
+            let value = AlterReplicaLogDir { topics };
+            ret.insert(key, value);
+        }
+
+        ret
     }
 }
 
-impl ToBytes for AlterReplicaLogDirTopicKey {
+impl ToBytes for IndexMap<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.name.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.name.serialize(version, _bytes);
+            value.partitions.serialize(version, _bytes);
+        }
     }
 }
 
@@ -131,28 +136,24 @@ impl AlterReplicaLogDirTopicKey {
     }
 }
 
-impl FromBytes for AlterReplicaLogDirTopicKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let name = String::deserialize(version, bytes);
-        AlterReplicaLogDirTopicKey { name }
-    }
-}
-
-impl ToBytes for AlterReplicaLogDirTopic {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.partitions.serialize(version, _bytes);
-    }
-}
-
 impl AlterReplicaLogDirTopic {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
-impl FromBytes for AlterReplicaLogDirTopic {
+impl FromBytes for IndexMap<AlterReplicaLogDirTopicKey, AlterReplicaLogDirTopic> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let partitions = Vec::<i32>::deserialize(version, bytes);
-        AlterReplicaLogDirTopic { partitions }
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let name = String::deserialize(version, bytes);
+            let partitions = Vec::<i32>::deserialize(version, bytes);
+            let key = AlterReplicaLogDirTopicKey { name };
+            let value = AlterReplicaLogDirTopic { partitions };
+            ret.insert(key, value);
+        }
+
+        ret
     }
 }

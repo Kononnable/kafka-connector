@@ -1,27 +1,10 @@
 use crate::prelude::ApiVersion;
 use bytes::BytesMut;
-use indexmap::{IndexMap, IndexSet};
+use indexmap::IndexSet;
 use std::{hash::Hash, mem::size_of};
 
 pub trait FromBytes {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self;
-}
-
-impl<K, V> FromBytes for IndexMap<K, V>
-where
-    K: FromBytes + Hash + Eq,
-    V: FromBytes,
-{
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let cap: i32 = FromBytes::deserialize(version, bytes);
-        let mut ret = IndexMap::new();
-        for _ in 0..cap {
-            let key = FromBytes::deserialize(version, bytes);
-            let value = FromBytes::deserialize(version, bytes);
-            ret.insert(key, value);
-        }
-        ret
-    }
 }
 
 impl<K> FromBytes for IndexSet<K>

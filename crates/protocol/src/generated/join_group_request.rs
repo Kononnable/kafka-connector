@@ -121,9 +121,13 @@ impl Default for JoinGroupRequest {
     }
 }
 
-impl ToBytes for JoinGroupRequestProtocolKey {
+impl ToBytes for IndexMap<JoinGroupRequestProtocolKey, JoinGroupRequestProtocol> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.name.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.name.serialize(version, _bytes);
+            value.metadata.serialize(version, _bytes);
+        }
     }
 }
 
@@ -133,28 +137,24 @@ impl JoinGroupRequestProtocolKey {
     }
 }
 
-impl FromBytes for JoinGroupRequestProtocolKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let name = String::deserialize(version, bytes);
-        JoinGroupRequestProtocolKey { name }
-    }
-}
-
-impl ToBytes for JoinGroupRequestProtocol {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.metadata.serialize(version, _bytes);
-    }
-}
-
 impl JoinGroupRequestProtocol {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
-impl FromBytes for JoinGroupRequestProtocol {
+impl FromBytes for IndexMap<JoinGroupRequestProtocolKey, JoinGroupRequestProtocol> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let metadata = Vec::<u8>::deserialize(version, bytes);
-        JoinGroupRequestProtocol { metadata }
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let name = String::deserialize(version, bytes);
+            let metadata = Vec::<u8>::deserialize(version, bytes);
+            let key = JoinGroupRequestProtocolKey { name };
+            let value = JoinGroupRequestProtocol { metadata };
+            ret.insert(key, value);
+        }
+
+        ret
     }
 }

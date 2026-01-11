@@ -57,10 +57,13 @@ fn transform_map_key(mut spec: ApiSpec) -> ApiSpec {
 
 fn transform_map_key_field(field: &mut ApiSpecField) {
     if let ApiSpecFieldSubtype::SubObject(name) = &field.type_.type_ {
-        let (keys, subfields): (Vec<_>, Vec<_>) =
-            field.fields.clone().into_iter().partition(|z| z.map_key);
+        let keys: Vec<_> = field
+            .fields
+            .clone()
+            .into_iter()
+            .filter(|z| z.map_key)
+            .collect();
         if !keys.is_empty() {
-            field.fields = subfields;
             field.type_.is_array = false;
             field.type_.type_ = ApiSpecFieldSubtype::Map {
                 name: name.to_owned(),

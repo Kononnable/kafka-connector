@@ -83,28 +83,19 @@ impl AddPartitionsToTxnResponse {
     }
 }
 
-impl ToBytes for AddPartitionsToTxnTopicResultKey {
+impl ToBytes for IndexMap<AddPartitionsToTxnTopicResultKey, AddPartitionsToTxnTopicResult> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.name.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.name.serialize(version, _bytes);
+            value.results.serialize(version, _bytes);
+        }
     }
 }
 
 impl AddPartitionsToTxnTopicResultKey {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
-    }
-}
-
-impl FromBytes for AddPartitionsToTxnTopicResultKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let name = String::deserialize(version, bytes);
-        AddPartitionsToTxnTopicResultKey { name }
-    }
-}
-
-impl ToBytes for AddPartitionsToTxnTopicResult {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.results.serialize(version, _bytes);
     }
 }
 
@@ -118,19 +109,32 @@ impl AddPartitionsToTxnTopicResult {
     }
 }
 
-impl FromBytes for AddPartitionsToTxnTopicResult {
+impl FromBytes for IndexMap<AddPartitionsToTxnTopicResultKey, AddPartitionsToTxnTopicResult> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let results = IndexMap::<
-            AddPartitionsToTxnPartitionResultKey,
-            AddPartitionsToTxnPartitionResult,
-        >::deserialize(version, bytes);
-        AddPartitionsToTxnTopicResult { results }
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let name = String::deserialize(version, bytes);
+            let results = IndexMap::<
+                AddPartitionsToTxnPartitionResultKey,
+                AddPartitionsToTxnPartitionResult,
+            >::deserialize(version, bytes);
+            let key = AddPartitionsToTxnTopicResultKey { name };
+            let value = AddPartitionsToTxnTopicResult { results };
+            ret.insert(key, value);
+        }
+
+        ret
     }
 }
 
-impl ToBytes for AddPartitionsToTxnPartitionResultKey {
+impl ToBytes for IndexMap<AddPartitionsToTxnPartitionResultKey, AddPartitionsToTxnPartitionResult> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.partition_index.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.partition_index.serialize(version, _bytes);
+            value.error_code.serialize(version, _bytes);
+        }
     }
 }
 
@@ -140,28 +144,26 @@ impl AddPartitionsToTxnPartitionResultKey {
     }
 }
 
-impl FromBytes for AddPartitionsToTxnPartitionResultKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let partition_index = i32::deserialize(version, bytes);
-        AddPartitionsToTxnPartitionResultKey { partition_index }
-    }
-}
-
-impl ToBytes for AddPartitionsToTxnPartitionResult {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.error_code.serialize(version, _bytes);
-    }
-}
-
 impl AddPartitionsToTxnPartitionResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
-impl FromBytes for AddPartitionsToTxnPartitionResult {
+impl FromBytes
+    for IndexMap<AddPartitionsToTxnPartitionResultKey, AddPartitionsToTxnPartitionResult>
+{
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
-        AddPartitionsToTxnPartitionResult { error_code }
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let partition_index = i32::deserialize(version, bytes);
+            let error_code = i16::deserialize(version, bytes);
+            let key = AddPartitionsToTxnPartitionResultKey { partition_index };
+            let value = AddPartitionsToTxnPartitionResult { error_code };
+            ret.insert(key, value);
+        }
+
+        ret
     }
 }

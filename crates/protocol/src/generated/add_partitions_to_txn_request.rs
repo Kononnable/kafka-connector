@@ -84,9 +84,13 @@ impl AddPartitionsToTxnRequest {
     }
 }
 
-impl ToBytes for AddPartitionsToTxnTopicKey {
+impl ToBytes for IndexMap<AddPartitionsToTxnTopicKey, AddPartitionsToTxnTopic> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.name.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.name.serialize(version, _bytes);
+            value.partitions.serialize(version, _bytes);
+        }
     }
 }
 
@@ -96,28 +100,24 @@ impl AddPartitionsToTxnTopicKey {
     }
 }
 
-impl FromBytes for AddPartitionsToTxnTopicKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let name = String::deserialize(version, bytes);
-        AddPartitionsToTxnTopicKey { name }
-    }
-}
-
-impl ToBytes for AddPartitionsToTxnTopic {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.partitions.serialize(version, _bytes);
-    }
-}
-
 impl AddPartitionsToTxnTopic {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
-impl FromBytes for AddPartitionsToTxnTopic {
+impl FromBytes for IndexMap<AddPartitionsToTxnTopicKey, AddPartitionsToTxnTopic> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let partitions = Vec::<i32>::deserialize(version, bytes);
-        AddPartitionsToTxnTopic { partitions }
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let name = String::deserialize(version, bytes);
+            let partitions = Vec::<i32>::deserialize(version, bytes);
+            let key = AddPartitionsToTxnTopicKey { name };
+            let value = AddPartitionsToTxnTopic { partitions };
+            ret.insert(key, value);
+        }
+
+        ret
     }
 }

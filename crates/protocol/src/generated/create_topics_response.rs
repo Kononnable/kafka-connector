@@ -82,9 +82,16 @@ impl CreateTopicsResponse {
     }
 }
 
-impl ToBytes for CreatableTopicResultKey {
+impl ToBytes for IndexMap<CreatableTopicResultKey, CreatableTopicResult> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.name.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.name.serialize(version, _bytes);
+            value.error_code.serialize(version, _bytes);
+            if version >= ApiVersion(1) {
+                value.error_message.serialize(version, _bytes);
+            }
+        }
     }
 }
 
@@ -94,39 +101,32 @@ impl CreatableTopicResultKey {
     }
 }
 
-impl FromBytes for CreatableTopicResultKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let name = String::deserialize(version, bytes);
-        CreatableTopicResultKey { name }
-    }
-}
-
-impl ToBytes for CreatableTopicResult {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.error_code.serialize(version, _bytes);
-        if version >= ApiVersion(1) {
-            self.error_message.serialize(version, _bytes);
-        }
-    }
-}
-
 impl CreatableTopicResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
-impl FromBytes for CreatableTopicResult {
+impl FromBytes for IndexMap<CreatableTopicResultKey, CreatableTopicResult> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
-        let error_message = if version >= ApiVersion(1) {
-            Option::<String>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        CreatableTopicResult {
-            error_code,
-            error_message,
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let name = String::deserialize(version, bytes);
+            let error_code = i16::deserialize(version, bytes);
+            let error_message = if version >= ApiVersion(1) {
+                Option::<String>::deserialize(version, bytes)
+            } else {
+                Default::default()
+            };
+            let key = CreatableTopicResultKey { name };
+            let value = CreatableTopicResult {
+                error_code,
+                error_message,
+            };
+            ret.insert(key, value);
         }
+
+        ret
     }
 }

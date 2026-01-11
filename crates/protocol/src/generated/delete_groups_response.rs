@@ -71,9 +71,13 @@ impl DeleteGroupsResponse {
     }
 }
 
-impl ToBytes for DeletableGroupResultKey {
+impl ToBytes for IndexMap<DeletableGroupResultKey, DeletableGroupResult> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.group_id.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.group_id.serialize(version, _bytes);
+            value.error_code.serialize(version, _bytes);
+        }
     }
 }
 
@@ -83,28 +87,24 @@ impl DeletableGroupResultKey {
     }
 }
 
-impl FromBytes for DeletableGroupResultKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let group_id = String::deserialize(version, bytes);
-        DeletableGroupResultKey { group_id }
-    }
-}
-
-impl ToBytes for DeletableGroupResult {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.error_code.serialize(version, _bytes);
-    }
-}
-
 impl DeletableGroupResult {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
-impl FromBytes for DeletableGroupResult {
+impl FromBytes for IndexMap<DeletableGroupResultKey, DeletableGroupResult> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
-        DeletableGroupResult { error_code }
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let group_id = String::deserialize(version, bytes);
+            let error_code = i16::deserialize(version, bytes);
+            let key = DeletableGroupResultKey { group_id };
+            let value = DeletableGroupResult { error_code };
+            ret.insert(key, value);
+        }
+
+        ret
     }
 }

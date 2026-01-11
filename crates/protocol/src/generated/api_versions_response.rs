@@ -88,9 +88,14 @@ impl ApiVersionsResponse {
     }
 }
 
-impl ToBytes for ApiVersionsResponseKeyKey {
+impl ToBytes for IndexMap<ApiVersionsResponseKeyKey, ApiVersionsResponseKey> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.index.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.index.serialize(version, _bytes);
+            value.min_version.serialize(version, _bytes);
+            value.max_version.serialize(version, _bytes);
+        }
     }
 }
 
@@ -100,33 +105,28 @@ impl ApiVersionsResponseKeyKey {
     }
 }
 
-impl FromBytes for ApiVersionsResponseKeyKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let index = i16::deserialize(version, bytes);
-        ApiVersionsResponseKeyKey { index }
-    }
-}
-
-impl ToBytes for ApiVersionsResponseKey {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.min_version.serialize(version, _bytes);
-        self.max_version.serialize(version, _bytes);
-    }
-}
-
 impl ApiVersionsResponseKey {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
-impl FromBytes for ApiVersionsResponseKey {
+impl FromBytes for IndexMap<ApiVersionsResponseKeyKey, ApiVersionsResponseKey> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let min_version = i16::deserialize(version, bytes);
-        let max_version = i16::deserialize(version, bytes);
-        ApiVersionsResponseKey {
-            min_version,
-            max_version,
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let index = i16::deserialize(version, bytes);
+            let min_version = i16::deserialize(version, bytes);
+            let max_version = i16::deserialize(version, bytes);
+            let key = ApiVersionsResponseKeyKey { index };
+            let value = ApiVersionsResponseKey {
+                min_version,
+                max_version,
+            };
+            ret.insert(key, value);
         }
+
+        ret
     }
 }

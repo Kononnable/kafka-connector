@@ -195,9 +195,17 @@ impl Default for MetadataResponse {
     }
 }
 
-impl ToBytes for MetadataResponseBrokerKey {
+impl ToBytes for IndexMap<MetadataResponseBrokerKey, MetadataResponseBroker> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.node_id.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.node_id.serialize(version, _bytes);
+            value.host.serialize(version, _bytes);
+            value.port.serialize(version, _bytes);
+            if version >= ApiVersion(1) {
+                value.rack.serialize(version, _bytes);
+            }
+        }
     }
 }
 
@@ -207,68 +215,51 @@ impl MetadataResponseBrokerKey {
     }
 }
 
-impl FromBytes for MetadataResponseBrokerKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let node_id = i32::deserialize(version, bytes);
-        MetadataResponseBrokerKey { node_id }
-    }
-}
-
-impl ToBytes for MetadataResponseBroker {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.host.serialize(version, _bytes);
-        self.port.serialize(version, _bytes);
-        if version >= ApiVersion(1) {
-            self.rack.serialize(version, _bytes);
-        }
-    }
-}
-
 impl MetadataResponseBroker {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
-impl FromBytes for MetadataResponseBroker {
+impl FromBytes for IndexMap<MetadataResponseBrokerKey, MetadataResponseBroker> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let host = String::deserialize(version, bytes);
-        let port = i32::deserialize(version, bytes);
-        let rack = if version >= ApiVersion(1) {
-            Option::<String>::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        MetadataResponseBroker { host, port, rack }
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let node_id = i32::deserialize(version, bytes);
+            let host = String::deserialize(version, bytes);
+            let port = i32::deserialize(version, bytes);
+            let rack = if version >= ApiVersion(1) {
+                Option::<String>::deserialize(version, bytes)
+            } else {
+                Default::default()
+            };
+            let key = MetadataResponseBrokerKey { node_id };
+            let value = MetadataResponseBroker { host, port, rack };
+            ret.insert(key, value);
+        }
+
+        ret
     }
 }
 
-impl ToBytes for MetadataResponseTopicKey {
+impl ToBytes for IndexMap<MetadataResponseTopicKey, MetadataResponseTopic> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.name.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            value.error_code.serialize(version, _bytes);
+            key.name.serialize(version, _bytes);
+            if version >= ApiVersion(1) {
+                value.is_internal.serialize(version, _bytes);
+            }
+            value.partitions.serialize(version, _bytes);
+        }
     }
 }
 
 impl MetadataResponseTopicKey {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
-    }
-}
-
-impl FromBytes for MetadataResponseTopicKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let name = String::deserialize(version, bytes);
-        MetadataResponseTopicKey { name }
-    }
-}
-
-impl ToBytes for MetadataResponseTopic {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.error_code.serialize(version, _bytes);
-        if version >= ApiVersion(1) {
-            self.is_internal.serialize(version, _bytes);
-        }
-        self.partitions.serialize(version, _bytes);
     }
 }
 
@@ -281,20 +272,29 @@ impl MetadataResponseTopic {
     }
 }
 
-impl FromBytes for MetadataResponseTopic {
+impl FromBytes for IndexMap<MetadataResponseTopicKey, MetadataResponseTopic> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
-        let is_internal = if version >= ApiVersion(1) {
-            bool::deserialize(version, bytes)
-        } else {
-            Default::default()
-        };
-        let partitions = Vec::<MetadataResponsePartition>::deserialize(version, bytes);
-        MetadataResponseTopic {
-            error_code,
-            is_internal,
-            partitions,
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let error_code = i16::deserialize(version, bytes);
+            let name = String::deserialize(version, bytes);
+            let is_internal = if version >= ApiVersion(1) {
+                bool::deserialize(version, bytes)
+            } else {
+                Default::default()
+            };
+            let partitions = Vec::<MetadataResponsePartition>::deserialize(version, bytes);
+            let key = MetadataResponseTopicKey { name };
+            let value = MetadataResponseTopic {
+                error_code,
+                is_internal,
+                partitions,
+            };
+            ret.insert(key, value);
         }
+
+        ret
     }
 }
 

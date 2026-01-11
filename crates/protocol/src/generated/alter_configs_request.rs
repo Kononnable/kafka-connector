@@ -86,33 +86,20 @@ impl AlterConfigsRequest {
     }
 }
 
-impl ToBytes for AlterConfigsResourceKey {
+impl ToBytes for IndexMap<AlterConfigsResourceKey, AlterConfigsResource> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.resource_type.serialize(version, _bytes);
-        self.resource_name.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.resource_type.serialize(version, _bytes);
+            key.resource_name.serialize(version, _bytes);
+            value.configs.serialize(version, _bytes);
+        }
     }
 }
 
 impl AlterConfigsResourceKey {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
-    }
-}
-
-impl FromBytes for AlterConfigsResourceKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let resource_type = i8::deserialize(version, bytes);
-        let resource_name = String::deserialize(version, bytes);
-        AlterConfigsResourceKey {
-            resource_type,
-            resource_name,
-        }
-    }
-}
-
-impl ToBytes for AlterConfigsResource {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.configs.serialize(version, _bytes);
     }
 }
 
@@ -126,16 +113,34 @@ impl AlterConfigsResource {
     }
 }
 
-impl FromBytes for AlterConfigsResource {
+impl FromBytes for IndexMap<AlterConfigsResourceKey, AlterConfigsResource> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let configs = IndexMap::<AlterableConfigKey, AlterableConfig>::deserialize(version, bytes);
-        AlterConfigsResource { configs }
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let resource_type = i8::deserialize(version, bytes);
+            let resource_name = String::deserialize(version, bytes);
+            let configs =
+                IndexMap::<AlterableConfigKey, AlterableConfig>::deserialize(version, bytes);
+            let key = AlterConfigsResourceKey {
+                resource_type,
+                resource_name,
+            };
+            let value = AlterConfigsResource { configs };
+            ret.insert(key, value);
+        }
+
+        ret
     }
 }
 
-impl ToBytes for AlterableConfigKey {
+impl ToBytes for IndexMap<AlterableConfigKey, AlterableConfig> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.name.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.name.serialize(version, _bytes);
+            value.value.serialize(version, _bytes);
+        }
     }
 }
 
@@ -145,28 +150,24 @@ impl AlterableConfigKey {
     }
 }
 
-impl FromBytes for AlterableConfigKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let name = String::deserialize(version, bytes);
-        AlterableConfigKey { name }
-    }
-}
-
-impl ToBytes for AlterableConfig {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.value.serialize(version, _bytes);
-    }
-}
-
 impl AlterableConfig {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
-impl FromBytes for AlterableConfig {
+impl FromBytes for IndexMap<AlterableConfigKey, AlterableConfig> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let value = Option::<String>::deserialize(version, bytes);
-        AlterableConfig { value }
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let name = String::deserialize(version, bytes);
+            let value = Option::<String>::deserialize(version, bytes);
+            let key = AlterableConfigKey { name };
+            let value = AlterableConfig { value };
+            ret.insert(key, value);
+        }
+
+        ret
     }
 }

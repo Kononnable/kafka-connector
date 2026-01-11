@@ -164,9 +164,13 @@ impl FromBytes for CreatableTopic {
     }
 }
 
-impl ToBytes for CreatableReplicaAssignmentKey {
+impl ToBytes for IndexMap<CreatableReplicaAssignmentKey, CreatableReplicaAssignment> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.partition_index.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.partition_index.serialize(version, _bytes);
+            value.broker_ids.serialize(version, _bytes);
+        }
     }
 }
 
@@ -176,35 +180,35 @@ impl CreatableReplicaAssignmentKey {
     }
 }
 
-impl FromBytes for CreatableReplicaAssignmentKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let partition_index = i32::deserialize(version, bytes);
-        CreatableReplicaAssignmentKey { partition_index }
-    }
-}
-
-impl ToBytes for CreatableReplicaAssignment {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.broker_ids.serialize(version, _bytes);
-    }
-}
-
 impl CreatableReplicaAssignment {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
-impl FromBytes for CreatableReplicaAssignment {
+impl FromBytes for IndexMap<CreatableReplicaAssignmentKey, CreatableReplicaAssignment> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let broker_ids = Vec::<i32>::deserialize(version, bytes);
-        CreatableReplicaAssignment { broker_ids }
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let partition_index = i32::deserialize(version, bytes);
+            let broker_ids = Vec::<i32>::deserialize(version, bytes);
+            let key = CreatableReplicaAssignmentKey { partition_index };
+            let value = CreatableReplicaAssignment { broker_ids };
+            ret.insert(key, value);
+        }
+
+        ret
     }
 }
 
-impl ToBytes for CreateableTopicConfigKey {
+impl ToBytes for IndexMap<CreateableTopicConfigKey, CreateableTopicConfig> {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.name.serialize(version, _bytes);
+        _bytes.put_i32(self.len() as i32);
+        for (key, value) in self {
+            key.name.serialize(version, _bytes);
+            value.value.serialize(version, _bytes);
+        }
     }
 }
 
@@ -214,28 +218,24 @@ impl CreateableTopicConfigKey {
     }
 }
 
-impl FromBytes for CreateableTopicConfigKey {
-    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let name = String::deserialize(version, bytes);
-        CreateableTopicConfigKey { name }
-    }
-}
-
-impl ToBytes for CreateableTopicConfig {
-    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        self.value.serialize(version, _bytes);
-    }
-}
-
 impl CreateableTopicConfig {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
         Ok(())
     }
 }
 
-impl FromBytes for CreateableTopicConfig {
+impl FromBytes for IndexMap<CreateableTopicConfigKey, CreateableTopicConfig> {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let value = Option::<String>::deserialize(version, bytes);
-        CreateableTopicConfig { value }
+        let cap: i32 = FromBytes::deserialize(version, bytes);
+        let mut ret = IndexMap::with_capacity(cap as usize);
+        for _ in 0..cap {
+            let name = String::deserialize(version, bytes);
+            let value = Option::<String>::deserialize(version, bytes);
+            let key = CreateableTopicConfigKey { name };
+            let value = CreateableTopicConfig { value };
+            ret.insert(key, value);
+        }
+
+        ret
     }
 }

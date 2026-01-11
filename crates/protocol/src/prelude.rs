@@ -1,5 +1,5 @@
 pub use crate::{from_bytes::FromBytes, to_bytes::ToBytes};
-pub use bytes::BytesMut;
+pub use bytes::{BufMut, BytesMut};
 pub use indexmap::{IndexMap, IndexSet};
 pub use std::fmt::Debug;
 use std::ops::Deref;

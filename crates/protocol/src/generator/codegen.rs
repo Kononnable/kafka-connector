@@ -2,6 +2,29 @@ use super::structs::{ApiSpec, ApiSpecField, ApiSpecFieldSubtype, ApiSpecType};
 use convert_case::{Case, Casing};
 use std::collections::VecDeque;
 
+fn generate_substuct(
+    content: &mut String,
+    sub_struct: &SubStruct,
+    is_map_key: bool,
+    mut sub_structs_partial: &mut VecDeque<SubStruct>,
+) {
+    let default_derive = if should_derive_default(&sub_struct.fields) {
+        ", Default"
+    } else {
+        ""
+    };
+    let map_key_derive = if is_map_key { ", Eq, Hash" } else { "" };
+    content.push_str(&format!(
+        "#[derive(Clone, Debug, PartialEq{}{})]\n",
+        default_derive, map_key_derive
+    ));
+    content.push_str(&format!("pub struct {} {{\n", sub_struct.name));
+    for field in &sub_struct.fields {
+        content.push_str(&get_field_definition(field, &mut sub_structs_partial));
+    }
+    content.push_str("}\n\n");
+}
+
 pub fn generate_source(spec: ApiSpec) -> (String, String) {
     let mut content = "use super::super::prelude::*;\n\n".to_owned();
     let mut sub_structs_partial = VecDeque::new();
@@ -21,25 +44,41 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
     content.push_str("}\n\n");
 
     while let Some(sub_struct) = sub_structs_partial.pop_front() {
-        let default_derive = if should_derive_default(&sub_struct.fields) {
-            ", Default"
-        } else {
-            ""
-        };
-        let map_key_derive = if sub_struct.is_map_key {
-            ", Eq, Hash"
-        } else {
-            ""
-        };
-        content.push_str(&format!(
-            "#[derive(Clone, Debug, PartialEq{}{})]\n",
-            default_derive, map_key_derive
-        ));
-        content.push_str(&format!("pub struct {} {{\n", sub_struct.name));
-        for field in &sub_struct.fields {
-            content.push_str(&get_field_definition(field, &mut sub_structs_partial));
+        match &sub_struct.subtype {
+            SubStructType::SubObject => {
+                generate_substuct(&mut content, &sub_struct, false, &mut sub_structs_partial)
+            }
+            SubStructType::IndexSet => {
+                generate_substuct(&mut content, &sub_struct, true, &mut sub_structs_partial)
+            }
+            SubStructType::IndexMap {
+                fields_key,
+                fields_value,
+                key_type_name,
+                value_type_name,
+            } => {
+                generate_substuct(
+                    &mut content,
+                    &SubStruct {
+                        name: key_type_name.clone(),
+                        fields: fields_key.clone(),
+                        subtype: SubStructType::SubObject,
+                    },
+                    true,
+                    &mut sub_structs_partial,
+                );
+                generate_substuct(
+                    &mut content,
+                    &SubStruct {
+                        name: value_type_name.clone(),
+                        fields: fields_value.clone(),
+                        subtype: SubStructType::SubObject,
+                    },
+                    false,
+                    &mut sub_structs_partial,
+                );
+            }
         }
-        content.push_str("}\n\n");
         sub_structs.push(sub_struct);
     }
 
@@ -142,39 +181,112 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
             content.push_str(&impl_default_trait(&spec.name, &spec.fields));
 
             for substruct in sub_structs {
-                content.push_str(&format!("impl ToBytes for {}{{\n", substruct.name));
-                content.push_str(
-                    "    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {\n",
-                );
-                for field in &substruct.fields {
-                    content.push_str(&serialize_field(field));
-                }
-                content.push_str("    }\n\n");
-                content.push_str("}\n\n");
-                content.push_str(&generate_validate_fields(
-                    &substruct.name,
-                    &substruct.fields,
-                ));
-
-                content.push_str(&format!("impl  FromBytes for {}{{\n", substruct.name));
-                content.push_str(
-                    "    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {\n",
-                );
-                for field in &substruct.fields {
-                    content.push_str(&deserialize_field(field));
-                }
-                content.push_str(&format!("        {} {{\n", substruct.name));
-                for field in &substruct.fields {
+                if let SubStructType::IndexMap {
+                    fields_key,
+                    fields_value,
+                    key_type_name,
+                    value_type_name,
+                } = substruct.subtype
+                {
                     content.push_str(&format!(
-                        "            {},\n",
-                        field.name.to_case(Case::Snake)
+                        "impl ToBytes for IndexMap<{key_type_name},{value_type_name}>{{\n"
                     ));
-                }
-                content.push_str("        }\n\n");
-                content.push_str("    }\n\n");
-                content.push_str("}\n\n");
+                    content.push_str(
+                        "    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {\n",
+                    );
+                    content.push_str("        _bytes.put_i32(self.len() as i32);\n");
+                    content.push_str("        for (key, value) in self {\n");
 
-                content.push_str(&impl_default_trait(&substruct.name, &substruct.fields));
+                    for field in &substruct.fields {
+                        let field_serialization = serialize_field(field);
+                        if fields_key.iter().any(|x| x.name == field.name) {
+                            content.push_str(&field_serialization.replace("self.", "    key."));
+                        } else {
+                            content.push_str(&field_serialization.replace("self.", "    value."));
+                        }
+                    }
+                    content.push_str("        }\n\n");
+                    content.push_str("    }\n\n");
+                    content.push_str("}\n\n");
+                    content.push_str(&generate_validate_fields(&key_type_name, &fields_key));
+                    content.push_str(&generate_validate_fields(&value_type_name, &fields_value));
+
+                    content.push_str(&format!(
+                        "impl  FromBytes for IndexMap<{key_type_name},{value_type_name}>{{\n"
+                    ));
+                    content.push_str(
+                        "    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {\n",
+                    );
+                    content.push_str(
+                        "        let cap: i32 = FromBytes::deserialize(version, bytes);\n",
+                    );
+                    content
+                        .push_str("        let mut ret = IndexMap::with_capacity(cap as usize);\n");
+                    content.push_str("        for _ in 0..cap {\n");
+                    for field in &substruct.fields {
+                        content.push_str(&"            ");
+                        content.push_str(&deserialize_field(field));
+                    }
+
+                    content.push_str(&format!("            let key = {} {{\n", key_type_name));
+                    for field in &fields_key {
+                        content.push_str(&format!(
+                            "            {},\n",
+                            field.name.to_case(Case::Snake)
+                        ));
+                    }
+                    content.push_str("            };\n");
+                    content.push_str(&format!("            let value = {} {{\n", value_type_name));
+                    for field in &fields_value {
+                        content.push_str(&format!(
+                            "            {},\n",
+                            field.name.to_case(Case::Snake)
+                        ));
+                    }
+                    content.push_str("            };\n");
+                    content.push_str("            ret.insert(key, value);\n");
+
+                    content.push_str("        }\n\n");
+                    content.push_str("    ret\n\n");
+                    content.push_str("    }\n\n");
+                    content.push_str("}\n\n");
+
+                    content.push_str(&impl_default_trait(&key_type_name, &fields_key));
+                    content.push_str(&impl_default_trait(&value_type_name, &fields_value));
+                } else {
+                    content.push_str(&format!("impl ToBytes for {}{{\n", substruct.name));
+                    content.push_str(
+                        "    fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {\n",
+                    );
+                    for field in &substruct.fields {
+                        content.push_str(&serialize_field(field));
+                    }
+                    content.push_str("    }\n\n");
+                    content.push_str("}\n\n");
+                    content.push_str(&generate_validate_fields(
+                        &substruct.name,
+                        &substruct.fields,
+                    ));
+
+                    content.push_str(&format!("impl  FromBytes for {}{{\n", substruct.name));
+                    content.push_str(
+                        "    fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {\n",
+                    );
+                    for field in &substruct.fields {
+                        content.push_str(&deserialize_field(field));
+                    }
+                    content.push_str(&format!("        {} {{\n", substruct.name));
+                    for field in &substruct.fields {
+                        content.push_str(&format!(
+                            "            {},\n",
+                            field.name.to_case(Case::Snake)
+                        ));
+                    }
+                    content.push_str("        }\n\n");
+                    content.push_str("    }\n\n");
+                    content.push_str("}\n\n");
+                    content.push_str(&impl_default_trait(&substruct.name, &substruct.fields));
+                }
             }
         }
         ApiSpecType::Header => {
@@ -237,7 +349,7 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
                     field.name.to_case(Case::Snake),
                     flatten
                 ));
-                if field.fields.is_empty() {
+                if field.fields.iter().all(|x| x.map_key) {
                     content.push_str(&"        item.validate_fields(_version)?;\n");
                 } else {
                     content.push_str(&"        item.0.validate_fields(_version)?;\n");
@@ -490,37 +602,58 @@ fn apply_turbo_fish(field_type: String) -> String {
     field_type.replace('<', "::<")
 }
 
-struct SubStructs {
+struct SubStruct {
     name: String,
     fields: Vec<ApiSpecField>,
-    is_map_key: bool,
+    subtype: SubStructType,
 }
 
-fn get_field_definition(field: &ApiSpecField, sub_structs: &mut VecDeque<SubStructs>) -> String {
+enum SubStructType {
+    SubObject,
+    IndexSet,
+    /// Two struct underneath, SubStruct->fields contains all fields in a proper order (needed for serialization),
+    IndexMap {
+        fields_key: Vec<ApiSpecField>,
+        fields_value: Vec<ApiSpecField>,
+        key_type_name: String,
+        value_type_name: String,
+    },
+}
+
+fn get_field_definition(field: &ApiSpecField, sub_structs: &mut VecDeque<SubStruct>) -> String {
     let mut content = "".to_owned();
     let field_type = get_field_type(field);
     match &field.type_.type_ {
         ApiSpecFieldSubtype::SubObject(name) => {
-            sub_structs.push_back(SubStructs {
+            sub_structs.push_back(SubStruct {
                 name: name.to_owned(),
                 fields: field.fields.clone(),
-                is_map_key: false,
+                subtype: SubStructType::SubObject,
             });
         }
         ApiSpecFieldSubtype::Map { name, keys } => {
-            let type_names = get_map_key_type_names(name, &field.fields);
-
-            sub_structs.push_back(SubStructs {
-                name: type_names.key_type,
-                fields: keys.clone(),
-                is_map_key: true,
-            });
+            let is_indexmap = field.fields.len() != keys.len();
+            let type_names = get_map_key_type_names(name, is_indexmap);
 
             if let Some(value_type) = type_names.value_type {
-                sub_structs.push_back(SubStructs {
-                    name: value_type,
+                let (keys, values): (Vec<_>, Vec<_>) =
+                    field.fields.clone().into_iter().partition(|z| z.map_key);
+
+                sub_structs.push_back(SubStruct {
+                    name: "// TODO: IndexMap".to_owned(),
                     fields: field.fields.clone(),
-                    is_map_key: false,
+                    subtype: SubStructType::IndexMap {
+                        fields_key: keys,
+                        fields_value: values,
+                        key_type_name: type_names.key_type,
+                        value_type_name: value_type,
+                    },
+                });
+            } else {
+                sub_structs.push_back(SubStruct {
+                    name: type_names.key_type,
+                    fields: keys.clone(),
+                    subtype: SubStructType::IndexSet,
                 });
             }
         }
@@ -558,8 +691,9 @@ fn get_field_base_type(field: &ApiSpecField) -> String {
         ApiSpecFieldSubtype::Int64 => "i64".to_owned(),
         ApiSpecFieldSubtype::String => "String".to_owned(),
         ApiSpecFieldSubtype::SubObject(sub) => sub.to_owned(),
-        ApiSpecFieldSubtype::Map { name, keys: _ } => {
-            get_map_key_type_names(name, &field.fields).full_type
+        ApiSpecFieldSubtype::Map { name, keys } => {
+            let is_indexmap = field.fields.len() != keys.len();
+            get_map_key_type_names(name, is_indexmap).full_type
         }
     }
 }
@@ -570,18 +704,18 @@ pub struct MapKeyTypeNames {
     pub value_type: Option<String>,
 }
 
-fn get_map_key_type_names(name: &str, subfields: &[ApiSpecField]) -> MapKeyTypeNames {
-    if subfields.is_empty() {
-        MapKeyTypeNames {
-            full_type: format!("IndexSet<{name}>"),
-            key_type: name.to_owned(),
-            value_type: None,
-        }
-    } else {
+fn get_map_key_type_names(name: &str, is_indexmap: bool) -> MapKeyTypeNames {
+    if is_indexmap {
         MapKeyTypeNames {
             full_type: format!("IndexMap<{name}Key,{name}>"),
             key_type: format!("{name}Key"),
             value_type: Some(name.to_owned()),
+        }
+    } else {
+        MapKeyTypeNames {
+            full_type: format!("IndexSet<{name}>"),
+            key_type: name.to_owned(),
+            value_type: None,
         }
     }
 }
