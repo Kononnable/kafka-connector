@@ -16,10 +16,11 @@ use kafka_connector_protocol::request_header::RequestHeader;
 use kafka_connector_protocol::response_header::ResponseHeader;
 use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, RwLock};
+use std::time::Duration;
 use tokio::net::TcpStream;
 use tokio::sync::mpsc;
 use tokio::task::{JoinError, JoinHandle};
-use tokio::time::{Instant, Sleep, sleep_until, timeout};
+use tokio::time::{Instant, Sleep, sleep, sleep_until, timeout};
 use tracing::{debug, instrument};
 
 struct QueuedApiCall {
@@ -95,7 +96,7 @@ pub struct BrokerLoop {
 }
 
 impl BrokerLoop {
-    #[instrument(level = "debug", skip(api_request_receiver))]
+    #[instrument(level = "debug", skip(api_request_receiver, supported_api_versions))]
     pub async fn start(
         address: String,
         api_request_receiver: mpsc::UnboundedReceiver<ApiRequestMessage>,
@@ -128,7 +129,7 @@ impl BrokerLoop {
             self.send_waiting_requests().await;
 
             tokio::select! {
-                _ = next_timeout.unwrap(), if next_timeout.is_some()=> {
+                _ = next_timeout.unwrap_or_else(||{sleep(Duration::from_secs(5))}), if next_timeout.is_some()=> {
                     // Handled in next loop iteration
                 },
                 signal =  self.api_request_receiver.recv() =>{
@@ -140,6 +141,7 @@ impl BrokerLoop {
                             })
                         }
                         None => {
+                            // Broker controller dropped
                             break;
                         }
                     }
@@ -185,7 +187,7 @@ impl BrokerLoop {
         for (_correlation_id, (response_sender, _timeout)) in self.api_calls_in_transit.drain() {
             let _ = response_sender.send(Err(ApiCallError::BrokerConnectionClosed));
         }
-        debug!("BrokerController main loop is closing");
+        debug!("Broker loop is closing");
 
         // TODO: Make sure it closes when broker is dropped - test?
     }
@@ -267,7 +269,7 @@ impl BrokerLoop {
         }
     }
 
-    #[instrument(level = "debug", skip(self, resp))]
+    #[instrument(level = "debug", skip_all)]
     fn handle_connection_established(
         &mut self,
         resp: Result<
@@ -340,6 +342,8 @@ impl BrokerLoop {
                             return;
                         }
                     }
+                } else {
+                    return;
                 }
             }
         }
