@@ -255,7 +255,7 @@ impl DescribeConfigsSynonym {
                 "DescribeConfigsSynonym",
             ));
         }
-        if self.value != Some(String::default()) && _version.0 < 1 {
+        if self.value.is_some() && _version.0 < 1 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "value",
                 *_version,

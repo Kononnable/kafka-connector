@@ -210,7 +210,7 @@ impl FetchablePartitionResponse {
         for item in self.aborted.iter().flatten() {
             item.validate_fields(_version)?;
         }
-        if self.aborted != Some(Vec::<AbortedTransaction>::default()) && _version.0 < 4 {
+        if self.aborted.is_some() && _version.0 < 4 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "aborted",
                 *_version,

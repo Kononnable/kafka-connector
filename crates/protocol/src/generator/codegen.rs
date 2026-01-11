@@ -423,11 +423,7 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
             apply_turbo_fish(field_non_option_type)
         ));
         let nullable_filter = if field.nullable_versions.is_some() {
-            format!(
-                "self.{} != Some({})",
-                field.name.to_case(Case::Snake),
-                default_value
-            )
+            format!("self.{}.is_some()", field.name.to_case(Case::Snake))
         } else {
             match default_value.as_str() {
                 "true" => format!("!self.{}", field.name.to_case(Case::Snake)),

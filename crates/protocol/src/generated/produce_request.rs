@@ -99,7 +99,7 @@ impl ProduceRequest {
         for item in self.topics.iter() {
             item.validate_fields(_version)?;
         }
-        if self.transactional_id != Some(String::default()) && _version.0 < 3 {
+        if self.transactional_id.is_some() && _version.0 < 3 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "transactional_id",
                 *_version,
