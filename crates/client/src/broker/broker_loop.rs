@@ -375,14 +375,12 @@ impl BrokerLoop {
         for (k, v) in self.api_calls_in_transit.iter() {
             if v.1 <= Instant::now() {
                 timed_out.push(*k);
-            } else {
-                if let Some(t1) = next_timeout {
-                    if v.1 < t1 {
-                        next_timeout = Some(v.1);
-                    }
-                } else {
+            } else if let Some(t1) = next_timeout {
+                if v.1 < t1 {
                     next_timeout = Some(v.1);
                 }
+            } else {
+                next_timeout = Some(v.1);
             }
         }
         for k in timed_out {

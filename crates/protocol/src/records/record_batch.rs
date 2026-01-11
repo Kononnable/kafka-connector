@@ -56,7 +56,7 @@ impl Default for RecordBatch {
             last_offset_delta: 0,
             base_timestamp: SystemTime::UNIX_EPOCH,
             max_timestamp: SystemTime::UNIX_EPOCH,
-            producer_id: 0,
+            producer_id: -1, // no idempotence
             producer_epoch: 0,
             base_sequence: 0,
             records: vec![],
