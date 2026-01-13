@@ -156,7 +156,7 @@ impl ToBytes for DescribeConfigsResourceResult {
         self.name.serialize(version, _bytes);
         self.value.serialize(version, _bytes);
         self.read_only.serialize(version, _bytes);
-        if version >= ApiVersion(0) {
+        if version == ApiVersion(0) {
             self.is_default.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
@@ -190,7 +190,7 @@ impl FromBytes for DescribeConfigsResourceResult {
         let name = String::deserialize(version, bytes);
         let value = Option::<String>::deserialize(version, bytes);
         let read_only = bool::deserialize(version, bytes);
-        let is_default = if version >= ApiVersion(0) {
+        let is_default = if version == ApiVersion(0) {
             bool::deserialize(version, bytes)
         } else {
             Default::default()

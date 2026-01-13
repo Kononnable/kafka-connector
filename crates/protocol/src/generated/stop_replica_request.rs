@@ -70,7 +70,7 @@ impl ApiRequest for StopReplicaRequest {
             self.broker_epoch.serialize(version, _bytes);
         }
         self.delete_partitions.serialize(version, _bytes);
-        if version >= ApiVersion(0) {
+        if version == ApiVersion(0) {
             self.partitions_v_0.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
@@ -88,7 +88,7 @@ impl ApiRequest for StopReplicaRequest {
             Default::default()
         };
         let delete_partitions = bool::deserialize(version, bytes);
-        let partitions_v_0 = if version >= ApiVersion(0) {
+        let partitions_v_0 = if version == ApiVersion(0) {
             Vec::<StopReplicaRequestPartitionV0>::deserialize(version, bytes)
         } else {
             Default::default()
@@ -151,10 +151,10 @@ impl Default for StopReplicaRequest {
 
 impl ToBytes for StopReplicaRequestPartitionV0 {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
-        if version >= ApiVersion(0) {
+        if version == ApiVersion(0) {
             self.topic_name.serialize(version, _bytes);
         }
-        if version >= ApiVersion(0) {
+        if version == ApiVersion(0) {
             self.partition_index.serialize(version, _bytes);
         }
     }
@@ -182,12 +182,12 @@ impl StopReplicaRequestPartitionV0 {
 
 impl FromBytes for StopReplicaRequestPartitionV0 {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let topic_name = if version >= ApiVersion(0) {
+        let topic_name = if version == ApiVersion(0) {
             String::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let partition_index = if version >= ApiVersion(0) {
+        let partition_index = if version == ApiVersion(0) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()

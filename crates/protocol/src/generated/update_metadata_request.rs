@@ -309,7 +309,7 @@ impl ToBytes for UpdateMetadataRequestPartitionStateV0 {
         if (0..=4).contains(&version.0) {
             self.replicas.serialize(version, _bytes);
         }
-        if version >= ApiVersion(4) {
+        if version == ApiVersion(4) {
             self.offline_replicas.serialize(version, _bytes);
         }
     }
@@ -426,7 +426,7 @@ impl FromBytes for UpdateMetadataRequestPartitionStateV0 {
         } else {
             Default::default()
         };
-        let offline_replicas = if version >= ApiVersion(4) {
+        let offline_replicas = if version == ApiVersion(4) {
             Vec::<i32>::deserialize(version, bytes)
         } else {
             Default::default()
@@ -448,10 +448,10 @@ impl FromBytes for UpdateMetadataRequestPartitionStateV0 {
 impl ToBytes for UpdateMetadataRequestBroker {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
         self.id.serialize(version, _bytes);
-        if version >= ApiVersion(0) {
+        if version == ApiVersion(0) {
             self.v_0_host.serialize(version, _bytes);
         }
-        if version >= ApiVersion(0) {
+        if version == ApiVersion(0) {
             self.v_0_port.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
@@ -482,12 +482,12 @@ impl UpdateMetadataRequestBroker {
 impl FromBytes for UpdateMetadataRequestBroker {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let id = i32::deserialize(version, bytes);
-        let v_0_host = if version >= ApiVersion(0) {
+        let v_0_host = if version == ApiVersion(0) {
             String::deserialize(version, bytes)
         } else {
             Default::default()
         };
-        let v_0_port = if version >= ApiVersion(0) {
+        let v_0_port = if version == ApiVersion(0) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()

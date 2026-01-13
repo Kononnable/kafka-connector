@@ -136,7 +136,7 @@ impl ToBytes for ListOffsetPartition {
             self.current_leader_epoch.serialize(version, _bytes);
         }
         self.timestamp.serialize(version, _bytes);
-        if version >= ApiVersion(0) {
+        if version == ApiVersion(0) {
             self.max_num_offsets.serialize(version, _bytes);
         }
     }
@@ -171,7 +171,7 @@ impl FromBytes for ListOffsetPartition {
             Default::default()
         };
         let timestamp = i64::deserialize(version, bytes);
-        let max_num_offsets = if version >= ApiVersion(0) {
+        let max_num_offsets = if version == ApiVersion(0) {
             i32::deserialize(version, bytes)
         } else {
             Default::default()

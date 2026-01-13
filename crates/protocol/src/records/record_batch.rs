@@ -148,7 +148,6 @@ impl RecordBatch {
             .timestamp_delta
             .0;
         self.max_timestamp = self.base_timestamp + Duration::from_millis(max_timestamp_diff as u64);
-        dbg!(&self);
 
         // Values calculated later on, reserving space
         let mut buf_batch_length = bytes.split_off(bytes.len());

@@ -545,9 +545,16 @@ fn serialize_field(field: &ApiSpecField) -> String {
         content.push_str("        }\n");
     } else if field.versions == "0+" {
         content.push_str(&format!("        {serialize}\n"));
-    } else {
+    } else if field.versions.contains("+") {
         let min = field.versions.replace('+', "");
         content.push_str(&format!("        if version >= ApiVersion({min}) {{\n"));
+        content.push_str(&format!("            {serialize}\n"));
+        content.push_str("        }\n");
+    } else {
+        content.push_str(&format!(
+            "        if version == ApiVersion({}) {{\n",
+            field.versions
+        ));
         content.push_str(&format!("            {serialize}\n"));
         content.push_str("        }\n");
     };
@@ -579,11 +586,21 @@ fn deserialize_field(field: &ApiSpecField) -> String {
             "        let {} = {deserialize};\n",
             field.name.to_case(Case::Snake)
         ));
-    } else {
+    } else if field.versions.contains("+") {
         let min = field.versions.replace('+', "");
         content.push_str(&format!(
             "        let {} = if version >= ApiVersion({min}) {{\n",
             field.name.to_case(Case::Snake)
+        ));
+        content.push_str(&format!("            {deserialize}\n"));
+        content.push_str("        } else {\n");
+        content.push_str("            Default::default()\n");
+        content.push_str("        };\n");
+    } else {
+        content.push_str(&format!(
+            "        let {} = if version == ApiVersion({}) {{\n",
+            field.name.to_case(Case::Snake),
+            field.versions
         ));
         content.push_str(&format!("            {deserialize}\n"));
         content.push_str("        } else {\n");

@@ -172,7 +172,7 @@ impl ToBytes for OffsetCommitRequestPartition {
         if version >= ApiVersion(6) {
             self.committed_leader_epoch.serialize(version, _bytes);
         }
-        if version >= ApiVersion(1) {
+        if version == ApiVersion(1) {
             self.commit_timestamp.serialize(version, _bytes);
         }
         self.committed_metadata.serialize(version, _bytes);
@@ -201,7 +201,7 @@ impl FromBytes for OffsetCommitRequestPartition {
         } else {
             Default::default()
         };
-        let commit_timestamp = if version >= ApiVersion(1) {
+        let commit_timestamp = if version == ApiVersion(1) {
             i64::deserialize(version, bytes)
         } else {
             Default::default()

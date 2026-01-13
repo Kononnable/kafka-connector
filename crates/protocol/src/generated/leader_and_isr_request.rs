@@ -281,7 +281,7 @@ impl ToBytes for LeaderAndIsrRequestPartitionStateV0 {
         if (0..=1).contains(&version.0) {
             self.replicas.serialize(version, _bytes);
         }
-        if version >= ApiVersion(1) {
+        if version == ApiVersion(1) {
             self.is_new.serialize(version, _bytes);
         }
     }
@@ -391,7 +391,7 @@ impl FromBytes for LeaderAndIsrRequestPartitionStateV0 {
         } else {
             Default::default()
         };
-        let is_new = if version >= ApiVersion(1) {
+        let is_new = if version == ApiVersion(1) {
             bool::deserialize(version, bytes)
         } else {
             Default::default()

@@ -125,7 +125,7 @@ impl ToBytes for ListOffsetPartitionResponse {
     fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
         self.partition_index.serialize(version, _bytes);
         self.error_code.serialize(version, _bytes);
-        if version >= ApiVersion(0) {
+        if version == ApiVersion(0) {
             self.old_style_offsets.serialize(version, _bytes);
         }
         if version >= ApiVersion(1) {
@@ -178,7 +178,7 @@ impl FromBytes for ListOffsetPartitionResponse {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
         let error_code = i16::deserialize(version, bytes);
-        let old_style_offsets = if version >= ApiVersion(0) {
+        let old_style_offsets = if version == ApiVersion(0) {
             Vec::<i64>::deserialize(version, bytes)
         } else {
             Default::default()
