@@ -398,7 +398,7 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
             let field_min_version: u8 = field.versions.replace('+', "").parse().unwrap();
             if field_min_version < min_null_version {
                 content.push_str(&format!(
-                    "        if self.{}.is_none() && !_version.0 < {min_null_version} {{\n",
+                    "        if self.{}.is_none() && _version.0 < {min_null_version} {{\n",
                     field.name.to_case(Case::Snake)
                 ));
                 content.push_str(&format!(

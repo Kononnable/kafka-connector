@@ -63,7 +63,7 @@ impl OffsetFetchRequest {
         for item in self.topics.iter().flatten() {
             item.validate_fields(_version)?;
         }
-        if self.topics.is_none() && !_version.0 < 2 {
+        if self.topics.is_none() && _version.0 < 2 {
             return Err(SerializationError::NullValue(
                 "topics",
                 *_version,
