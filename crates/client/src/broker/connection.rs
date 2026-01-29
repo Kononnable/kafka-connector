@@ -169,9 +169,14 @@ pub(crate) async fn fetch_initial_broker_list_from_broker(
             metadata_request_version = MetadataRequest::get_max_supported_version();
         }
         let metadata_request = MetadataRequest {
-            topics: Some(vec![]),
+            topics: if metadata_request_version == ApiVersion(0) {
+                Some(vec![])
+            } else {
+                None
+            },
             ..Default::default()
         };
+        dbg!(&metadata_request, metadata_request_version);
         let metadata =
             call_api_inline(&mut connection, metadata_request, metadata_request_version).await?;
         Ok((connection, supported_api_versions, metadata))

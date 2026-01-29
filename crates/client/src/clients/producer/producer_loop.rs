@@ -1,8 +1,6 @@
 use crate::clients::producer::client::{KafkaProducerOptions, ProduceRequestMessage};
-use crate::cluster::controller::ClusterController;
+use crate::cluster::controller::{ClusterController, ForceRefresh};
 use bytes::BytesMut;
-use kafka_connector_protocol::metadata_request::{MetadataRequest, MetadataRequestTopic};
-use kafka_connector_protocol::metadata_response::MetadataResponseTopicKey;
 use kafka_connector_protocol::produce_request::{
     PartitionProduceData, ProduceRequest, TopicProduceData,
 };
@@ -62,24 +60,8 @@ impl ProducerLoop {
 
                     let metadata = self
                         .controller
-                        .make_api_call(
-                            1,
-                            MetadataRequest {
-                                topics: Some(vec![MetadataRequestTopic {
-                                    name: sig.topic.clone(),
-                                }]),
-                                ..Default::default()
-                            },
-                            None,
-                        )
+                        .get_topic_metadata(&sig.topic, ForceRefresh::No)
                         .await
-                        .unwrap();
-
-                    let metadata = metadata
-                        .topics
-                        .get(&MetadataResponseTopicKey {
-                            name: sig.topic.clone(),
-                        })
                         .unwrap();
 
                     assert_eq!(metadata.error_code, 0);

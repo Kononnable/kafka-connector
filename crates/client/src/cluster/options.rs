@@ -22,4 +22,7 @@ pub struct ClusterControllerOptions {
     pub buffer_size: usize,
     #[derivative(Default(value = "5"))]
     pub max_requests_per_connection: usize,
+
+    #[derivative(Default(value = "Duration::from_millis(300_000)"))]
+    pub metadata_refresh_interval: Duration, // TODO: should this be even exposed to the client(?)
 }

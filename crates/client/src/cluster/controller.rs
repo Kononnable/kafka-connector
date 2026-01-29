@@ -3,22 +3,37 @@ use crate::{
     cluster::{error::ClusterControllerCreationError, options::ClusterControllerOptions},
 };
 use indexmap::IndexMap;
+use std::collections::HashMap;
+use std::ops::Add;
+use std::sync::{Mutex, RwLock};
+use std::time::Instant;
 use std::{fmt::Debug, sync::Arc};
 use tokio::net::ToSocketAddrs;
-use tokio_stream as stream;
-use tokio_stream::StreamExt;
 
+use crate::broker::broker_metadata::BrokerMetadata;
 use crate::{
     broker::connection::fetch_initial_broker_list_from_broker, cluster::error::ApiCallError,
 };
 use kafka_connector_protocol::api_versions_response::ApiVersionsResponseKey;
+use kafka_connector_protocol::metadata_request::{MetadataRequest, MetadataRequestTopic};
+use kafka_connector_protocol::metadata_response::{
+    MetadataResponseTopic, MetadataResponseTopicKey,
+};
 use kafka_connector_protocol::{ApiRequest, ApiVersion, metadata_response::MetadataResponse};
 use tracing::{debug, instrument};
 
 /// Main entrypoint for communication with Kafka cluster.
 pub struct ClusterController {
-    broker_list: IndexMap<i32, BrokerController>,
+    broker_list: HashMap<i32, BrokerController>,
     options: Arc<ClusterControllerOptions>,
+    topic_metadata_cache: RwLock<HashMap<String, MetadataResponseTopic>>,
+    topic_metadata_refresh: Mutex<Instant>,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum ForceRefresh {
+    Yes,
+    No,
 }
 
 impl ClusterController {
@@ -33,24 +48,30 @@ impl ClusterController {
         let (supported_apis, metadata) =
             Self::fetch_initial_broker_list(bootstrap_servers, &options).await?;
 
+        let topic_metadata_cache = metadata
+            .topics
+            .into_iter()
+            .filter(|x| x.1.error_code == 0)
+            .map(|(k, v)| (k.name, v))
+            .collect();
+
         let broker_list = metadata
             .brokers
-            .iter()
+            .into_iter()
             .map(|(k, v)| {
                 (
                     k.node_id,
-                    BrokerController::new(
-                        format!("{}:{}", v.host, v.port),
-                        &options,
-                        k.node_id,
-                        supported_apis.clone(),
-                    ),
+                    BrokerController::new(v.into(), k.node_id, &options, supported_apis.clone()),
                 )
             })
             .collect();
+        let topic_metadata_refresh =
+            Mutex::new(Instant::now().add(options.metadata_refresh_interval));
         Ok(Self {
             broker_list,
             options,
+            topic_metadata_cache: RwLock::new(topic_metadata_cache),
+            topic_metadata_refresh,
         })
     }
 
@@ -97,29 +118,32 @@ impl ClusterController {
         ))
     }
 
-    /// Returns known broker list with their statuses
-    // TODO: Check if needed for 'production', or if rename is needed
-    // TODO: should it be tested?
-    pub async fn get_broker_list(&self) -> Vec<(i32, (String, BrokerControllerStatus))> {
-        stream::iter(self.broker_list.iter())
-            .then(|(k, v)| async { (*k, (v.get_address().to_owned(), v.get_status().await)) })
+    /// Returns metadata for known brokers with their statuses
+    pub fn get_broker_status_list(&self) -> Vec<(i32, (BrokerMetadata, BrokerControllerStatus))> {
+        self.broker_list
+            .iter()
+            .map(|(k, v)| (*k, (v.get_metadata().to_owned(), v.get_status())))
             .collect()
-            .await
     }
 
-    pub async fn make_api_call<R: ApiRequest>(
+    pub async fn make_api_call<R: ApiRequest, I: Into<Option<i32>>>(
         &self,
-        broker_id: i32,
+        broker_id: I,
         request: R,
         version: Option<ApiVersion>,
     ) -> Result<R::Response, ApiCallError> {
+        // TODO: If broker_id not specified find first available(connected) broker, if no connected wait for connection with timeout (from config)
+        // TODO: how to handle timeouts in such case; e.g. situation when machine lost internet connection (it must have been established earlier, otherwise Cluster Controller would not be created)
+        let broker_id = broker_id.into().unwrap();
         let broker = self
             .broker_list
             .get(&broker_id)
             .ok_or(ApiCallError::BrokerNotFound(broker_id))?;
+        // TODO: Refactor unwrap or else
         let version = if let Some(version) = version {
             version
         } else {
+            // TODO: Extract to new method - clients code may want to know if specific fields(features) are supported or not
             let supported_apis = broker.supported_api_versions.read().expect("Poisoned lock");
             let broker_supported_versions = supported_apis
                 .get(&R::get_api_key().0)
@@ -138,6 +162,103 @@ impl ClusterController {
             ApiVersion(max_supported)
         };
         broker.make_api_call(version, request).await
+    }
+
+    // TODO: Tests
+    // TODO: Extract Metadata cache as a separate struct(?)
+    pub(crate) async fn get_topic_metadata<N: Into<String>>(
+        &self,
+        name: N,
+        force_refresh: ForceRefresh,
+    ) -> Result<MetadataResponseTopic, ApiCallError> {
+        let topic_name = name.into();
+
+        self.clear_metadata_cache_if_timeout_reached();
+
+        if force_refresh == ForceRefresh::No {
+            if let Some(value) = self.fetch_metadata_from_cache(&topic_name) {
+                return Ok(value);
+            }
+        }
+
+        let response = self
+            .make_api_call(
+                Some(1), // None, TODO: Change to None, once using any available broker is implemented in make_api_call
+                MetadataRequest {
+                    topics: Some(vec![MetadataRequestTopic {
+                        name: topic_name.clone(),
+                    }]),
+                    allow_auto_topic_creation: false,
+                },
+                None,
+            )
+            .await?;
+
+        let (MetadataResponseTopicKey { name: key }, metadata) = response
+            .topics
+            .into_iter()
+            .next()
+            // TODO: General (unknown) kafka error handling, or is expect ok - it will be common error in the whole code
+            .expect("Unexpected Kafka Api Response format");
+        assert_eq!(key, topic_name);
+        assert_eq!(metadata.error_code, 0); // TODO: General (unknown) kafka error handling
+
+        self.topic_metadata_cache
+            .write()
+            .unwrap_or_else(|poison| {
+                self.topic_metadata_cache.clear_poison();
+                let mut cache = poison.into_inner();
+                cache.clear();
+                cache
+            })
+            .insert(topic_name, metadata.clone());
+
+        Ok(metadata)
+
+        // TODO: node metadata - act if:
+        // new broker added
+        // broker removed
+        // broker hostname/port/rack changed
+        // + tests (?)
+        // use same method in controller creation
+    }
+
+    fn fetch_metadata_from_cache(&self, topic_name: &str) -> Option<MetadataResponseTopic> {
+        let cache = self.topic_metadata_cache.read().unwrap_or_else(|_| {
+            self.topic_metadata_cache.clear_poison();
+            let mut cache = self.topic_metadata_cache.write().unwrap();
+            cache.clear();
+            drop(cache);
+            self.topic_metadata_cache.read().unwrap()
+        });
+        if let Some(metadata) = cache.get(topic_name) {
+            return Some(metadata.to_owned());
+        }
+        None
+    }
+
+    fn clear_metadata_cache_if_timeout_reached(&self) {
+        let mut refresh_timeout = self.topic_metadata_refresh.lock().unwrap_or_else(|poison| {
+            self.topic_metadata_refresh.clear_poison();
+            let mut lock = poison.into_inner();
+            *lock = Instant::now();
+            lock
+        });
+        if *refresh_timeout > Instant::now() {
+            *refresh_timeout = Instant::now() + self.options.metadata_refresh_interval;
+            self.topic_metadata_cache
+                .write()
+                .unwrap_or_else(|poison| {
+                    self.topic_metadata_cache.clear_poison();
+                    poison.into_inner()
+                })
+                .clear()
+        }
+        drop(refresh_timeout);
+    }
+
+    fn update_broker_metadata() {
+        todo!()
     }
 }
 
@@ -253,7 +374,7 @@ mod tests {
 
             let result = ClusterController::new(bootstrap_servers, Default::default()).await;
             assert!(result.is_ok());
-            assert_eq!(result.unwrap().get_broker_list().await.len(), 1);
+            assert_eq!(result.unwrap().get_broker_status_list().len(), 1);
         }
 
         #[test_log::test(tokio::test)]
@@ -282,8 +403,9 @@ mod tests {
             )
             .await;
             assert!(result.is_ok());
+            let broker_list = result.unwrap().get_broker_status_list();
             assert_eq!(
-                result.unwrap().get_broker_list().await[0].1.0,
+                format!("{}:{}", broker_list[0].1.0.host, broker_list[0].1.0.port),
                 bootstrap_servers[1].to_string()
             );
         }

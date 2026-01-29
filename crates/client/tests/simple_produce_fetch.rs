@@ -20,7 +20,7 @@ pub async fn main() {
     .await
     .unwrap();
     let cluster = Arc::new(cluster);
-    let broker_list = cluster.get_broker_list().await;
+    let broker_list = cluster.get_broker_status_list();
     assert!(!broker_list.is_empty());
 
     let test_topic = TestTopic::new(cluster.clone(), "simple_produce_fetch", None).await;

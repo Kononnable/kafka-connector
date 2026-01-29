@@ -1,4 +1,5 @@
 use crate::broker::broker_loop::BrokerLoop;
+use crate::broker::broker_metadata::BrokerMetadata;
 use crate::cluster::{error::ApiCallError, options::ClusterControllerOptions};
 use bytes::BytesMut;
 use indexmap::IndexMap;
@@ -28,11 +29,11 @@ pub(super) struct ApiRequestMessage {
 pub(super) type ResponseChannel = oneshot::Sender<Result<BytesMut, ApiCallError>>;
 
 pub struct BrokerController {
-    address: String,
+    metadata: BrokerMetadata,
+    _node_id: i32,
     request_tx: mpsc::UnboundedSender<ApiRequestMessage>,
     buffer: Mutex<BytesMut>,
     options: Arc<ClusterControllerOptions>,
-    _node_id: i32,
     pub(crate) supported_api_versions: Arc<RwLock<IndexMap<i16, ApiVersionsResponseKey>>>, // TODO: pub crate for api(?)
     status: Arc<RwLock<BrokerControllerStatus>>,
 }
@@ -43,16 +44,16 @@ impl BrokerController {
     // TODO: metadata refresh
     #[instrument(level = "debug")]
     pub fn new(
-        address: String,
-        options: &Arc<ClusterControllerOptions>,
+        metadata: BrokerMetadata,
         node_id: i32,
+        options: &Arc<ClusterControllerOptions>,
         parent_supported_apis: IndexMap<i16, ApiVersionsResponseKey>,
     ) -> BrokerController {
         let (request_tx, request_rx) = mpsc::unbounded_channel();
         let supported_api_versions = Arc::new(RwLock::new(parent_supported_apis));
         let status = Arc::new(RwLock::new(BrokerControllerStatus::Disconnected));
         tokio::spawn(BrokerLoop::start(
-            address.clone(),
+            format!("{}:{}", metadata.host, metadata.port),
             request_rx,
             options.clone(),
             node_id,
@@ -60,7 +61,7 @@ impl BrokerController {
             status.clone(),
         ));
         BrokerController {
-            address,
+            metadata,
             request_tx,
             buffer: Mutex::new(BytesMut::with_capacity(options.buffer_size)),
             options: options.clone(),
@@ -71,7 +72,7 @@ impl BrokerController {
     }
 
     #[instrument(level = "debug", skip_all)]
-    pub async fn get_status(&self) -> BrokerControllerStatus {
+    pub fn get_status(&self) -> BrokerControllerStatus {
         self.status.read().expect("Poisoned lock").clone()
     }
 
@@ -111,7 +112,7 @@ impl BrokerController {
         }
     }
 
-    pub fn get_address(&self) -> &str {
-        &self.address
+    pub fn get_metadata(&self) -> &BrokerMetadata {
+        &self.metadata
     }
 }
