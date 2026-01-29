@@ -8,7 +8,7 @@ pub struct DescribeAclsResponse {
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The error message, or null if there was no error.
     pub error_message: Option<String>,
@@ -79,7 +79,7 @@ impl ApiResponse for DescribeAclsResponse {
 
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let throttle_time_ms = i32::deserialize(version, bytes);
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         let resources = Vec::<DescribeAclsResource>::deserialize(version, bytes);
         DescribeAclsResponse {

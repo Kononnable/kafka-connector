@@ -8,7 +8,7 @@ pub struct FindCoordinatorResponse {
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The error message, or null if there was no error.
     pub error_message: Option<String>,
@@ -65,7 +65,7 @@ impl ApiResponse for FindCoordinatorResponse {
         } else {
             Default::default()
         };
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let error_message = if version >= ApiVersion(1) {
             Option::<String>::deserialize(version, bytes)
         } else {

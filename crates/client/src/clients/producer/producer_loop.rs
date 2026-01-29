@@ -64,9 +64,9 @@ impl ProducerLoop {
                         .await
                         .unwrap();
 
-                    assert_eq!(metadata.error_code, 0);
+                    assert!(metadata.error_code.is_none());
                     let partition_metadata = metadata.partitions.first().unwrap();
-                    assert_eq!(partition_metadata.error_code, 0);
+                    assert!(partition_metadata.error_code.is_none());
                     assert_eq!(partition_metadata.partition_index, 0);
                     let broker_id = partition_metadata.leader_id;
 
@@ -120,7 +120,7 @@ impl ProducerLoop {
 
                     for resp in resp.responses {
                         for part in resp.partitions {
-                            assert_eq!(part.error_code, 0);
+                            assert!(part.error_code.is_none());
                         }
                     }
                     signal.response_sender.send(()).unwrap();

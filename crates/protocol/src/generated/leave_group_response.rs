@@ -8,7 +8,7 @@ pub struct LeaveGroupResponse {
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 }
 
 impl ApiResponse for LeaveGroupResponse {
@@ -47,7 +47,7 @@ impl ApiResponse for LeaveGroupResponse {
         } else {
             Default::default()
         };
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         LeaveGroupResponse {
             throttle_time_ms,
             error_code,

@@ -18,7 +18,7 @@ pub struct OffsetFetchResponse {
     pub topics: Vec<OffsetFetchResponseTopic>,
 
     /// The top-level error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 }
 
 #[derive(Clone, Debug, PartialEq, Default)]
@@ -45,7 +45,7 @@ pub struct OffsetFetchResponsePartition {
     pub metadata: Option<String>,
 
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 }
 
 impl ApiResponse for OffsetFetchResponse {
@@ -89,7 +89,7 @@ impl ApiResponse for OffsetFetchResponse {
         };
         let topics = Vec::<OffsetFetchResponseTopic>::deserialize(version, bytes);
         let error_code = if version >= ApiVersion(2) {
-            i16::deserialize(version, bytes)
+            Option::<ApiError>::deserialize(version, bytes)
         } else {
             Default::default()
         };
@@ -106,7 +106,7 @@ impl OffsetFetchResponse {
         for item in self.topics.iter() {
             item.validate_fields(_version)?;
         }
-        if self.error_code != 0 && _version.0 < 2 {
+        if self.error_code != ApiError::from_i16(0) && _version.0 < 2 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "error_code",
                 *_version,
@@ -176,7 +176,7 @@ impl FromBytes for OffsetFetchResponsePartition {
             Default::default()
         };
         let metadata = Option::<String>::deserialize(version, bytes);
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         OffsetFetchResponsePartition {
             partition_index,
             committed_offset,

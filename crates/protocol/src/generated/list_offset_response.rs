@@ -30,7 +30,7 @@ pub struct ListOffsetPartitionResponse {
     pub partition_index: i32,
 
     /// The partition error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The result offsets.
     pub old_style_offsets: Vec<i64>,
@@ -177,7 +177,7 @@ impl ListOffsetPartitionResponse {
 impl FromBytes for ListOffsetPartitionResponse {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let old_style_offsets = if version == ApiVersion(0) {
             Vec::<i64>::deserialize(version, bytes)
         } else {

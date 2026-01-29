@@ -13,7 +13,7 @@ pub struct DescribeLogDirsResponse {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribeLogDirsResult {
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The absolute log directory path.
     pub log_dir: String,
@@ -111,7 +111,7 @@ impl DescribeLogDirsResult {
 
 impl FromBytes for DescribeLogDirsResult {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let log_dir = String::deserialize(version, bytes);
         let topics = Vec::<DescribeLogDirsTopic>::deserialize(version, bytes);
         DescribeLogDirsResult {

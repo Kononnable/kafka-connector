@@ -13,7 +13,7 @@ pub struct AlterConfigsResponse {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct AlterConfigsResourceResponse {
     /// The resource error code.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The resource error message, or null if there was no error.
     pub error_message: Option<String>,
@@ -89,7 +89,7 @@ impl AlterConfigsResourceResponse {
 
 impl FromBytes for AlterConfigsResourceResponse {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         let resource_type = i8::deserialize(version, bytes);
         let resource_name = String::deserialize(version, bytes);

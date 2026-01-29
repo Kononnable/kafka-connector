@@ -24,7 +24,7 @@ pub struct PartitionResult {
     pub partition_id: i32,
 
     /// The result error, or zero if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The result message, or null if there was no error.
     pub error_message: Option<String>,
@@ -121,7 +121,7 @@ impl PartitionResult {
 impl FromBytes for PartitionResult {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_id = i32::deserialize(version, bytes);
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         PartitionResult {
             partition_id,

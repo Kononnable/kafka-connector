@@ -47,7 +47,7 @@ impl TestTopic {
             .await
             .unwrap();
         assert_eq!(resp.topics.first().unwrap().1.error_message, None);
-        assert_eq!(resp.topics.first().unwrap().1.error_code, 0);
+        assert!(resp.topics.first().unwrap().1.error_code.is_none());
         TestTopic {
             name,
             cluster,
@@ -74,7 +74,7 @@ impl TestTopic {
             )
             .await
             .unwrap();
-        assert_eq!(resp.responses.first().unwrap().error_code, 0);
+        assert!(resp.responses.first().unwrap().error_code.is_none());
         self.is_deleted = true;
     }
 }

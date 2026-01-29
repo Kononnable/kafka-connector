@@ -4,7 +4,7 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct SaslAuthenticateResponse {
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The error message, or null if there was no error.
     pub error_message: Option<String>,
@@ -49,7 +49,7 @@ impl ApiResponse for SaslAuthenticateResponse {
     }
 
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         let auth_bytes = Vec::<u8>::deserialize(version, bytes);
         let session_lifetime_ms = if version >= ApiVersion(1) {

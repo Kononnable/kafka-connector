@@ -425,14 +425,14 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
         let nullable_filter = if field.nullable_versions.is_some() {
             format!("self.{}.is_some()", field.name.to_case(Case::Snake))
         } else {
+            let field_name = field.name.to_case(Case::Snake);
             match default_value.as_str() {
-                "true" => format!("!self.{}", field.name.to_case(Case::Snake)),
-                "false" => format!("self.{}", field.name.to_case(Case::Snake)),
-                _ => format!(
-                    "self.{} != {}",
-                    field.name.to_case(Case::Snake),
-                    default_value
-                ),
+                "true" => format!("!self.{field_name}",),
+                "false" => format!("self.{field_name}",),
+                _ if field_name == "error_code" => {
+                    format!("self.error_code != ApiError::from_i16({})", default_value)
+                }
+                _ => format!("self.{field_name} != {}", default_value),
             }
         };
         if field.versions.contains('-') {
@@ -685,6 +685,9 @@ fn get_field_definition(field: &ApiSpecField, sub_structs: &mut VecDeque<SubStru
 
 fn get_field_type(field: &ApiSpecField) -> String {
     let mut field_type = get_field_base_type(field);
+    if field.name == "ErrorCode" {
+        field_type = "Option<ApiError>".to_owned();
+    }
     if field.type_.is_array {
         field_type = format!("Vec<{field_type}>");
     }

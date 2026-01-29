@@ -21,7 +21,7 @@ pub struct CreatableTopicResultKey {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct CreatableTopicResult {
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The error message, or null if there was no error.
     pub error_message: Option<String>,
@@ -113,7 +113,7 @@ impl FromBytes for IndexMap<CreatableTopicResultKey, CreatableTopicResult> {
         let mut ret = IndexMap::with_capacity(cap as usize);
         for _ in 0..cap {
             let name = String::deserialize(version, bytes);
-            let error_code = i16::deserialize(version, bytes);
+            let error_code = Option::<ApiError>::deserialize(version, bytes);
             let error_message = if version >= ApiVersion(1) {
                 Option::<String>::deserialize(version, bytes)
             } else {

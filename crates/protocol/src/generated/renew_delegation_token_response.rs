@@ -4,7 +4,7 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct RenewDelegationTokenResponse {
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The timestamp in milliseconds at which this token expires.
     pub expiry_timestamp_ms: i64,
@@ -43,7 +43,7 @@ impl ApiResponse for RenewDelegationTokenResponse {
     }
 
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let expiry_timestamp_ms = i64::deserialize(version, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
         RenewDelegationTokenResponse {

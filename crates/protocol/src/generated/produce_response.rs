@@ -34,7 +34,7 @@ pub struct PartitionProduceResponse {
     pub partition_index: i32,
 
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The base offset.
     pub base_offset: i64,
@@ -146,7 +146,7 @@ impl PartitionProduceResponse {
 impl FromBytes for PartitionProduceResponse {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let base_offset = i64::deserialize(version, bytes);
         let log_append_time_ms = if version >= ApiVersion(2) {
             i64::deserialize(version, bytes)

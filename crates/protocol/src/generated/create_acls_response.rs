@@ -13,7 +13,7 @@ pub struct CreateAclsResponse {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct CreatableAclResult {
     /// The result error, or zero if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The result message, or null if there was no error.
     pub error_message: Option<String>,
@@ -81,7 +81,7 @@ impl CreatableAclResult {
 
 impl FromBytes for CreatableAclResult {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         CreatableAclResult {
             error_code,

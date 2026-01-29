@@ -27,7 +27,7 @@ pub struct FetchResponse {
     pub throttle_time_ms: i32,
 
     /// The top level response error code.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The fetch session ID, or 0 if this is not part of a fetch session.
     pub session_id: i32,
@@ -51,7 +51,7 @@ pub struct FetchablePartitionResponse {
     pub partition_index: i32,
 
     /// The error code, or 0 if there was no fetch error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The current high water mark.
     pub high_watermark: i64,
@@ -121,7 +121,7 @@ impl ApiResponse for FetchResponse {
             Default::default()
         };
         let error_code = if version >= ApiVersion(7) {
-            i16::deserialize(version, bytes)
+            Option::<ApiError>::deserialize(version, bytes)
         } else {
             Default::default()
         };
@@ -145,7 +145,7 @@ impl FetchResponse {
         for item in self.topics.iter() {
             item.validate_fields(_version)?;
         }
-        if self.error_code != i16::default() && _version.0 < 7 {
+        if self.error_code != ApiError::from_i16(i16::default()) && _version.0 < 7 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "error_code",
                 *_version,
@@ -224,7 +224,7 @@ impl FetchablePartitionResponse {
 impl FromBytes for FetchablePartitionResponse {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let partition_index = i32::deserialize(version, bytes);
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let high_watermark = i64::deserialize(version, bytes);
         let last_stable_offset = if version >= ApiVersion(4) {
             i64::deserialize(version, bytes)

@@ -6,7 +6,7 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct LeaderAndIsrResponse {
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// Each partition.
     pub partitions: Vec<LeaderAndIsrResponsePartition>,
@@ -21,7 +21,7 @@ pub struct LeaderAndIsrResponsePartition {
     pub partition_index: i32,
 
     /// The partition error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 }
 
 impl ApiResponse for LeaderAndIsrResponse {
@@ -53,7 +53,7 @@ impl ApiResponse for LeaderAndIsrResponse {
     }
 
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let partitions = Vec::<LeaderAndIsrResponsePartition>::deserialize(version, bytes);
         LeaderAndIsrResponse {
             error_code,
@@ -89,7 +89,7 @@ impl FromBytes for LeaderAndIsrResponsePartition {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let topic_name = String::deserialize(version, bytes);
         let partition_index = i32::deserialize(version, bytes);
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         LeaderAndIsrResponsePartition {
             topic_name,
             partition_index,

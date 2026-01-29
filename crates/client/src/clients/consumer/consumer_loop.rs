@@ -60,9 +60,9 @@ impl ConsumerLoop {
             })
             .unwrap();
 
-        assert_eq!(metadata.error_code, 0);
+        assert!(metadata.error_code.is_none());
         let partition_metadata = metadata.partitions.first().unwrap();
-        assert_eq!(partition_metadata.error_code, 0);
+        assert!(partition_metadata.error_code.is_none());
         // TODO: Single topic partition support for now
         let broker_id = partition_metadata.leader_id;
 
@@ -87,7 +87,7 @@ impl ConsumerLoop {
             )
             .await
             .unwrap();
-        assert_eq!(
+        assert!(
             list_offsets
                 .topics
                 .first()
@@ -95,8 +95,8 @@ impl ConsumerLoop {
                 .partitions
                 .first()
                 .unwrap()
-                .error_code,
-            0
+                .error_code
+                .is_none()
         );
         assert_eq!(
             list_offsets
@@ -148,7 +148,7 @@ impl ConsumerLoop {
                 )
                 .await
                 .unwrap();
-            assert_eq!(fetch_response.error_code, 0);
+            assert!(fetch_response.error_code.is_none());
             let partition_data = fetch_response
                 .topics
                 .first()
@@ -156,7 +156,7 @@ impl ConsumerLoop {
                 .partitions
                 .first()
                 .unwrap();
-            assert_eq!(partition_data.error_code, 0);
+            assert!(partition_data.error_code.is_none());
             let mut remaining_records = BytesMut::new();
             remaining_records.extend_from_slice(partition_data.records.as_ref().unwrap());
             while !remaining_records.is_empty() {

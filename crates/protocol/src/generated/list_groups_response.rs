@@ -8,7 +8,7 @@ pub struct ListGroupsResponse {
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// Each group in the response.
     pub groups: Vec<ListedGroup>,
@@ -60,7 +60,7 @@ impl ApiResponse for ListGroupsResponse {
         } else {
             Default::default()
         };
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let groups = Vec::<ListedGroup>::deserialize(version, bytes);
         ListGroupsResponse {
             throttle_time_ms,

@@ -4,7 +4,7 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct UpdateMetadataResponse {
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 }
 
 impl ApiResponse for UpdateMetadataResponse {
@@ -35,7 +35,7 @@ impl ApiResponse for UpdateMetadataResponse {
     }
 
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         UpdateMetadataResponse { error_code }
     }
 }

@@ -14,7 +14,7 @@ pub struct DeleteAclsResponse {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct DeleteAclsFilterResult {
     /// The error code, or 0 if the filter succeeded.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The error message, or null if the filter succeeded.
     pub error_message: Option<String>,
@@ -26,7 +26,7 @@ pub struct DeleteAclsFilterResult {
 #[derive(Clone, Debug, PartialEq)]
 pub struct DeleteAclsMatchingAcl {
     /// The deletion error code, or 0 if the deletion succeeded.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The deletion error message, or null if the deletion succeeded.
     pub error_message: Option<String>,
@@ -119,7 +119,7 @@ impl DeleteAclsFilterResult {
 
 impl FromBytes for DeleteAclsFilterResult {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         let matching_acls = Vec::<DeleteAclsMatchingAcl>::deserialize(version, bytes);
         DeleteAclsFilterResult {
@@ -161,7 +161,7 @@ impl DeleteAclsMatchingAcl {
 
 impl FromBytes for DeleteAclsMatchingAcl {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         let resource_type = i8::deserialize(version, bytes);
         let resource_name = String::deserialize(version, bytes);

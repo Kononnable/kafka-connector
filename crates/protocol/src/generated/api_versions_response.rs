@@ -5,7 +5,7 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ApiVersionsResponse {
     /// The top-level error code.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The APIs supported by the broker.
     pub api_keys: IndexMap<ApiVersionsResponseKeyKey, ApiVersionsResponseKey>,
@@ -61,7 +61,7 @@ impl ApiResponse for ApiVersionsResponse {
     }
 
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let api_keys = IndexMap::<ApiVersionsResponseKeyKey, ApiVersionsResponseKey>::deserialize(
             version, bytes,
         );

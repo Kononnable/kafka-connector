@@ -8,7 +8,7 @@ pub struct SyncGroupResponse {
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The member assignment.
     pub assignment: Vec<u8>,
@@ -51,7 +51,7 @@ impl ApiResponse for SyncGroupResponse {
         } else {
             Default::default()
         };
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let assignment = Vec::<u8>::deserialize(version, bytes);
         SyncGroupResponse {
             throttle_time_ms,

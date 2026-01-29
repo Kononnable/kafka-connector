@@ -51,7 +51,7 @@ impl ClusterController {
         let topic_metadata_cache = metadata
             .topics
             .into_iter()
-            .filter(|x| x.1.error_code == 0)
+            .filter(|x| x.1.error_code.is_none())
             .map(|(k, v)| (k.name, v))
             .collect();
 
@@ -201,7 +201,7 @@ impl ClusterController {
             // TODO: General (unknown) kafka error handling, or is expect ok - it will be common error in the whole code
             .expect("Unexpected Kafka Api Response format");
         assert_eq!(key, topic_name);
-        assert_eq!(metadata.error_code, 0); // TODO: General (unknown) kafka error handling
+        assert!(metadata.error_code.is_none()); // TODO: General (unknown) kafka error handling
 
         self.topic_metadata_cache
             .write()

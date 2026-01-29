@@ -4,7 +4,7 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DescribeDelegationTokenResponse {
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The tokens.
     pub tokens: Vec<DescribedDelegationToken>,
@@ -79,7 +79,7 @@ impl ApiResponse for DescribeDelegationTokenResponse {
     }
 
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let tokens = Vec::<DescribedDelegationToken>::deserialize(version, bytes);
         let throttle_time_ms = i32::deserialize(version, bytes);
         DescribeDelegationTokenResponse {

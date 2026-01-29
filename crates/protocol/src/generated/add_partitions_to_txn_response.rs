@@ -31,7 +31,7 @@ pub struct AddPartitionsToTxnPartitionResultKey {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct AddPartitionsToTxnPartitionResult {
     /// The response error code.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 }
 
 impl ApiResponse for AddPartitionsToTxnResponse {
@@ -158,7 +158,7 @@ impl FromBytes
         let mut ret = IndexMap::with_capacity(cap as usize);
         for _ in 0..cap {
             let partition_index = i32::deserialize(version, bytes);
-            let error_code = i16::deserialize(version, bytes);
+            let error_code = Option::<ApiError>::deserialize(version, bytes);
             let key = AddPartitionsToTxnPartitionResultKey { partition_index };
             let value = AddPartitionsToTxnPartitionResult { error_code };
             ret.insert(key, value);

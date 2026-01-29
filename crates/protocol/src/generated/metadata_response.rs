@@ -60,7 +60,7 @@ pub struct MetadataResponseTopicKey {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct MetadataResponseTopic {
     /// The topic error, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// True if the topic is internal.
     pub is_internal: bool,
@@ -72,7 +72,7 @@ pub struct MetadataResponseTopic {
 #[derive(Clone, Debug, PartialEq)]
 pub struct MetadataResponsePartition {
     /// The partition error, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The partition index.
     pub partition_index: i32,
@@ -277,7 +277,7 @@ impl FromBytes for IndexMap<MetadataResponseTopicKey, MetadataResponseTopic> {
         let cap: i32 = FromBytes::deserialize(version, bytes);
         let mut ret = IndexMap::with_capacity(cap as usize);
         for _ in 0..cap {
-            let error_code = i16::deserialize(version, bytes);
+            let error_code = Option::<ApiError>::deserialize(version, bytes);
             let name = String::deserialize(version, bytes);
             let is_internal = if version >= ApiVersion(1) {
                 bool::deserialize(version, bytes)
@@ -322,7 +322,7 @@ impl MetadataResponsePartition {
 
 impl FromBytes for MetadataResponsePartition {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let partition_index = i32::deserialize(version, bytes);
         let leader_id = i32::deserialize(version, bytes);
         let leader_epoch = if version >= ApiVersion(7) {

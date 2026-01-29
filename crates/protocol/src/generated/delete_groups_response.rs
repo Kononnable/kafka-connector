@@ -19,7 +19,7 @@ pub struct DeletableGroupResultKey {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct DeletableGroupResult {
     /// The deletion error, or 0 if the deletion succeeded.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 }
 
 impl ApiResponse for DeleteGroupsResponse {
@@ -99,7 +99,7 @@ impl FromBytes for IndexMap<DeletableGroupResultKey, DeletableGroupResult> {
         let mut ret = IndexMap::with_capacity(cap as usize);
         for _ in 0..cap {
             let group_id = String::deserialize(version, bytes);
-            let error_code = i16::deserialize(version, bytes);
+            let error_code = Option::<ApiError>::deserialize(version, bytes);
             let key = DeletableGroupResultKey { group_id };
             let value = DeletableGroupResult { error_code };
             ret.insert(key, value);

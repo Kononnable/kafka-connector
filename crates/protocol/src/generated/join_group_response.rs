@@ -11,7 +11,7 @@ pub struct JoinGroupResponse {
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The generation ID of the group.
     pub generation_id: i32,
@@ -78,7 +78,7 @@ impl ApiResponse for JoinGroupResponse {
         } else {
             Default::default()
         };
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let generation_id = i32::deserialize(version, bytes);
         let protocol_name = String::deserialize(version, bytes);
         let leader = String::deserialize(version, bytes);

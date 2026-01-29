@@ -7,7 +7,7 @@ pub struct AddOffsetsToTxnResponse {
     pub throttle_time_ms: i32,
 
     /// The response error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 }
 
 impl ApiResponse for AddOffsetsToTxnResponse {
@@ -40,7 +40,7 @@ impl ApiResponse for AddOffsetsToTxnResponse {
 
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let throttle_time_ms = i32::deserialize(version, bytes);
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         AddOffsetsToTxnResponse {
             throttle_time_ms,
             error_code,

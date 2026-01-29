@@ -4,7 +4,7 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ControlledShutdownResponse {
     /// The top-level error code.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The partitions that the broker still leads.
     pub remaining_partitions: IndexSet<RemainingPartition>,
@@ -48,7 +48,7 @@ impl ApiResponse for ControlledShutdownResponse {
     }
 
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let remaining_partitions = IndexSet::<RemainingPartition>::deserialize(version, bytes);
         ControlledShutdownResponse {
             error_code,

@@ -7,7 +7,7 @@ pub struct InitProducerIdResponse {
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The current producer id.
     pub producer_id: i64,
@@ -48,7 +48,7 @@ impl ApiResponse for InitProducerIdResponse {
 
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let throttle_time_ms = i32::deserialize(version, bytes);
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let producer_id = i64::deserialize(version, bytes);
         let producer_epoch = i16::deserialize(version, bytes);
         InitProducerIdResponse {

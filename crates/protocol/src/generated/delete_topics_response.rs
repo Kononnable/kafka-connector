@@ -18,7 +18,7 @@ pub struct DeletableTopicResult {
     pub name: String,
 
     /// The deletion error, or 0 if the deletion succeeded.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 }
 
 impl ApiResponse for DeleteTopicsResponse {
@@ -97,7 +97,7 @@ impl DeletableTopicResult {
 impl FromBytes for DeletableTopicResult {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let name = String::deserialize(version, bytes);
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         DeletableTopicResult { name, error_code }
     }
 }

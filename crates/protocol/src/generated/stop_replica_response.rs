@@ -4,7 +4,7 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct StopReplicaResponse {
     /// The top-level error code, or 0 if there was no top-level error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The responses for each partition.
     pub partitions: Vec<StopReplicaResponsePartition>,
@@ -19,7 +19,7 @@ pub struct StopReplicaResponsePartition {
     pub partition_index: i32,
 
     /// The partition error code, or 0 if there was no partition error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 }
 
 impl ApiResponse for StopReplicaResponse {
@@ -51,7 +51,7 @@ impl ApiResponse for StopReplicaResponse {
     }
 
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let partitions = Vec::<StopReplicaResponsePartition>::deserialize(version, bytes);
         StopReplicaResponse {
             error_code,
@@ -87,7 +87,7 @@ impl FromBytes for StopReplicaResponsePartition {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let topic_name = String::deserialize(version, bytes);
         let partition_index = i32::deserialize(version, bytes);
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         StopReplicaResponsePartition {
             topic_name,
             partition_index,

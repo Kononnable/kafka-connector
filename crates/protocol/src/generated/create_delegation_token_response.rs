@@ -4,7 +4,7 @@ use super::super::prelude::*;
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct CreateDelegationTokenResponse {
     /// The top-level error, or zero if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The principal type of the token owner.
     pub principal_type: String,
@@ -67,7 +67,7 @@ impl ApiResponse for CreateDelegationTokenResponse {
     }
 
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let principal_type = String::deserialize(version, bytes);
         let principal_name = String::deserialize(version, bytes);
         let issue_timestamp_ms = i64::deserialize(version, bytes);

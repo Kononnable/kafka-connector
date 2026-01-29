@@ -1,4 +1,4 @@
-pub use crate::{from_bytes::FromBytes, to_bytes::ToBytes};
+pub use crate::{ApiError, from_bytes::FromBytes, to_bytes::ToBytes};
 pub use bytes::{BufMut, BytesMut};
 pub use indexmap::{IndexMap, IndexSet};
 pub use std::fmt::Debug;

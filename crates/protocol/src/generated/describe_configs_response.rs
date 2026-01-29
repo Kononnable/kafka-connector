@@ -17,7 +17,7 @@ pub struct DescribeConfigsResponse {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribeConfigsResult {
     /// The error code, or 0 if we were able to successfully describe the configurations.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The error message, or null if we were able to successfully describe the configurations.
     pub error_message: Option<String>,
@@ -136,7 +136,7 @@ impl DescribeConfigsResult {
 
 impl FromBytes for DescribeConfigsResult {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let error_message = Option::<String>::deserialize(version, bytes);
         let resource_type = i8::deserialize(version, bytes);
         let resource_name = String::deserialize(version, bytes);

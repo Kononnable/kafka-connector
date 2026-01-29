@@ -23,7 +23,7 @@ pub struct OffsetForLeaderTopicResult {
 #[derive(Clone, Debug, PartialEq)]
 pub struct OffsetForLeaderPartitionResult {
     /// The error code 0, or if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The partition index.
     pub partition_index: i32,
@@ -131,7 +131,7 @@ impl OffsetForLeaderPartitionResult {
 
 impl FromBytes for OffsetForLeaderPartitionResult {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let partition_index = i32::deserialize(version, bytes);
         let leader_epoch = if version >= ApiVersion(1) {
             i32::deserialize(version, bytes)

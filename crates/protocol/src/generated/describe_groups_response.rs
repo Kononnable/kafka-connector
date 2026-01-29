@@ -18,7 +18,7 @@ pub struct DescribeGroupsResponse {
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct DescribedGroup {
     /// The describe error, or 0 if there was no error.
-    pub error_code: i16,
+    pub error_code: Option<ApiError>,
 
     /// The group ID string.
     pub group_id: String,
@@ -129,7 +129,7 @@ impl DescribedGroup {
 
 impl FromBytes for DescribedGroup {
     fn deserialize(version: ApiVersion, bytes: &mut BytesMut) -> Self {
-        let error_code = i16::deserialize(version, bytes);
+        let error_code = Option::<ApiError>::deserialize(version, bytes);
         let group_id = String::deserialize(version, bytes);
         let group_state = String::deserialize(version, bytes);
         let protocol_type = String::deserialize(version, bytes);
