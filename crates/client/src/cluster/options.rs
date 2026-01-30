@@ -16,7 +16,7 @@ pub struct ClusterControllerOptions {
     pub connection_timeout: Duration,
     #[derivative(Default(value = "Duration::from_millis(5_000)"))]
     pub request_timeout: Duration,
-    #[derivative(Default(value = "\"kafka-connector\".to_owned()"))]
+    #[derivative(Default(value = "env!(\"CARGO_CRATE_NAME\").to_owned()"))]
     pub client_name: String,
     #[derivative(Default(value = "1_024"))]
     pub buffer_size: usize,

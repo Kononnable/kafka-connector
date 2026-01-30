@@ -176,7 +176,6 @@ pub(crate) async fn fetch_initial_broker_list_from_broker(
             },
             ..Default::default()
         };
-        dbg!(&metadata_request, metadata_request_version);
         let metadata =
             call_api_inline(&mut connection, metadata_request, metadata_request_version).await?;
         Ok((connection, supported_api_versions, metadata))

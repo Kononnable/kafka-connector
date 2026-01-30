@@ -52,7 +52,6 @@ impl ProducerLoop {
                 }
                 Some(signal) => {
                     let default_timestamp = SystemTime::now();
-                    // TODO: Metadata cache on controller, with autorefresh, and refresh on error/force refresh
 
                     // TODO: Clean, error handling, remove const values
 

@@ -1,25 +1,25 @@
+use crate::broker::broker_metadata::BrokerMetadata;
+use crate::{
+    broker::connection::fetch_initial_broker_list_from_broker, cluster::error::ApiCallError,
+};
 use crate::{
     broker::controller::{BrokerController, BrokerControllerStatus},
     cluster::{error::ClusterControllerCreationError, options::ClusterControllerOptions},
 };
 use indexmap::IndexMap;
-use std::collections::HashMap;
-use std::ops::Add;
-use std::sync::{Mutex, RwLock};
-use std::time::Instant;
-use std::{fmt::Debug, sync::Arc};
-use tokio::net::ToSocketAddrs;
-
-use crate::broker::broker_metadata::BrokerMetadata;
-use crate::{
-    broker::connection::fetch_initial_broker_list_from_broker, cluster::error::ApiCallError,
-};
 use kafka_connector_protocol::api_versions_response::ApiVersionsResponseKey;
 use kafka_connector_protocol::metadata_request::{MetadataRequest, MetadataRequestTopic};
 use kafka_connector_protocol::metadata_response::{
     MetadataResponseTopic, MetadataResponseTopicKey,
 };
 use kafka_connector_protocol::{ApiRequest, ApiVersion, metadata_response::MetadataResponse};
+use std::collections::HashMap;
+use std::ops::Add;
+use std::sync::{Mutex, RwLock};
+use std::time::{Duration, Instant};
+use std::{fmt::Debug, sync::Arc};
+use tokio::net::ToSocketAddrs;
+use tokio::time::{sleep, timeout};
 use tracing::{debug, instrument};
 
 /// Main entrypoint for communication with Kafka cluster.
@@ -132,36 +132,40 @@ impl ClusterController {
         request: R,
         version: Option<ApiVersion>,
     ) -> Result<R::Response, ApiCallError> {
-        // TODO: If broker_id not specified find first available(connected) broker, if no connected wait for connection with timeout (from config)
-        // TODO: how to handle timeouts in such case; e.g. situation when machine lost internet connection (it must have been established earlier, otherwise Cluster Controller would not be created)
-        let broker_id = broker_id.into().unwrap();
+        let broker_id = if let Some(broker_id) = broker_id.into() {
+            broker_id
+        } else {
+            self.get_any_connected_broker_id().await?
+        };
+
         let broker = self
             .broker_list
             .get(&broker_id)
             .ok_or(ApiCallError::BrokerNotFound(broker_id))?;
-        // TODO: Refactor unwrap or else
-        let version = if let Some(version) = version {
-            version
-        } else {
-            // TODO: Extract to new method - clients code may want to know if specific fields(features) are supported or not
-            let supported_apis = broker.supported_api_versions.read().expect("Poisoned lock");
-            let broker_supported_versions = supported_apis
-                .get(&R::get_api_key().0)
-                .ok_or(ApiCallError::UnsupportedApi(R::get_api_key()))?;
-            let max_supported = i16::min(
-                broker_supported_versions.max_version,
-                R::get_max_supported_version().0,
-            );
-            let min_supported = i16::max(
-                broker_supported_versions.min_version,
-                R::get_min_supported_version().0,
-            );
-            if min_supported > max_supported {
-                return Err(ApiCallError::UnsupportedApi(R::get_api_key()));
-            }
-            ApiVersion(max_supported)
-        };
+
+        let version = version
+            .or_else(|| broker.get_max_supported_api_version::<R>())
+            .ok_or(ApiCallError::UnsupportedApi(R::get_api_key()))?;
+
         broker.make_api_call(version, request).await
+    }
+
+    async fn get_any_connected_broker_id(&self) -> Result<i32, ApiCallError> {
+        timeout(self.options.request_timeout, async {
+            loop {
+                let broker_id = self
+                    .get_broker_status_list()
+                    .into_iter()
+                    .find(|(_id, (_metadata, status))| *status == BrokerControllerStatus::Connected)
+                    .map(|(id, _)| id);
+                if let Some(broker_id) = broker_id {
+                    return Ok::<i32, ApiCallError>(broker_id);
+                }
+                sleep(Duration::from_millis(10)).await
+            }
+        })
+        .await
+        .map_err(|_| ApiCallError::TimeoutReached)?
     }
 
     // TODO: Tests
@@ -183,7 +187,7 @@ impl ClusterController {
 
         let response = self
             .make_api_call(
-                Some(1), // None, TODO: Change to None, once using any available broker is implemented in make_api_call
+                None,
                 MetadataRequest {
                     topics: Some(vec![MetadataRequestTopic {
                         name: topic_name.clone(),

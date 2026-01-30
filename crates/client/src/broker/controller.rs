@@ -13,7 +13,7 @@ use std::{
 use tokio::sync::{mpsc, oneshot};
 use tracing::instrument;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum BrokerControllerStatus {
     Connecting,
     Connected,
@@ -41,7 +41,6 @@ pub struct BrokerController {
 impl BrokerController {
     // TODO: Assumption - until connected supported api versions are the same as on other nodes (copy from initial connection to cluster)
     // TODO: Document parameters - parent
-    // TODO: metadata refresh
     #[instrument(level = "debug")]
     pub fn new(
         metadata: BrokerMetadata,
@@ -114,5 +113,22 @@ impl BrokerController {
 
     pub fn get_metadata(&self) -> &BrokerMetadata {
         &self.metadata
+    }
+
+    pub fn get_max_supported_api_version<R: ApiRequest>(&self) -> Option<ApiVersion> {
+        let supported_apis = self.supported_api_versions.read().expect("Poisoned lock");
+        let broker_supported_versions = supported_apis.get(&R::get_api_key().0)?;
+        let max_supported = i16::min(
+            broker_supported_versions.max_version,
+            R::get_max_supported_version().0,
+        );
+        let min_supported = i16::max(
+            broker_supported_versions.min_version,
+            R::get_min_supported_version().0,
+        );
+        if min_supported > max_supported {
+            return None;
+        }
+        Some(ApiVersion(max_supported))
     }
 }

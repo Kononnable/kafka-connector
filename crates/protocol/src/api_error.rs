@@ -490,7 +490,7 @@ impl ApiError {
 impl ToBytes for Option<ApiError> {
     fn serialize(&self, version: ApiVersion, bytes: &mut BytesMut) {
         let error_code = match self {
-            None => 0_16,
+            None => 0,
             Some(x) => (*x).into(),
         };
         i16::serialize(&error_code, version, bytes);
