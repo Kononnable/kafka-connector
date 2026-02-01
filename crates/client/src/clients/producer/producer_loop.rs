@@ -59,8 +59,11 @@ impl ProducerLoop {
 
                     let metadata = self
                         .controller
-                        .get_topic_metadata(&sig.topic, ForceRefresh::No)
+                        .get_topic_metadata(&[&sig.topic], ForceRefresh::No)
                         .await
+                        .unwrap()
+                        .into_values()
+                        .next()
                         .unwrap();
 
                     assert!(metadata.error_code.is_none());
