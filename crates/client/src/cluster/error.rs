@@ -1,4 +1,4 @@
-use kafka_connector_protocol::ApiKey;
+use kafka_connector_protocol::{ApiError, ApiKey};
 use thiserror::Error as DeriveError;
 
 #[non_exhaustive]
@@ -25,4 +25,6 @@ pub enum ApiCallError {
     TimeoutReached,
     #[error("Broker does not support API {0:?}")]
     UnsupportedApi(ApiKey),
+    #[error("Broker returned unsupported error code {1:?} in field {2} when calling API {0:?} ")]
+    UnsupportedErrorCode(ApiKey, ApiError, &'static str),
 }

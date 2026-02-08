@@ -11,7 +11,7 @@ use kafka_connector_protocol::api_versions_response::ApiVersionsResponseKey;
 use kafka_connector_protocol::metadata_request::{MetadataRequest, MetadataRequestTopic};
 use kafka_connector_protocol::metadata_response::MetadataResponseTopic;
 use kafka_connector_protocol::{ApiRequest, ApiVersion, metadata_response::MetadataResponse};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::ops::Add;
 use std::sync::{Mutex, RwLock};
 use std::time::{Duration, Instant};
@@ -168,15 +168,12 @@ impl ClusterController {
 
     // TODO: Tests
     // TODO: Extract Metadata cache as a separate struct(?)
-    pub(crate) async fn get_topic_metadata<N: AsRef<str>>(
+    pub(crate) async fn get_topic_metadata<N: Into<HashSet<String>>>(
         &self,
-        name: &[N],
+        topics: N,
         force_refresh: ForceRefresh,
     ) -> Result<HashMap<String, MetadataResponseTopic>, ApiCallError> {
-        let topics = name
-            .into_iter()
-            .map(AsRef::<str>::as_ref)
-            .collect::<Vec<_>>();
+        let topics = topics.into();
 
         self.clear_metadata_cache_if_timeout_reached();
 
@@ -193,9 +190,7 @@ impl ClusterController {
                     topics: Some(
                         topics
                             .into_iter()
-                            .map(|topic_name| MetadataRequestTopic {
-                                name: topic_name.to_string(),
-                            })
+                            .map(|name| MetadataRequestTopic { name })
                             .collect(),
                     ),
                     allow_auto_topic_creation: false,
@@ -216,7 +211,6 @@ impl ClusterController {
             if metadata.error_code.is_none() {
                 cache.insert(key.name.clone(), metadata.clone());
             }
-            assert!(metadata.error_code.is_none()); // TODO: General (unknown) kafka error handling, probably should be done on caller site(?)
             ret_val.insert(key.name, metadata);
         }
 
@@ -232,7 +226,7 @@ impl ClusterController {
 
     fn fetch_metadata_from_cache(
         &self,
-        topic_names: &[&str],
+        topic_names: &HashSet<String>,
     ) -> Option<HashMap<String, MetadataResponseTopic>> {
         let cache = self.topic_metadata_cache.read().unwrap_or_else(|_| {
             self.topic_metadata_cache.clear_poison();
@@ -243,7 +237,7 @@ impl ClusterController {
         });
         let mut results = HashMap::new();
         for name in topic_names {
-            if let Some(metadata) = cache.get(*name) {
+            if let Some(metadata) = cache.get(name) {
                 results.insert(name.to_string(), metadata.to_owned());
             } else {
                 return None;
@@ -259,7 +253,7 @@ impl ClusterController {
             *lock = Instant::now();
             lock
         });
-        if *refresh_timeout > Instant::now() {
+        if *refresh_timeout < Instant::now() {
             *refresh_timeout = Instant::now() + self.options.metadata_refresh_interval;
             self.topic_metadata_cache
                 .write()

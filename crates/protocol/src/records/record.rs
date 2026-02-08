@@ -6,7 +6,7 @@ use bytes::{BufMut, BytesMut};
 #[derive(Debug, Default, Eq, PartialEq, Clone)]
 pub struct Record {
     pub timestamp_delta: VarLong,
-    // Will be calculated automatically
+    /// Will be calculated automatically
     pub offset_delta: VarInt,
     pub key: VarIntBytes,
     pub value: VarIntBytes,

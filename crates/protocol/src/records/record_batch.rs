@@ -249,7 +249,7 @@ mod tests {
                 ),
                 value: VarIntBytes("QfD38".as_bytes().iter().map(ToOwned::to_owned).collect()),
                 headers: VarIntVec(vec![Header {
-                    header_key: VarIntString("app.name".to_owned()),
+                    key: VarIntString("app.name".to_owned()),
                     value: VarIntBytes("test".as_bytes().to_owned()),
                 }]),
             }],

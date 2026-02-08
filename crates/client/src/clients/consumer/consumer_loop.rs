@@ -187,6 +187,6 @@ impl ConsumerLoop {
 
         debug!("Consumer loop is closing");
 
-        // TODO: Make sure it closes when broker is dropped - test?
+        // TODO: Make sure it closes when consumer client is dropped - test?
     }
 }

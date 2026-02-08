@@ -8,6 +8,8 @@ pub struct FutureRecord {
     pub key: Vec<u8>,
     pub value: Vec<u8>,
     pub topic: String,
+    /// Set only if you want to force a specific partition, skipping partitioner mechanism
+    pub partition: Option<i16>,
     pub headers: HashMap<String, Vec<u8>>,
 }
 

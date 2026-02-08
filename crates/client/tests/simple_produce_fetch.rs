@@ -31,11 +31,23 @@ pub async fn main() {
         SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
-            .as_secs()
+            .as_millis()
     );
 
     producer
         .send(FutureRecord::new(test_topic.name(), key, value.as_str()))
+        .await
+        .unwrap();
+
+    let value2 = format!(
+        "Time: {}",
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis()
+    );
+    producer
+        .send(FutureRecord::new(test_topic.name(), key, value2.as_str()))
         .await
         .unwrap();
 
@@ -48,6 +60,10 @@ pub async fn main() {
     let record = consumer.recv().await.unwrap();
     assert_eq!(String::from_utf8_lossy(record.0.as_slice()), key);
     assert_eq!(String::from_utf8_lossy(record.1.as_slice()), value);
+
+    let record = consumer.recv().await.unwrap();
+    assert_eq!(String::from_utf8_lossy(record.0.as_slice()), key);
+    assert_eq!(String::from_utf8_lossy(record.1.as_slice()), value2);
 
     assert!(consumer.recv().await.is_none());
 
