@@ -1,14 +1,16 @@
-use crate::clients::producer::client::{KafkaProducerOptions, ProduceRequestMessage, RecordAppend};
+use crate::clients::producer::client::{KafkaProducerOptions, RecordAppend};
 use crate::clients::producer::error::ProduceError;
 use crate::clients::producer::future_record::FutureRecord;
 use crate::cluster::controller::{ClusterController, ForceRefresh};
 use crate::cluster::error::ApiCallError;
 use bytes::BytesMut;
+use futures::future::select_all;
 use kafka_connector_protocol::metadata_request::MetadataRequest;
 use kafka_connector_protocol::metadata_response::MetadataResponseTopic;
 use kafka_connector_protocol::produce_request::{
     PartitionProduceData, ProduceRequest, TopicProduceData,
 };
+use kafka_connector_protocol::produce_response::ProduceResponse;
 use kafka_connector_protocol::records::base_types::{
     VarIntBytes, VarIntString, VarIntVec, VarLong,
 };
@@ -18,23 +20,33 @@ use kafka_connector_protocol::records::record_batch::RecordBatch;
 use kafka_connector_protocol::{ApiError, ApiRequest};
 use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
 use std::ops::Add;
-use std::sync::{Arc, Mutex};
+use std::pin::Pin;
+use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use tokio::sync::{mpsc, oneshot};
 use tracing::{debug, instrument};
 
+pub(super) type ProduceRequestMessage = (FutureRecord, RecordAppendTx);
+pub(super) type RecordAppendTx = oneshot::Sender<Result<RecordAppend, ProduceError>>;
+
+type ProduceApiCallResult = (i32, Result<ProduceResponse, ApiCallError>);
+type RecordBatchesToSend =
+    BTreeMap<RecordBatchID, (RecordBatch, Vec<(RecordAppend, RecordAppendTx)>)>;
+
+#[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
+struct RecordBatchID {
+    broker_id: i32,
+    topic: String,
+    partition: i32,
+}
 pub struct ProducerLoop {
     controller: Arc<ClusterController>,
     producer_options: KafkaProducerOptions,
-    serialization_buffer: Mutex<BytesMut>,
-    waiting_queue: Mutex<
-        VecDeque<(
-            FutureRecord,
-            oneshot::Sender<Result<RecordAppend, ProduceError>>,
-        )>,
-    >,
-    in_flight_requests: Option<()>,
+    serialization_buffer: BytesMut,
+    records_waiting: VecDeque<ProduceRequestMessage>,
+    records_in_flight: BTreeMap<RecordBatchID, Vec<(RecordAppend, RecordAppendTx)>>,
 }
+
 impl ProducerLoop {
     #[instrument(level = "debug", skip_all)]
     pub async fn start(
@@ -45,46 +57,47 @@ impl ProducerLoop {
         ProducerLoop {
             controller,
             producer_options,
-            serialization_buffer: Mutex::new(BytesMut::with_capacity(10_000_000)), // TODO: size from options, at least 2 times max record_batch, default same as for rdkafka
-            waiting_queue: Mutex::new(VecDeque::new()),
-            in_flight_requests: None,
+            serialization_buffer: BytesMut::with_capacity(10_000_000), // TODO: size from options, at least 2 times max record_batch, default same as for rdkafka
+            records_waiting: VecDeque::new(),
+            records_in_flight: Default::default(),
         }
         .run(receiver)
         .await;
     }
 
-    #[instrument(level = "debug", skip(self))]
-    async fn run(&self, mut receiver: mpsc::UnboundedReceiver<ProduceRequestMessage>) {
+    #[instrument(level = "debug", skip_all)]
+    async fn run(&mut self, mut receiver: mpsc::UnboundedReceiver<ProduceRequestMessage>) {
         debug!("Producer loop started.");
         // TODO: Add batching based on time
-        // TODO: Add concurrency (loop with select! and queues) - nonblocking
 
-        let mut send_message_task = None;
+        let mut send_message_task = Box::pin(Self::conditional_task(None));
+
         loop {
             tokio::select! {
                 signal = receiver.recv() => {
                     match signal {
                         Some(request) => {
-                            {
-                            let mut waiting_queue = self.waiting_queue.lock().expect("Poisoned lock");
-                            for msg in request.records {
-                                waiting_queue.push_back( msg);
-                            }
-                            drop(waiting_queue);
-                                }
-                            if self.in_flight_requests.is_none() {
-                                 send_message_task = self.send_messages().await;
-                                // TODO: run in a non-blocking way within a loop(select)
-                                if let Some(x) = send_message_task.take(){
-                                    x.await;
+                            self.records_waiting.push_back(request);
+                            if self.records_in_flight.is_empty() {
+                                if let Some(futures) = self.send_messages().await {
+                                    send_message_task = Box::pin(Self::conditional_task(Some(select_all(futures))));
                                 }
                             }
                         }
                         None => { break;}
                     }
-                }
-                // TODO: receive response
+                },
+                Some((response, _, api_calls_in_flight)) = &mut send_message_task, if !self.records_in_flight.is_empty() => {
+                    self.handle_responses(response).await;
+                    if api_calls_in_flight.is_empty() {
+                         if let Some(futures) = self.send_messages().await {
+                            send_message_task = Box::pin(Self::conditional_task(Some(select_all(futures))));
+                        }
+                    } else {
+                        send_message_task = Box::pin(Self::conditional_task(Some(select_all(api_calls_in_flight))));
+                    }
 
+                }
             }
         }
         // TODO: Cleanup waiting/in-flight requests
@@ -94,116 +107,133 @@ impl ProducerLoop {
         // TODO: Make sure it closes when producer client is dropped - test?
     }
 
-    async fn conditional_task<F: Future<Output = Out>, Out>(f: Option<F>) -> Option<Out> {
-        match f {
-            Some(f) => Some(f.await),
-            None => None,
-        }
-    }
-    async fn send_messages(&self) -> Option<impl Future<Output = ()>> {
-        // TODO: max record batch size - may require changing single record batch to vec (if max msg size > max record batch size)
-        // TODO: retry with backoff
-        // TODO: multiple records in transit
-        // TODO: partition leader change (on retry)
+    async fn handle_responses(
+        &mut self,
+        (broker_id, response): (i32, Result<ProduceResponse, ApiCallError>),
+    ) {
+        // TODO: error handling
+        let response = response.unwrap();
+        for resp in response.responses {
+            for part in resp.partitions {
+                assert!(part.error_code.is_none());
 
-        let topics = {
-            let waiting_queue = self.waiting_queue.lock().expect("Poisoned lock");
-            if waiting_queue.is_empty() {
-                return None;
-            }
-            waiting_queue
-                .iter()
-                .map(|(record, _)| record.topic.clone())
-                .collect::<HashSet<String>>()
-        };
-
-        // Blocks producer loop if metadata requests is send to a broker - will prevent multiple request for the same topics running in parallel
-        let metadata = self
-            .controller
-            .get_topic_metadata(topics, ForceRefresh::No)
-            .await // TODO: error handling
-            .unwrap();
-
-        let mut records_to_send = BTreeMap::<
-            (i32, String, i32),
-            (
-                RecordBatch,
-                Vec<(
-                    RecordAppend,
-                    oneshot::Sender<Result<RecordAppend, ProduceError>>,
-                )>,
-            ),
-        >::new();
-
-        let default_timestamp = SystemTime::now();
-
-        // TODO: change to tokio mutex? reacquiring mutex while no one else could take it (same thread as main loop)
-        {
-            let mut waiting_queue = self.waiting_queue.lock().expect("Poisoned lock");
-            while let Some((record, tx)) = waiting_queue.pop_front() {
-                let x = process_record(
-                    record,
-                    &metadata,
-                    &mut records_to_send,
-                    default_timestamp,
-                    tx,
-                );
-                if let Err(()) = x {
-                    continue;
+                let partition_signals = self
+                    .records_in_flight
+                    .remove(&RecordBatchID {
+                        broker_id,
+                        topic: resp.name.clone(),
+                        partition: part.partition_index,
+                    })
+                    .unwrap();
+                for (i, (mut append, sig)) in partition_signals.into_iter().enumerate() {
+                    append.offset = part.base_offset + i as i64;
+                    if part.log_append_time_ms != -1 {
+                        append.timestamp = SystemTime::UNIX_EPOCH
+                            .add(Duration::from_millis(part.log_append_time_ms as u64));
+                    }
+                    let _ = sig.send(Ok(append));
                 }
             }
         }
+    }
 
-        let mut requests = vec![];
-        let mut signal_handlers = BTreeMap::<
-            (i32, String, i32),
-            Vec<(
-                RecordAppend,
-                oneshot::Sender<Result<RecordAppend, ProduceError>>,
-            )>,
-        >::new();
+    async fn conditional_task<F: Future<Output = OUT>, OUT>(t: Option<F>) -> Option<OUT> {
+        match t {
+            None => None,
+            Some(t) => Some(t.await),
+        }
+    }
+    async fn send_messages(
+        &mut self,
+    ) -> Option<
+        Vec<Pin<Box<impl Future<Output = (i32, Result<ProduceResponse, ApiCallError>)> + use<>>>>,
+    > {
+        // TODO: max record batch size - may require changing single record batch to vec (if max msg size > max record batch size)
+        // TODO: KIP-192 retry, multiple calls in transit (to same broker) - most retries should be handled by producer client, some (idempotency related) by loop itself
 
-        let ((mut prev_broker_id, mut prev_topic, partition), (mut batch, signal_triggers)) =
-            records_to_send.pop_first().unwrap();
-        signal_handlers.insert(
-            (prev_broker_id, prev_topic.clone(), partition),
-            signal_triggers,
-        );
+        if self.records_waiting.is_empty() {
+            return None;
+        }
 
-        let mut serialization_buffer = self.serialization_buffer.lock().expect("Poisoned lock");
-        batch.encode(&mut serialization_buffer);
-        let records = serialization_buffer.to_vec();
-        serialization_buffer.clear();
-        requests.push((
-            prev_broker_id,
-            ProduceRequest {
-                acks: 1, // TODO: Acks
-                topics: vec![TopicProduceData {
-                    name: prev_topic.to_string(),
-                    partitions: vec![PartitionProduceData {
-                        partition_index: partition,
-                        records: Some(records),
-                    }],
-                }],
-                ..Default::default()
-            },
-        ));
+        let topics = self
+            .records_waiting
+            .iter()
+            .map(|(record, _)| record.topic.clone())
+            .collect::<HashSet<String>>();
 
-        while let Some(((broker_id, topic, partition), (mut batch, signal_triggers))) =
-            records_to_send.pop_first()
-        {
-            signal_handlers.insert((broker_id, topic.clone(), partition), signal_triggers);
-
-            batch.encode(&mut serialization_buffer);
-            let records = serialization_buffer.to_vec();
-            serialization_buffer.clear();
-            if prev_broker_id == broker_id {
-                if prev_topic == topic {
-                    requests
-                        .last_mut()
-                        .unwrap()
+        // Blocks producer loop if metadata requests is send to a broker - will prevent multiple requests for the same topics running in parallel
+        let metadata = self
+            .controller
+            .get_topic_metadata(topics, ForceRefresh::No)
+            .await
+            .map_err(|err| {
+                let err = Arc::new(err);
+                while let Some(req) = self.records_waiting.pop_front() {
+                    let _ = req
                         .1
-                        .topics
+                        .send(Err(ProduceError::MetadataFetchFailed(err.clone())));
+                }
+            })
+            .ok()?;
+
+        let mut batches_to_send = BTreeMap::new();
+        let default_timestamp = SystemTime::now();
+
+        while let Some((record, tx)) = self.records_waiting.pop_front() {
+            if let Err((tx, err)) = process_record(
+                record,
+                &metadata,
+                &mut batches_to_send,
+                default_timestamp,
+                tx,
+            ) {
+                let _ = tx.send(Err(err));
+                continue;
+            }
+        }
+
+        if batches_to_send.is_empty() {
+            return None;
+        }
+
+        Some(self.send_produce_api_calls(&mut batches_to_send))
+    }
+
+    fn send_produce_api_calls(
+        &mut self,
+        batches_to_send: &mut RecordBatchesToSend,
+    ) -> Vec<Pin<Box<impl Future<Output = ProduceApiCallResult> + use<>>>> {
+        let mut requests: Vec<(i32, ProduceRequest)> = vec![];
+
+        let mut prev_broker_id = None;
+        let mut prev_topic = None;
+
+        while let Some((
+            RecordBatchID {
+                broker_id,
+                topic,
+                partition,
+            },
+            (mut batch, signal_triggers),
+        )) = batches_to_send.pop_first()
+        {
+            self.records_in_flight.insert(
+                RecordBatchID {
+                    broker_id,
+                    topic: topic.clone(),
+                    partition,
+                },
+                signal_triggers,
+            );
+
+            batch.encode(&mut self.serialization_buffer);
+            let records = self.serialization_buffer.to_vec();
+            self.serialization_buffer.clear();
+
+            if prev_broker_id == Some(broker_id) {
+                let topics = &mut requests.last_mut().unwrap().1.topics;
+                if prev_topic.as_ref().unwrap() == topic.as_str() {
+                    topics
                         .last_mut()
                         .unwrap()
                         .partitions
@@ -212,18 +242,13 @@ impl ProducerLoop {
                             records: Some(records),
                         });
                 } else {
-                    requests
-                        .last_mut()
-                        .unwrap()
-                        .1
-                        .topics
-                        .push(TopicProduceData {
-                            name: topic.clone(),
-                            partitions: vec![PartitionProduceData {
-                                partition_index: partition,
-                                records: Some(records),
-                            }],
-                        });
+                    topics.push(TopicProduceData {
+                        name: topic.clone(),
+                        partitions: vec![PartitionProduceData {
+                            partition_index: partition,
+                            records: Some(records),
+                        }],
+                    });
                 }
             } else {
                 requests.push((
@@ -237,63 +262,40 @@ impl ProducerLoop {
                                 records: Some(records),
                             }],
                         }],
+                        timeout_ms: 0, // TODO:
                         ..Default::default()
                     },
                 ));
             }
-            prev_broker_id = broker_id;
-            prev_topic = topic;
+            prev_broker_id = Some(broker_id);
+            prev_topic = Some(topic);
         }
 
-        let controller = self.controller.clone();
-        Some(async move {
-            for (broker_id, request) in requests {
-                let resp = controller
-                    .make_api_call(broker_id, request, None)
-                    .await
-                    .unwrap(); // TODO: in background, error handling
-
-                for resp in resp.responses {
-                    for part in resp.partitions {
-                        assert!(part.error_code.is_none());
-
-                        let partition_signals = signal_handlers
-                            .remove(&(broker_id, resp.name.clone(), part.partition_index))
-                            .unwrap();
-                        for (i, (mut append, sig)) in partition_signals.into_iter().enumerate() {
-                            append.offset = part.base_offset + i as i64;
-                            if part.log_append_time_ms != -1 {
-                                append.timestamp = SystemTime::UNIX_EPOCH
-                                    .add(Duration::from_millis(part.log_append_time_ms as u64));
-                            }
-                            let _ = sig.send(Ok(append));
-                        }
-                    }
-                }
-            }
-        })
+        requests
+            .into_iter()
+            .map(|(broker_id, request)| {
+                let controller = self.controller.clone();
+                Box::pin(async move {
+                    (
+                        broker_id,
+                        controller.make_api_call(broker_id, request, None).await,
+                    )
+                })
+            })
+            .collect::<Vec<_>>()
     }
 }
 
 fn process_record(
     record: FutureRecord,
     metadata: &HashMap<String, MetadataResponseTopic>,
-    records_to_send: &mut BTreeMap<
-        (i32, String, i32),
-        (
-            RecordBatch,
-            Vec<(
-                RecordAppend,
-                oneshot::Sender<Result<RecordAppend, ProduceError>>,
-            )>,
-        ),
-    >,
+    batches_to_send: &mut RecordBatchesToSend,
     default_timestamp: SystemTime,
-    tx: oneshot::Sender<Result<RecordAppend, ProduceError>>,
-) -> Result<(), ()> {
+    tx: RecordAppendTx,
+) -> Result<(), (RecordAppendTx, ProduceError)> {
     let topic_metadata = metadata.get(&record.topic).unwrap();
     if let Some(error_code) = topic_metadata.error_code {
-        let err = match error_code {
+        let error = match error_code {
             ApiError::RequestTimedOut => ProduceError::ApiCallError(ApiCallError::TimeoutReached),
             ApiError::UnknownTopicOrPartition => ProduceError::TopicNotFound(record.topic.clone()),
             error_code => ProduceError::ApiCallError(ApiCallError::UnsupportedErrorCode(
@@ -302,26 +304,23 @@ fn process_record(
                 "topics.error_code",
             )),
         };
-        let _ = tx.send(Err(err));
-        return Err(());
+        return Err((tx, error));
     }
 
     let partition_idx = get_partition_no(&record, topic_metadata);
-    let partition_metadata = topic_metadata
+    let Some(partition_metadata) = topic_metadata
         .partitions
         .iter()
         .find(|x| x.partition_index == partition_idx)
-        .ok_or_else(|| ProduceError::PartitionNotFound(record.topic.clone(), partition_idx));
-
-    let partition_metadata = if let Err(err) = partition_metadata {
-        let _ = tx.send(Err(err));
-        return Err(());
-    } else {
-        partition_metadata.unwrap()
+    else {
+        return Err((
+            tx,
+            ProduceError::PartitionNotFound(record.topic.clone(), partition_idx),
+        ));
     };
 
     if let Some(error_code) = partition_metadata.error_code {
-        let err = match error_code {
+        let error = match error_code {
             ApiError::UnknownTopicOrPartition => ProduceError::TopicNotFound(record.topic.clone()),
             error_code => ProduceError::ApiCallError(ApiCallError::UnsupportedErrorCode(
                 MetadataRequest::get_api_key(),
@@ -329,8 +328,7 @@ fn process_record(
                 "topics.partitions.error_code",
             )),
         };
-        let _ = tx.send(Err(err));
-        return Err(());
+        return Err((tx, error));
     }
 
     let broker_id = partition_metadata.leader_id;
@@ -357,11 +355,15 @@ fn process_record(
         ),
     };
 
-    let record_entry = records_to_send
-        .entry((broker_id, record.topic, partition_idx))
+    let entry = batches_to_send
+        .entry(RecordBatchID {
+            broker_id,
+            topic: record.topic,
+            partition: partition_idx,
+        })
         .or_default();
-    record_entry.0.records.push(produce_record);
-    record_entry.1.push((
+    entry.0.records.push(produce_record);
+    entry.1.push((
         RecordAppend {
             partition: partition_idx,
             offset: 0,

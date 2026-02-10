@@ -1,6 +1,6 @@
 use crate::clients::producer::error::ProduceError;
 use crate::clients::producer::future_record::FutureRecord;
-use crate::clients::producer::producer_loop::ProducerLoop;
+use crate::clients::producer::producer_loop::{ProduceRequestMessage, ProducerLoop};
 use crate::cluster::controller::ClusterController;
 use crate::cluster::error::ClusterControllerCreationError;
 use crate::cluster::options::ClusterControllerOptions;
@@ -12,13 +12,6 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::{mpsc, oneshot};
 use tracing::instrument;
 
-pub(super) struct ProduceRequestMessage {
-    pub records: Vec<(
-        FutureRecord,
-        oneshot::Sender<Result<RecordAppend, ProduceError>>,
-    )>,
-}
-
 #[derive(Debug)]
 pub struct RecordAppend {
     pub partition: i32,
@@ -29,7 +22,6 @@ pub struct RecordAppend {
 #[derive(Clone, Debug, Default)]
 pub struct KafkaProducerOptions {}
 pub struct KafkaProducer {
-    cluster: Arc<ClusterController>,
     options: KafkaProducerOptions,
     request_tx: UnboundedSender<ProduceRequestMessage>,
 }
@@ -50,20 +42,20 @@ impl KafkaProducer {
         controller: Arc<ClusterController>,
         producer_options: KafkaProducerOptions,
     ) -> KafkaProducer {
-        let (request_tx, request_rx) = mpsc::unbounded_channel::<ProduceRequestMessage>();
+        let (tx, rx) = mpsc::unbounded_channel::<ProduceRequestMessage>();
         tokio::spawn(ProducerLoop::start(
-            controller.clone(),
+            controller,
             producer_options.clone(),
-            request_rx,
+            rx,
         ));
         KafkaProducer {
-            cluster: controller,
             options: producer_options,
-            request_tx,
+            request_tx: tx,
         }
     }
 
-    // TODO: send_multiple<R>
+    // TODO: retries (+ backoff?)
+    // TODO: should return type be Future or something hiding it? must_use may not be desired in this case + document it
     #[instrument(level = "debug", skip_all)]
     pub fn send<R>(&self, record: R) -> impl Future<Output = Result<RecordAppend, ProduceError>>
     where
@@ -71,9 +63,7 @@ impl KafkaProducer {
     {
         let (tx, rx) = oneshot::channel();
         self.request_tx
-            .send(ProduceRequestMessage {
-                records: vec![(record.into(), tx)],
-            })
+            .send((record.into(), tx))
             .expect("Producer loop dropped while producer is still alive");
         async move {
             rx.await

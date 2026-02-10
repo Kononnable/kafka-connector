@@ -175,6 +175,10 @@ impl ClusterController {
     ) -> Result<HashMap<String, MetadataResponseTopic>, ApiCallError> {
         let topics = topics.into();
 
+        if topics.is_empty() {
+            return Ok(HashMap::new());
+        }
+
         self.clear_metadata_cache_if_timeout_reached();
 
         if force_refresh == ForceRefresh::No {
