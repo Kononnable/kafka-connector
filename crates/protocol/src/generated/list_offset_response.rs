@@ -142,7 +142,7 @@ impl ToBytes for ListOffsetPartitionResponse {
 
 impl ListOffsetPartitionResponse {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.old_style_offsets != Vec::<i64>::default() && _version.0 < 0 {
+        if self.old_style_offsets != Vec::<i64>::default() && _version.0 != 0 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "old_style_offsets",
                 *_version,

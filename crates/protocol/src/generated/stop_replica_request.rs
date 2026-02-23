@@ -117,7 +117,7 @@ impl StopReplicaRequest {
         for item in self.topics.iter() {
             item.validate_fields(_version)?;
         }
-        if self.partitions_v_0 != Vec::<StopReplicaRequestPartitionV0>::default() && _version.0 < 0
+        if self.partitions_v_0 != Vec::<StopReplicaRequestPartitionV0>::default() && _version.0 != 0
         {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partitions_v_0",
@@ -162,14 +162,14 @@ impl ToBytes for StopReplicaRequestPartitionV0 {
 
 impl StopReplicaRequestPartitionV0 {
     fn validate_fields(&self, _version: ApiVersion) -> Result<(), SerializationError> {
-        if self.topic_name != String::default() && _version.0 < 0 {
+        if self.topic_name != String::default() && _version.0 != 0 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "topic_name",
                 *_version,
                 "StopReplicaRequestPartitionV0",
             ));
         }
-        if self.partition_index != i32::default() && _version.0 < 0 {
+        if self.partition_index != i32::default() && _version.0 != 0 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "partition_index",
                 *_version,

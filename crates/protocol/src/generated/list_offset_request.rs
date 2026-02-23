@@ -151,7 +151,7 @@ impl ListOffsetPartition {
                 "ListOffsetPartition",
             ));
         }
-        if self.max_num_offsets != i32::default() && _version.0 < 0 {
+        if self.max_num_offsets != i32::default() && _version.0 != 0 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "max_num_offsets",
                 *_version,

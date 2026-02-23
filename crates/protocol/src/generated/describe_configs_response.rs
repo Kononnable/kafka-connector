@@ -174,7 +174,7 @@ impl DescribeConfigsResourceResult {
         for item in self.synonyms.iter() {
             item.validate_fields(_version)?;
         }
-        if self.is_default != bool::default() && _version.0 < 0 {
+        if self.is_default != bool::default() && _version.0 != 0 {
             return Err(SerializationError::NonIgnorableFieldSet(
                 "is_default",
                 *_version,

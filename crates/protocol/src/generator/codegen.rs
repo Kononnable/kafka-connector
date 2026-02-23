@@ -444,6 +444,10 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
             ));
         } else if field.versions == "0+" {
             continue;
+        } else if field.versions == "0" {
+            content.push_str(&format!(
+                "        if {nullable_filter} && _version.0 != 0{{\n",
+            ));
         } else {
             let min = field.versions.replace('+', "");
             content.push_str(&format!(
