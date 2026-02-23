@@ -7,7 +7,7 @@ use kafka_connector_client::cluster::{
     controller::ClusterController, options::ClusterControllerOptions,
 };
 use std::sync::Arc;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 mod common;
 
@@ -57,15 +57,16 @@ pub async fn main() {
             topic: test_topic.name().to_owned(),
         },
     );
-    let record = consumer.recv().await.unwrap();
-    assert_eq!(String::from_utf8_lossy(record.0.as_slice()), key);
-    assert_eq!(String::from_utf8_lossy(record.1.as_slice()), value);
+    let record = consumer.recv().await;
+    assert_eq!(String::from_utf8_lossy(record.key.as_slice()), key);
+    assert_eq!(String::from_utf8_lossy(record.value.as_slice()), value);
 
-    let record = consumer.recv().await.unwrap();
-    assert_eq!(String::from_utf8_lossy(record.0.as_slice()), key);
-    assert_eq!(String::from_utf8_lossy(record.1.as_slice()), value2);
+    let record = consumer.recv().await;
+    assert_eq!(String::from_utf8_lossy(record.key.as_slice()), key);
+    assert_eq!(String::from_utf8_lossy(record.value.as_slice()), value2);
 
-    assert!(consumer.recv().await.is_none());
+    tokio::time::sleep(Duration::from_millis(500)).await;
+    assert!(consumer.try_recv().await.is_none());
 
     test_topic.delete().await;
 }

@@ -1,4 +1,5 @@
 use crate::clients::consumer::consumer_loop::ConsumerLoop;
+use crate::clients::consumer::record::Record;
 use crate::cluster::controller::ClusterController;
 use crate::cluster::error::ClusterControllerCreationError;
 use crate::cluster::options::ClusterControllerOptions;
@@ -14,7 +15,8 @@ pub struct KafkaConsumerOptions {
 pub struct KafkaConsumer {
     cluster: Arc<ClusterController>,
     options: KafkaConsumerOptions,
-    record_channel: mpsc::Receiver<(Vec<u8>, Vec<u8>)>,
+    record_channel: mpsc::Receiver<Record>,
+    command_channel: mpsc::Sender<()>,
 }
 
 impl KafkaConsumer {
@@ -34,19 +36,29 @@ impl KafkaConsumer {
         consumer_options: KafkaConsumerOptions,
     ) -> KafkaConsumer {
         let (record_tx, record_rx) = mpsc::channel(1);
+        let (command_tx, command_rx) = mpsc::channel(1);
         tokio::spawn(ConsumerLoop::start(
             controller.clone(),
             consumer_options.clone(),
             record_tx,
+            command_rx,
         ));
         KafkaConsumer {
             cluster: controller,
             options: consumer_options,
             record_channel: record_rx,
+            command_channel: command_tx,
         }
     }
 
-    pub async fn recv(&mut self) -> Option<(Vec<u8>, Vec<u8>)> {
-        self.record_channel.recv().await
+    pub async fn recv(&mut self) -> Record {
+        self.record_channel
+            .recv()
+            .await
+            .expect("Consumer loop should be alive")
+    }
+
+    pub async fn try_recv(&mut self) -> Option<Record> {
+        self.record_channel.try_recv().ok()
     }
 }
