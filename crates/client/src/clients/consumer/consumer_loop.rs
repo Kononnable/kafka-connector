@@ -7,13 +7,14 @@ use crate::cluster::error::ApiCallError;
 use crate::protocol_consts::{IsolationLevel, ListOffsetsTimestampType};
 use bytes::BytesMut;
 use futures::future::{join_all, select_all};
-use kafka_connector_protocol::ApiError;
 use kafka_connector_protocol::fetch_request::{FetchPartition, FetchRequest, FetchableTopic};
 use kafka_connector_protocol::fetch_response::FetchResponse;
 use kafka_connector_protocol::list_offset_request::{
     ListOffsetPartition, ListOffsetRequest, ListOffsetTopic,
 };
+use kafka_connector_protocol::metadata_request::MetadataRequest;
 use kafka_connector_protocol::records::record_batch::RecordBatch;
+use kafka_connector_protocol::{ApiError, ApiRequest};
 use std::collections::HashMap;
 use std::ops::Add;
 use std::pin::Pin;
@@ -21,16 +22,16 @@ use std::sync::Arc;
 use std::task::{Context, Poll, Waker};
 use std::time::Duration;
 use tokio::sync::mpsc;
-use tracing::{debug, instrument};
+use tracing::{debug, error, info, instrument, warn};
 
 pub struct ConsumerLoop {
     controller: Arc<ClusterController>,
     consumer_options: KafkaConsumerOptions,
     record_sender: mpsc::Sender<Record>,
-    reinitialize_triggered: bool,
-    /// Broker -> Topic -> Partition -> next_offset_to_fetch, current_leader_epoch
+    /// Broker -> Topic -> Partition -> (next_offset_to_fetch, current_leader_epoch)
     mappings: HashMap<i32, HashMap<String, HashMap<i32, (i64, i32)>>>,
     deserialization_buffer: BytesMut,
+    reinitialize_triggered: bool,
 }
 
 impl ConsumerLoop {
@@ -45,9 +46,9 @@ impl ConsumerLoop {
             controller,
             consumer_options,
             record_sender,
-            reinitialize_triggered: false,
             mappings: Default::default(),
             deserialization_buffer: BytesMut::new(),
+            reinitialize_triggered: false,
         }
         .run(command_receiver)
         .await;
@@ -69,8 +70,8 @@ impl ConsumerLoop {
         // TODO: Make sure it closes when consumer client is dropped - test?
     }
 
-    // TODO: Add tracing
-    async fn main_loop(mut self) -> ! {
+    #[instrument(level = "debug", skip(self))]
+    async fn main_loop(mut self) {
         let mut requests_in_flight = None;
         loop {
             if requests_in_flight.is_none() {
@@ -80,8 +81,19 @@ impl ConsumerLoop {
                     ForceRefresh::Yes
                 };
                 self.reinitialize_triggered = false;
-                self.prepare_mappings(refresh).await.unwrap(); // TODO:
-                self.reinitialize_triggered = false;
+                if let Err(err) = self.sync_metadata(refresh).await {
+                    self.reinitialize_triggered = true;
+                    info!(
+                        "Encountered {err} during consumer metadata synchronization, retrying in 1000 ms."
+                    );
+                    tokio::time::sleep(Duration::from_millis(1_000)).await;
+                }
+
+                // Can be triggered by sync_metadata internally, or by returning an error
+                if self.reinitialize_triggered {
+                    continue;
+                }
+
                 requests_in_flight = Some(Box::pin(select_all(
                     self.mappings
                         .keys()
@@ -120,35 +132,225 @@ impl ConsumerLoop {
         }
     }
 
+    #[instrument(level = "debug", skip(self))]
+    async fn sync_metadata(&mut self, refresh: ForceRefresh) -> Result<(), ConsumeError> {
+        for (topic, topic_metadata) in self
+            .controller
+            .get_topic_metadata([self.consumer_options.topic.clone()], refresh)
+            .await
+            .map_err(MetadataFetchFailed)?
+            .into_iter()
+        {
+            if let Some(error_code) = topic_metadata.error_code {
+                match error_code {
+                    ApiError::UnknownTopicOrPartition => {
+                        // remove old mappings if topic was removed
+                        self.mappings.iter_mut().for_each(|(_, mappings)| {
+                            mappings.remove(&topic);
+                        });
+                        warn!("Kafka Topic {} not found", topic);
+                    }
+                    ApiError::InvalidTopicException => {
+                        error!("{} is not a valid name for a Kafka Topic", topic);
+                    }
+                    _ => Err(ApiCallError::UnexpectedErrorCode(
+                        MetadataRequest::get_api_key(),
+                        error_code,
+                        "topics.error_code",
+                    ))?,
+                }
+            }
+
+            for partition_metadata in topic_metadata.partitions {
+                if let Some(error_code) = partition_metadata.error_code {
+                    Err(ConsumeError::ApiCallError(
+                        ApiCallError::UnexpectedErrorCode(
+                            MetadataRequest::get_api_key(),
+                            error_code,
+                            "topics.partitions.error_code",
+                        ),
+                    ))?
+                }
+
+                let (_, epoch) = self
+                    .mappings
+                    .entry(partition_metadata.leader_id)
+                    .or_default()
+                    .entry(topic.clone())
+                    .or_default()
+                    .entry(partition_metadata.partition_index)
+                    .or_insert((-1, -1));
+                *epoch = partition_metadata.leader_epoch;
+            }
+        }
+
+        if self.mappings.is_empty() {
+            return Err(ConsumeError::NoValidTopicsFound());
+        }
+
+        let list_offset_responses = join_all(self.mappings.iter().map(|(broker_id, mappings)| {
+            let request = ListOffsetRequest {
+                replica_id: -1,
+                isolation_level: IsolationLevel::ReadCommited.into(),
+                topics: mappings
+                    .iter()
+                    .map(|(topic, partitions)| {
+                        ListOffsetTopic {
+                            name: topic.to_owned(),
+                            partitions: partitions
+                                .iter()
+                                .map(|(&partition_index, &(_, current_leader_epoch))| {
+                                    ListOffsetPartition {
+                                        partition_index,
+                                        current_leader_epoch,
+                                        timestamp: ListOffsetsTimestampType::Earliest.into(), // TODO: value from options
+                                        max_num_offsets: 0,
+                                    }
+                                })
+                                .collect(),
+                        }
+                    })
+                    .collect(),
+            };
+
+            let controller = self.controller.clone();
+            async move {
+                (
+                    *broker_id,
+                    controller.make_api_call(*broker_id, request, None).await,
+                )
+            }
+        }))
+        .await;
+
+        for (broker_id, response) in list_offset_responses {
+            let broker_mappings = self.mappings.entry(broker_id).or_default();
+            for topic in response?.topics {
+                for partition in topic.partitions {
+                    if let Some(error_code) = partition.error_code {
+                        match error_code {
+                            ApiError::UnknownLeaderEpoch | ApiError::FencedLeaderEpoch => {
+                                self.reinitialize_triggered = true;
+                                return Ok(());
+                            }
+                            _ => Err(ApiCallError::UnexpectedErrorCode(
+                                ListOffsetRequest::get_api_key(),
+                                error_code,
+                                "topics.partitions.error_code",
+                            ))?,
+                        }
+                    }
+                    let (offset, _) = broker_mappings
+                        .entry(topic.name.clone())
+                        .or_default()
+                        .entry(partition.partition_index)
+                        .or_insert((-1, partition.leader_epoch));
+                    if *offset == -1 || (*offset < partition.offset && true) {
+                        // TODO: true - Earliest timestamp from (options)
+                        // TODO: make sure corer case works - timestamp !=earliest and consumer fallen behind retention (data deleted)
+                        *offset = partition.offset;
+                    }
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    #[instrument(level = "debug", skip(self))]
+    fn fetch_data(
+        &self,
+        broker_id: i32,
+    ) -> Pin<Box<impl Future<Output = (i32, Result<FetchResponse, ApiCallError>)> + use<>>> {
+        let mappings = self.mappings.get(&broker_id).unwrap();
+        // TODO: fetch options
+        let request = FetchRequest {
+            replica_id: -1,
+            max_wait: 0,
+            min_bytes: 0,
+            max_bytes: 52428800, // 50MB, librdkafka defaults
+            isolation_level: IsolationLevel::ReadCommited.into(),
+            session_id: 0,
+            epoch: -1,
+            topics: mappings
+                .iter()
+                .map(|(topic, partitions)| {
+                    FetchableTopic {
+                        name: topic.to_owned(),
+                        fetch_partitions: partitions
+                            .iter()
+                            .map(|(partition_index, &(offset, epoch))| {
+                                FetchPartition {
+                                    partition_index: *partition_index,
+                                    current_leader_epoch: epoch,
+                                    fetch_offset: offset,
+                                    log_start_offset: -1,
+                                    max_bytes: 1048576, // TODO: 1MB, librdkafka defaults
+                                }
+                            })
+                            .collect(),
+                    }
+                })
+                .collect(),
+            forgotten: vec![],
+        };
+
+        let controller = self.controller.clone();
+        Box::pin(async move {
+            (
+                broker_id,
+                controller.make_api_call(broker_id, request, None).await,
+            )
+        })
+    }
+
+    #[instrument(level = "debug", skip(self, response))]
     async fn process_fetch_response(
         &mut self,
         broker: i32,
         response: Result<FetchResponse, ApiCallError>,
     ) {
-        let response = response.unwrap(); // TODO:
+        let Ok(response) = response else {
+            info!(
+                "Encountered {} during records consumption.",
+                response.err().unwrap()
+            );
+            return;
+        };
         if let Some(error_code) = response.error_code {
-            match error_code {
-                _ => todo!("unknown error"),
-            }
+            let err = ApiCallError::UnexpectedErrorCode(
+                FetchRequest::get_api_key(),
+                error_code,
+                "topics.partitions.error_code",
+            );
+            info!("Encountered {err} during records consumption.");
+            self.reinitialize_triggered = true;
         }
         for topic_response in response.topics {
             let topic = topic_response.name.as_str();
             for partition_response in topic_response.partitions {
                 if let Some(error_code) = response.error_code {
                     match error_code {
-                        ApiError::UnknownTopicOrPartition => todo!(),
-                        ApiError::NotLeaderOrFollower => todo!(),
-                        ApiError::ReplicaNotAvailable => todo!(),
-                        ApiError::FencedLeaderEpoch => todo!(),
-                        ApiError::UnknownLeaderEpoch => todo!(),
-                        ApiError::OffsetOutOfRange => todo!(),
-                        ApiError::CorruptMessage => todo!(),
-                        ApiError::RequestTimedOut => todo!(),
-                        _ => todo!("unknown error"),
+                        ApiError::UnknownTopicOrPartition
+                        | ApiError::NotLeaderOrFollower
+                        | ApiError::ReplicaNotAvailable
+                        | ApiError::FencedLeaderEpoch
+                        | ApiError::UnknownLeaderEpoch
+                        | ApiError::OffsetOutOfRange => self.reinitialize_triggered = true,
+                        ApiError::RequestTimedOut => {}
+                        _ => {
+                            let err = ApiCallError::UnexpectedErrorCode(
+                                FetchRequest::get_api_key(),
+                                error_code,
+                                "topics.partitions.error_code",
+                            );
+                            info!("Encountered {err} during records consumption.");
+                            self.reinitialize_triggered = true;
+                        }
                     }
                 }
-                let partition = partition_response.partition_index;
                 if let Some(records) = partition_response.records {
+                    let partition = partition_response.partition_index;
                     self.process_partition_records(broker, topic, partition, records)
                         .await;
                 }
@@ -156,6 +358,7 @@ impl ConsumerLoop {
         }
     }
 
+    #[instrument(level = "debug", skip(self, records))]
     async fn process_partition_records(
         &mut self,
         broker: i32,
@@ -204,160 +407,5 @@ impl ConsumerLoop {
                 .unwrap()
                 .0 = offset + 1;
         }
-    }
-
-    fn fetch_data(
-        &self,
-        broker_id: i32,
-    ) -> Pin<Box<impl Future<Output = (i32, Result<FetchResponse, ApiCallError>)> + use<>>> {
-        let mappings = self.mappings.get(&broker_id).unwrap();
-        // TODO: fetch options
-        let request = FetchRequest {
-            replica_id: -1,
-            max_wait: 0,
-            min_bytes: 0,
-            max_bytes: 52428800, // 50MB, librdkafka defaults
-            isolation_level: IsolationLevel::ReadCommited.into(),
-            session_id: 0,
-            epoch: -1,
-            topics: mappings
-                .iter()
-                .map(|(topic, partitions)| {
-                    FetchableTopic {
-                        name: topic.to_owned(),
-                        fetch_partitions: partitions
-                            .iter()
-                            .map(|(partition_index, &(offset, epoch))| {
-                                FetchPartition {
-                                    partition_index: *partition_index,
-                                    // TODO: handle errors in response - UNKNOWN_LEADER_EPOCH, FENCED_LEADER_EPOCH - force metadata refresh, check if offset exists (records may disappear if unclean leader election is on), send standard fetch requests
-                                    current_leader_epoch: epoch,
-                                    fetch_offset: offset,
-                                    log_start_offset: -1,
-                                    max_bytes: 1048576, // TODO: 1MB, librdkafka defaults
-                                }
-                            })
-                            .collect(),
-                    }
-                })
-                .collect(),
-            forgotten: vec![],
-        };
-
-        let controller = self.controller.clone();
-        Box::pin(async move {
-            (
-                broker_id,
-                controller.make_api_call(broker_id, request, None).await,
-            )
-        })
-    }
-
-    async fn prepare_mappings(&mut self, refresh: ForceRefresh) -> Result<(), ConsumeError> {
-        for (topic, metadata) in self
-            .controller
-            .get_topic_metadata([self.consumer_options.topic.clone()], refresh)
-            .await
-            .map_err(MetadataFetchFailed)?
-            .into_iter()
-        {
-            if let Some(error_code) = metadata.error_code {
-                match error_code {
-                    ApiError::UnknownTopicOrPartition => {
-                        // remove old mappings if topic was removed
-                        self.mappings.iter_mut().for_each(|(_, mappings)| {
-                            mappings.remove(&topic);
-                        });
-                        todo!("log error");
-                    }
-                    ApiError::InvalidTopicException => {
-                        todo!("log error")
-                    }
-                    _ => todo!("unknown error"),
-                }
-            }
-
-            for partition_metadata in metadata.partitions {
-                if let Some(error_code) = partition_metadata.error_code {
-                    todo!("unknown error")
-                }
-
-                let (_, epoch) = self
-                    .mappings
-                    .entry(partition_metadata.leader_id)
-                    .or_default()
-                    .entry(topic.clone())
-                    .or_default()
-                    .entry(partition_metadata.partition_index)
-                    .or_insert((-1, -1));
-                *epoch = partition_metadata.leader_epoch;
-            }
-        }
-        if self.mappings.is_empty() {
-            todo!();
-        }
-
-        let list_offset_responses = join_all(self.mappings.iter().map(|(broker_id, mappings)| {
-            let request = ListOffsetRequest {
-                replica_id: -1,
-                isolation_level: IsolationLevel::ReadCommited.into(),
-                topics: mappings
-                    .iter()
-                    .map(|(topic, partitions)| {
-                        ListOffsetTopic {
-                            name: topic.to_owned(),
-                            partitions: partitions
-                                .iter()
-                                .map(|(&partition_index, &(_, current_leader_epoch))| {
-                                    ListOffsetPartition {
-                                        partition_index,
-                                        current_leader_epoch, // TODO: Handle errors -  UNKNOWN_LEADER_EPOCH, FENCED_LEADER_EPOCH
-                                        timestamp: ListOffsetsTimestampType::Earliest.into(), // TODO: value from options
-                                        max_num_offsets: 0,
-                                    }
-                                })
-                                .collect(),
-                        }
-                    })
-                    .collect(),
-            };
-
-            let controller = self.controller.clone();
-            async move {
-                (
-                    *broker_id,
-                    controller.make_api_call(*broker_id, request, None).await,
-                )
-            }
-        }))
-        .await;
-
-        for (broker_id, response) in list_offset_responses {
-            let response = response.unwrap(); // TODO:
-            let broker_mappings = self.mappings.entry(broker_id).or_default();
-            for topic in response.topics {
-                for partition in topic.partitions {
-                    if let Some(error_code) = partition.error_code {
-                        match error_code {
-                            ApiError::FencedLeaderEpoch => todo!(),
-                            ApiError::BrokerNotAvailable => todo!(),
-                            _ => todo!("Unknown error"),
-                        }
-                    }
-                    let (offset, _) = broker_mappings
-                        .entry(topic.name.clone())
-                        .or_default()
-                        .entry(partition.partition_index)
-                        .or_insert((-1, partition.leader_epoch));
-                    if *offset == -1 || (*offset < partition.offset && true) {
-                        // TODO: true - Earliest timestamp from (options)
-                        // TODO: make sure corer case works - timestamp !=earliest and consumer fallen behind retention (data deleted)
-                        *offset = partition.offset;
-                    }
-                }
-            }
-        }
-
-        Ok(())
     }
 }

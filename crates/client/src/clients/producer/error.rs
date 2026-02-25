@@ -11,6 +11,6 @@ pub enum ProduceError {
     PartitionNotFound(String, i32),
     #[error("Metadata fetch request failed: {0}")]
     MetadataFetchFailed(Arc<ApiCallError>),
-    #[error("Kafka API returned an error {0}")]
+    #[error("Kafka API returned unexpected error {0}")]
     ApiCallError(#[from] ApiCallError),
 }

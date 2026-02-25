@@ -298,7 +298,7 @@ fn process_record(
         let error = match error_code {
             ApiError::RequestTimedOut => ProduceError::ApiCallError(ApiCallError::TimeoutReached),
             ApiError::UnknownTopicOrPartition => ProduceError::TopicNotFound(record.topic.clone()),
-            error_code => ProduceError::ApiCallError(ApiCallError::UnsupportedErrorCode(
+            error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
                 MetadataRequest::get_api_key(),
                 error_code,
                 "topics.error_code",
@@ -322,7 +322,7 @@ fn process_record(
     if let Some(error_code) = partition_metadata.error_code {
         let error = match error_code {
             ApiError::UnknownTopicOrPartition => ProduceError::TopicNotFound(record.topic.clone()),
-            error_code => ProduceError::ApiCallError(ApiCallError::UnsupportedErrorCode(
+            error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
                 MetadataRequest::get_api_key(),
                 error_code,
                 "topics.partitions.error_code",

@@ -25,6 +25,6 @@ pub enum ApiCallError {
     TimeoutReached,
     #[error("Broker does not support API {0:?}")]
     UnsupportedApi(ApiKey),
-    #[error("Broker returned unsupported error code {1:?} in field {2} when calling API {0:?} ")]
-    UnsupportedErrorCode(ApiKey, ApiError, &'static str),
+    #[error("Broker returned unexpected error code {1:?} in field {2} when calling API {0:?} ")]
+    UnexpectedErrorCode(ApiKey, ApiError, &'static str),
 }

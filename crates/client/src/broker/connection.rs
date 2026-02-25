@@ -236,7 +236,7 @@ fn map_error_inline(value: ApiCallError) -> BrokerConnectionInitializationError 
             unreachable!();
         }
         // TODO: check if needed
-        ApiCallError::UnsupportedErrorCode(_, _, _) => {
+        ApiCallError::UnexpectedErrorCode(_, _, _) => {
             unreachable!();
         }
     }
