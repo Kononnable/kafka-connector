@@ -45,7 +45,7 @@ impl BrokerController {
     pub fn new(
         metadata: BrokerMetadata,
         node_id: i32,
-        options: &Arc<ClusterControllerOptions>,
+        options: Arc<ClusterControllerOptions>,
         parent_supported_apis: IndexMap<i16, ApiVersionsResponseKey>,
     ) -> BrokerController {
         let (request_tx, request_rx) = mpsc::unbounded_channel();
@@ -63,7 +63,7 @@ impl BrokerController {
             metadata,
             request_tx,
             buffer: Mutex::new(BytesMut::with_capacity(options.buffer_size)),
-            options: options.clone(),
+            options,
             _node_id: node_id,
             supported_api_versions,
             status,
@@ -130,5 +130,29 @@ impl BrokerController {
             return None;
         }
         Some(ApiVersion(max_supported))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+    #[test_log::test(tokio::test)]
+    async fn loop_closes_after_controller_drops() {
+        let metadata = BrokerMetadata {
+            host: "".to_string(),
+            port: 0,
+            rack: None,
+        };
+        let options = Default::default();
+        let options_weak = Arc::downgrade(&options);
+
+        let controller = BrokerController::new(metadata, 1, options, Default::default());
+        drop(controller);
+
+        // Wait for loop to exit
+        tokio::time::sleep(Duration::from_millis(50)).await;
+
+        assert!(options_weak.upgrade().is_none());
     }
 }

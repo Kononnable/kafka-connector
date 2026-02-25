@@ -103,8 +103,6 @@ impl ProducerLoop {
         // TODO: Cleanup waiting/in-flight requests
 
         debug!("Producer loop is closing");
-
-        // TODO: Make sure it closes when producer client is dropped - test?
     }
 
     async fn handle_responses(

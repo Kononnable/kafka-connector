@@ -24,12 +24,15 @@ use std::time::Duration;
 use tokio::sync::mpsc;
 use tracing::{debug, error, info, instrument, warn};
 
+/// Broker -> Topic -> Partition -> (next_offset_to_fetch, current_leader_epoch)
+type Mappings = HashMap<i32, HashMap<String, HashMap<i32, (i64, i32)>>>;
+
 pub struct ConsumerLoop {
     controller: Arc<ClusterController>,
     consumer_options: KafkaConsumerOptions,
     record_sender: mpsc::Sender<Record>,
     /// Broker -> Topic -> Partition -> (next_offset_to_fetch, current_leader_epoch)
-    mappings: HashMap<i32, HashMap<String, HashMap<i32, (i64, i32)>>>,
+    mappings: Mappings,
     deserialization_buffer: BytesMut,
     reinitialize_triggered: bool,
 }
@@ -66,8 +69,6 @@ impl ConsumerLoop {
         }
 
         debug!("Consumer loop is closing");
-
-        // TODO: Make sure it closes when consumer client is dropped - test?
     }
 
     #[instrument(level = "debug", skip(self))]

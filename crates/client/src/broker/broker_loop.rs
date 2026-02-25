@@ -188,8 +188,6 @@ impl BrokerLoop {
             let _ = response_sender.send(Err(ApiCallError::BrokerConnectionClosed));
         }
         debug!("Broker loop is closing");
-
-        // TODO: Make sure it closes when broker is dropped - test?
     }
 
     #[instrument(level = "debug", skip(self))]

@@ -33,7 +33,7 @@ impl From<i64> for ListOffsetsTimestampType {
             -1 => ListOffsetsTimestampType::Latest,
             o => {
                 assert!(o >= 0, "Unknown ListOffsetsTimestampType value");
-                Specific(o as i64)
+                Specific(o)
             }
         }
     }
