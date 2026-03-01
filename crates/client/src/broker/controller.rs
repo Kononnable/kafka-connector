@@ -62,7 +62,7 @@ impl BrokerController {
         BrokerController {
             metadata,
             request_tx,
-            buffer: Mutex::new(BytesMut::with_capacity(options.buffer_size)),
+            buffer: Mutex::new(BytesMut::with_capacity(options.advanced.buffer_size)),
             options,
             _node_id: node_id,
             supported_api_versions,
@@ -85,8 +85,8 @@ impl BrokerController {
         let (tx, rx) = oneshot::channel();
 
         let mut buffer = self.buffer.lock().expect("Poisoned lock");
-        if buffer.capacity() < self.options.buffer_size {
-            buffer.reserve(self.options.buffer_size);
+        if buffer.capacity() < self.options.advanced.buffer_size {
+            buffer.reserve(self.options.advanced.buffer_size);
         }
         let serialization_result = request.serialize(version, &mut buffer).map(|_| {
             let request_buf = &mut (*buffer);

@@ -135,7 +135,7 @@ pub(crate) async fn fetch_initial_broker_list_from_broker(
             .await
             .map_err(BrokerConnectionInitializationError::ConnectionError)?;
 
-        let buffer = BytesMut::with_capacity(options.buffer_size);
+        let buffer = BytesMut::with_capacity(options.advanced.buffer_size);
         let header = RequestHeader {
             client_id: options.client_name.to_owned(),
             ..Default::default()

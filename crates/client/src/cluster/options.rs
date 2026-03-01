@@ -1,28 +1,46 @@
 use derivative::Derivative;
 use std::time::Duration;
 
-// TODO: Rename fields?
 // TODO: add all options (from 1.0, without ones introduced later in KIPs to be implemented)
-// TODO: Set proper defaults
-// TODO: Split standard and advanced config(?)
 #[derive(Clone, Debug, Derivative)]
 #[derivative(Default)]
 pub struct ClusterControllerOptions {
+    /// Number of retries during Cluster Controller creation before ClusterController::new() returns error.
     #[derivative(Default(value = "5"))]
-    pub connection_retires: u8,
+    pub initialization_retires: u8,
+
+    /// Delay before retrying after connection failure.
     #[derivative(Default(value = "Duration::from_millis(1_000)"))]
     pub connection_retry_delay: Duration,
-    #[derivative(Default(value = "Duration::from_millis(5_000)"))]
+
+    /// Duration after which connection attempt is treated as failed.
+    #[derivative(Default(value = "Duration::from_millis(30_000)"))]
     pub connection_timeout: Duration,
+
+    /// Timeout for kafka api remote calls
     #[derivative(Default(value = "Duration::from_millis(5_000)"))]
     pub request_timeout: Duration,
+
+    /// Client identifier
     #[derivative(Default(value = "env!(\"CARGO_CRATE_NAME\").to_owned()"))]
     pub client_name: String,
-    #[derivative(Default(value = "1_024"))]
-    pub buffer_size: usize,
+
+    /// Advanced settings, change only if needed and you understand the consequences
+    pub advanced: ClusterControllerAdvancedOptions,
+}
+
+#[derive(Clone, Debug, Derivative)]
+#[derivative(Default)]
+pub struct ClusterControllerAdvancedOptions {
+    /// Limit of parallel api requests for single broker connection
     #[derivative(Default(value = "5"))]
     pub max_requests_per_connection: usize,
 
+    /// Initial buffer size for serializing/deserializing kafka api messages.
+    #[derivative(Default(value = "1_048_576"))] // 1MB
+    pub buffer_size: usize,
+
+    /// Maximum time for which metadata is kept in cache before considered outdated.
     #[derivative(Default(value = "Duration::from_millis(300_000)"))]
-    pub metadata_refresh_interval: Duration, // TODO: should this be even exposed to the client(?)
+    pub metadata_refresh_interval: Duration,
 }

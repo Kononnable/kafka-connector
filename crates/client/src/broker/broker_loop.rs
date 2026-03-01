@@ -200,7 +200,7 @@ impl BrokerLoop {
                 .await
                 .map_err(BrokerConnectionInitializationError::ConnectionError)?;
 
-            let buffer = BytesMut::with_capacity(options.buffer_size);
+            let buffer = BytesMut::with_capacity(options.advanced.buffer_size);
             let header = RequestHeader {
                 client_id: options.client_name.to_owned(),
                 ..Default::default()
@@ -304,7 +304,9 @@ impl BrokerLoop {
     async fn send_waiting_requests(&mut self) {
         if let BrokerLoopStatusInner::Connected { connection, .. } = &mut self.loop_status.as_mut()
         {
-            while self.api_calls_in_transit.len() <= self.options.max_requests_per_connection {
+            while self.api_calls_in_transit.len()
+                <= self.options.advanced.max_requests_per_connection
+            {
                 if let Some(call) = self.api_call_queue.pop_front() {
                     let result = connection
                         .send(

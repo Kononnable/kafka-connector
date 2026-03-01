@@ -69,7 +69,7 @@ impl ClusterController {
             })
             .collect();
         let topic_metadata_refresh =
-            Mutex::new(Instant::now().add(options.metadata_refresh_interval));
+            Mutex::new(Instant::now().add(options.advanced.metadata_refresh_interval));
         Ok(Self {
             broker_list,
             options,
@@ -90,7 +90,7 @@ impl ClusterController {
         if bootstrap_servers.is_empty() {
             return Err(ClusterControllerCreationError::NoClusterAddressFound);
         }
-        for i in 0..=options.connection_retires {
+        for i in 0..=options.initialization_retires {
             if i > 0 {
                 debug!(
                     "No connection established, retry in {} ms",
@@ -101,7 +101,7 @@ impl ClusterController {
             debug!(
                 "Connecting to kafka cluster attempt {} of {}",
                 i + 1,
-                options.connection_retires + 1
+                options.initialization_retires + 1
             );
             for address in &bootstrap_servers {
                 debug!(?address, "Connecting to kafka broker");
@@ -117,7 +117,7 @@ impl ClusterController {
             }
         }
         Err(ClusterControllerCreationError::OutOfConnectionAttempts(
-            options.connection_retires as u16 + 1,
+            options.initialization_retires as u16 + 1,
         ))
     }
 
@@ -263,7 +263,7 @@ impl ClusterController {
             lock
         });
         if *refresh_timeout < Instant::now() {
-            *refresh_timeout = Instant::now() + self.options.metadata_refresh_interval;
+            *refresh_timeout = Instant::now() + self.options.advanced.metadata_refresh_interval;
             self.topic_metadata_cache
                 .write()
                 .unwrap_or_else(|poison| {
@@ -342,7 +342,7 @@ mod tests {
                 bootstrap_servers.clone(),
                 ClusterControllerOptions {
                     connection_timeout: Duration::from_millis(1000),
-                    connection_retires: 0,
+                    initialization_retires: 0,
                     ..Default::default()
                 },
             )
@@ -384,7 +384,7 @@ mod tests {
                 bootstrap_servers,
                 ClusterControllerOptions {
                     connection_retry_delay: Duration::from_millis(10_000),
-                    connection_retires: 2,
+                    initialization_retires: 2,
                     connection_timeout: Duration::from_millis(20),
                     ..Default::default()
                 },
@@ -416,7 +416,7 @@ mod tests {
             let result = ClusterController::new(
                 bootstrap_servers,
                 ClusterControllerOptions {
-                    connection_retires: 0,
+                    initialization_retires: 0,
                     connection_timeout: Duration::from_millis(29_000),
                     ..Default::default()
                 },
@@ -449,7 +449,7 @@ mod tests {
             let result = ClusterController::new(
                 bootstrap_servers,
                 ClusterControllerOptions {
-                    connection_retires: 0,
+                    initialization_retires: 0,
                     ..Default::default()
                 },
             )
@@ -475,7 +475,7 @@ mod tests {
             let result = ClusterController::new(
                 bootstrap_servers,
                 ClusterControllerOptions {
-                    connection_retires: 0,
+                    initialization_retires: 0,
                     connection_timeout: Duration::from_millis(29_000),
                     ..Default::default()
                 },
@@ -523,7 +523,7 @@ mod tests {
             let result = ClusterController::new(
                 bootstrap_servers,
                 ClusterControllerOptions {
-                    connection_retires: 0,
+                    initialization_retires: 0,
                     ..Default::default()
                 },
             )
