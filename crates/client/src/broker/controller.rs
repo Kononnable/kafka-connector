@@ -85,8 +85,8 @@ impl BrokerController {
         let (tx, rx) = oneshot::channel();
 
         let mut buffer = self.buffer.lock().expect("Poisoned lock");
-        if buffer.capacity() < self.options.advanced.buffer_size {
-            buffer.reserve(self.options.advanced.buffer_size);
+        if buffer.capacity() < self.options.advanced.buffer_grow_size / 2 {
+            buffer.reserve(self.options.advanced.buffer_grow_size);
         }
         let serialization_result = request.serialize(version, &mut buffer).map(|_| {
             let request_buf = &mut (*buffer);

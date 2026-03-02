@@ -17,8 +17,8 @@ pub struct ClusterControllerOptions {
     #[derivative(Default(value = "Duration::from_millis(30_000)"))]
     pub connection_timeout: Duration,
 
-    /// Timeout for kafka api remote calls
-    #[derivative(Default(value = "Duration::from_millis(5_000)"))]
+    /// Timeout for kafka api calls
+    #[derivative(Default(value = "Duration::from_secs(30_000)"))]
     pub request_timeout: Duration,
 
     /// Client identifier
@@ -37,8 +37,15 @@ pub struct ClusterControllerAdvancedOptions {
     pub max_requests_per_connection: usize,
 
     /// Initial buffer size for serializing/deserializing kafka api messages.
-    #[derivative(Default(value = "1_048_576"))] // 1MB
+    #[derivative(Default(value = "2 * 1024 * 1024"))] // 2MB
     pub buffer_size: usize,
+
+    /// Amount of bytes buffers grow when they're near limit.
+    ///
+    /// Note: Not every operation checks if buffer is near full.
+    /// Checking and increasing the buffer size can be resource intensive.
+    #[derivative(Default(value = "1024 * 1024"))] // 1MB
+    pub buffer_grow_size: usize,
 
     /// Maximum time for which metadata is kept in cache before considered outdated.
     #[derivative(Default(value = "Duration::from_millis(300_000)"))]

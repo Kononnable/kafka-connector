@@ -23,7 +23,7 @@ use tracing::{debug, instrument};
 /// Main entrypoint for communication with Kafka cluster.
 pub struct ClusterController {
     broker_list: HashMap<i32, BrokerController>,
-    options: Arc<ClusterControllerOptions>,
+    pub options: Arc<ClusterControllerOptions>,
     topic_metadata_cache: RwLock<HashMap<String, MetadataResponseTopic>>,
     topic_metadata_refresh: Mutex<Instant>,
 }
@@ -172,14 +172,11 @@ impl ClusterController {
     }
 
     // TODO: Tests
-    // TODO: Extract Metadata cache as a separate struct(?)
-    pub(crate) async fn get_topic_metadata<N: Into<HashSet<String>>>(
+    pub(crate) async fn get_topic_metadata(
         &self,
-        topics: N,
+        topics: HashSet<String>,
         force_refresh: ForceRefresh,
     ) -> Result<HashMap<String, MetadataResponseTopic>, ApiCallError> {
-        let topics = topics.into();
-
         if topics.is_empty() {
             return Ok(HashMap::new());
         }

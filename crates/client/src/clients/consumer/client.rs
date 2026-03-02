@@ -1,4 +1,5 @@
 use crate::clients::consumer::consumer_loop::ConsumerLoop;
+use crate::clients::consumer::options::KafkaConsumerOptions;
 use crate::clients::consumer::record::Record;
 use crate::cluster::controller::ClusterController;
 use crate::cluster::error::ClusterControllerCreationError;
@@ -8,10 +9,6 @@ use std::sync::Arc;
 use tokio::net::ToSocketAddrs;
 use tokio::sync::mpsc;
 
-#[derive(Clone, Debug, Default)]
-pub struct KafkaConsumerOptions {
-    pub topic: String, // TODO: temporary
-}
 pub struct KafkaConsumer {
     cluster: Arc<ClusterController>,
     options: KafkaConsumerOptions,

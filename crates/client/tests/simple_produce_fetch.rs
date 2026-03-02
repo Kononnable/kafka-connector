@@ -1,8 +1,10 @@
 use crate::common::KAFKA_TEST_BROKER_ADDR_1;
 use crate::common::test_topic::TestTopic;
-use kafka_connector_client::clients::consumer::client::{KafkaConsumer, KafkaConsumerOptions};
-use kafka_connector_client::clients::producer::client::{KafkaProducer, KafkaProducerOptions};
+use kafka_connector_client::clients::consumer::client::KafkaConsumer;
+use kafka_connector_client::clients::consumer::options::KafkaConsumerOptions;
+use kafka_connector_client::clients::producer::client::KafkaProducer;
 use kafka_connector_client::clients::producer::future_record::FutureRecord;
+use kafka_connector_client::clients::producer::options::KafkaProducerOptions;
 use kafka_connector_client::cluster::{
     controller::ClusterController, options::ClusterControllerOptions,
 };
@@ -24,7 +26,8 @@ pub async fn main() {
     assert!(!broker_list.is_empty());
 
     let test_topic = TestTopic::new(cluster.clone(), "simple_produce_fetch", None).await;
-    let producer = KafkaProducer::from_cluster_controller(cluster.clone(), KafkaProducerOptions {});
+    let producer =
+        KafkaProducer::from_cluster_controller(cluster.clone(), KafkaProducerOptions::default());
     let key = "Key";
     let value = format!(
         "Time: {}",
@@ -54,7 +57,8 @@ pub async fn main() {
     let mut consumer = KafkaConsumer::from_cluster_controller(
         cluster,
         KafkaConsumerOptions {
-            topic: test_topic.name().to_owned(),
+            topics: [test_topic.name().to_owned()].into(),
+            ..Default::default()
         },
     );
     let record = consumer.recv().await;

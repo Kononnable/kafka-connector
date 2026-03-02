@@ -1,5 +1,6 @@
 use crate::clients::producer::error::ProduceError;
 use crate::clients::producer::future_record::FutureRecord;
+use crate::clients::producer::options::KafkaProducerOptions;
 use crate::clients::producer::producer_loop::{ProduceRequestMessage, ProducerLoop};
 use crate::cluster::controller::ClusterController;
 use crate::cluster::error::ClusterControllerCreationError;
@@ -19,8 +20,6 @@ pub struct RecordAppend {
     pub timestamp: SystemTime,
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct KafkaProducerOptions {}
 pub struct KafkaProducer {
     options: KafkaProducerOptions,
     request_tx: UnboundedSender<ProduceRequestMessage>,

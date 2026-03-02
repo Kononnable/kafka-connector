@@ -12,7 +12,6 @@ use kafka_connector_protocol::api_versions_request::ApiVersionsRequest;
 use kafka_connector_protocol::api_versions_response::{
     ApiVersionsResponse, ApiVersionsResponseKey,
 };
-use kafka_connector_protocol::request_header::RequestHeader;
 use kafka_connector_protocol::response_header::ResponseHeader;
 use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, RwLock};
@@ -200,13 +199,7 @@ impl BrokerLoop {
                 .await
                 .map_err(BrokerConnectionInitializationError::ConnectionError)?;
 
-            let buffer = BytesMut::with_capacity(options.advanced.buffer_size);
-            let header = RequestHeader {
-                client_id: options.client_name.to_owned(),
-                ..Default::default()
-            };
-
-            let mut connection = BrokerConnection::new(buffer, stream, header);
+            let mut connection = BrokerConnection::new(stream, &options);
 
             let api_versions_response = crate::broker::connection::call_api_inline(
                 &mut connection,

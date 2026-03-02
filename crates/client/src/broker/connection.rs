@@ -35,14 +35,22 @@ pub(crate) struct BrokerConnection {
     buffer: BytesMut,
     stream: TcpStream,
     header: RequestHeader,
+    buffer_grow_size: usize,
 }
 
 impl BrokerConnection {
-    pub fn new(buffer: BytesMut, stream: TcpStream, header: RequestHeader) -> BrokerConnection {
+    pub fn new(stream: TcpStream, options: &ClusterControllerOptions) -> BrokerConnection {
+        let buffer = BytesMut::with_capacity(options.advanced.buffer_size);
+        let header = RequestHeader {
+            client_id: options.client_name.to_owned(),
+            ..Default::default()
+        };
+        let buffer_grow_size = options.advanced.buffer_grow_size;
         BrokerConnection {
             buffer,
             stream,
             header,
+            buffer_grow_size,
         }
     }
 
@@ -54,8 +62,8 @@ impl BrokerConnection {
         if let Some(value) = self.try_read_next_response() {
             return Some(value);
         }
-        if self.buffer.capacity() < 4 {
-            self.buffer.reserve(4);
+        if self.buffer.capacity() < self.buffer_grow_size / 2 {
+            self.buffer.reserve(self.buffer_grow_size);
         }
 
         let read_bytes_len = self.stream.read_buf(&mut self.buffer).await;
@@ -87,7 +95,8 @@ impl BrokerConnection {
             } else {
                 let bytes_missing = resp_len + 4 - self.buffer.len();
                 if self.buffer.capacity() < bytes_missing {
-                    self.buffer.reserve(bytes_missing);
+                    self.buffer
+                        .reserve(usize::max(bytes_missing, self.buffer_grow_size));
                 }
             }
         }
@@ -135,13 +144,7 @@ pub(crate) async fn fetch_initial_broker_list_from_broker(
             .await
             .map_err(BrokerConnectionInitializationError::ConnectionError)?;
 
-        let buffer = BytesMut::with_capacity(options.advanced.buffer_size);
-        let header = RequestHeader {
-            client_id: options.client_name.to_owned(),
-            ..Default::default()
-        };
-
-        let mut connection = BrokerConnection::new(buffer, stream, header);
+        let mut connection = BrokerConnection::new(stream, options);
 
         let api_versions_response = call_api_inline(
             &mut connection,
@@ -249,6 +252,7 @@ mod tests {
 
     mod try_recv {
         use crate::broker::connection::BrokerConnection;
+        use crate::cluster::options::ClusterControllerOptions;
         use bytes::BytesMut;
         use kafka_connector_protocol::api_versions_request::ApiVersionsRequest;
         use kafka_connector_protocol::request_header::RequestHeader;
@@ -271,11 +275,8 @@ mod tests {
                 }
             });
             let stream = TcpStream::connect(addr).await.unwrap();
-
-            let buffer = BytesMut::with_capacity(1024);
-            let header = RequestHeader::default();
-
-            let connection = BrokerConnection::new(buffer, stream, header);
+            let options = ClusterControllerOptions::default();
+            let connection = BrokerConnection::new(stream, &options);
             (connection, tx)
         }
 
@@ -403,11 +404,8 @@ mod tests {
             });
 
             let stream = TcpStream::connect(addr).await.unwrap();
-
-            let buffer = BytesMut::with_capacity(1024);
-            let header = RequestHeader::default();
-
-            let mut connection = BrokerConnection::new(buffer, stream, header);
+            let options = ClusterControllerOptions::default();
+            let mut connection = BrokerConnection::new(stream, &options);
 
             let req1 = connection
                 .send(

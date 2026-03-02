@@ -1,6 +1,7 @@
-use crate::clients::producer::client::{KafkaProducerOptions, RecordAppend};
+use crate::clients::producer::client::RecordAppend;
 use crate::clients::producer::error::ProduceError;
 use crate::clients::producer::future_record::FutureRecord;
+use crate::clients::producer::options::KafkaProducerOptions;
 use crate::cluster::controller::{ClusterController, ForceRefresh};
 use crate::cluster::error::ApiCallError;
 use bytes::BytesMut;
@@ -54,10 +55,11 @@ impl ProducerLoop {
         producer_options: KafkaProducerOptions,
         receiver: mpsc::UnboundedReceiver<ProduceRequestMessage>,
     ) {
+        let serialization_buffer = BytesMut::with_capacity(controller.options.advanced.buffer_size);
         ProducerLoop {
             controller,
             producer_options,
-            serialization_buffer: BytesMut::with_capacity(10_000_000), // TODO: size from options, at least 2 times max record_batch, default same as for rdkafka
+            serialization_buffer,
             records_waiting: VecDeque::new(),
             records_in_flight: Default::default(),
         }
@@ -252,7 +254,7 @@ impl ProducerLoop {
                 requests.push((
                     broker_id,
                     ProduceRequest {
-                        acks: 1, // TODO: Acks
+                        acks: self.producer_options.acks.into(),
                         topics: vec![TopicProduceData {
                             name: topic.clone(),
                             partitions: vec![PartitionProduceData {
@@ -260,7 +262,11 @@ impl ProducerLoop {
                                 records: Some(records),
                             }],
                         }],
-                        timeout_ms: 0, // TODO:
+                        timeout_ms: self
+                            .producer_options
+                            .timeout
+                            .map(|d| d.as_millis() as i32)
+                            .unwrap_or(0),
                         ..Default::default()
                     },
                 ));

@@ -116,6 +116,8 @@ impl RecordBatch {
     }
     /// Encodes struct to kafka format. Some field values are calculated during encoding.
     pub fn encode(&mut self, bytes: &mut BytesMut) {
+        // TODO: extend bytes if needed - check before each record how much space is available
+        // TODO: max request size
         assert!(!self.records.is_empty());
         assert_eq!(self.magic, 2);
 

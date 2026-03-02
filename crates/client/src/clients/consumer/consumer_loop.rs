@@ -1,6 +1,6 @@
-use crate::clients::consumer::client::KafkaConsumerOptions;
 use crate::clients::consumer::error::ConsumeError;
 use crate::clients::consumer::error::ConsumeError::MetadataFetchFailed;
+use crate::clients::consumer::options::KafkaConsumerOptions;
 use crate::clients::consumer::record::Record;
 use crate::cluster::controller::{ClusterController, ForceRefresh};
 use crate::cluster::error::ApiCallError;
@@ -137,7 +137,7 @@ impl ConsumerLoop {
     async fn sync_metadata(&mut self, refresh: ForceRefresh) -> Result<(), ConsumeError> {
         for (topic, topic_metadata) in self
             .controller
-            .get_topic_metadata([self.consumer_options.topic.clone()], refresh)
+            .get_topic_metadata(self.consumer_options.topics.clone(), refresh)
             .await
             .map_err(MetadataFetchFailed)?
             .into_iter()
@@ -264,33 +264,28 @@ impl ConsumerLoop {
         broker_id: i32,
     ) -> Pin<Box<impl Future<Output = (i32, Result<FetchResponse, ApiCallError>)> + use<>>> {
         let mappings = self.mappings.get(&broker_id).unwrap();
-        // TODO: fetch options
         let request = FetchRequest {
             replica_id: -1,
-            max_wait: 0,
-            min_bytes: 0,
-            max_bytes: 52428800, // 50MB, librdkafka defaults
+            max_wait: self.consumer_options.max_wait.as_millis() as i32,
+            min_bytes: self.consumer_options.min_bytes,
+            max_bytes: self.consumer_options.max_bytes,
             isolation_level: IsolationLevel::ReadCommited.into(),
             session_id: 0,
             epoch: -1,
             topics: mappings
                 .iter()
-                .map(|(topic, partitions)| {
-                    FetchableTopic {
-                        name: topic.to_owned(),
-                        fetch_partitions: partitions
-                            .iter()
-                            .map(|(partition_index, &(offset, epoch))| {
-                                FetchPartition {
-                                    partition_index: *partition_index,
-                                    current_leader_epoch: epoch,
-                                    fetch_offset: offset,
-                                    log_start_offset: -1,
-                                    max_bytes: 1048576, // TODO: 1MB, librdkafka defaults
-                                }
-                            })
-                            .collect(),
-                    }
+                .map(|(topic, partitions)| FetchableTopic {
+                    name: topic.to_owned(),
+                    fetch_partitions: partitions
+                        .iter()
+                        .map(|(partition_index, &(offset, epoch))| FetchPartition {
+                            partition_index: *partition_index,
+                            current_leader_epoch: epoch,
+                            fetch_offset: offset,
+                            log_start_offset: -1,
+                            max_bytes: self.consumer_options.max_bytes_per_partition,
+                        })
+                        .collect(),
                 })
                 .collect(),
             forgotten: vec![],
