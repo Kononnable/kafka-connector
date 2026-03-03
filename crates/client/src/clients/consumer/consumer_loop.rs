@@ -1,6 +1,6 @@
 use crate::clients::consumer::error::ConsumeError;
 use crate::clients::consumer::error::ConsumeError::MetadataFetchFailed;
-use crate::clients::consumer::options::KafkaConsumerOptions;
+use crate::clients::consumer::options::{KafkaConsumerOptions, OffsetReset};
 use crate::clients::consumer::record::Record;
 use crate::cluster::controller::{ClusterController, ForceRefresh};
 use crate::cluster::error::ApiCallError;
@@ -195,21 +195,19 @@ impl ConsumerLoop {
                 isolation_level: IsolationLevel::ReadCommited.into(),
                 topics: mappings
                     .iter()
-                    .map(|(topic, partitions)| {
-                        ListOffsetTopic {
-                            name: topic.to_owned(),
-                            partitions: partitions
-                                .iter()
-                                .map(|(&partition_index, &(_, current_leader_epoch))| {
-                                    ListOffsetPartition {
-                                        partition_index,
-                                        current_leader_epoch,
-                                        timestamp: ListOffsetsTimestampType::Earliest.into(), // TODO: value from options
-                                        max_num_offsets: 0,
-                                    }
-                                })
-                                .collect(),
-                        }
+                    .map(|(topic, partitions)| ListOffsetTopic {
+                        name: topic.to_owned(),
+                        partitions: partitions
+                            .iter()
+                            .map(|(&partition_index, &(_, current_leader_epoch))| {
+                                ListOffsetPartition {
+                                    partition_index,
+                                    current_leader_epoch,
+                                    timestamp: self.consumer_options.offset_reset.into(),
+                                    max_num_offsets: 0,
+                                }
+                            })
+                            .collect(),
                     })
                     .collect(),
             };
@@ -246,8 +244,10 @@ impl ConsumerLoop {
                         .or_default()
                         .entry(partition.partition_index)
                         .or_insert((-1, partition.leader_epoch));
-                    if *offset == -1 || (*offset < partition.offset && true) {
-                        // TODO: true - Earliest timestamp from (options)
+                    if *offset == -1
+                        || (*offset < partition.offset
+                            && self.consumer_options.offset_reset == OffsetReset::Earliest)
+                    {
                         // TODO: make sure corer case works - timestamp !=earliest and consumer fallen behind retention (data deleted)
                         *offset = partition.offset;
                     }
