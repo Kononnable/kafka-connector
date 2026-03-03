@@ -14,7 +14,7 @@ use kafka_connector_protocol::api_versions_response::{
 };
 use kafka_connector_protocol::response_header::ResponseHeader;
 use std::collections::{HashMap, VecDeque};
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::net::TcpStream;
 use tokio::sync::mpsc;
@@ -29,7 +29,7 @@ struct QueuedApiCall {
 
 struct BrokerLoopStatus {
     inner: BrokerLoopStatusInner,
-    status: Arc<RwLock<BrokerControllerStatus>>,
+    status: Arc<Mutex<BrokerControllerStatus>>,
 }
 impl AsRef<BrokerLoopStatusInner> for BrokerLoopStatus {
     fn as_ref(&self) -> &BrokerLoopStatusInner {
@@ -43,7 +43,7 @@ impl AsMut<BrokerLoopStatusInner> for BrokerLoopStatus {
     }
 }
 impl BrokerLoopStatus {
-    pub fn new(status: Arc<RwLock<BrokerControllerStatus>>) -> BrokerLoopStatus {
+    pub fn new(status: Arc<Mutex<BrokerControllerStatus>>) -> BrokerLoopStatus {
         let mut status = BrokerLoopStatus {
             inner: BrokerLoopStatusInner::Disconnected {
                 backoff_timeout: Instant::now(),
@@ -64,7 +64,7 @@ impl BrokerLoopStatus {
         };
 
         self.inner = new_inner;
-        let mut guard = self.status.write().unwrap();
+        let mut guard = self.status.lock().unwrap();
         *guard = status;
     }
 }
@@ -90,7 +90,7 @@ pub struct BrokerLoop {
     api_request_receiver: mpsc::UnboundedReceiver<ApiRequestMessage>,
     api_call_queue: VecDeque<QueuedApiCall>,
     api_calls_in_transit: HashMap<i32, (ResponseChannel, Instant)>,
-    supported_api_versions: Arc<RwLock<IndexMap<i16, ApiVersionsResponseKey>>>,
+    supported_api_versions: Arc<Mutex<IndexMap<i16, ApiVersionsResponseKey>>>,
     loop_status: BrokerLoopStatus,
 }
 
@@ -101,8 +101,8 @@ impl BrokerLoop {
         api_request_receiver: mpsc::UnboundedReceiver<ApiRequestMessage>,
         options: Arc<ClusterControllerOptions>,
         node_id: i32,
-        supported_api_versions: Arc<RwLock<IndexMap<i16, ApiVersionsResponseKey>>>,
-        status: Arc<RwLock<BrokerControllerStatus>>,
+        supported_api_versions: Arc<Mutex<IndexMap<i16, ApiVersionsResponseKey>>>,
+        status: Arc<Mutex<BrokerControllerStatus>>,
     ) {
         BrokerLoop {
             address,
@@ -272,7 +272,7 @@ impl BrokerLoop {
             Ok(Ok((connection, api_versions))) => {
                 self.loop_status
                     .set(BrokerLoopStatusInner::Connected { connection });
-                let mut supported_apis = self.supported_api_versions.write().unwrap();
+                let mut supported_apis = self.supported_api_versions.lock().unwrap();
                 *supported_apis = api_versions
                     .api_keys
                     .into_iter()

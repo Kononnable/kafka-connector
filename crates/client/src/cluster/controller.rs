@@ -13,7 +13,7 @@ use kafka_connector_protocol::metadata_response::MetadataResponseTopic;
 use kafka_connector_protocol::{ApiRequest, ApiVersion, metadata_response::MetadataResponse};
 use std::collections::{HashMap, HashSet};
 use std::ops::Add;
-use std::sync::{Mutex, RwLock};
+use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use std::{fmt::Debug, sync::Arc};
 use tokio::net::ToSocketAddrs;
@@ -24,7 +24,7 @@ use tracing::{debug, instrument};
 pub struct ClusterController {
     broker_list: HashMap<i32, BrokerController>,
     pub options: Arc<ClusterControllerOptions>,
-    topic_metadata_cache: RwLock<HashMap<String, MetadataResponseTopic>>,
+    topic_metadata_cache: Mutex<HashMap<String, MetadataResponseTopic>>,
     topic_metadata_refresh: Mutex<Instant>,
 }
 
@@ -73,7 +73,7 @@ impl ClusterController {
         Ok(Self {
             broker_list,
             options,
-            topic_metadata_cache: RwLock::new(topic_metadata_cache),
+            topic_metadata_cache: Mutex::new(topic_metadata_cache),
             topic_metadata_refresh,
         })
     }
@@ -205,7 +205,7 @@ impl ClusterController {
             )
             .await?;
 
-        let mut cache = self.topic_metadata_cache.write().unwrap_or_else(|poison| {
+        let mut cache = self.topic_metadata_cache.lock().unwrap_or_else(|poison| {
             self.topic_metadata_cache.clear_poison();
             let mut cache = poison.into_inner();
             cache.clear();
@@ -234,12 +234,11 @@ impl ClusterController {
         &self,
         topic_names: &HashSet<String>,
     ) -> Option<HashMap<String, MetadataResponseTopic>> {
-        let cache = self.topic_metadata_cache.read().unwrap_or_else(|_| {
+        let cache = self.topic_metadata_cache.lock().unwrap_or_else(|poison| {
             self.topic_metadata_cache.clear_poison();
-            let mut cache = self.topic_metadata_cache.write().unwrap();
+            let mut cache = poison.into_inner();
             cache.clear();
-            drop(cache);
-            self.topic_metadata_cache.read().unwrap()
+            cache
         });
         let mut results = HashMap::new();
         for name in topic_names {
@@ -262,7 +261,7 @@ impl ClusterController {
         if *refresh_timeout < Instant::now() {
             *refresh_timeout = Instant::now() + self.options.advanced.metadata_refresh_interval;
             self.topic_metadata_cache
-                .write()
+                .lock()
                 .unwrap_or_else(|poison| {
                     self.topic_metadata_cache.clear_poison();
                     poison.into_inner()

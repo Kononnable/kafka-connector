@@ -5,7 +5,6 @@ use bytes::BytesMut;
 use indexmap::IndexMap;
 use kafka_connector_protocol::api_versions_response::ApiVersionsResponseKey;
 use kafka_connector_protocol::{ApiKey, ApiRequest, ApiResponse, ApiVersion};
-use std::sync::RwLock;
 use std::{
     future::Future,
     sync::{Arc, Mutex},
@@ -34,8 +33,8 @@ pub struct BrokerController {
     request_tx: mpsc::UnboundedSender<ApiRequestMessage>,
     buffer: Mutex<BytesMut>,
     options: Arc<ClusterControllerOptions>,
-    pub(crate) supported_api_versions: Arc<RwLock<IndexMap<i16, ApiVersionsResponseKey>>>, // TODO: pub crate for api(?)
-    status: Arc<RwLock<BrokerControllerStatus>>,
+    pub(crate) supported_api_versions: Arc<Mutex<IndexMap<i16, ApiVersionsResponseKey>>>, // TODO: pub crate for api(?)
+    status: Arc<Mutex<BrokerControllerStatus>>,
 }
 
 impl BrokerController {
@@ -49,8 +48,8 @@ impl BrokerController {
         parent_supported_apis: IndexMap<i16, ApiVersionsResponseKey>,
     ) -> BrokerController {
         let (request_tx, request_rx) = mpsc::unbounded_channel();
-        let supported_api_versions = Arc::new(RwLock::new(parent_supported_apis));
-        let status = Arc::new(RwLock::new(BrokerControllerStatus::Disconnected));
+        let supported_api_versions = Arc::new(Mutex::new(parent_supported_apis));
+        let status = Arc::new(Mutex::new(BrokerControllerStatus::Disconnected));
         tokio::spawn(BrokerLoop::start(
             format!("{}:{}", metadata.host, metadata.port),
             request_rx,
@@ -72,7 +71,7 @@ impl BrokerController {
 
     #[instrument(level = "debug", skip_all)]
     pub fn get_status(&self) -> BrokerControllerStatus {
-        self.status.read().expect("Poisoned lock").clone()
+        self.status.lock().expect("Poisoned lock").clone()
     }
 
     // TODO: Test
@@ -116,7 +115,7 @@ impl BrokerController {
     }
 
     pub fn get_max_supported_api_version<R: ApiRequest>(&self) -> Option<ApiVersion> {
-        let supported_apis = self.supported_api_versions.read().expect("Poisoned lock");
+        let supported_apis = self.supported_api_versions.lock().expect("Poisoned lock");
         let broker_supported_versions = supported_apis.get(&R::get_api_key().0)?;
         let max_supported = i16::min(
             broker_supported_versions.max_version,

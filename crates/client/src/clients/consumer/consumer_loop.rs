@@ -4,7 +4,7 @@ use crate::clients::consumer::options::{KafkaConsumerOptions, OffsetReset};
 use crate::clients::consumer::record::Record;
 use crate::cluster::controller::{ClusterController, ForceRefresh};
 use crate::cluster::error::ApiCallError;
-use crate::protocol_consts::{IsolationLevel, ListOffsetsTimestampType};
+use crate::protocol_consts::IsolationLevel;
 use bytes::BytesMut;
 use futures::future::{join_all, select_all};
 use kafka_connector_protocol::fetch_request::{FetchPartition, FetchRequest, FetchableTopic};
