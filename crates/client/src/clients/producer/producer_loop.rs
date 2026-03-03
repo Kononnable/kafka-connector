@@ -2,6 +2,7 @@ use crate::clients::producer::client::RecordAppend;
 use crate::clients::producer::error::ProduceError;
 use crate::clients::producer::future_record::FutureRecord;
 use crate::clients::producer::options::KafkaProducerOptions;
+use crate::clients::producer::partitioner::Partitioner;
 use crate::cluster::controller::{ClusterController, ForceRefresh};
 use crate::cluster::error::ApiCallError;
 use bytes::BytesMut;
@@ -40,19 +41,25 @@ struct RecordBatchID {
     topic: String,
     partition: i32,
 }
-pub struct ProducerLoop {
+pub struct ProducerLoop<P>
+where
+    P: Partitioner,
+{
     controller: Arc<ClusterController>,
-    producer_options: KafkaProducerOptions,
+    producer_options: KafkaProducerOptions<P>,
     serialization_buffer: BytesMut,
     records_waiting: VecDeque<ProduceRequestMessage>,
     records_in_flight: BTreeMap<RecordBatchID, Vec<(RecordAppend, RecordAppendTx)>>,
 }
 
-impl ProducerLoop {
+impl<P> ProducerLoop<P>
+where
+    P: Partitioner,
+{
     #[instrument(level = "debug", skip_all)]
     pub async fn start(
         controller: Arc<ClusterController>,
-        producer_options: KafkaProducerOptions,
+        producer_options: KafkaProducerOptions<P>,
         receiver: mpsc::UnboundedReceiver<ProduceRequestMessage>,
     ) {
         let serialization_buffer = BytesMut::with_capacity(controller.options.advanced.buffer_size);
@@ -146,7 +153,7 @@ impl ProducerLoop {
     async fn send_messages(
         &mut self,
     ) -> Option<
-        Vec<Pin<Box<impl Future<Output = (i32, Result<ProduceResponse, ApiCallError>)> + use<>>>>,
+        Vec<Pin<Box<impl Future<Output = (i32, Result<ProduceResponse, ApiCallError>)> + use<P>>>>,
     > {
         // TODO: max record batch size - may require changing single record batch to vec (if max msg size > max record batch size)
         // TODO: KIP-192 retry, multiple calls in transit (to same broker) - most retries should be handled by producer client, some (idempotency related) by loop itself
@@ -180,7 +187,7 @@ impl ProducerLoop {
         let default_timestamp = SystemTime::now();
 
         while let Some((record, tx)) = self.records_waiting.pop_front() {
-            if let Err((tx, err)) = process_record(
+            if let Err((tx, err)) = self.process_record(
                 record,
                 &metadata,
                 &mut batches_to_send,
@@ -202,7 +209,7 @@ impl ProducerLoop {
     fn send_produce_api_calls(
         &mut self,
         batches_to_send: &mut RecordBatchesToSend,
-    ) -> Vec<Pin<Box<impl Future<Output = ProduceApiCallResult> + use<>>>> {
+    ) -> Vec<Pin<Box<impl Future<Output = ProduceApiCallResult> + use<P>>>> {
         let mut requests: Vec<(i32, ProduceRequest)> = vec![];
 
         let mut prev_broker_id = None;
@@ -288,98 +295,102 @@ impl ProducerLoop {
             })
             .collect::<Vec<_>>()
     }
-}
+    fn process_record(
+        &self,
+        record: FutureRecord,
+        metadata: &HashMap<String, MetadataResponseTopic>,
+        batches_to_send: &mut RecordBatchesToSend,
+        default_timestamp: SystemTime,
+        tx: RecordAppendTx,
+    ) -> Result<(), (RecordAppendTx, ProduceError)> {
+        let topic_metadata = metadata.get(&record.topic).unwrap();
+        if let Some(error_code) = topic_metadata.error_code {
+            let error = match error_code {
+                ApiError::RequestTimedOut => {
+                    ProduceError::ApiCallError(ApiCallError::TimeoutReached)
+                }
+                ApiError::UnknownTopicOrPartition => {
+                    ProduceError::TopicNotFound(record.topic.clone())
+                }
+                error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
+                    MetadataRequest::get_api_key(),
+                    error_code,
+                    "topics.error_code",
+                )),
+            };
+            return Err((tx, error));
+        }
 
-fn process_record(
-    record: FutureRecord,
-    metadata: &HashMap<String, MetadataResponseTopic>,
-    batches_to_send: &mut RecordBatchesToSend,
-    default_timestamp: SystemTime,
-    tx: RecordAppendTx,
-) -> Result<(), (RecordAppendTx, ProduceError)> {
-    let topic_metadata = metadata.get(&record.topic).unwrap();
-    if let Some(error_code) = topic_metadata.error_code {
-        let error = match error_code {
-            ApiError::RequestTimedOut => ProduceError::ApiCallError(ApiCallError::TimeoutReached),
-            ApiError::UnknownTopicOrPartition => ProduceError::TopicNotFound(record.topic.clone()),
-            error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
-                MetadataRequest::get_api_key(),
-                error_code,
-                "topics.error_code",
-            )),
+        let partition_idx = self
+            .producer_options
+            .partitioner
+            .calculate_partition_index(&record.key, topic_metadata.partitions.len());
+        let Some(partition_metadata) = topic_metadata
+            .partitions
+            .iter()
+            .find(|x| x.partition_index == partition_idx)
+        else {
+            return Err((
+                tx,
+                ProduceError::PartitionNotFound(record.topic.clone(), partition_idx),
+            ));
         };
-        return Err((tx, error));
-    }
 
-    let partition_idx = get_partition_no(&record, topic_metadata);
-    let Some(partition_metadata) = topic_metadata
-        .partitions
-        .iter()
-        .find(|x| x.partition_index == partition_idx)
-    else {
-        return Err((
+        if let Some(error_code) = partition_metadata.error_code {
+            let error = match error_code {
+                ApiError::UnknownTopicOrPartition => {
+                    ProduceError::TopicNotFound(record.topic.clone())
+                }
+                error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
+                    MetadataRequest::get_api_key(),
+                    error_code,
+                    "topics.partitions.error_code",
+                )),
+            };
+            return Err((tx, error));
+        }
+
+        let broker_id = partition_metadata.leader_id;
+        let timestamp = record.timestamp.unwrap_or(default_timestamp);
+        let produce_record = Record {
+            timestamp_delta: VarLong(
+                timestamp
+                    .duration_since(SystemTime::UNIX_EPOCH)
+                    .unwrap()
+                    .as_millis() as i64,
+            ),
+            offset_delta: Default::default(),
+            key: VarIntBytes(record.key),
+            value: VarIntBytes(record.value),
+            headers: VarIntVec(
+                record
+                    .headers
+                    .into_iter()
+                    .map(|(key, value)| Header {
+                        key: VarIntString(key),
+                        value: VarIntBytes(value),
+                    })
+                    .collect(),
+            ),
+        };
+
+        let entry = batches_to_send
+            .entry(RecordBatchID {
+                broker_id,
+                topic: record.topic,
+                partition: partition_idx,
+            })
+            .or_default();
+        entry.0.records.push(produce_record);
+        entry.1.push((
+            RecordAppend {
+                partition: partition_idx,
+                offset: 0,
+                timestamp,
+            },
             tx,
-            ProduceError::PartitionNotFound(record.topic.clone(), partition_idx),
         ));
-    };
 
-    if let Some(error_code) = partition_metadata.error_code {
-        let error = match error_code {
-            ApiError::UnknownTopicOrPartition => ProduceError::TopicNotFound(record.topic.clone()),
-            error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
-                MetadataRequest::get_api_key(),
-                error_code,
-                "topics.partitions.error_code",
-            )),
-        };
-        return Err((tx, error));
+        Ok(())
     }
-
-    let broker_id = partition_metadata.leader_id;
-    let timestamp = record.timestamp.unwrap_or(default_timestamp);
-    let produce_record = Record {
-        timestamp_delta: VarLong(
-            timestamp
-                .duration_since(SystemTime::UNIX_EPOCH)
-                .unwrap()
-                .as_millis() as i64,
-        ),
-        offset_delta: Default::default(),
-        key: VarIntBytes(record.key),
-        value: VarIntBytes(record.value),
-        headers: VarIntVec(
-            record
-                .headers
-                .into_iter()
-                .map(|(key, value)| Header {
-                    key: VarIntString(key),
-                    value: VarIntBytes(value),
-                })
-                .collect(),
-        ),
-    };
-
-    let entry = batches_to_send
-        .entry(RecordBatchID {
-            broker_id,
-            topic: record.topic,
-            partition: partition_idx,
-        })
-        .or_default();
-    entry.0.records.push(produce_record);
-    entry.1.push((
-        RecordAppend {
-            partition: partition_idx,
-            offset: 0,
-            timestamp,
-        },
-        tx,
-    ));
-
-    Ok(())
-}
-
-fn get_partition_no(_record: &FutureRecord, _metadata: &MetadataResponseTopic) -> i32 {
-    // TODO: Partitioner
-    0
 }

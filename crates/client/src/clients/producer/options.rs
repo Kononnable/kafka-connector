@@ -1,9 +1,13 @@
+use crate::clients::producer::partitioner::{Partitioner, crc32::Crc32Partitioner};
 use derivative::Derivative;
 use std::time::Duration;
 
 #[derive(Clone, Debug, Derivative)]
 #[derivative(Default)]
-pub struct KafkaProducerOptions {
+pub struct KafkaProducerOptions<P = Crc32Partitioner>
+where
+    P: Partitioner,
+{
     /// Acknowledgements from brokers needed for a message to be successfully delivered.
     #[derivative(Default(value = "Acks::All"))]
     pub acks: Acks,
@@ -11,6 +15,15 @@ pub struct KafkaProducerOptions {
     /// Maximum time for messages to be acknowledged, before they are treated as failed and retry is triggered.
     #[derivative(Default(value = "None"))]
     pub timeout: Option<Duration>, // TODO: Test
+
+    /// Partitioner that will be used for assigning messages to specific partitions
+    pub partitioner: P,
+}
+
+impl KafkaProducerOptions<Crc32Partitioner> {
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
 #[derive(Clone, Copy, Debug)]

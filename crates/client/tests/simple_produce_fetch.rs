@@ -26,8 +26,17 @@ pub async fn main() {
     assert!(!broker_list.is_empty());
 
     let test_topic = TestTopic::new(cluster.clone(), "simple_produce_fetch", None).await;
+
+    let mut consumer = KafkaConsumer::from_cluster_controller(
+        cluster.clone(),
+        KafkaConsumerOptions {
+            topics: [test_topic.name().to_owned()].into(),
+            ..Default::default()
+        },
+    );
+
     let producer =
-        KafkaProducer::from_cluster_controller(cluster.clone(), KafkaProducerOptions::default());
+        KafkaProducer::from_cluster_controller(cluster.clone(), KafkaProducerOptions::new());
     let key = "Key";
     let value = format!(
         "Time: {}",
@@ -54,13 +63,6 @@ pub async fn main() {
         .await
         .unwrap();
 
-    let mut consumer = KafkaConsumer::from_cluster_controller(
-        cluster,
-        KafkaConsumerOptions {
-            topics: [test_topic.name().to_owned()].into(),
-            ..Default::default()
-        },
-    );
     let record = consumer.recv().await;
     assert_eq!(String::from_utf8_lossy(record.key.as_slice()), key);
     assert_eq!(String::from_utf8_lossy(record.value.as_slice()), value);

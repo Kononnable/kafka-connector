@@ -1,6 +1,7 @@
 use crate::clients::producer::error::ProduceError;
 use crate::clients::producer::future_record::FutureRecord;
 use crate::clients::producer::options::KafkaProducerOptions;
+use crate::clients::producer::partitioner::Partitioner;
 use crate::clients::producer::producer_loop::{ProduceRequestMessage, ProducerLoop};
 use crate::cluster::controller::ClusterController;
 use crate::cluster::error::ClusterControllerCreationError;
@@ -20,17 +21,23 @@ pub struct RecordAppend {
     pub timestamp: SystemTime,
 }
 
-pub struct KafkaProducer {
-    options: KafkaProducerOptions,
+pub struct KafkaProducer<P>
+where
+    P: Partitioner,
+{
+    options: KafkaProducerOptions<P>,
     request_tx: UnboundedSender<ProduceRequestMessage>,
 }
 
-impl KafkaProducer {
+impl<P> KafkaProducer<P>
+where
+    P: Partitioner,
+{
     pub async fn new(
         bootstrap_servers: Vec<impl ToSocketAddrs + Debug>,
         connection_options: ClusterControllerOptions,
-        producer_options: KafkaProducerOptions,
-    ) -> Result<KafkaProducer, ClusterControllerCreationError> {
+        producer_options: KafkaProducerOptions<P>,
+    ) -> Result<KafkaProducer<P>, ClusterControllerCreationError> {
         let controller = ClusterController::new(bootstrap_servers, connection_options).await?;
         Ok(Self::from_cluster_controller(
             Arc::new(controller),
@@ -39,8 +46,8 @@ impl KafkaProducer {
     }
     pub fn from_cluster_controller(
         controller: Arc<ClusterController>,
-        producer_options: KafkaProducerOptions,
-    ) -> KafkaProducer {
+        producer_options: KafkaProducerOptions<P>,
+    ) -> KafkaProducer<P> {
         let (tx, rx) = mpsc::unbounded_channel::<ProduceRequestMessage>();
         tokio::spawn(ProducerLoop::start(
             controller,
@@ -101,7 +108,7 @@ mod tests {
 
         let cluster_weak = Arc::downgrade(&cluster);
 
-        let producer = KafkaProducer::from_cluster_controller(cluster, Default::default());
+        let producer = KafkaProducer::from_cluster_controller(cluster, KafkaProducerOptions::new());
         drop(producer);
 
         // Wait for loop to exit
