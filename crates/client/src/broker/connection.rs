@@ -20,12 +20,12 @@ use tracing::instrument;
 #[non_exhaustive]
 #[derive(Debug, DeriveError)]
 pub(crate) enum BrokerConnectionInitializationError {
-    #[error("Error encountered during network communication. {0}")]
-    NetworkError(std::io::Error),
     #[error("Failed to connect with the broker. {0}")]
     ConnectionError(std::io::Error),
     #[error("Failed to initialize broker connection within specified time")]
     ConnectionTimeoutReached,
+    #[error("Failed to communicate with the broker. {0}")]
+    ProtocolError(#[from] ApiCallError),
 }
 
 // TODO: Proper documentation (whole file)
@@ -200,47 +200,13 @@ pub(super) async fn call_api_inline<R: ApiRequest>(
         .expect("Serialization failure during establishing broker connection");
 
     let request = connection.buffer.split();
-    let correlation_id = connection
-        .send(R::get_api_key(), version, request)
-        .await
-        .map_err(map_error_inline)?;
+    let correlation_id = connection.send(R::get_api_key(), version, request).await?;
     loop {
         if let Some(result) = connection.try_recv().await {
-            let (header, mut response) = result.map_err(map_error_inline)?;
+            let (header, mut response) = result?;
             if header.correlation_id == correlation_id {
                 break Ok(R::Response::deserialize(version, &mut response));
             }
-        }
-    }
-}
-fn map_error_inline(value: ApiCallError) -> BrokerConnectionInitializationError {
-    match value {
-        ApiCallError::BrokerConnectionClosed => {
-            BrokerConnectionInitializationError::NetworkError(std::io::Error::new(
-                std::io::ErrorKind::ConnectionAborted,
-                "Connection closed during initialization",
-            ))
-        }
-        ApiCallError::IoError(e) => BrokerConnectionInitializationError::NetworkError(e),
-        // TODO: check if needed
-        ApiCallError::SerializationError(e) => {
-            panic!("Serialization failure during broker connection. {:?}", e)
-        }
-        // TODO: check if needed
-        ApiCallError::TimeoutReached => {
-            panic!("TODO")
-        }
-        // TODO: check if needed
-        ApiCallError::BrokerNotFound(_) => {
-            unreachable!();
-        }
-        // TODO: check if needed
-        ApiCallError::UnsupportedApi(_) => {
-            unreachable!();
-        }
-        // TODO: check if needed
-        ApiCallError::UnexpectedErrorCode(_, _, _) => {
-            unreachable!();
         }
     }
 }
