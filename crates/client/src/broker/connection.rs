@@ -28,8 +28,6 @@ pub(crate) enum BrokerConnectionInitializationError {
     ProtocolError(#[from] ApiCallError),
 }
 
-// TODO: Proper documentation (whole file)
-
 // TODO: Rename?
 pub(crate) struct BrokerConnection {
     buffer: BytesMut,
@@ -103,7 +101,7 @@ impl BrokerConnection {
         None
     }
 
-    // TODO: docs + mention not cancellation safety
+    // docs - mention not cancellation safety
     pub async fn send(
         &mut self,
         api_key: ApiKey,

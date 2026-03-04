@@ -2,7 +2,6 @@ use std::fmt::Debug;
 
 pub mod crc32;
 
-// TODO: Proper docs
 pub trait Partitioner: Clone + Debug + Send + 'static {
     /// `key` - kafka message key
     ///

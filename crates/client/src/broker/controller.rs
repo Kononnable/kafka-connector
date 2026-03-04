@@ -39,7 +39,6 @@ pub struct BrokerController {
 
 impl BrokerController {
     // TODO: Assumption - until connected supported api versions are the same as on other nodes (copy from initial connection to cluster)
-    // TODO: Document parameters - parent
     #[instrument(level = "debug")]
     pub fn new(
         metadata: BrokerMetadata,

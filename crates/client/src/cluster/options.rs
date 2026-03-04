@@ -1,7 +1,6 @@
 use derivative::Derivative;
 use std::time::Duration;
 
-// TODO: add all options (from 1.0, without ones introduced later in KIPs to be implemented)
 #[derive(Clone, Debug, Derivative)]
 #[derivative(Default)]
 pub struct ClusterControllerOptions {
