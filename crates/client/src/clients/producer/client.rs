@@ -25,7 +25,7 @@ pub struct KafkaProducer<P>
 where
     P: Partitioner,
 {
-    options: KafkaProducerOptions<P>,
+    _options: KafkaProducerOptions<P>,
     request_tx: UnboundedSender<ProduceRequestMessage>,
 }
 
@@ -55,7 +55,7 @@ where
             rx,
         ));
         KafkaProducer {
-            options: producer_options,
+            _options: producer_options,
             request_tx: tx,
         }
     }

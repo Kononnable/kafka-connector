@@ -10,10 +10,10 @@ use tokio::net::ToSocketAddrs;
 use tokio::sync::mpsc;
 
 pub struct KafkaConsumer {
-    cluster: Arc<ClusterController>,
-    options: KafkaConsumerOptions,
+    _cluster: Arc<ClusterController>,
+    _options: KafkaConsumerOptions,
     record_channel: mpsc::Receiver<Record>,
-    command_channel: mpsc::Sender<()>,
+    _command_channel: mpsc::Sender<()>,
 }
 
 impl KafkaConsumer {
@@ -41,10 +41,10 @@ impl KafkaConsumer {
             command_rx,
         ));
         KafkaConsumer {
-            cluster: controller,
-            options: consumer_options,
+            _cluster: controller,
+            _options: consumer_options,
             record_channel: record_rx,
-            command_channel: command_tx,
+            _command_channel: command_tx,
         }
     }
 

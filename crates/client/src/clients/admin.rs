@@ -7,8 +7,8 @@ use tokio::net::ToSocketAddrs;
 
 pub struct KafkaAdminOptions {}
 pub struct KafkaAdmin {
-    cluster: Arc<ClusterController>,
-    options: KafkaAdminOptions,
+    _cluster: Arc<ClusterController>,
+    _options: KafkaAdminOptions,
 }
 
 impl KafkaAdmin {
@@ -28,8 +28,8 @@ impl KafkaAdmin {
         admin_options: KafkaAdminOptions,
     ) -> KafkaAdmin {
         KafkaAdmin {
-            cluster: controller,
-            options: admin_options,
+            _cluster: controller,
+            _options: admin_options,
         }
     }
 }

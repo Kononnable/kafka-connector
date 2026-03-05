@@ -26,8 +26,8 @@ pub struct KafkaConsumerOptions {
     /// Maximum amount of data for single partition fetch response should return.
     ///
     /// Should not be higher than `max_bytes`.
-    /// This limit will not be respected if message batch is larger than the limit.
-    #[derivative(Default(value = "1 * 1024 * 1024"))]
+    /// This limit will not be respected if a single message batch is larger than the limit.
+    #[derivative(Default(value = "1024 * 1024"))]
     pub max_bytes_per_partition: i32,
 
     /// Defines which offset to start consuming from if there is no previous offset stored, or if it is unavailable.
