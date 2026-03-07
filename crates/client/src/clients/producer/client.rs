@@ -73,10 +73,9 @@ where
 }
 #[cfg(test)]
 mod tests {
-    // TODO: Test - topic does not exist
-    // TODO: Test - partition does not exist (partition set directly in FutureRecord)
-    // TODO: Test - multiple records send at once, some fail
-    // TODO: Test - batching
+    // TODO: E2E test - topic does not exist
+    // TODO: E2E test - partition does not exist (partition set directly in FutureRecord)
+    // TODO: E2E test - multiple records send at once, some fail
 
     use super::*;
     use crate::cluster::controller::ClusterController;

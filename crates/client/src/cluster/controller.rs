@@ -99,7 +99,7 @@ impl ClusterController {
             .collect()
     }
 
-    // TODO: test - send to broker which is offline (but within metadata)
+    // TODO: E2E test - send to broker which is offline (but within metadata)
     pub async fn make_api_call<R: ApiRequest, I: Into<Option<i32>>>(
         &self,
         broker_id: I,
@@ -164,7 +164,7 @@ impl ClusterController {
         .map_err(|_| ApiCallError::TimeoutReached)?
     }
 
-    // TODO: Tests
+    // TODO: E2E tests
     pub(crate) async fn get_metadata(
         &self,
         topics: HashSet<String>,
@@ -220,7 +220,7 @@ impl ClusterController {
         Ok(ret_val)
     }
 
-    // TODO: test all cases with e2e tests
+    // TODO: E2E test
     fn sync_broker_metadata(
         &self,
         response: IndexMap<MetadataResponseBrokerKey, MetadataResponseBroker>,

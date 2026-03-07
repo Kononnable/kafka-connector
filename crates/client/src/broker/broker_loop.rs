@@ -8,12 +8,12 @@ use crate::{
 };
 use bytes::BytesMut;
 use indexmap::IndexMap;
-use kafka_connector_protocol::ApiRequest;
 use kafka_connector_protocol::api_versions_request::ApiVersionsRequest;
 use kafka_connector_protocol::api_versions_response::{
     ApiVersionsResponse, ApiVersionsResponseKey,
 };
 use kafka_connector_protocol::response_header::ResponseHeader;
+use kafka_connector_protocol::{ApiRequest, ApiResponse};
 use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -202,12 +202,22 @@ impl BrokerLoop {
 
             let mut connection = BrokerConnection::new(stream, &options);
 
-            let api_versions_response = crate::broker::connection::call_api_inline(
-                &mut connection,
-                ApiVersionsRequest::default(),
-                ApiVersionsRequest::get_min_supported_version(),
-            )
-            .await?;
+            let mut buffer = BytesMut::with_capacity(1024);
+            let version = ApiVersionsRequest::get_min_supported_version();
+            ApiVersionsRequest::default()
+                .serialize(version, &mut buffer)
+                .unwrap();
+            connection
+                .send(ApiVersionsRequest::get_api_key(), version, buffer)
+                .await
+                .map_err(BrokerConnectionInitializationError::ProtocolError)?;
+
+            let api_versions_response = loop {
+                if let Some(result) = connection.try_recv().await {
+                    let (_, mut response) = result?;
+                    break ApiVersionsResponse::deserialize(version, &mut response);
+                }
+            };
 
             Ok((connection, api_versions_response))
         });
@@ -218,7 +228,7 @@ impl BrokerLoop {
                     connection_task
                         .await
                         .map_err(|_| BrokerConnectionInitializationError::ConnectionTimeoutReached)
-                        .unwrap()
+                        .and_then(|inner| inner)
                 })
             },
         });
@@ -282,8 +292,11 @@ impl BrokerLoop {
                 debug!("Connection with kafka broker established.");
             }
             Err(e) => {
+                // TODO: E2E test - broker in metadata but offline/unreacheable (should not panic, keep reconnecting, recconect after broker gets back online)
                 debug!(?e, "Connecting to kafka broker failed.");
-                panic!("Error connecting to kafka broker {e:?}");
+                self.loop_status.set(BrokerLoopStatusInner::Disconnected {
+                    backoff_timeout: Instant::now() + self.options.connection_retry_delay,
+                });
             }
             Ok(Err(e)) => {
                 debug!(?e, "Connecting to kafka broker failed.");

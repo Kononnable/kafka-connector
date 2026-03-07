@@ -1,8 +1,7 @@
 use crate::cluster::{error::ApiCallError, options::ClusterControllerOptions};
 use bytes::BytesMut;
 use kafka_connector_protocol::{
-    ApiKey, ApiRequest, ApiResponse, ApiVersion, request_header::RequestHeader,
-    response_header::ResponseHeader,
+    ApiKey, ApiVersion, request_header::RequestHeader, response_header::ResponseHeader,
 };
 use std::fmt::Debug;
 use thiserror::Error as DeriveError;
@@ -117,30 +116,6 @@ impl BrokerConnection {
     }
 }
 
-/// Used only for initial cluster metadata fetch, outside of that `BrokerController` is solely responsible for direct communication with kafka brokers
-/// If it fails(e.g. timeout) whole connection needs to be reseted
-// TODO: Test(?)
-pub(super) async fn call_api_inline<R: ApiRequest>(
-    connection: &mut BrokerConnection,
-    request: R,
-    version: ApiVersion,
-) -> Result<R::Response, BrokerConnectionInitializationError> {
-    request
-        .serialize(version, &mut connection.buffer)
-        .expect("Serialization failure during establishing broker connection");
-
-    let request = connection.buffer.split();
-    let correlation_id = connection.send(R::get_api_key(), version, request).await?;
-    loop {
-        if let Some(result) = connection.try_recv().await {
-            let (header, mut response) = result?;
-            if header.correlation_id == correlation_id {
-                break Ok(R::Response::deserialize(version, &mut response));
-            }
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -251,6 +226,7 @@ mod tests {
 
     mod send {
         use super::*;
+        use kafka_connector_protocol::ApiRequest;
         use kafka_connector_protocol::api_versions_request::ApiVersionsRequest;
 
         async fn read_message_as_server<T: ApiRequest>(

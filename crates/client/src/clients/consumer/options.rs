@@ -35,7 +35,7 @@ pub struct KafkaConsumerOptions {
     pub offset_reset: OffsetReset,
 }
 
-// TODO: Test
+// TODO: E2E tests
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum OffsetReset {
     /// Start consuming from the oldest available message
