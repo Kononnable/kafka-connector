@@ -99,6 +99,7 @@ impl ClusterController {
             .collect()
     }
 
+    // TODO: test - send to broker which is offline (but within metadata)
     pub async fn make_api_call<R: ApiRequest, I: Into<Option<i32>>>(
         &self,
         broker_id: I,
@@ -106,7 +107,25 @@ impl ClusterController {
         version: Option<ApiVersion>,
     ) -> Result<R::Response, ApiCallError> {
         let broker_id = if let Some(broker_id) = broker_id.into() {
-            broker_id
+            timeout(self.options.request_timeout, async {
+                loop {
+                    if self
+                        .broker_list
+                        .lock()
+                        .unwrap()
+                        .get(&broker_id)
+                        .unwrap()
+                        .0
+                        .get_status()
+                        == BrokerControllerStatus::Connected
+                    {
+                        break broker_id;
+                    }
+                    sleep(Duration::from_millis(10)).await
+                }
+            })
+            .await
+            .map_err(|_| ApiCallError::TimeoutReached)?
         } else {
             self.get_any_connected_broker_id().await?
         };
