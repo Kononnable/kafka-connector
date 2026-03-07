@@ -137,7 +137,7 @@ impl ConsumerLoop {
     async fn sync_metadata(&mut self, refresh: ForceRefresh) -> Result<(), ConsumeError> {
         for (topic, topic_metadata) in self
             .controller
-            .get_topic_metadata(self.consumer_options.topics.clone(), refresh)
+            .get_metadata(self.consumer_options.topics.clone(), refresh)
             .await
             .map_err(MetadataFetchFailed)?
             .into_iter()

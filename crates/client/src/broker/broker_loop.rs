@@ -1,3 +1,4 @@
+use crate::broker::broker_metadata::BrokerMetadata;
 use crate::broker::connection::{BrokerConnection, BrokerConnectionInitializationError};
 use crate::broker::controller::ResponseChannel;
 use crate::cluster::error::ApiCallError;
@@ -84,8 +85,7 @@ enum BrokerLoopStatusInner {
 }
 
 pub struct BrokerLoop {
-    _node_id: i32,
-    address: String,
+    metadata: Arc<Mutex<BrokerMetadata>>,
     options: Arc<ClusterControllerOptions>,
     api_request_receiver: mpsc::UnboundedReceiver<ApiRequestMessage>,
     api_call_queue: VecDeque<QueuedApiCall>,
@@ -97,18 +97,16 @@ pub struct BrokerLoop {
 impl BrokerLoop {
     #[instrument(level = "debug", skip(api_request_receiver, supported_api_versions))]
     pub async fn start(
-        address: String,
+        metadata: Arc<Mutex<BrokerMetadata>>,
         api_request_receiver: mpsc::UnboundedReceiver<ApiRequestMessage>,
         options: Arc<ClusterControllerOptions>,
-        node_id: i32,
         supported_api_versions: Arc<Mutex<IndexMap<i16, ApiVersionsResponseKey>>>,
         status: Arc<Mutex<BrokerControllerStatus>>,
     ) {
         BrokerLoop {
-            address,
+            metadata,
             api_request_receiver,
             options,
-            _node_id: node_id,
             api_call_queue: VecDeque::new(),
             loop_status: BrokerLoopStatus::new(status),
             api_calls_in_transit: HashMap::new(),
@@ -193,7 +191,10 @@ impl BrokerLoop {
     fn handle_connection_backoff_met(&mut self) {
         debug_assert!(self.api_calls_in_transit.is_empty());
         let options = self.options.clone();
-        let address = self.address.clone();
+        let address = {
+            let metadata = self.metadata.lock().unwrap();
+            format!("{}:{}", metadata.host, metadata.port)
+        };
         let connection_task = timeout(options.connection_timeout, async move {
             let stream = TcpStream::connect(address)
                 .await
@@ -297,9 +298,7 @@ impl BrokerLoop {
     async fn send_waiting_requests(&mut self) {
         if let BrokerLoopStatusInner::Connected { connection, .. } = &mut self.loop_status.as_mut()
         {
-            while self.api_calls_in_transit.len()
-                <= self.options.advanced.max_requests_per_connection
-            {
+            while self.api_calls_in_transit.len() <= self.options.advanced.max_in_flight_requests {
                 if let Some(call) = self.api_call_queue.pop_front() {
                     let result = connection
                         .send(

@@ -1,21 +1,15 @@
 use crate::cluster::{error::ApiCallError, options::ClusterControllerOptions};
 use bytes::BytesMut;
-use indexmap::IndexMap;
-use kafka_connector_protocol::api_versions_response::ApiVersionsResponseKey;
 use kafka_connector_protocol::{
-    ApiKey, ApiRequest, ApiResponse, ApiVersion, api_versions_request::ApiVersionsRequest,
-    api_versions_response::ApiVersionsResponseKeyKey, metadata_request::MetadataRequest,
-    metadata_response::MetadataResponse, request_header::RequestHeader,
+    ApiKey, ApiRequest, ApiResponse, ApiVersion, request_header::RequestHeader,
     response_header::ResponseHeader,
 };
 use std::fmt::Debug;
 use thiserror::Error as DeriveError;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
-    net::{TcpStream, ToSocketAddrs},
-    time::timeout,
+    net::TcpStream,
 };
-use tracing::instrument;
 
 #[non_exhaustive]
 #[derive(Debug, DeriveError)]
@@ -121,68 +115,6 @@ impl BrokerConnection {
 
         Ok(self.header.correlation_id)
     }
-}
-
-// TODO: Rename
-// TODO: Test(?)
-#[instrument(level = "debug", skip_all)]
-pub(crate) async fn fetch_initial_broker_list_from_broker(
-    options: &ClusterControllerOptions,
-    address: impl ToSocketAddrs + Debug,
-) -> Result<
-    (
-        BrokerConnection,
-        IndexMap<i16, ApiVersionsResponseKey>,
-        MetadataResponse,
-    ),
-    BrokerConnectionInitializationError,
-> {
-    timeout(options.connection_timeout, async {
-        let stream = TcpStream::connect(address)
-            .await
-            .map_err(BrokerConnectionInitializationError::ConnectionError)?;
-
-        let mut connection = BrokerConnection::new(stream, options);
-
-        let api_versions_response = call_api_inline(
-            &mut connection,
-            ApiVersionsRequest::default(),
-            ApiVersionsRequest::get_min_supported_version(),
-        )
-        .await?;
-        let mut metadata_request_version = ApiVersion(
-            api_versions_response
-                .api_keys
-                .get(&ApiVersionsResponseKeyKey {
-                    index: *MetadataRequest::get_api_key(),
-                })
-                .expect("Server should support metadata requests")
-                .max_version,
-        );
-
-        let supported_api_versions: IndexMap<i16, ApiVersionsResponseKey> = api_versions_response
-            .api_keys
-            .into_iter()
-            .map(|(k, v)| (k.index, v))
-            .collect();
-
-        if metadata_request_version > MetadataRequest::get_max_supported_version() {
-            metadata_request_version = MetadataRequest::get_max_supported_version();
-        }
-        let metadata_request = MetadataRequest {
-            topics: if metadata_request_version == ApiVersion(0) {
-                Some(vec![])
-            } else {
-                None
-            },
-            ..Default::default()
-        };
-        let metadata =
-            call_api_inline(&mut connection, metadata_request, metadata_request_version).await?;
-        Ok((connection, supported_api_versions, metadata))
-    })
-    .await
-    .map_err(|_| BrokerConnectionInitializationError::ConnectionTimeoutReached)?
 }
 
 /// Used only for initial cluster metadata fetch, outside of that `BrokerController` is solely responsible for direct communication with kafka brokers
@@ -319,6 +251,7 @@ mod tests {
 
     mod send {
         use super::*;
+        use kafka_connector_protocol::api_versions_request::ApiVersionsRequest;
 
         async fn read_message_as_server<T: ApiRequest>(
             connection: &mut TcpStream,

@@ -1,5 +1,5 @@
-use crate::common::KAFKA_TEST_BROKER_ADDR_1;
 use crate::common::test_topic::TestTopic;
+use crate::common::{KAFKA_TEST_BROKER_ADDR_1_HOST, KAFKA_TEST_BROKER_ADDR_1_PORT};
 use kafka_connector_client::clients::consumer::client::KafkaConsumer;
 use kafka_connector_client::clients::consumer::options::KafkaConsumerOptions;
 use kafka_connector_client::clients::producer::client::KafkaProducer;
@@ -15,12 +15,14 @@ mod common;
 
 #[test_log::test(tokio::test)]
 pub async fn main() {
-    let cluster = ClusterController::new(
-        vec![KAFKA_TEST_BROKER_ADDR_1],
-        ClusterControllerOptions::default(),
-    )
-    .await
-    .unwrap();
+    let cluster = ClusterController::new(ClusterControllerOptions {
+        bootstrap_servers: vec![(
+            KAFKA_TEST_BROKER_ADDR_1_HOST.to_owned(),
+            KAFKA_TEST_BROKER_ADDR_1_PORT,
+        )],
+        ..Default::default()
+    })
+    .await;
     let cluster = Arc::new(cluster);
     let broker_list = cluster.get_broker_status_list();
     assert!(!broker_list.is_empty());

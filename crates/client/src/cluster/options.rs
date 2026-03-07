@@ -4,9 +4,8 @@ use std::time::Duration;
 #[derive(Clone, Debug, Derivative)]
 #[derivative(Default)]
 pub struct ClusterControllerOptions {
-    /// Number of retries during Cluster Controller creation before ClusterController::new() returns error.
-    #[derivative(Default(value = "5"))]
-    pub initialization_retires: u8,
+    /// Addresses (host, port) used for establishing first connection with kafka cluster
+    pub bootstrap_servers: Vec<(String, u16)>,
 
     /// Delay before retrying after connection failure.
     #[derivative(Default(value = "Duration::from_millis(1_000)"))]
@@ -33,7 +32,7 @@ pub struct ClusterControllerOptions {
 pub struct ClusterControllerAdvancedOptions {
     /// Limit of parallel api requests for single broker connection
     #[derivative(Default(value = "5"))]
-    pub max_requests_per_connection: usize,
+    pub max_in_flight_requests: usize,
 
     /// Initial buffer size for serializing/deserializing kafka api messages.
     #[derivative(Default(value = "2 * 1024 * 1024"))] // 2MB

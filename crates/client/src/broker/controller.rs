@@ -27,42 +27,38 @@ pub(super) struct ApiRequestMessage {
 }
 pub(super) type ResponseChannel = oneshot::Sender<Result<BytesMut, ApiCallError>>;
 
+#[derive(Debug)]
 pub struct BrokerController {
-    metadata: BrokerMetadata,
-    _node_id: i32,
+    // For better tracing
+    _metadata: Arc<Mutex<BrokerMetadata>>,
     request_tx: mpsc::UnboundedSender<ApiRequestMessage>,
     buffer: Mutex<BytesMut>,
     options: Arc<ClusterControllerOptions>,
-    pub(crate) supported_api_versions: Arc<Mutex<IndexMap<i16, ApiVersionsResponseKey>>>, // TODO: pub crate for api(?)
+    supported_api_versions: Arc<Mutex<IndexMap<i16, ApiVersionsResponseKey>>>,
     status: Arc<Mutex<BrokerControllerStatus>>,
 }
 
 impl BrokerController {
-    // TODO: Assumption - until connected supported api versions are the same as on other nodes (copy from initial connection to cluster)
     #[instrument(level = "debug")]
     pub fn new(
-        metadata: BrokerMetadata,
-        node_id: i32,
+        metadata: Arc<Mutex<BrokerMetadata>>,
         options: Arc<ClusterControllerOptions>,
-        parent_supported_apis: IndexMap<i16, ApiVersionsResponseKey>,
     ) -> BrokerController {
         let (request_tx, request_rx) = mpsc::unbounded_channel();
-        let supported_api_versions = Arc::new(Mutex::new(parent_supported_apis));
+        let supported_api_versions = Arc::new(Mutex::new(IndexMap::new()));
         let status = Arc::new(Mutex::new(BrokerControllerStatus::Disconnected));
         tokio::spawn(BrokerLoop::start(
-            format!("{}:{}", metadata.host, metadata.port),
+            metadata.clone(),
             request_rx,
             options.clone(),
-            node_id,
             supported_api_versions.clone(),
             status.clone(),
         ));
         BrokerController {
-            metadata,
+            _metadata: metadata,
             request_tx,
             buffer: Mutex::new(BytesMut::with_capacity(options.advanced.buffer_size)),
             options,
-            _node_id: node_id,
             supported_api_versions,
             status,
         }
@@ -70,7 +66,7 @@ impl BrokerController {
 
     #[instrument(level = "debug", skip_all)]
     pub fn get_status(&self) -> BrokerControllerStatus {
-        self.status.lock().expect("Poisoned lock").clone()
+        self.status.lock().unwrap().clone()
     }
 
     // TODO: Test
@@ -82,7 +78,7 @@ impl BrokerController {
     ) -> impl Future<Output = Result<R::Response, ApiCallError>> + use<R> {
         let (tx, rx) = oneshot::channel();
 
-        let mut buffer = self.buffer.lock().expect("Poisoned lock");
+        let mut buffer = self.buffer.lock().unwrap();
         if buffer.capacity() < self.options.advanced.buffer_grow_size / 2 {
             buffer.reserve(self.options.advanced.buffer_grow_size);
         }
@@ -109,12 +105,8 @@ impl BrokerController {
         }
     }
 
-    pub fn get_metadata(&self) -> &BrokerMetadata {
-        &self.metadata
-    }
-
     pub fn get_max_supported_api_version<R: ApiRequest>(&self) -> Option<ApiVersion> {
-        let supported_apis = self.supported_api_versions.lock().expect("Poisoned lock");
+        let supported_apis = self.supported_api_versions.lock().unwrap();
         let broker_supported_versions = supported_apis.get(&R::get_api_key().0)?;
         let max_supported = i16::min(
             broker_supported_versions.max_version,
@@ -137,15 +129,16 @@ mod tests {
     use std::time::Duration;
     #[test_log::test(tokio::test)]
     async fn loop_closes_after_controller_drops() {
-        let metadata = BrokerMetadata {
+        let metadata = Arc::new(Mutex::new(BrokerMetadata {
+            broker_id: 1,
             host: "".to_string(),
             port: 0,
             rack: None,
-        };
+        }));
         let options = Default::default();
         let options_weak = Arc::downgrade(&options);
 
-        let controller = BrokerController::new(metadata, 1, options, Default::default());
+        let controller = BrokerController::new(metadata, options);
         drop(controller);
 
         // Wait for loop to exit

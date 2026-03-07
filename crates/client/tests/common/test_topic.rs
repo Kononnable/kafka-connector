@@ -36,7 +36,7 @@ impl TestTopic {
         debug!("Creating test topic {name}");
         let resp = cluster
             .make_api_call(
-                1,
+                None,
                 CreateTopicsRequest {
                     topics: vec![options],
                     timeout_ms: TIMEOUT_MS,

@@ -2,11 +2,8 @@ use crate::clients::consumer::consumer_loop::ConsumerLoop;
 use crate::clients::consumer::options::KafkaConsumerOptions;
 use crate::clients::consumer::record::Record;
 use crate::cluster::controller::ClusterController;
-use crate::cluster::error::ClusterControllerCreationError;
 use crate::cluster::options::ClusterControllerOptions;
-use std::fmt::Debug;
 use std::sync::Arc;
-use tokio::net::ToSocketAddrs;
 use tokio::sync::mpsc;
 
 pub struct KafkaConsumer {
@@ -18,15 +15,11 @@ pub struct KafkaConsumer {
 
 impl KafkaConsumer {
     pub async fn new(
-        bootstrap_servers: Vec<impl ToSocketAddrs + Debug>,
         connection_options: ClusterControllerOptions,
         consumer_options: KafkaConsumerOptions,
-    ) -> Result<KafkaConsumer, ClusterControllerCreationError> {
-        let controller = ClusterController::new(bootstrap_servers, connection_options).await?;
-        Ok(Self::from_cluster_controller(
-            Arc::new(controller),
-            consumer_options,
-        ))
+    ) -> KafkaConsumer {
+        let controller = ClusterController::new(connection_options).await;
+        Self::from_cluster_controller(Arc::new(controller), consumer_options)
     }
     pub fn from_cluster_controller(
         controller: Arc<ClusterController>,
@@ -70,16 +63,19 @@ mod tests {
     #[test_log::test(tokio::test)]
     async fn loop_closes_after_client_drops() {
         let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
-        let bootstrap_servers = vec![server.local_addr().unwrap()];
+        let local_addr = server.local_addr().unwrap();
+        let bootstrap_servers = vec![(local_addr.ip().to_string(), local_addr.port())];
 
         tokio::spawn(async move {
             initialize_as_single_broker_cluster(&server).await;
         });
 
         let cluster = Arc::new(
-            ClusterController::new(bootstrap_servers, Default::default())
-                .await
-                .unwrap(),
+            ClusterController::new(ClusterControllerOptions {
+                bootstrap_servers,
+                ..Default::default()
+            })
+            .await,
         );
 
         let cluster_weak = Arc::downgrade(&cluster);

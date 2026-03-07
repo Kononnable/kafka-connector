@@ -171,7 +171,7 @@ where
         // Blocks producer loop if metadata requests is send to a broker - will prevent multiple requests for the same topics running in parallel
         let metadata = self
             .controller
-            .get_topic_metadata(topics, ForceRefresh::No)
+            .get_metadata(topics, ForceRefresh::No)
             .await
             .map_err(|err| {
                 let err = Arc::new(err);

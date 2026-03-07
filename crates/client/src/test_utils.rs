@@ -65,7 +65,7 @@ pub mod cluster_controller {
 
         let mut metadata_response = MetadataResponse::default();
         metadata_response.brokers.insert(
-            MetadataResponseBrokerKey { node_id: 0 },
+            MetadataResponseBrokerKey { node_id: 1 },
             MetadataResponseBroker {
                 port: server.local_addr().unwrap().port() as i32,
                 host: server.local_addr().unwrap().ip().to_string(),

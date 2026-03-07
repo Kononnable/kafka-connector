@@ -1,28 +1,28 @@
 use crate::broker::broker_metadata::BrokerMetadata;
-use crate::{
-    broker::connection::fetch_initial_broker_list_from_broker, cluster::error::ApiCallError,
-};
+use crate::cluster::error::ApiCallError;
 use crate::{
     broker::controller::{BrokerController, BrokerControllerStatus},
-    cluster::{error::ClusterControllerCreationError, options::ClusterControllerOptions},
+    cluster::options::ClusterControllerOptions,
 };
 use indexmap::IndexMap;
-use kafka_connector_protocol::api_versions_response::ApiVersionsResponseKey;
 use kafka_connector_protocol::metadata_request::{MetadataRequest, MetadataRequestTopic};
-use kafka_connector_protocol::metadata_response::MetadataResponseTopic;
-use kafka_connector_protocol::{ApiRequest, ApiVersion, metadata_response::MetadataResponse};
+use kafka_connector_protocol::metadata_response::{
+    MetadataResponseBroker, MetadataResponseBrokerKey, MetadataResponseTopic,
+};
+use kafka_connector_protocol::{ApiRequest, ApiVersion};
 use std::collections::{HashMap, HashSet};
 use std::ops::Add;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use std::{fmt::Debug, sync::Arc};
-use tokio::net::ToSocketAddrs;
 use tokio::time::{sleep, timeout};
 use tracing::{debug, instrument};
 
+pub type BrokerList = Mutex<HashMap<i32, (BrokerController, Arc<Mutex<BrokerMetadata>>)>>;
+
 /// Main entrypoint for communication with Kafka cluster.
 pub struct ClusterController {
-    broker_list: HashMap<i32, BrokerController>,
+    broker_list: BrokerList,
     pub options: Arc<ClusterControllerOptions>,
     topic_metadata_cache: Mutex<HashMap<String, MetadataResponseTopic>>,
     topic_metadata_refresh: Mutex<Instant>,
@@ -38,94 +38,64 @@ impl ClusterController {
     /// Initializes communication with Kafka cluster.
     /// Will wait for successful connection with first available broker from `bootstrap_servers`.
     #[instrument(level = "debug")]
-    pub async fn new(
-        bootstrap_servers: Vec<impl ToSocketAddrs + Debug>,
-        options: ClusterControllerOptions,
-    ) -> Result<ClusterController, ClusterControllerCreationError> {
+    pub async fn new(options: ClusterControllerOptions) -> ClusterController {
+        assert!(
+            !options.bootstrap_servers.is_empty(),
+            "Kafka bootstrap servers not provided"
+        );
         let options = Arc::new(options);
-        let (supported_apis, metadata) =
-            Self::fetch_initial_broker_list(bootstrap_servers, &options).await?;
 
-        let topic_metadata_cache = metadata
-            .topics
-            .into_iter()
-            .filter(|x| x.1.error_code.is_none())
-            .map(|(k, v)| (k.name, v))
-            .collect();
+        let broker_list = Mutex::new(
+            options
+                .bootstrap_servers
+                .iter()
+                .enumerate()
+                .map(|(enumerator, (host, port))| {
+                    let fake_broker_id = -(enumerator as i32) - 1;
+                    let metadata = Arc::new(Mutex::new(BrokerMetadata {
+                        broker_id: fake_broker_id,
+                        host: host.clone(),
+                        port: *port as i32,
+                        rack: None,
+                    }));
+                    (
+                        fake_broker_id,
+                        (
+                            BrokerController::new(metadata.clone(), options.clone()),
+                            metadata,
+                        ),
+                    )
+                })
+                .collect(),
+        );
 
-        let broker_list = metadata
-            .brokers
-            .into_iter()
-            .map(|(k, v)| {
-                (
-                    k.node_id,
-                    BrokerController::new(
-                        v.into(),
-                        k.node_id,
-                        options.clone(),
-                        supported_apis.clone(),
-                    ),
-                )
-            })
-            .collect();
         let topic_metadata_refresh =
             Mutex::new(Instant::now().add(options.advanced.metadata_refresh_interval));
-        Ok(Self {
+
+        let controller = ClusterController {
             broker_list,
             options,
-            topic_metadata_cache: Mutex::new(topic_metadata_cache),
+            topic_metadata_cache: Mutex::new(HashMap::new()),
             topic_metadata_refresh,
-        })
+        };
+
+        // Get metadata for nodes after first broker connects, synchronize broker list
+        while let Err(err) = controller
+            .get_metadata(HashSet::new(), ForceRefresh::Yes)
+            .await
+        {
+            debug!("Cluster initialization error: {err:?}")
+        }
+        controller
     }
 
-    /// Connect to first available bootstrap server and fetch kafka cluster broker list
-    #[instrument(level = "debug", skip_all)]
-    async fn fetch_initial_broker_list(
-        bootstrap_servers: Vec<impl ToSocketAddrs + Debug>,
-        options: &ClusterControllerOptions,
-    ) -> Result<
-        (IndexMap<i16, ApiVersionsResponseKey>, MetadataResponse),
-        ClusterControllerCreationError,
-    > {
-        if bootstrap_servers.is_empty() {
-            return Err(ClusterControllerCreationError::NoClusterAddressFound);
-        }
-        for i in 0..=options.initialization_retires {
-            if i > 0 {
-                debug!(
-                    "No connection established, retry in {} ms",
-                    options.connection_retry_delay.as_millis()
-                );
-                tokio::time::sleep(options.connection_retry_delay).await;
-            }
-            debug!(
-                "Connecting to kafka cluster attempt {} of {}",
-                i + 1,
-                options.initialization_retires + 1
-            );
-            for address in &bootstrap_servers {
-                debug!(?address, "Connecting to kafka broker");
-                match fetch_initial_broker_list_from_broker(options, address).await {
-                    Ok(resp) => {
-                        return Ok((resp.1, resp.2));
-                    }
-                    Err(err) => {
-                        debug!(?address, ?err, "Failed to connect to broker");
-                        continue;
-                    }
-                }
-            }
-        }
-        Err(ClusterControllerCreationError::OutOfConnectionAttempts(
-            options.initialization_retires as u16 + 1,
-        ))
-    }
-
-    /// Returns metadata for known brokers with their statuses
-    pub fn get_broker_status_list(&self) -> Vec<(i32, (BrokerMetadata, BrokerControllerStatus))> {
+    /// Returns connection status for known brokers
+    pub fn get_broker_status_list(&self) -> Vec<(i32, BrokerControllerStatus)> {
         self.broker_list
+            .lock()
+            .unwrap()
             .iter()
-            .map(|(k, v)| (*k, (v.get_metadata().to_owned(), v.get_status())))
+            .map(|(broker_id, (controller, _))| (*broker_id, controller.get_status()))
             .collect()
     }
 
@@ -141,16 +111,20 @@ impl ClusterController {
             self.get_any_connected_broker_id().await?
         };
 
-        let broker = self
-            .broker_list
-            .get(&broker_id)
-            .ok_or(ApiCallError::BrokerNotFound(broker_id))?;
+        let api_call = {
+            let broker_list = self.broker_list.lock().unwrap();
+            let (broker, _) = broker_list
+                .get(&broker_id)
+                .ok_or(ApiCallError::BrokerNotFound(broker_id))?;
 
-        let version = version
-            .or_else(|| broker.get_max_supported_api_version::<R>())
-            .ok_or(ApiCallError::UnsupportedApi(R::get_api_key()))?;
+            let version = version
+                .or_else(|| broker.get_max_supported_api_version::<R>())
+                .ok_or(ApiCallError::UnsupportedApi(R::get_api_key()))?;
 
-        broker.make_api_call(version, request).await
+            broker.make_api_call(version, request)
+        };
+
+        api_call.await
     }
 
     async fn get_any_connected_broker_id(&self) -> Result<i32, ApiCallError> {
@@ -159,7 +133,7 @@ impl ClusterController {
                 let broker_id = self
                     .get_broker_status_list()
                     .into_iter()
-                    .find(|(_id, (_metadata, status))| *status == BrokerControllerStatus::Connected)
+                    .find(|(_id, status)| *status == BrokerControllerStatus::Connected)
                     .map(|(id, _)| id);
                 if let Some(broker_id) = broker_id {
                     return Ok::<i32, ApiCallError>(broker_id);
@@ -172,15 +146,11 @@ impl ClusterController {
     }
 
     // TODO: Tests
-    pub(crate) async fn get_topic_metadata(
+    pub(crate) async fn get_metadata(
         &self,
         topics: HashSet<String>,
         force_refresh: ForceRefresh,
     ) -> Result<HashMap<String, MetadataResponseTopic>, ApiCallError> {
-        if topics.is_empty() {
-            return Ok(HashMap::new());
-        }
-
         self.clear_metadata_cache_if_timeout_reached();
 
         if force_refresh == ForceRefresh::No {
@@ -189,9 +159,19 @@ impl ClusterController {
             }
         }
 
+        let broker = self.get_any_connected_broker_id().await?;
+        let api_version = self
+            .broker_list
+            .lock()
+            .unwrap()
+            .get(&broker)
+            .unwrap()
+            .0
+            .get_max_supported_api_version::<MetadataRequest>()
+            .unwrap();
         let response = self
             .make_api_call(
-                None,
+                broker,
                 MetadataRequest {
                     topics: Some(
                         topics
@@ -199,50 +179,105 @@ impl ClusterController {
                             .map(|name| MetadataRequestTopic { name })
                             .collect(),
                     ),
-                    allow_auto_topic_creation: false,
+                    allow_auto_topic_creation: api_version.0 < 4,
                 },
-                None,
+                Some(api_version),
             )
             .await?;
 
-        let mut cache = self.topic_metadata_cache.lock().unwrap_or_else(|poison| {
-            self.topic_metadata_cache.clear_poison();
-            let mut cache = poison.into_inner();
-            cache.clear();
-            cache
-        });
-
-        let mut ret_val = HashMap::new();
-        for (key, metadata) in response.topics {
-            if metadata.error_code.is_none() {
-                cache.insert(key.name.clone(), metadata.clone());
+        let ret_val = {
+            let mut topic_cache = self.topic_metadata_cache.lock().unwrap();
+            let mut ret_val = HashMap::new();
+            for (key, metadata) in response.topics {
+                if metadata.error_code.is_none() {
+                    topic_cache.insert(key.name.clone(), metadata.clone());
+                }
+                ret_val.insert(key.name, metadata);
             }
-            ret_val.insert(key.name, metadata);
-        }
+            ret_val
+        };
 
+        self.sync_broker_metadata(response.brokers);
         Ok(ret_val)
+    }
 
-        // TODO: node metadata - act if:
-        // new broker added
-        // broker removed
-        // broker hostname/port/rack changed
-        // + tests (?)
-        // use same method in controller creation
+    // TODO: test all cases with e2e tests
+    fn sync_broker_metadata(
+        &self,
+        response: IndexMap<MetadataResponseBrokerKey, MetadataResponseBroker>,
+    ) {
+        let mut broker_list = self.broker_list.lock().unwrap();
+        let response_keys = response
+            .iter()
+            .map(|(&MetadataResponseBrokerKey { node_id }, _)| node_id)
+            .collect::<Vec<_>>();
+        for (MetadataResponseBrokerKey { node_id }, MetadataResponseBroker { host, port, rack }) in
+            response
+        {
+            if let Some((_, stored_metadata)) = broker_list.get_mut(&node_id) {
+                let mut stored_metadata = stored_metadata.lock().unwrap();
+                if stored_metadata.host == host && stored_metadata.port == port {
+                    if stored_metadata.rack != rack {
+                        stored_metadata.rack = rack;
+                    }
+                } else {
+                    debug!(
+                        ?node_id,
+                        "Broker address change detected - migration to new address will happen on next network error"
+                    );
+                    *stored_metadata = BrokerMetadata {
+                        broker_id: node_id,
+                        host,
+                        port,
+                        rack,
+                    };
+                }
+            } else if let Some(fake_broker_id) = broker_list
+                .iter()
+                .find(|&(&id, (_, metadata))| {
+                    let metadata = metadata.lock().unwrap();
+                    id < 0 && metadata.host == host && metadata.port == port
+                })
+                .map(|(&fake_broker_id, _)| fake_broker_id)
+            {
+                debug!(
+                    "Connected to Kafka cluster. Assigning broker_id: {fake_broker_id} => {node_id}, rack: {rack:?}",
+                );
+                let (broker, metadata) = broker_list.remove(&fake_broker_id).unwrap();
+                {
+                    let mut metadata = metadata.lock().unwrap();
+                    metadata.rack = rack;
+                }
+                broker_list.insert(node_id, (broker, metadata));
+            } else {
+                let metadata = Arc::new(Mutex::new(BrokerMetadata {
+                    broker_id: node_id,
+                    host,
+                    port,
+                    rack,
+                }));
+                let broker = BrokerController::new(metadata.clone(), self.options.clone());
+                broker_list.insert(node_id, (broker, metadata));
+            }
+        }
+        let removed_brokers = broker_list
+            .keys()
+            .filter(|&x| !response_keys.contains(x))
+            .cloned()
+            .collect::<Vec<_>>();
+        for broker_id in removed_brokers {
+            broker_list.remove(&broker_id);
+        }
     }
 
     fn fetch_metadata_from_cache(
         &self,
         topic_names: &HashSet<String>,
     ) -> Option<HashMap<String, MetadataResponseTopic>> {
-        let cache = self.topic_metadata_cache.lock().unwrap_or_else(|poison| {
-            self.topic_metadata_cache.clear_poison();
-            let mut cache = poison.into_inner();
-            cache.clear();
-            cache
-        });
+        let topic_cache = self.topic_metadata_cache.lock().unwrap();
         let mut results = HashMap::new();
         for name in topic_names {
-            if let Some(metadata) = cache.get(name) {
+            if let Some(metadata) = topic_cache.get(name) {
                 results.insert(name.to_string(), metadata.to_owned());
             } else {
                 return None;
@@ -252,27 +287,12 @@ impl ClusterController {
     }
 
     fn clear_metadata_cache_if_timeout_reached(&self) {
-        let mut refresh_timeout = self.topic_metadata_refresh.lock().unwrap_or_else(|poison| {
-            self.topic_metadata_refresh.clear_poison();
-            let mut lock = poison.into_inner();
-            *lock = Instant::now();
-            lock
-        });
+        let mut refresh_timeout = self.topic_metadata_refresh.lock().unwrap();
         if *refresh_timeout < Instant::now() {
             *refresh_timeout = Instant::now() + self.options.advanced.metadata_refresh_interval;
-            self.topic_metadata_cache
-                .lock()
-                .unwrap_or_else(|poison| {
-                    self.topic_metadata_cache.clear_poison();
-                    poison.into_inner()
-                })
-                .clear()
+            self.topic_metadata_cache.lock().unwrap().clear()
         }
         drop(refresh_timeout);
-    }
-
-    fn update_broker_metadata() {
-        todo!()
     }
 }
 
@@ -283,257 +303,30 @@ mod tests {
     mod creating_and_initializing {
         use super::*;
         use crate::test_utils::cluster_controller::initialize_as_single_broker_cluster;
-        use bytes::BytesMut;
-        use std::{ops::Sub, time::Duration};
-        use tokio::{
-            io::{AsyncReadExt, AsyncWriteExt},
-            net::TcpListener,
-            time::Instant,
-        };
+        use tokio::net::TcpListener;
 
         #[test_log::test(tokio::test)]
+        #[should_panic = "Kafka bootstrap servers not provided"]
         async fn errors_if_bootstrap_servers_is_empty() {
-            let timeout_start = Instant::now();
-            let result = ClusterController::new(Vec::<String>::new(), Default::default()).await;
-            let connection_delay = Instant::now().sub(timeout_start);
-            debug!(?connection_delay);
-            assert!(connection_delay.as_millis() < 5);
-
-            assert!(matches!(
-                result,
-                Err(ClusterControllerCreationError::NoClusterAddressFound)
-            ));
+            ClusterController::new(Default::default()).await;
         }
         #[test_log::test(tokio::test)]
         async fn connects_and_initializes_broker_clients_successfully() {
             let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
-            let bootstrap_servers = vec![server.local_addr().unwrap()];
+            let local_addr = server.local_addr().unwrap();
+            let bootstrap_servers = vec![(local_addr.ip().to_string(), local_addr.port())];
 
             tokio::spawn(async move {
                 initialize_as_single_broker_cluster(&server).await;
             });
 
-            let result = ClusterController::new(bootstrap_servers, Default::default()).await;
-            assert!(result.is_ok());
-            assert_eq!(result.unwrap().get_broker_status_list().len(), 1);
-        }
-
-        #[test_log::test(tokio::test)]
-        async fn connects_first_available_broker() {
-            let first_server = TcpListener::bind("127.0.0.1:0").await.unwrap();
-            let second_server = TcpListener::bind("127.0.0.2:0").await.unwrap();
-            let bootstrap_servers = vec![
-                first_server.local_addr().unwrap(),
-                second_server.local_addr().unwrap(),
-            ];
-
-            tokio::spawn(async move {
-                // Accept connection and reset it right away
-                first_server.accept().await.unwrap();
-
-                initialize_as_single_broker_cluster(&second_server).await;
-            });
-
-            let result = ClusterController::new(
-                bootstrap_servers.clone(),
-                ClusterControllerOptions {
-                    connection_timeout: Duration::from_millis(1000),
-                    initialization_retires: 0,
-                    ..Default::default()
-                },
-            )
-            .await;
-            assert!(result.is_ok());
-            let broker_list = result.unwrap().get_broker_status_list();
-            assert_eq!(
-                format!("{}:{}", broker_list[0].1.0.host, broker_list[0].1.0.port),
-                bootstrap_servers[1].to_string()
-            );
-        }
-
-        #[test_log::test(tokio::test(start_paused = true))]
-        async fn retries_with_specified_amount_of_times_and_delay() {
-            let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
-            let bootstrap_servers = vec![server.local_addr().unwrap()];
-
-            tokio::spawn(async move {
-                let attempt_1 = server.accept().await;
-                drop(attempt_1);
-
-                let timeout_start = Instant::now();
-                let attempt_2 = server.accept().await;
-                let connection_delay = Instant::now().sub(timeout_start);
-                assert!(9_999 < connection_delay.as_millis());
-                assert!(connection_delay.as_millis() < 10_005);
-                drop(attempt_2);
-
-                let timeout_start = Instant::now();
-                let attempt_3 = server.accept().await;
-                let connection_delay = Instant::now().sub(timeout_start);
-                assert!(9_999 < connection_delay.as_millis());
-                assert!(connection_delay.as_millis() < 10_005);
-                drop(attempt_3);
-            });
-
-            let timeout_start = Instant::now();
-            let result = ClusterController::new(
+            let cluster = ClusterController::new(ClusterControllerOptions {
                 bootstrap_servers,
-                ClusterControllerOptions {
-                    connection_retry_delay: Duration::from_millis(10_000),
-                    initialization_retires: 2,
-                    connection_timeout: Duration::from_millis(20),
-                    ..Default::default()
-                },
-            )
+                ..Default::default()
+            })
             .await;
 
-            let connection_delay = Instant::now().sub(timeout_start);
-            debug!(?connection_delay);
-            assert!(19_999 < connection_delay.as_millis());
-            assert!(connection_delay.as_millis() < 20_005);
-
-            assert!(result.is_err());
-            assert!(matches!(
-                result,
-                Err(ClusterControllerCreationError::OutOfConnectionAttempts(3))
-            ));
-        }
-
-        // Fails on windows with default settings - connecting to 255.255.255.0 results in NetworkUnreachable error
-        #[cfg(not(target_family = "windows"))]
-        #[test_log::test(tokio::test(start_paused = true))]
-        async fn handles_timeout_during_connect_operation() {
-            let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
-            let mut bootstrap_servers = vec![server.local_addr().unwrap()];
-            //255.255.255.0 is a class E address, reserved for research, so it can act as a black hole
-            bootstrap_servers[0].set_ip("255.255.255.0".parse().unwrap());
-
-            let timeout_start = Instant::now();
-            let result = ClusterController::new(
-                bootstrap_servers,
-                ClusterControllerOptions {
-                    initialization_retires: 0,
-                    connection_timeout: Duration::from_millis(29_000),
-                    ..Default::default()
-                },
-            )
-            .await;
-
-            let connection_delay = Instant::now().sub(timeout_start);
-            debug!(?connection_delay);
-            assert!(28_999 < connection_delay.as_millis());
-            assert!(connection_delay.as_millis() < 29_005);
-
-            assert!(result.is_err());
-            assert!(matches!(
-                result,
-                Err(ClusterControllerCreationError::OutOfConnectionAttempts(1))
-            ));
-        }
-
-        // Fails on Windows with default settings - connections on 127.0.0.2 are rejected
-        #[cfg(not(target_family = "windows"))]
-        #[test_log::test(tokio::test)]
-        async fn handles_rejection_of_tcp_connection() {
-            let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
-            let mut bootstrap_servers = vec![server.local_addr().unwrap()];
-            // 127.0.0.2 is a loopback address
-            // we're only listening on different loopback address, so connection will be refused
-            bootstrap_servers[0].set_ip("127.0.0.2".parse().unwrap());
-
-            let timeout_start = Instant::now();
-            let result = ClusterController::new(
-                bootstrap_servers,
-                ClusterControllerOptions {
-                    initialization_retires: 0,
-                    ..Default::default()
-                },
-            )
-            .await;
-
-            let connection_delay = Instant::now().sub(timeout_start);
-            debug!(?connection_delay);
-            assert!(connection_delay.as_millis() < 5);
-
-            assert!(result.is_err());
-            assert!(matches!(
-                result,
-                Err(ClusterControllerCreationError::OutOfConnectionAttempts(1))
-            ));
-        }
-
-        #[test_log::test(tokio::test(start_paused = true))]
-        async fn handles_timeout_during_metadata_initialization() {
-            let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
-            let bootstrap_servers = vec![server.local_addr().unwrap()];
-
-            let timeout_start = Instant::now();
-            let result = ClusterController::new(
-                bootstrap_servers,
-                ClusterControllerOptions {
-                    initialization_retires: 0,
-                    connection_timeout: Duration::from_millis(29_000),
-                    ..Default::default()
-                },
-            )
-            .await;
-
-            let connection_delay = Instant::now().sub(timeout_start);
-            debug!(?connection_delay);
-            assert!(28_999 < connection_delay.as_millis());
-            assert!(connection_delay.as_millis() < 29_005);
-
-            assert!(result.is_err());
-            assert!(matches!(
-                result,
-                Err(ClusterControllerCreationError::OutOfConnectionAttempts(1))
-            ));
-        }
-
-        #[test_log::test(tokio::test)]
-        async fn errors_if_connection_closed_during_communication() {
-            let server = TcpListener::bind("127.0.0.1:0").await.unwrap();
-            let bootstrap_servers = vec![server.local_addr().unwrap()];
-
-            tokio::spawn(async move {
-                let (mut connection, _) = server.accept().await.unwrap();
-
-                let mut buffer = BytesMut::with_capacity(1_024);
-
-                let mut buffer_size = [0; 4];
-                connection.read_exact(&mut buffer_size).await.unwrap();
-                let message_size = i32::from_be_bytes(buffer_size);
-                buffer.reserve(message_size as usize);
-                unsafe {
-                    buffer.set_len(message_size as usize);
-                }
-                connection.read_exact(&mut buffer).await.unwrap();
-
-                let len = 4i32; // Indicate more data is coming
-                connection.write_all(&len.to_be_bytes()).await.unwrap();
-
-                drop(server);
-            });
-
-            let timeout_start = Instant::now();
-            let result = ClusterController::new(
-                bootstrap_servers,
-                ClusterControllerOptions {
-                    initialization_retires: 0,
-                    ..Default::default()
-                },
-            )
-            .await;
-
-            let connection_delay = Instant::now().sub(timeout_start);
-            debug!(?connection_delay);
-            assert!(connection_delay.as_millis() < 5);
-
-            assert!(result.is_err());
-            assert!(matches!(
-                result,
-                Err(ClusterControllerCreationError::OutOfConnectionAttempts(1))
-            ));
+            assert_eq!(cluster.get_broker_status_list().len(), 1);
         }
     }
 }
