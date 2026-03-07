@@ -172,11 +172,10 @@ impl ClusterController {
     ) -> Result<HashMap<String, MetadataResponseTopic>, ApiCallError> {
         self.clear_metadata_cache_if_timeout_reached();
 
-        if force_refresh == ForceRefresh::No {
-            if let Some(value) = self.fetch_metadata_from_cache(&topics) {
+        if force_refresh == ForceRefresh::No
+            && let Some(value) = self.fetch_metadata_from_cache(&topics) {
                 return Ok(value);
             }
-        }
 
         let broker = self.get_any_connected_broker_id().await?;
         let api_version = self

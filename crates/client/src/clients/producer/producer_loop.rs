@@ -87,11 +87,10 @@ where
                     match signal {
                         Some(request) => {
                             self.records_waiting.push_back(request);
-                            if self.records_in_flight.is_empty() {
-                                if let Some(futures) = self.send_messages().await {
+                            if self.records_in_flight.is_empty()
+                                && let Some(futures) = self.send_messages().await {
                                     send_message_task = Box::pin(Self::conditional_task(Some(select_all(futures))));
                                 }
-                            }
                         }
                         None => { break;}
                     }
