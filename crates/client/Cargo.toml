@@ -20,5 +20,6 @@ tokio = { version = "1.36.0", features = ["net", "io-util", "rt", "sync", "time"
 tracing = { version = "0.1.40", features = ["log"] }
 
 [dev-dependencies]
+testcontainers = "0.27.1"
 test-log = { version = "0.2.17", default-features = false, features = ["trace", "color"] }
 tokio = { version = "1.36.0", features = ["test-util"] }

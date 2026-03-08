@@ -1,3 +1,4 @@
+use crate::common::cluster::ThreeNodeCluster;
 use crate::common::test_topic::TestTopic;
 use crate::common::{KAFKA_TEST_BROKER_ADDR_1_HOST, KAFKA_TEST_BROKER_ADDR_1_PORT};
 use kafka_connector_client::clients::consumer::client::KafkaConsumer;
@@ -15,6 +16,7 @@ mod common;
 
 #[test_log::test(tokio::test)]
 pub async fn main() {
+    let _kafka_cluster = ThreeNodeCluster::new().await;
     let cluster = ClusterController::new(ClusterControllerOptions {
         bootstrap_servers: vec![(
             KAFKA_TEST_BROKER_ADDR_1_HOST.to_owned(),

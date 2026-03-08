@@ -228,7 +228,7 @@ impl BrokerLoop {
                     connection_task
                         .await
                         .map_err(|_| BrokerConnectionInitializationError::ConnectionTimeoutReached)
-                        .and_then(|inner| inner)
+                        .flatten()
                 })
             },
         });

@@ -19,3 +19,5 @@ pub(crate) mod test_utils;
 // readme
 // examples
 // check tracing - if it is where needed, if it doesn't log that should not be logged (e.g. channels, mutexes are ok if underneath data is valuable)
+// define and document MSRV and minimum Kafka version (KIP-896; changes in protocol crate to skip generating unused fields/options where fields are required etc.)
+// dependencies - check for unused, use-default-features, set "wide" version requirements (only major version if possible)
