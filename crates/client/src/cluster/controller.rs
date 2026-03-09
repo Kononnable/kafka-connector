@@ -87,6 +87,8 @@ impl ClusterController {
             debug!("Cluster initialization error: {err:?}")
         }
         controller
+        // TODO E2E tests
+        // bootstrap with single broker, connects to multiple
     }
 
     /// Returns connection status for known brokers
@@ -165,6 +167,7 @@ impl ClusterController {
     }
 
     // TODO: E2E tests
+    // cache - get_metadata(does not exist), add topic, get metadata(exists), delete topic, get metadata (exists), wait refresh interval, get metadata (does not exist)
     pub(crate) async fn get_metadata(
         &self,
         topics: HashSet<String>,
@@ -173,9 +176,10 @@ impl ClusterController {
         self.clear_metadata_cache_if_timeout_reached();
 
         if force_refresh == ForceRefresh::No
-            && let Some(value) = self.fetch_metadata_from_cache(&topics) {
-                return Ok(value);
-            }
+            && let Some(value) = self.fetch_metadata_from_cache(&topics)
+        {
+            return Ok(value);
+        }
 
         let broker = self.get_any_connected_broker_id().await?;
         let api_version = self
@@ -219,7 +223,7 @@ impl ClusterController {
         Ok(ret_val)
     }
 
-    // TODO: E2E test
+    // TODO: UT test
     fn sync_broker_metadata(
         &self,
         response: IndexMap<MetadataResponseBrokerKey, MetadataResponseBroker>,

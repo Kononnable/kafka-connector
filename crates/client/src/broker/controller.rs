@@ -69,7 +69,6 @@ impl BrokerController {
         self.status.lock().unwrap().clone()
     }
 
-    // TODO: Test
     #[instrument(level = "debug", skip_all)]
     pub fn make_api_call<R: ApiRequest>(
         &self,

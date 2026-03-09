@@ -14,7 +14,7 @@ where
 
     /// Maximum time for messages to be acknowledged, before they are treated as failed and retry is triggered.
     #[derivative(Default(value = "None"))]
-    pub timeout: Option<Duration>, // TODO: Test
+    pub timeout: Option<Duration>,
 
     /// Partitioner that will be used for assigning messages to specific partitions
     pub partitioner: P,

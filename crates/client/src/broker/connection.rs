@@ -4,6 +4,7 @@ use kafka_connector_protocol::{
     ApiKey, ApiVersion, request_header::RequestHeader, response_header::ResponseHeader,
 };
 use std::fmt::Debug;
+use std::io::ErrorKind;
 use thiserror::Error as DeriveError;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
@@ -57,16 +58,21 @@ impl BrokerConnection {
             self.buffer.reserve(self.buffer_grow_size);
         }
 
-        let read_bytes_len = self.stream.read_buf(&mut self.buffer).await;
-        match read_bytes_len {
-            Ok(read_bytes_len) => {
-                if read_bytes_len == 0 {
-                    return Some(Err(ApiCallError::BrokerConnectionClosed));
+        loop {
+            let read_bytes_len = self.stream.read_buf(&mut self.buffer).await;
+            match read_bytes_len {
+                Ok(read_bytes_len) => {
+                    if read_bytes_len == 0 {
+                        return Some(Err(ApiCallError::BrokerConnectionClosed));
+                    }
+                    break;
                 }
-            }
-            Err(err) => {
-                // TODO: if ErrorKind::Interrupted - retry (or recursive call?)
-                return Some(Err(ApiCallError::IoError(err)));
+                Err(err) => {
+                    if err.kind() == ErrorKind::Interrupted {
+                        continue;
+                    }
+                    return Some(Err(ApiCallError::IoError(err)));
+                }
             }
         }
 

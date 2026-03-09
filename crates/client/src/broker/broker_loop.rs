@@ -32,17 +32,7 @@ struct BrokerLoopStatus {
     inner: BrokerLoopStatusInner,
     status: Arc<Mutex<BrokerControllerStatus>>,
 }
-impl AsRef<BrokerLoopStatusInner> for BrokerLoopStatus {
-    fn as_ref(&self) -> &BrokerLoopStatusInner {
-        &self.inner
-    }
-}
-impl AsMut<BrokerLoopStatusInner> for BrokerLoopStatus {
-    fn as_mut(&mut self) -> &mut BrokerLoopStatusInner {
-        // TODO: Using writing to dereferenced as_mut may invalidate internal state (synchronization with status field)
-        &mut self.inner
-    }
-}
+
 impl BrokerLoopStatus {
     pub fn new(status: Arc<Mutex<BrokerControllerStatus>>) -> BrokerLoopStatus {
         let mut status = BrokerLoopStatus {
@@ -144,7 +134,7 @@ impl BrokerLoop {
                     }
                 },
                 (reconnect, connection_establish_task, received_data) = async {
-                    match &mut self.loop_status.as_mut() {
+                    match &mut self.loop_status.inner {
                         BrokerLoopStatusInner::Disconnected { backoff_timeout} => {
                             sleep_until(*backoff_timeout).await;
                             (Some(()), None, None)
@@ -309,8 +299,7 @@ impl BrokerLoop {
 
     #[instrument(level = "debug", skip(self))]
     async fn send_waiting_requests(&mut self) {
-        if let BrokerLoopStatusInner::Connected { connection, .. } = &mut self.loop_status.as_mut()
-        {
+        if let BrokerLoopStatusInner::Connected { connection, .. } = &mut self.loop_status.inner {
             while self.api_calls_in_transit.len() <= self.options.advanced.max_in_flight_requests {
                 if let Some(call) = self.api_call_queue.pop_front() {
                     let result = connection
