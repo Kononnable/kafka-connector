@@ -2,7 +2,6 @@ use kafka_connector_client::cluster::controller::ClusterController;
 use kafka_connector_protocol::create_topics_request::{CreatableTopic, CreateTopicsRequest};
 use kafka_connector_protocol::delete_topics_request::DeleteTopicsRequest;
 use std::sync::Arc;
-use std::time::{SystemTime, UNIX_EPOCH};
 use tracing::debug;
 
 const TIMEOUT_MS: i32 = 1_000;
@@ -14,17 +13,10 @@ pub struct TestTopic {
 impl TestTopic {
     pub async fn new<S: Into<String>>(
         cluster: Arc<ClusterController>,
-        base_name: S,
+        name: S,
         options: Option<CreatableTopic>,
     ) -> TestTopic {
-        let name = format!(
-            "{}_{}",
-            base_name.into(),
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs()
-        );
+        let name = name.into();
         let mut options = options.unwrap_or(CreatableTopic {
             name: name.clone(),
             num_partitions: 1,

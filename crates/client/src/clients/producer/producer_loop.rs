@@ -320,10 +320,11 @@ where
             return Err((tx, error));
         }
 
-        let partition_idx = self
-            .producer_options
-            .partitioner
-            .calculate_partition_index(&record.key, topic_metadata.partitions.len());
+        let partition_idx = record.partition.unwrap_or_else(|| {
+            self.producer_options
+                .partitioner
+                .calculate_partition_index(&record.key, topic_metadata.partitions.len())
+        });
         let Some(partition_metadata) = topic_metadata
             .partitions
             .iter()

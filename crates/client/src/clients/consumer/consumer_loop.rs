@@ -71,9 +71,6 @@ impl ConsumerLoop {
         debug!("Consumer loop is closing");
     }
 
-    // TODO: E2E tests
-    // topic does not exist, subscribe to, try to consume, create topic, see if it started consumption
-    // one topic exist, one does not, start consumption, create second topic while consumer is working
     #[instrument(level = "debug", skip(self))]
     async fn main_loop(mut self) {
         let mut requests_in_flight = None;
@@ -393,6 +390,7 @@ impl ConsumerLoop {
                     offset,
                 };
 
+                // TODO: change mechanism so it does not hang here if buffer is full
                 let _ = self.record_sender.send(record).await;
             }
         }

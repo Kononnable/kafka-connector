@@ -282,7 +282,6 @@ impl BrokerLoop {
                 debug!("Connection with kafka broker established.");
             }
             Err(e) => {
-                // TODO: E2E test - broker in metadata but offline/unreacheable (should not panic, keep reconnecting, recconect after broker gets back online)
                 debug!(?e, "Connecting to kafka broker failed.");
                 self.loop_status.set(BrokerLoopStatusInner::Disconnected {
                     backoff_timeout: Instant::now() + self.options.connection_retry_delay,

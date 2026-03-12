@@ -16,7 +16,7 @@ pub struct ClusterControllerOptions {
     pub connection_timeout: Duration,
 
     /// Timeout for kafka api calls
-    #[derivative(Default(value = "Duration::from_secs(30_000)"))]
+    #[derivative(Default(value = "Duration::from_millis(30_000)"))]
     pub request_timeout: Duration,
 
     /// Client identifier

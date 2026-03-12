@@ -73,10 +73,6 @@ where
 }
 #[cfg(test)]
 mod tests {
-    // TODO: E2E test - topic does not exist
-    // TODO: E2E test - partition does not exist (partition set directly in FutureRecord)
-    // TODO: E2E test - multiple records send at once, some fail
-
     use super::*;
     use crate::cluster::controller::ClusterController;
     use crate::test_utils::cluster_controller::initialize_as_single_broker_cluster;

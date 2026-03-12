@@ -12,7 +12,7 @@ use std::{
 use tokio::sync::{mpsc, oneshot};
 use tracing::instrument;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum BrokerControllerStatus {
     Connecting,
     Connected,
@@ -66,7 +66,7 @@ impl BrokerController {
 
     #[instrument(level = "debug", skip_all)]
     pub fn get_status(&self) -> BrokerControllerStatus {
-        self.status.lock().unwrap().clone()
+        *self.status.lock().unwrap()
     }
 
     #[instrument(level = "debug", skip_all)]

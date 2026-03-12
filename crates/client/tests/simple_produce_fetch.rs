@@ -1,4 +1,4 @@
-use crate::common::cluster::ThreeNodeCluster;
+use crate::common::cluster::SingleNodeCluster;
 use crate::common::test_topic::TestTopic;
 use crate::common::{KAFKA_TEST_BROKER_ADDR_1_HOST, KAFKA_TEST_BROKER_ADDR_1_PORT};
 use kafka_connector_client::clients::consumer::client::KafkaConsumer;
@@ -16,7 +16,7 @@ mod common;
 
 #[test_log::test(tokio::test)]
 pub async fn main() {
-    let _kafka_cluster = ThreeNodeCluster::new().await;
+    let _kafka_cluster = SingleNodeCluster::new().await;
     let cluster = ClusterController::new(ClusterControllerOptions {
         bootstrap_servers: vec![(
             KAFKA_TEST_BROKER_ADDR_1_HOST.to_owned(),
@@ -26,7 +26,7 @@ pub async fn main() {
     })
     .await;
     let cluster = Arc::new(cluster);
-    let broker_list = cluster.get_broker_status_list();
+    let broker_list = cluster.get_broker_list();
     assert!(!broker_list.is_empty());
 
     let test_topic = TestTopic::new(cluster.clone(), "simple_produce_fetch", None).await;
@@ -76,7 +76,7 @@ pub async fn main() {
     assert_eq!(String::from_utf8_lossy(record.value.as_slice()), value2);
 
     tokio::time::sleep(Duration::from_millis(500)).await;
-    assert!(consumer.try_recv().await.is_none());
+    assert!(consumer.try_recv().is_none());
 
     test_topic.delete().await;
 }

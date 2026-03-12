@@ -25,7 +25,7 @@ impl KafkaConsumer {
         controller: Arc<ClusterController>,
         consumer_options: KafkaConsumerOptions,
     ) -> KafkaConsumer {
-        let (record_tx, record_rx) = mpsc::channel(1);
+        let (record_tx, record_rx) = mpsc::channel(100);
         let (command_tx, command_rx) = mpsc::channel(1);
         tokio::spawn(ConsumerLoop::start(
             controller.clone(),
@@ -48,7 +48,7 @@ impl KafkaConsumer {
             .expect("Consumer loop should be alive")
     }
 
-    pub async fn try_recv(&mut self) -> Option<Record> {
+    pub fn try_recv(&mut self) -> Option<Record> {
         self.record_channel.try_recv().ok()
     }
 }

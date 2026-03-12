@@ -1,9 +1,40 @@
+use crate::common::{KAFKA_TEST_BROKER_1_RACK, KAFKA_TEST_BROKER_2_RACK, KAFKA_TEST_BROKER_3_RACK};
 use std::sync::Arc;
 use std::thread;
+use std::time::Duration;
 use testcontainers::core::wait::LogWaitStrategy;
 use testcontainers::core::{ContainerPort, WaitFor};
 use testcontainers::runners::AsyncRunner;
 use testcontainers::{ContainerAsync, ContainerRequest, GenericImage, ImageExt};
+
+pub struct SingleNodeCluster {
+    pub broker_1: Arc<ContainerAsync<GenericImage>>,
+}
+impl SingleNodeCluster {
+    pub async fn new() -> SingleNodeCluster {
+        let broker_1 = kafka_container(1, 1).start().await.unwrap();
+        SingleNodeCluster {
+            broker_1: Arc::new(broker_1),
+        }
+    }
+}
+
+impl Drop for SingleNodeCluster {
+    fn drop(&mut self) {
+        thread::scope(|s| {
+            s.spawn(|| {
+                tokio::runtime::Builder::new_current_thread()
+                    .enable_all()
+                    .build()
+                    .unwrap()
+                    .block_on(async move {
+                        self.broker_1.stop_with_timeout(Some(0)).await.unwrap();
+                        tokio::time::sleep(Duration::from_millis(1000)).await;
+                    });
+            });
+        });
+    }
+}
 
 pub struct ThreeNodeCluster {
     pub broker_1: Arc<ContainerAsync<GenericImage>>,
@@ -37,6 +68,7 @@ impl Drop for ThreeNodeCluster {
                         self.broker_1.stop_with_timeout(Some(0)).await.unwrap();
                         self.broker_2.stop_with_timeout(Some(0)).await.unwrap();
                         self.broker_3.stop_with_timeout(Some(0)).await.unwrap();
+                        tokio::time::sleep(Duration::from_millis(1000)).await;
                     });
             });
         });
@@ -52,7 +84,14 @@ fn kafka_container(node_id: u16, nodes_in_cluster: u32) -> ContainerRequest<Gene
         .collect::<Vec<_>>()
         .join(",");
 
-    GenericImage::new(image, tag)
+    let rack = match node_id {
+        1 => KAFKA_TEST_BROKER_1_RACK,
+        2 => KAFKA_TEST_BROKER_2_RACK,
+        3 => KAFKA_TEST_BROKER_3_RACK,
+        _ => unimplemented!(),
+    };
+
+    let mut image = GenericImage::new(image, tag)
         .with_wait_for(WaitFor::Log(LogWaitStrategy::stdout(
             "Kafka Server started",
         )))
@@ -76,5 +115,9 @@ fn kafka_container(node_id: u16, nodes_in_cluster: u32) -> ContainerRequest<Gene
         .with_env_var("KAFKA_CONTROLLER_QUORUM_VOTERS", quorum_voters)
         .with_env_var("KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS", "0")
         .with_mapped_port(node_id * 10_000 + 9_092, ContainerPort::Tcp(9092))
-        .with_network("kafka-cluster")
+        .with_network("kafka-cluster");
+    if let Some(rack) = rack {
+        image = image.with_env_var("KAFKA_BROKER_RACK", rack);
+    }
+    image
 }

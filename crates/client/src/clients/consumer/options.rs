@@ -1,7 +1,7 @@
 use crate::protocol_consts::ListOffsetsTimestampType;
 use derivative::Derivative;
 use std::collections::HashSet;
-use std::ops::Add;
+use std::ops::Sub;
 use std::time::{Duration, SystemTime};
 
 #[derive(Clone, Debug, Derivative)]
@@ -35,7 +35,6 @@ pub struct KafkaConsumerOptions {
     pub offset_reset: OffsetReset,
 }
 
-// TODO: E2E tests
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum OffsetReset {
     /// Start consuming from the oldest available message
@@ -54,7 +53,7 @@ impl From<OffsetReset> for i64 {
             OffsetReset::Earliest => ListOffsetsTimestampType::Earliest.into(),
             OffsetReset::Latest => ListOffsetsTimestampType::Latest.into(),
             OffsetReset::FromNow(duration) => SystemTime::now()
-                .add(duration)
+                .sub(duration)
                 .duration_since(SystemTime::UNIX_EPOCH)
                 .unwrap()
                 .as_millis() as i64,

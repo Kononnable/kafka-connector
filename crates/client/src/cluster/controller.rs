@@ -87,21 +87,22 @@ impl ClusterController {
             debug!("Cluster initialization error: {err:?}")
         }
         controller
-        // TODO E2E tests
-        // bootstrap with single broker, connects to multiple
     }
 
-    /// Returns connection status for known brokers
-    pub fn get_broker_status_list(&self) -> Vec<(i32, BrokerControllerStatus)> {
+    pub fn get_broker_list(&self) -> HashMap<i32, (BrokerMetadata, BrokerControllerStatus)> {
         self.broker_list
             .lock()
             .unwrap()
             .iter()
-            .map(|(broker_id, (controller, _))| (*broker_id, controller.get_status()))
+            .map(|(broker_id, (controller, metadata))| {
+                (
+                    *broker_id,
+                    (metadata.lock().unwrap().clone(), controller.get_status()),
+                )
+            })
             .collect()
     }
 
-    // TODO: E2E test - send to broker which is offline (but within metadata)
     pub async fn make_api_call<R: ApiRequest, I: Into<Option<i32>>>(
         &self,
         broker_id: I,
@@ -152,10 +153,14 @@ impl ClusterController {
         timeout(self.options.request_timeout, async {
             loop {
                 let broker_id = self
-                    .get_broker_status_list()
-                    .into_iter()
-                    .find(|(_id, status)| *status == BrokerControllerStatus::Connected)
-                    .map(|(id, _)| id);
+                    .broker_list
+                    .lock()
+                    .unwrap()
+                    .iter()
+                    .find(|(_id, (controller, _))| {
+                        controller.get_status() == BrokerControllerStatus::Connected
+                    })
+                    .map(|(id, _)| *id);
                 if let Some(broker_id) = broker_id {
                     return Ok::<i32, ApiCallError>(broker_id);
                 }
@@ -166,9 +171,7 @@ impl ClusterController {
         .map_err(|_| ApiCallError::TimeoutReached)?
     }
 
-    // TODO: E2E tests
-    // cache - get_metadata(does not exist), add topic, get metadata(exists), delete topic, get metadata (exists), wait refresh interval, get metadata (does not exist)
-    pub(crate) async fn get_metadata(
+    pub async fn get_metadata(
         &self,
         topics: HashSet<String>,
         force_refresh: ForceRefresh,
@@ -348,7 +351,7 @@ mod tests {
             })
             .await;
 
-            assert_eq!(cluster.get_broker_status_list().len(), 1);
+            assert_eq!(cluster.get_broker_list().len(), 1);
         }
     }
 }
