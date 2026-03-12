@@ -6,7 +6,7 @@ fn generate_substuct(
     content: &mut String,
     sub_struct: &SubStruct,
     is_map_key: bool,
-    mut sub_structs_partial: &mut VecDeque<SubStruct>,
+    sub_structs_partial: &mut VecDeque<SubStruct>,
 ) {
     let default_derive = if should_derive_default(&sub_struct.fields) {
         ", Default"
@@ -20,7 +20,7 @@ fn generate_substuct(
     ));
     content.push_str(&format!("pub struct {} {{\n", sub_struct.name));
     for field in &sub_struct.fields {
-        content.push_str(&get_field_definition(field, &mut sub_structs_partial));
+        content.push_str(&get_field_definition(field, sub_structs_partial));
     }
     content.push_str("}\n\n");
 }
@@ -224,7 +224,7 @@ pub fn generate_source(spec: ApiSpec) -> (String, String) {
                         .push_str("        let mut ret = IndexMap::with_capacity(cap as usize);\n");
                     content.push_str("        for _ in 0..cap {\n");
                     for field in &substruct.fields {
-                        content.push_str(&"            ");
+                        content.push_str("            ");
                         content.push_str(&deserialize_field(field));
                     }
 
@@ -350,10 +350,10 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
                     flatten
                 ));
                 if field.fields.iter().all(|x| x.map_key) {
-                    content.push_str(&"        item.validate_fields(_version)?;\n");
+                    content.push_str("        item.validate_fields(_version)?;\n");
                 } else {
-                    content.push_str(&"        item.0.validate_fields(_version)?;\n");
-                    content.push_str(&"        item.1.validate_fields(_version)?;\n");
+                    content.push_str("        item.0.validate_fields(_version)?;\n");
+                    content.push_str("        item.1.validate_fields(_version)?;\n");
                 }
                 content.push_str("      }\n");
             }
@@ -364,7 +364,7 @@ fn generate_validate_fields(struct_name: &str, fields: &[ApiSpecField]) -> Strin
                         field.name.to_case(Case::Snake),
                         flatten
                     ));
-                    content.push_str(&"        item.validate_fields(_version)?;\n");
+                    content.push_str("        item.validate_fields(_version)?;\n");
                     content.push_str("      }\n");
                 } else {
                     content.push_str(&format!(
@@ -482,7 +482,7 @@ fn get_min_max_supported_version(spec: &ApiSpec) -> String {
     let mut content = "".to_owned();
 
     let min_supported_version = spec.valid_versions.split('-').next().unwrap();
-    let max_supported_version = spec.valid_versions.split('-').last().unwrap();
+    let max_supported_version = spec.valid_versions.split('-').next_back().unwrap();
     content.push_str("    fn get_min_supported_version() -> ApiVersion {\n");
     content.push_str(&format!("        ApiVersion({})\n", min_supported_version));
     content.push_str("    }\n\n");
