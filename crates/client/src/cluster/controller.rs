@@ -226,7 +226,6 @@ impl ClusterController {
         Ok(ret_val)
     }
 
-    // TODO: UT test
     fn sync_broker_metadata(
         &self,
         response: IndexMap<MetadataResponseBrokerKey, MetadataResponseBroker>,
@@ -271,6 +270,7 @@ impl ClusterController {
                 let (broker, metadata) = broker_list.remove(&fake_broker_id).unwrap();
                 {
                     let mut metadata = metadata.lock().unwrap();
+                    metadata.broker_id = node_id;
                     metadata.rack = rack;
                 }
                 broker_list.insert(node_id, (broker, metadata));
@@ -352,6 +352,222 @@ mod tests {
             .await;
 
             assert_eq!(cluster.get_broker_list().len(), 1);
+        }
+    }
+
+    mod broker_metadata_synchronization {
+        use crate::broker::broker_metadata::BrokerMetadata;
+        use crate::broker::controller::BrokerController;
+        use crate::cluster::controller::ClusterController;
+        use kafka_connector_protocol::metadata_response::{
+            MetadataResponseBroker, MetadataResponseBrokerKey,
+        };
+        use std::ops::Add;
+        use std::sync::{Arc, Mutex};
+        use std::time::{Duration, Instant};
+
+        async fn prepare(initial_metadata: &[Arc<Mutex<BrokerMetadata>>]) -> ClusterController {
+            let broker_list = initial_metadata
+                .iter()
+                .map(|metadata| {
+                    let broker_id = metadata.lock().unwrap().broker_id;
+                    let controller = BrokerController::new(metadata.clone(), Default::default());
+                    (broker_id, (controller, metadata.clone()))
+                })
+                .collect();
+
+            ClusterController {
+                broker_list: Mutex::new(broker_list),
+                options: Arc::new(Default::default()),
+                topic_metadata_cache: Mutex::new(Default::default()),
+                topic_metadata_refresh: Mutex::new(Instant::now().add(Duration::from_secs(10))),
+            }
+        }
+
+        #[test_log::test(tokio::test)]
+        async fn broker_address_change() {
+            let old_broker_metadata = vec![Arc::new(Mutex::new(BrokerMetadata {
+                broker_id: 1,
+                host: "127.0.0.2".to_string(),
+                port: 1234,
+                rack: None,
+            }))];
+
+            let cluster = prepare(&old_broker_metadata).await;
+
+            cluster.sync_broker_metadata(
+                [(
+                    MetadataResponseBrokerKey { node_id: 1 },
+                    MetadataResponseBroker {
+                        host: "127.0.0.3".to_string(),
+                        port: 1234,
+                        rack: None,
+                    },
+                )]
+                .into(),
+            );
+
+            let broker_list = cluster.broker_list.lock().unwrap();
+            assert_eq!(broker_list.len(), 1);
+            let new_broker_metadata = broker_list.get(&1).unwrap().1.lock().unwrap();
+            assert_eq!(new_broker_metadata.broker_id, 1);
+            assert_eq!(new_broker_metadata.host, "127.0.0.3");
+            assert_eq!(new_broker_metadata.port, 1234);
+            assert_eq!(new_broker_metadata.rack, None);
+
+            assert!(
+                Arc::strong_count(old_broker_metadata.first().unwrap()) > 1,
+                "BrokerController wasn't reused"
+            );
+        }
+
+        #[test_log::test(tokio::test)]
+        async fn broker_rack_change() {
+            let old_broker_metadata = vec![Arc::new(Mutex::new(BrokerMetadata {
+                broker_id: 1,
+                host: "127.0.0.2".to_string(),
+                port: 1234,
+                rack: None,
+            }))];
+
+            let cluster = prepare(&old_broker_metadata).await;
+
+            cluster.sync_broker_metadata(
+                [(
+                    MetadataResponseBrokerKey { node_id: 1 },
+                    MetadataResponseBroker {
+                        host: "127.0.0.2".to_string(),
+                        port: 1234,
+                        rack: Some("rack".to_owned()),
+                    },
+                )]
+                .into(),
+            );
+
+            let broker_list = cluster.broker_list.lock().unwrap();
+            assert_eq!(broker_list.len(), 1);
+            let new_broker_metadata = broker_list.get(&1).unwrap().1.lock().unwrap();
+            assert_eq!(new_broker_metadata.broker_id, 1);
+            assert_eq!(new_broker_metadata.host, "127.0.0.2");
+            assert_eq!(new_broker_metadata.port, 1234);
+            assert_eq!(new_broker_metadata.rack, Some("rack".to_owned()));
+
+            assert!(
+                Arc::strong_count(old_broker_metadata.first().unwrap()) > 1,
+                "BrokerController wasn't reused"
+            );
+        }
+        #[test_log::test(tokio::test)]
+        async fn broker_added() {
+            let old_broker_metadata = vec![Arc::new(Mutex::new(BrokerMetadata {
+                broker_id: 1,
+                host: "127.0.0.2".to_string(),
+                port: 1234,
+                rack: None,
+            }))];
+
+            let cluster = prepare(&old_broker_metadata).await;
+
+            cluster.sync_broker_metadata(
+                [
+                    (
+                        MetadataResponseBrokerKey { node_id: 1 },
+                        MetadataResponseBroker {
+                            host: "127.0.0.2".to_string(),
+                            port: 1234,
+                            rack: None,
+                        },
+                    ),
+                    (
+                        MetadataResponseBrokerKey { node_id: 2 },
+                        MetadataResponseBroker {
+                            host: "127.0.0.3".to_string(),
+                            port: 1234,
+                            rack: None,
+                        },
+                    ),
+                ]
+                .into(),
+            );
+
+            assert_eq!(cluster.broker_list.lock().unwrap().len(), 2);
+        }
+
+        #[test_log::test(tokio::test)]
+        async fn broker_removed() {
+            let old_broker_metadata = vec![
+                Arc::new(Mutex::new(BrokerMetadata {
+                    broker_id: 1,
+                    host: "127.0.0.2".to_string(),
+                    port: 1234,
+                    rack: None,
+                })),
+                Arc::new(Mutex::new(BrokerMetadata {
+                    broker_id: 2,
+                    host: "127.0.0.3".to_string(),
+                    port: 1234,
+                    rack: None,
+                })),
+            ];
+
+            let cluster = prepare(&old_broker_metadata).await;
+
+            cluster.sync_broker_metadata(
+                [(
+                    MetadataResponseBrokerKey { node_id: 2 },
+                    MetadataResponseBroker {
+                        host: "127.0.0.3".to_string(),
+                        port: 1234,
+                        rack: None,
+                    },
+                )]
+                .into(),
+            );
+
+            let broker_list = cluster.broker_list.lock().unwrap();
+            assert_eq!(broker_list.len(), 1);
+            let new_broker_metadata = broker_list.get(&2).unwrap().1.lock().unwrap();
+            assert_eq!(new_broker_metadata.broker_id, 2);
+            assert_eq!(new_broker_metadata.host, "127.0.0.3");
+            assert_eq!(new_broker_metadata.port, 1234);
+            assert_eq!(new_broker_metadata.rack, None);
+        }
+
+        #[test_log::test(tokio::test)]
+        async fn cluster_initialization_fake_id_handling() {
+            let old_broker_metadata = vec![Arc::new(Mutex::new(BrokerMetadata {
+                broker_id: -2,
+                host: "127.0.0.2".to_string(),
+                port: 1234,
+                rack: None,
+            }))];
+
+            let cluster = prepare(&old_broker_metadata).await;
+
+            cluster.sync_broker_metadata(
+                [(
+                    MetadataResponseBrokerKey { node_id: 1 },
+                    MetadataResponseBroker {
+                        host: "127.0.0.2".to_string(),
+                        port: 1234,
+                        rack: None,
+                    },
+                )]
+                .into(),
+            );
+
+            let broker_list = cluster.broker_list.lock().unwrap();
+            assert_eq!(broker_list.len(), 1);
+            let new_broker_metadata = broker_list.get(&1).unwrap().1.lock().unwrap();
+            assert_eq!(new_broker_metadata.broker_id, 1);
+            assert_eq!(new_broker_metadata.host, "127.0.0.2");
+            assert_eq!(new_broker_metadata.port, 1234);
+            assert_eq!(new_broker_metadata.rack, None);
+
+            assert!(
+                Arc::strong_count(old_broker_metadata.first().unwrap()) > 1,
+                "BrokerController wasn't reused"
+            );
         }
     }
 }
