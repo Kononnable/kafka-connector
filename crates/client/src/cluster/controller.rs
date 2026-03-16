@@ -103,13 +103,37 @@ impl ClusterController {
             .collect()
     }
 
+    #[instrument(level = "debug", skip_all)]
     pub async fn make_api_call<R: ApiRequest, I: Into<Option<i32>>>(
         &self,
         broker_id: I,
         request: R,
         version: Option<ApiVersion>,
     ) -> Result<R::Response, ApiCallError> {
-        let broker_id = if let Some(broker_id) = broker_id.into() {
+        self.make_api_call_internal(broker_id.into(), request, version, true)
+            .await
+            .map(|response| response.unwrap())
+    }
+    #[instrument(level = "debug", skip_all)]
+    pub async fn make_api_call_without_response<R: ApiRequest, I: Into<Option<i32>>>(
+        &self,
+        broker_id: I,
+        request: R,
+        version: Option<ApiVersion>,
+    ) -> Result<(), ApiCallError> {
+        self.make_api_call_internal(broker_id.into(), request, version, false)
+            .await
+            .map(|_| ())
+    }
+
+    async fn make_api_call_internal<R: ApiRequest>(
+        &self,
+        broker_id: Option<i32>,
+        request: R,
+        version: Option<ApiVersion>,
+        wait_for_response: bool,
+    ) -> Result<Option<R::Response>, ApiCallError> {
+        let broker_id = if let Some(broker_id) = broker_id {
             timeout(self.options.request_timeout, async {
                 loop {
                     if self
@@ -143,7 +167,7 @@ impl ClusterController {
                 .or_else(|| broker.get_max_supported_api_version::<R>())
                 .ok_or(ApiCallError::UnsupportedApi(R::get_api_key()))?;
 
-            broker.make_api_call(version, request)
+            broker.make_api_call(version, request, wait_for_response)
         };
 
         api_call.await

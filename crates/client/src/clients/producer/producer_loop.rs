@@ -1,7 +1,7 @@
 use crate::clients::producer::client::RecordAppend;
 use crate::clients::producer::error::ProduceError;
 use crate::clients::producer::future_record::FutureRecord;
-use crate::clients::producer::options::KafkaProducerOptions;
+use crate::clients::producer::options::{Acks, KafkaProducerOptions};
 use crate::clients::producer::partitioner::Partitioner;
 use crate::cluster::controller::{ClusterController, ForceRefresh};
 use crate::cluster::error::ApiCallError;
@@ -31,11 +31,11 @@ use tracing::{debug, instrument};
 pub(super) type ProduceRequestMessage = (FutureRecord, RecordAppendTx);
 pub(super) type RecordAppendTx = oneshot::Sender<Result<RecordAppend, ProduceError>>;
 
-type ProduceApiCallResult = (i32, Result<ProduceResponse, ApiCallError>);
+type ProduceApiCallResult = (i32, Result<Option<ProduceResponse>, ApiCallError>);
 type RecordBatchesToSend =
     BTreeMap<RecordBatchID, (RecordBatch, Vec<(RecordAppend, RecordAppendTx)>)>;
 
-#[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Debug, Ord, PartialOrd, Eq, PartialEq, Clone)]
 struct RecordBatchID {
     broker_id: i32,
     topic: String,
@@ -115,28 +115,43 @@ where
 
     async fn handle_responses(
         &mut self,
-        (broker_id, response): (i32, Result<ProduceResponse, ApiCallError>),
+        (broker_id, response): (i32, Result<Option<ProduceResponse>, ApiCallError>),
     ) {
         // TODO: error handling
         let response = response.unwrap();
-        for resp in response.responses {
-            for part in resp.partitions {
-                assert!(part.error_code.is_none());
+        if let Some(response) = response {
+            for resp in response.responses {
+                for part in resp.partitions {
+                    assert!(part.error_code.is_none());
 
-                let partition_signals = self
-                    .records_in_flight
-                    .remove(&RecordBatchID {
-                        broker_id,
-                        topic: resp.name.clone(),
-                        partition: part.partition_index,
-                    })
-                    .unwrap();
-                for (i, (mut append, sig)) in partition_signals.into_iter().enumerate() {
-                    append.offset = part.base_offset + i as i64;
-                    if part.log_append_time_ms != -1 {
-                        append.timestamp = SystemTime::UNIX_EPOCH
-                            .add(Duration::from_millis(part.log_append_time_ms as u64));
+                    let partition_signals = self
+                        .records_in_flight
+                        .remove(&RecordBatchID {
+                            broker_id,
+                            topic: resp.name.clone(),
+                            partition: part.partition_index,
+                        })
+                        .unwrap();
+                    for (i, (mut append, sig)) in partition_signals.into_iter().enumerate() {
+                        append.offset = part.base_offset + i as i64;
+                        if part.log_append_time_ms != -1 {
+                            append.timestamp = SystemTime::UNIX_EPOCH
+                                .add(Duration::from_millis(part.log_append_time_ms as u64));
+                        }
+                        let _ = sig.send(Ok(append));
                     }
+                }
+            }
+        } else {
+            let batches_sent = self
+                .records_in_flight
+                .keys()
+                .filter(|batch_id| batch_id.broker_id == broker_id)
+                .cloned()
+                .collect::<Vec<_>>();
+            for batch in batches_sent {
+                for (mut append, sig) in self.records_in_flight.remove(&batch).unwrap() {
+                    append.offset = -1;
                     let _ = sig.send(Ok(append));
                 }
             }
@@ -152,7 +167,13 @@ where
     async fn send_messages(
         &mut self,
     ) -> Option<
-        Vec<Pin<Box<impl Future<Output = (i32, Result<ProduceResponse, ApiCallError>)> + use<P>>>>,
+        Vec<
+            Pin<
+                Box<
+                    impl Future<Output = (i32, Result<Option<ProduceResponse>, ApiCallError>)> + use<P>,
+                >,
+            >,
+        >,
     > {
         // TODO: max record batch size - may require changing single record batch to vec (if max msg size > max record batch size)
         // TODO: KIP-192 retry, multiple calls in transit (to same broker) - most retries should be handled by producer client, some (idempotency related) by loop itself
@@ -285,10 +306,21 @@ where
             .into_iter()
             .map(|(broker_id, request)| {
                 let controller = self.controller.clone();
+                let ack_no = matches!(self.producer_options.acks, Acks::NoAck);
                 Box::pin(async move {
                     (
                         broker_id,
-                        controller.make_api_call(broker_id, request, None).await,
+                        if ack_no {
+                            controller
+                                .make_api_call_without_response(broker_id, request, None)
+                                .await
+                                .map(|_| None)
+                        } else {
+                            controller
+                                .make_api_call(broker_id, request, None)
+                                .await
+                                .map(Some)
+                        },
                     )
                 })
             })

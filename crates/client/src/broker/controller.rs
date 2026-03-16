@@ -24,6 +24,7 @@ pub(super) struct ApiRequestMessage {
     pub api_key: ApiKey,
     pub api_version: ApiVersion,
     pub request: BytesMut,
+    pub wait_for_response: bool,
 }
 pub(super) type ResponseChannel = oneshot::Sender<Result<BytesMut, ApiCallError>>;
 
@@ -74,13 +75,13 @@ impl BrokerController {
         &self,
         version: ApiVersion,
         request: R,
-    ) -> impl Future<Output = Result<R::Response, ApiCallError>> + use<R> {
-        let (tx, rx) = oneshot::channel();
-
+        wait_for_response: bool,
+    ) -> impl Future<Output = Result<Option<R::Response>, ApiCallError>> + use<R> {
         let mut buffer = self.buffer.lock().unwrap();
         if buffer.capacity() < self.options.advanced.buffer_grow_size / 2 {
             buffer.reserve(self.options.advanced.buffer_grow_size);
         }
+        let (tx, rx) = oneshot::channel();
         let serialization_result = request.serialize(version, &mut buffer).map(|_| {
             let request_buf = &mut (*buffer);
             self.request_tx
@@ -89,17 +90,22 @@ impl BrokerController {
                     api_key: R::get_api_key(),
                     api_version: version,
                     request: request_buf.split_to(request_buf.len()),
+                    wait_for_response,
                 })
                 .expect("Broker loop channel should be open");
         });
 
         async move {
             if let Err(err) = serialization_result {
-                Result::<R::Response, ApiCallError>::Err(ApiCallError::SerializationError(err))
+                Result::<Option<R::Response>, ApiCallError>::Err(ApiCallError::SerializationError(
+                    err,
+                ))
             } else {
                 rx.await
                     .map_err(|_| ApiCallError::BrokerConnectionClosed)?
-                    .map(|mut resp| R::Response::deserialize(version, &mut resp))
+                    .map(|mut resp| {
+                        wait_for_response.then(|| R::Response::deserialize(version, &mut resp))
+                    })
             }
         }
     }

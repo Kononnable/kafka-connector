@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::time::SystemTime;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct FutureRecord {
     /// If empty, it will be set automatically when message is sent
     pub timestamp: Option<SystemTime>,

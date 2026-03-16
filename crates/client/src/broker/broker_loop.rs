@@ -310,10 +310,14 @@ impl BrokerLoop {
                         .await;
                     match result {
                         Ok(correlation_id) => {
-                            self.api_calls_in_transit.insert(
-                                correlation_id,
-                                (call.request.response_sender, call.timeout),
-                            );
+                            if call.request.wait_for_response {
+                                self.api_calls_in_transit.insert(
+                                    correlation_id,
+                                    (call.request.response_sender, call.timeout),
+                                );
+                            } else {
+                                let _ = call.request.response_sender.send(Ok(BytesMut::new()));
+                            }
                         }
                         Err(err) => {
                             debug!(

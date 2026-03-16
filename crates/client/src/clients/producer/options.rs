@@ -29,7 +29,7 @@ impl KafkaProducerOptions<Crc32Partitioner> {
 #[derive(Clone, Copy, Debug)]
 pub enum Acks {
     /// No broker acknowledge messages
-    NoAck, // TODO: Implement; tests
+    NoAck,
     /// Partition leaders acknowledge messages
     Leader,
     /// All in-sync replicas acknowledge messages

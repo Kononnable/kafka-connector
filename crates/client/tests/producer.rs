@@ -7,7 +7,7 @@ mod send {
     use kafka_connector_client::clients::producer::client::KafkaProducer;
     use kafka_connector_client::clients::producer::error::ProduceError;
     use kafka_connector_client::clients::producer::future_record::FutureRecord;
-    use kafka_connector_client::clients::producer::options::KafkaProducerOptions;
+    use kafka_connector_client::clients::producer::options::{Acks, KafkaProducerOptions};
     use kafka_connector_client::cluster::controller::ClusterController;
     use kafka_connector_client::cluster::options::ClusterControllerOptions;
     use kafka_connector_protocol::create_topics_request::CreatableTopic;
@@ -88,6 +88,66 @@ mod send {
             false
         };
         assert!(is_error);
+
+        topic.delete().await;
+    }
+
+    #[test_log::test(tokio::test)]
+    pub async fn produce_acks() {
+        let _kafka_cluster = SingleNodeCluster::new().await;
+        let topic_name = "topic".to_owned();
+
+        let cluster = Arc::new(
+            ClusterController::new(ClusterControllerOptions {
+                bootstrap_servers: vec![(
+                    KAFKA_TEST_BROKER_ADDR_1_HOST.to_owned(),
+                    KAFKA_TEST_BROKER_ADDR_1_PORT,
+                )],
+                ..Default::default()
+            })
+            .await,
+        );
+        let topic = TestTopic::new(
+            cluster.clone(),
+            &topic_name,
+            Some(CreatableTopic {
+                num_partitions: 3,
+                replication_factor: 1,
+                ..Default::default()
+            }),
+        )
+        .await;
+
+        let producer_no_ack = KafkaProducer::from_cluster_controller(
+            cluster.clone(),
+            KafkaProducerOptions {
+                acks: Acks::NoAck,
+                ..KafkaProducerOptions::new()
+            },
+        );
+        let producer_leader = KafkaProducer::from_cluster_controller(
+            cluster.clone(),
+            KafkaProducerOptions {
+                acks: Acks::Leader,
+                ..KafkaProducerOptions::new()
+            },
+        );
+        let producer_all = KafkaProducer::from_cluster_controller(
+            cluster.clone(),
+            KafkaProducerOptions {
+                acks: Acks::All,
+                ..KafkaProducerOptions::new()
+            },
+        );
+
+        let record = FutureRecord::new(&topic_name, vec![], vec![]);
+        let result_no_ack = producer_no_ack.send(record.clone()).await.unwrap();
+        let result_leader = producer_leader.send(record.clone()).await.unwrap();
+        let result_all = producer_all.send(record).await.unwrap();
+
+        assert_eq!(result_no_ack.offset, -1);
+        assert_eq!(result_leader.offset, 1);
+        assert_eq!(result_all.offset, 2);
 
         topic.delete().await;
     }
