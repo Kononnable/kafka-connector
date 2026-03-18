@@ -67,7 +67,7 @@ where
             .expect("Producer loop dropped while producer is still alive");
         async move {
             rx.await
-                .expect("Producer loop dropped while producer is still alive")
+                .expect("Producer loop didn't clean in progress messages before being dropped")
         }
     }
 }

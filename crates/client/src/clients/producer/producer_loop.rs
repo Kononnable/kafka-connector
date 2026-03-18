@@ -108,7 +108,14 @@ where
                 }
             }
         }
-        // TODO: Cleanup waiting/in-flight requests
+
+        while let Some((_, batch_records)) = self.records_in_flight.pop_first() {
+            for (_, tx) in batch_records {
+                let _ = tx.send(Err(ProduceError::ApiCallError(Arc::new(
+                    ApiCallError::BrokerConnectionClosed,
+                ))));
+            }
+        }
 
         debug!("Producer loop is closing");
     }
