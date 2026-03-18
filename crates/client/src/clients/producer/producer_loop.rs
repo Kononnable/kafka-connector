@@ -19,7 +19,7 @@ use kafka_connector_protocol::records::base_types::{
 use kafka_connector_protocol::records::header::Header;
 use kafka_connector_protocol::records::record::Record;
 use kafka_connector_protocol::records::record_batch::RecordBatch;
-use kafka_connector_protocol::{ApiError, ApiRequest};
+use kafka_connector_protocol::{ApiError, ApiRequest, ApiResponse};
 use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
 use std::ops::Add;
 use std::pin::Pin;
@@ -117,42 +117,72 @@ where
         &mut self,
         (broker_id, response): (i32, Result<Option<ProduceResponse>, ApiCallError>),
     ) {
-        // TODO: error handling
-        let response = response.unwrap();
-        if let Some(response) = response {
-            for resp in response.responses {
-                for part in resp.partitions {
-                    assert!(part.error_code.is_none());
-
-                    let partition_signals = self
-                        .records_in_flight
-                        .remove(&RecordBatchID {
-                            broker_id,
-                            topic: resp.name.clone(),
-                            partition: part.partition_index,
-                        })
-                        .unwrap();
-                    for (i, (mut append, sig)) in partition_signals.into_iter().enumerate() {
-                        append.offset = part.base_offset + i as i64;
-                        if part.log_append_time_ms != -1 {
-                            append.timestamp = SystemTime::UNIX_EPOCH
-                                .add(Duration::from_millis(part.log_append_time_ms as u64));
+        match response {
+            Ok(response) => {
+                if let Some(response) = response {
+                    for resp in response.responses {
+                        for part in resp.partitions {
+                            let partition_signals = self
+                                .records_in_flight
+                                .remove(&RecordBatchID {
+                                    broker_id,
+                                    topic: resp.name.clone(),
+                                    partition: part.partition_index,
+                                })
+                                .unwrap();
+                            for (i, (mut append, sig)) in partition_signals.into_iter().enumerate()
+                            {
+                                match part.error_code {
+                                    None => {
+                                        append.offset = part.base_offset + i as i64;
+                                        if part.log_append_time_ms != -1 {
+                                            append.timestamp =
+                                                SystemTime::UNIX_EPOCH.add(Duration::from_millis(
+                                                    part.log_append_time_ms as u64,
+                                                ));
+                                        }
+                                        let _ = sig.send(Ok(append));
+                                    }
+                                    Some(error_code) => {
+                                        let _ = sig.send(Err(ProduceError::ApiCallError(
+                                            Arc::new(ApiCallError::UnexpectedErrorCode(
+                                                ProduceResponse::get_api_key(),
+                                                error_code,
+                                                "responses.partitions.error_code",
+                                            )),
+                                        )));
+                                    }
+                                }
+                            }
                         }
-                        let _ = sig.send(Ok(append));
+                    }
+                } else {
+                    let batches_sent = self
+                        .records_in_flight
+                        .keys()
+                        .filter(|batch_id| batch_id.broker_id == broker_id)
+                        .cloned()
+                        .collect::<Vec<_>>();
+                    for batch in batches_sent {
+                        for (mut append, sig) in self.records_in_flight.remove(&batch).unwrap() {
+                            append.offset = -1;
+                            let _ = sig.send(Ok(append));
+                        }
                     }
                 }
             }
-        } else {
-            let batches_sent = self
-                .records_in_flight
-                .keys()
-                .filter(|batch_id| batch_id.broker_id == broker_id)
-                .cloned()
-                .collect::<Vec<_>>();
-            for batch in batches_sent {
-                for (mut append, sig) in self.records_in_flight.remove(&batch).unwrap() {
-                    append.offset = -1;
-                    let _ = sig.send(Ok(append));
+            Err(err) => {
+                let error = ProduceError::ApiCallError(Arc::new(err));
+                let batches_sent = self
+                    .records_in_flight
+                    .keys()
+                    .filter(|batch_id| batch_id.broker_id == broker_id)
+                    .cloned()
+                    .collect::<Vec<_>>();
+                for batch in batches_sent {
+                    for (_, sig) in self.records_in_flight.remove(&batch).unwrap() {
+                        let _ = sig.send(Err(error.clone()));
+                    }
                 }
             }
         }
@@ -338,16 +368,18 @@ where
         if let Some(error_code) = topic_metadata.error_code {
             let error = match error_code {
                 ApiError::RequestTimedOut => {
-                    ProduceError::ApiCallError(ApiCallError::TimeoutReached)
+                    ProduceError::ApiCallError(Arc::new(ApiCallError::TimeoutReached))
                 }
                 ApiError::UnknownTopicOrPartition => {
                     ProduceError::TopicNotFound(record.topic.clone())
                 }
-                error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
-                    MetadataRequest::get_api_key(),
-                    error_code,
-                    "topics.error_code",
-                )),
+                error_code => {
+                    ProduceError::ApiCallError(Arc::new(ApiCallError::UnexpectedErrorCode(
+                        MetadataRequest::get_api_key(),
+                        error_code,
+                        "topics.error_code",
+                    )))
+                }
             };
             return Err((tx, error));
         }
@@ -373,11 +405,13 @@ where
                 ApiError::UnknownTopicOrPartition => {
                     ProduceError::TopicNotFound(record.topic.clone())
                 }
-                error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
-                    MetadataRequest::get_api_key(),
-                    error_code,
-                    "topics.partitions.error_code",
-                )),
+                error_code => {
+                    ProduceError::ApiCallError(Arc::new(ApiCallError::UnexpectedErrorCode(
+                        MetadataRequest::get_api_key(),
+                        error_code,
+                        "topics.partitions.error_code",
+                    )))
+                }
             };
             return Err((tx, error));
         }

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use thiserror::Error as DeriveError;
 
 #[non_exhaustive]
-#[derive(Debug, DeriveError)]
+#[derive(Debug, DeriveError, Clone)]
 pub enum ProduceError {
     #[error("Kafka topic {0} does not exist")]
     TopicNotFound(String),
@@ -12,5 +12,5 @@ pub enum ProduceError {
     #[error("Metadata fetch request failed: {0}")]
     MetadataFetchFailed(Arc<ApiCallError>),
     #[error("Kafka API returned unexpected error {0}")]
-    ApiCallError(#[from] ApiCallError),
+    ApiCallError(Arc<ApiCallError>),
 }
