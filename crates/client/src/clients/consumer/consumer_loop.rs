@@ -1,6 +1,6 @@
 use crate::clients::consumer::error::ConsumeError;
 use crate::clients::consumer::error::ConsumeError::MetadataFetchFailed;
-use crate::clients::consumer::options::{KafkaConsumerOptions, OffsetReset};
+use crate::clients::consumer::options::KafkaConsumerOptions;
 use crate::clients::consumer::record::Record;
 use crate::cluster::controller::{ClusterController, ForceRefresh};
 use crate::cluster::error::ApiCallError;
@@ -244,11 +244,7 @@ impl ConsumerLoop {
                         .or_default()
                         .entry(partition.partition_index)
                         .or_insert((-1, partition.leader_epoch));
-                    if *offset == -1
-                        || (*offset < partition.offset
-                            && self.consumer_options.offset_reset == OffsetReset::Earliest)
-                    {
-                        // TODO: make sure corner case works - timestamp !=earliest and consumer fallen behind retention (data deleted)
+                    if *offset == -1 {
                         *offset = partition.offset;
                     }
                 }
@@ -331,8 +327,20 @@ impl ConsumerLoop {
                         | ApiError::NotLeaderOrFollower
                         | ApiError::ReplicaNotAvailable
                         | ApiError::FencedLeaderEpoch
-                        | ApiError::UnknownLeaderEpoch
-                        | ApiError::OffsetOutOfRange => self.reinitialize_triggered = true,
+                        | ApiError::UnknownLeaderEpoch => {
+                            self.reinitialize_triggered = true;
+                        }
+                        ApiError::OffsetOutOfRange => {
+                            self.reinitialize_triggered = true;
+                            self.mappings
+                                .get_mut(&broker)
+                                .unwrap()
+                                .get_mut(topic)
+                                .unwrap()
+                                .get_mut(&partition_response.partition_index)
+                                .unwrap()
+                                .0 = -1;
+                        }
                         ApiError::RequestTimedOut => {}
                         _ => {
                             let err = ApiCallError::UnexpectedErrorCode(
