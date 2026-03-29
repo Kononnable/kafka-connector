@@ -1,5 +1,4 @@
 use crate::cluster::error::ApiCallError;
-use std::sync::Arc;
 use thiserror::Error as DeriveError;
 
 #[non_exhaustive]
@@ -10,7 +9,7 @@ pub enum ProduceError {
     #[error("Topic {0} does not have partition {1}")]
     PartitionNotFound(String, i32),
     #[error("Metadata fetch request failed: {0}")]
-    MetadataFetchFailed(Arc<ApiCallError>),
+    MetadataFetchFailed(ApiCallError),
     #[error("Kafka API returned unexpected error {0}")]
-    ApiCallError(Arc<ApiCallError>),
+    ApiCallError(ApiCallError),
 }

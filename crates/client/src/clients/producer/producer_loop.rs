@@ -111,9 +111,9 @@ where
 
         while let Some((_, batch_records)) = self.records_in_flight.pop_first() {
             for (_, tx) in batch_records {
-                let _ = tx.send(Err(ProduceError::ApiCallError(Arc::new(
+                let _ = tx.send(Err(ProduceError::ApiCallError(
                     ApiCallError::BrokerConnectionClosed,
-                ))));
+                )));
             }
         }
 
@@ -152,11 +152,11 @@ where
                                     }
                                     Some(error_code) => {
                                         let _ = sig.send(Err(ProduceError::ApiCallError(
-                                            Arc::new(ApiCallError::UnexpectedErrorCode(
+                                            ApiCallError::UnexpectedErrorCode(
                                                 ProduceResponse::get_api_key(),
                                                 error_code,
                                                 "responses.partitions.error_code",
-                                            )),
+                                            ),
                                         )));
                                     }
                                 }
@@ -179,7 +179,6 @@ where
                 }
             }
             Err(err) => {
-                let error = ProduceError::ApiCallError(Arc::new(err));
                 let batches_sent = self
                     .records_in_flight
                     .keys()
@@ -188,7 +187,7 @@ where
                     .collect::<Vec<_>>();
                 for batch in batches_sent {
                     for (_, sig) in self.records_in_flight.remove(&batch).unwrap() {
-                        let _ = sig.send(Err(error.clone()));
+                        let _ = sig.send(Err(ProduceError::ApiCallError(err.clone())));
                     }
                 }
             }
@@ -231,7 +230,6 @@ where
             .get_metadata(topics, ForceRefresh::No)
             .await
             .map_err(|err| {
-                let err = Arc::new(err);
                 while let Some(req) = self.records_waiting.pop_front() {
                     let _ = req
                         .1
@@ -375,18 +373,16 @@ where
         if let Some(error_code) = topic_metadata.error_code {
             let error = match error_code {
                 ApiError::RequestTimedOut => {
-                    ProduceError::ApiCallError(Arc::new(ApiCallError::TimeoutReached))
+                    ProduceError::ApiCallError(ApiCallError::TimeoutReached)
                 }
                 ApiError::UnknownTopicOrPartition => {
                     ProduceError::TopicNotFound(record.topic.clone())
                 }
-                error_code => {
-                    ProduceError::ApiCallError(Arc::new(ApiCallError::UnexpectedErrorCode(
-                        MetadataRequest::get_api_key(),
-                        error_code,
-                        "topics.error_code",
-                    )))
-                }
+                error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
+                    MetadataRequest::get_api_key(),
+                    error_code,
+                    "topics.error_code",
+                )),
             };
             return Err((tx, error));
         }
@@ -412,13 +408,11 @@ where
                 ApiError::UnknownTopicOrPartition => {
                     ProduceError::TopicNotFound(record.topic.clone())
                 }
-                error_code => {
-                    ProduceError::ApiCallError(Arc::new(ApiCallError::UnexpectedErrorCode(
-                        MetadataRequest::get_api_key(),
-                        error_code,
-                        "topics.partitions.error_code",
-                    )))
-                }
+                error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
+                    MetadataRequest::get_api_key(),
+                    error_code,
+                    "topics.partitions.error_code",
+                )),
             };
             return Err((tx, error));
         }

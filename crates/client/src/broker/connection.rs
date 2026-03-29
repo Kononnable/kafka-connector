@@ -5,6 +5,7 @@ use kafka_connector_protocol::{
 };
 use std::fmt::Debug;
 use std::io::ErrorKind;
+use std::sync::Arc;
 use thiserror::Error as DeriveError;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
@@ -71,7 +72,7 @@ impl BrokerConnection {
                     if err.kind() == ErrorKind::Interrupted {
                         continue;
                     }
-                    return Some(Err(ApiCallError::IoError(err)));
+                    return Some(Err(ApiCallError::IoError(Arc::new(err))));
                 }
             }
         }
