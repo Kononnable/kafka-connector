@@ -6,9 +6,11 @@ use crate::clients::producer::partitioner::Partitioner;
 use crate::cluster::controller::{ClusterController, ForceRefresh};
 use crate::cluster::error::ApiCallError;
 use bytes::BytesMut;
-use futures::future::select_all;
+use futures::future::{Either, select_all};
 use kafka_connector_protocol::metadata_request::MetadataRequest;
-use kafka_connector_protocol::metadata_response::MetadataResponseTopic;
+use kafka_connector_protocol::metadata_response::{
+    MetadataResponsePartition, MetadataResponseTopic,
+};
 use kafka_connector_protocol::produce_request::{
     PartitionProduceData, ProduceRequest, TopicProduceData,
 };
@@ -20,7 +22,8 @@ use kafka_connector_protocol::records::header::Header;
 use kafka_connector_protocol::records::record::Record;
 use kafka_connector_protocol::records::record_batch::RecordBatch;
 use kafka_connector_protocol::{ApiError, ApiRequest, ApiResponse};
-use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
+use std::collections::{BTreeMap, HashMap};
+use std::future;
 use std::ops::Add;
 use std::pin::Pin;
 use std::sync::Arc;
@@ -31,27 +34,44 @@ use tracing::{debug, instrument};
 pub(super) type ProduceRequestMessage = (FutureRecord, RecordAppendTx);
 pub(super) type RecordAppendTx = oneshot::Sender<Result<RecordAppend, ProduceError>>;
 
-type ProduceApiCallResult = (i32, Result<Option<ProduceResponse>, ApiCallError>);
-type RecordBatchesToSend =
-    BTreeMap<RecordBatchID, (RecordBatch, Vec<(RecordAppend, RecordAppendTx)>)>;
-
-#[derive(Debug, Ord, PartialOrd, Eq, PartialEq, Clone)]
-struct RecordBatchID {
+struct ProduceApiCallResult {
     broker_id: i32,
-    topic: String,
-    partition: i32,
+    msg_id: u32,
+    response: Result<Option<ProduceResponse>, ApiCallError>,
 }
+
+#[derive(Default, Debug)]
+struct BatchBuilder {
+    records: Vec<(Record, RecordAppend, RecordAppendTx)>,
+}
+
+#[derive(Default, Debug)]
+struct Batch {
+    records: Vec<(RecordAppend, RecordAppendTx)>,
+}
+
+#[derive(Default, Debug)]
+struct BrokerState {
+    batches_waiting: BTreeMap<(String, i32), BatchBuilder>,
+    active_calls: HashMap<u32, HashMap<String, HashMap<i32, Batch>>>,
+}
+
 pub struct ProducerLoop<P>
 where
     P: Partitioner,
 {
     controller: Arc<ClusterController>,
-    producer_options: KafkaProducerOptions<P>,
+    producer_options: Arc<KafkaProducerOptions<P>>,
     serialization_buffer: BytesMut,
-    records_waiting: VecDeque<ProduceRequestMessage>,
-    records_in_flight: BTreeMap<RecordBatchID, Vec<(RecordAppend, RecordAppendTx)>>,
+    brokers: HashMap<i32, BrokerState>,
+    /// Internal counter to provide unique identifiers to track messages in flight
+    produce_calls_counter: u32,
 }
 
+// TODO: add linger_ms support
+// TODO: add max_bytes support - for topic/partition, same for produce message as a whole(?) (more than one batch with same broker, topic, partition)
+// TODO: add multiple requests in flight support (more than one batch with same broker, topic, partition)
+// TODO: Produce call error handling
 impl<P> ProducerLoop<P>
 where
     P: Partitioner,
@@ -63,362 +83,152 @@ where
         receiver: mpsc::UnboundedReceiver<ProduceRequestMessage>,
     ) {
         let serialization_buffer = BytesMut::with_capacity(controller.options.advanced.buffer_size);
+        let producer_options = Arc::new(producer_options);
         ProducerLoop {
             controller,
             producer_options,
             serialization_buffer,
-            records_waiting: VecDeque::new(),
-            records_in_flight: Default::default(),
+            brokers: HashMap::new(),
+            produce_calls_counter: 0,
         }
         .run(receiver)
         .await;
     }
 
     #[instrument(level = "debug", skip_all)]
-    async fn run(&mut self, mut receiver: mpsc::UnboundedReceiver<ProduceRequestMessage>) {
+    async fn run(mut self, mut receiver: mpsc::UnboundedReceiver<ProduceRequestMessage>) {
         debug!("Producer loop started.");
-        // TODO: Add batching based on time
 
-        let mut send_message_task = Box::pin(Self::conditional_task(None));
+        let mut send_message_task = select_all([self.send_produce_request(-1)]);
 
         loop {
             tokio::select! {
                 signal = receiver.recv() => {
                     match signal {
                         Some(request) => {
-                            self.records_waiting.push_back(request);
-                            if self.records_in_flight.is_empty()
-                                && let Some(futures) = self.send_messages().await {
-                                    send_message_task = Box::pin(Self::conditional_task(Some(select_all(futures))));
-                                }
+                            self.add_message(request).await;
+
                         }
                         None => { break;}
                     }
                 },
-                Some((response, _, api_calls_in_flight)) = &mut send_message_task, if !self.records_in_flight.is_empty() => {
-                    self.handle_responses(response).await;
-                    if api_calls_in_flight.is_empty() {
-                         if let Some(futures) = self.send_messages().await {
-                            send_message_task = Box::pin(Self::conditional_task(Some(select_all(futures))));
-                        }
-                    } else {
-                        send_message_task = Box::pin(Self::conditional_task(Some(select_all(api_calls_in_flight))));
+                (response, _, api_calls_in_flight) = &mut send_message_task => {
+                    self.on_produce_response(response).await;
+                    if !api_calls_in_flight.is_empty() {
+                        send_message_task = select_all(api_calls_in_flight);
                     }
 
+                },
+                broker_id = self.ready_to_send_data() => {
+                    let mut futures = send_message_task.into_inner();
+                    futures.push(self.send_produce_request(broker_id));
+                    send_message_task = select_all(futures);
                 }
             }
         }
 
-        while let Some((_, batch_records)) = self.records_in_flight.pop_first() {
-            for (_, tx) in batch_records {
-                let _ = tx.send(Err(ProduceError::ApiCallError(
-                    ApiCallError::BrokerConnectionClosed,
-                )));
-            }
-        }
+        // TODO: Test cleanup
+        self.brokers.into_iter().for_each(|(_, broker_data)| {
+            broker_data
+                .batches_waiting
+                .into_iter()
+                .flat_map(|(_, batch_data)| batch_data.records)
+                .for_each(|(_, _, tx)| {
+                    let _ = tx.send(Err(ProduceError::ProducerClosed));
+                });
+            broker_data
+                .active_calls
+                .into_values()
+                .flat_map(|topic| topic.into_values())
+                .flat_map(|partition| partition.into_values())
+                .flat_map(|batch| batch.records)
+                .for_each(|(_, tx)| {
+                    let _ = tx.send(Err(ProduceError::ProducerClosed));
+                });
+        });
 
         debug!("Producer loop is closing");
     }
 
-    async fn handle_responses(
-        &mut self,
-        (broker_id, response): (i32, Result<Option<ProduceResponse>, ApiCallError>),
-    ) {
-        match response {
-            Ok(response) => {
-                if let Some(response) = response {
-                    for resp in response.responses {
-                        for part in resp.partitions {
-                            let partition_signals = self
-                                .records_in_flight
-                                .remove(&RecordBatchID {
-                                    broker_id,
-                                    topic: resp.name.clone(),
-                                    partition: part.partition_index,
-                                })
-                                .unwrap();
-                            for (i, (mut append, sig)) in partition_signals.into_iter().enumerate()
-                            {
-                                match part.error_code {
-                                    None => {
-                                        append.offset = part.base_offset + i as i64;
-                                        if part.log_append_time_ms != -1 {
-                                            append.timestamp =
-                                                SystemTime::UNIX_EPOCH.add(Duration::from_millis(
-                                                    part.log_append_time_ms as u64,
-                                                ));
-                                        }
-                                        let _ = sig.send(Ok(append));
-                                    }
-                                    Some(error_code) => {
-                                        let _ = sig.send(Err(ProduceError::ApiCallError(
-                                            ApiCallError::UnexpectedErrorCode(
-                                                ProduceResponse::get_api_key(),
-                                                error_code,
-                                                "responses.partitions.error_code",
-                                            ),
-                                        )));
-                                    }
-                                }
-                            }
-                        }
+    /// Schedules record to be sent
+    async fn add_message(&mut self, (record, tx): ProduceRequestMessage) {
+        let partitions = match self
+            .controller
+            .get_metadata([record.topic.clone()].into(), ForceRefresh::No)
+            .await
+            .map(|x| x.into_values().next())
+        {
+            Ok(Some(MetadataResponseTopic {
+                error_code: None,
+                partitions,
+                ..
+            })) => partitions,
+            Ok(Some(MetadataResponseTopic {
+                error_code: Some(error_code),
+                ..
+            })) => {
+                let error = match error_code {
+                    ApiError::RequestTimedOut => {
+                        ProduceError::ApiCallError(ApiCallError::TimeoutReached)
                     }
-                } else {
-                    let batches_sent = self
-                        .records_in_flight
-                        .keys()
-                        .filter(|batch_id| batch_id.broker_id == broker_id)
-                        .cloned()
-                        .collect::<Vec<_>>();
-                    for batch in batches_sent {
-                        for (mut append, sig) in self.records_in_flight.remove(&batch).unwrap() {
-                            append.offset = -1;
-                            let _ = sig.send(Ok(append));
-                        }
-                    }
-                }
+                    ApiError::UnknownTopicOrPartition => ProduceError::TopicNotFound(record.topic),
+                    error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
+                        MetadataRequest::get_api_key(),
+                        error_code,
+                        "topics.error_code",
+                    )),
+                };
+                let _ = tx.send(Err(error));
+                return;
+            }
+            Ok(None) => {
+                let _ = tx.send(Err(ProduceError::TopicNotFound(record.topic)));
+                return;
             }
             Err(err) => {
-                let batches_sent = self
-                    .records_in_flight
-                    .keys()
-                    .filter(|batch_id| batch_id.broker_id == broker_id)
-                    .cloned()
-                    .collect::<Vec<_>>();
-                for batch in batches_sent {
-                    for (_, sig) in self.records_in_flight.remove(&batch).unwrap() {
-                        let _ = sig.send(Err(ProduceError::ApiCallError(err.clone())));
-                    }
-                }
+                let _ = tx.send(Err(ProduceError::MetadataFetchFailed(err)));
+                return;
             }
-        }
-    }
-
-    async fn conditional_task<F: Future<Output = OUT>, OUT>(t: Option<F>) -> Option<OUT> {
-        match t {
-            None => None,
-            Some(t) => Some(t.await),
-        }
-    }
-    async fn send_messages(
-        &mut self,
-    ) -> Option<
-        Vec<
-            Pin<
-                Box<
-                    impl Future<Output = (i32, Result<Option<ProduceResponse>, ApiCallError>)> + use<P>,
-                >,
-            >,
-        >,
-    > {
-        // TODO: max record batch size - may require changing single record batch to vec (if max msg size > max record batch size)
-        // TODO: KIP-192 retry, multiple calls in transit (to same broker) - most retries should be handled by producer client, some (idempotency related) by loop itself
-
-        if self.records_waiting.is_empty() {
-            return None;
-        }
-
-        let topics = self
-            .records_waiting
-            .iter()
-            .map(|(record, _)| record.topic.clone())
-            .collect::<HashSet<String>>();
-
-        // Blocks producer loop if metadata requests is send to a broker - will prevent multiple requests for the same topics running in parallel
-        let metadata = self
-            .controller
-            .get_metadata(topics, ForceRefresh::No)
-            .await
-            .map_err(|err| {
-                while let Some(req) = self.records_waiting.pop_front() {
-                    let _ = req
-                        .1
-                        .send(Err(ProduceError::MetadataFetchFailed(err.clone())));
-                }
-            })
-            .ok()?;
-
-        let mut batches_to_send = BTreeMap::new();
-        let default_timestamp = SystemTime::now();
-
-        while let Some((record, tx)) = self.records_waiting.pop_front() {
-            if let Err((tx, err)) = self.process_record(
-                record,
-                &metadata,
-                &mut batches_to_send,
-                default_timestamp,
-                tx,
-            ) {
-                let _ = tx.send(Err(err));
-                continue;
-            }
-        }
-
-        if batches_to_send.is_empty() {
-            return None;
-        }
-
-        Some(self.send_produce_api_calls(&mut batches_to_send))
-    }
-
-    fn send_produce_api_calls(
-        &mut self,
-        batches_to_send: &mut RecordBatchesToSend,
-    ) -> Vec<Pin<Box<impl Future<Output = ProduceApiCallResult> + use<P>>>> {
-        let mut requests: Vec<(i32, ProduceRequest)> = vec![];
-
-        let mut prev_broker_id = None;
-        let mut prev_topic = None;
-
-        while let Some((
-            RecordBatchID {
-                broker_id,
-                topic,
-                partition,
-            },
-            (mut batch, signal_triggers),
-        )) = batches_to_send.pop_first()
-        {
-            self.records_in_flight.insert(
-                RecordBatchID {
-                    broker_id,
-                    topic: topic.clone(),
-                    partition,
-                },
-                signal_triggers,
-            );
-
-            batch.encode(&mut self.serialization_buffer);
-            let records = self.serialization_buffer.to_vec();
-            self.serialization_buffer.clear();
-
-            if prev_broker_id == Some(broker_id) {
-                let topics = &mut requests.last_mut().unwrap().1.topics;
-                if prev_topic.as_ref().unwrap() == topic.as_str() {
-                    topics
-                        .last_mut()
-                        .unwrap()
-                        .partitions
-                        .push(PartitionProduceData {
-                            partition_index: partition,
-                            records: Some(records),
-                        });
-                } else {
-                    topics.push(TopicProduceData {
-                        name: topic.clone(),
-                        partitions: vec![PartitionProduceData {
-                            partition_index: partition,
-                            records: Some(records),
-                        }],
-                    });
-                }
-            } else {
-                requests.push((
-                    broker_id,
-                    ProduceRequest {
-                        acks: self.producer_options.acks.into(),
-                        topics: vec![TopicProduceData {
-                            name: topic.clone(),
-                            partitions: vec![PartitionProduceData {
-                                partition_index: partition,
-                                records: Some(records),
-                            }],
-                        }],
-                        timeout_ms: self
-                            .producer_options
-                            .timeout
-                            .map(|d| d.as_millis() as i32)
-                            .unwrap_or(0),
-                        ..Default::default()
-                    },
-                ));
-            }
-            prev_broker_id = Some(broker_id);
-            prev_topic = Some(topic);
-        }
-
-        requests
-            .into_iter()
-            .map(|(broker_id, request)| {
-                let controller = self.controller.clone();
-                let ack_no = matches!(self.producer_options.acks, Acks::NoAck);
-                Box::pin(async move {
-                    (
-                        broker_id,
-                        if ack_no {
-                            controller
-                                .make_api_call_without_response(broker_id, request, None)
-                                .await
-                                .map(|_| None)
-                        } else {
-                            controller
-                                .make_api_call(broker_id, request, None)
-                                .await
-                                .map(Some)
-                        },
-                    )
-                })
-            })
-            .collect::<Vec<_>>()
-    }
-    fn process_record(
-        &self,
-        record: FutureRecord,
-        metadata: &HashMap<String, MetadataResponseTopic>,
-        batches_to_send: &mut RecordBatchesToSend,
-        default_timestamp: SystemTime,
-        tx: RecordAppendTx,
-    ) -> Result<(), (RecordAppendTx, ProduceError)> {
-        let topic_metadata = metadata.get(&record.topic).unwrap();
-        if let Some(error_code) = topic_metadata.error_code {
-            let error = match error_code {
-                ApiError::RequestTimedOut => {
-                    ProduceError::ApiCallError(ApiCallError::TimeoutReached)
-                }
-                ApiError::UnknownTopicOrPartition => {
-                    ProduceError::TopicNotFound(record.topic.clone())
-                }
-                error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
-                    MetadataRequest::get_api_key(),
-                    error_code,
-                    "topics.error_code",
-                )),
-            };
-            return Err((tx, error));
-        }
-
-        let partition_idx = record.partition.unwrap_or_else(|| {
-            self.producer_options
-                .partitioner
-                .calculate_partition_index(&record.key, topic_metadata.partitions.len())
-        });
-        let Some(partition_metadata) = topic_metadata
-            .partitions
-            .iter()
-            .find(|x| x.partition_index == partition_idx)
-        else {
-            return Err((
-                tx,
-                ProduceError::PartitionNotFound(record.topic.clone(), partition_idx),
-            ));
         };
 
-        if let Some(error_code) = partition_metadata.error_code {
-            let error = match error_code {
-                ApiError::UnknownTopicOrPartition => {
-                    ProduceError::TopicNotFound(record.topic.clone())
-                }
-                error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
-                    MetadataRequest::get_api_key(),
-                    error_code,
-                    "topics.partitions.error_code",
-                )),
-            };
-            return Err((tx, error));
-        }
+        let partition = record.partition.unwrap_or_else(|| {
+            self.producer_options
+                .partitioner
+                .calculate_partition_index(&record.key, partitions.len())
+        });
 
-        let broker_id = partition_metadata.leader_id;
-        let timestamp = record.timestamp.unwrap_or(default_timestamp);
+        let broker_id = match partitions.iter().find(|x| x.partition_index == partition) {
+            Some(&MetadataResponsePartition {
+                error_code: None,
+                leader_id,
+                ..
+            }) => leader_id,
+            Some(&MetadataResponsePartition {
+                error_code: Some(error_code),
+                ..
+            }) => {
+                let error = match error_code {
+                    ApiError::UnknownTopicOrPartition => ProduceError::TopicNotFound(record.topic),
+                    error_code => ProduceError::ApiCallError(ApiCallError::UnexpectedErrorCode(
+                        MetadataRequest::get_api_key(),
+                        error_code,
+                        "topics.partitions.error_code",
+                    )),
+                };
+                let _ = tx.send(Err(error));
+                return;
+            }
+            None => {
+                let _ = tx.send(Err(ProduceError::PartitionNotFound(
+                    record.topic,
+                    partition,
+                )));
+                return;
+            }
+        };
+
+        let timestamp = record.timestamp.unwrap_or(SystemTime::now());
+
         let produce_record = Record {
             timestamp_delta: VarLong(
                 timestamp
@@ -441,23 +251,214 @@ where
             ),
         };
 
-        let entry = batches_to_send
-            .entry(RecordBatchID {
-                broker_id,
-                topic: record.topic,
-                partition: partition_idx,
-            })
-            .or_default();
-        entry.0.records.push(produce_record);
-        entry.1.push((
-            RecordAppend {
-                partition: partition_idx,
-                offset: 0,
-                timestamp,
-            },
-            tx,
-        ));
+        let record_append = RecordAppend {
+            partition,
+            offset: 0,
+            timestamp,
+        };
 
-        Ok(())
+        self.brokers
+            .entry(broker_id)
+            .or_default()
+            .batches_waiting
+            .entry((record.topic.clone(), partition))
+            .or_default()
+            .records
+            .push((produce_record, record_append, tx));
+    }
+
+    /// Returns id of a broker, that is able to receive new records.
+    ///
+    /// If there are no messages to be sent future will never resolve.
+    fn ready_to_send_data(&mut self) -> impl Future<Output = i32> {
+        let ready_broker = self
+            .brokers
+            .iter()
+            .find(|x| !x.1.batches_waiting.is_empty())
+            .map(|x| *x.0);
+        async move {
+            if let Some(broker_id) = ready_broker {
+                return broker_id;
+            }
+            future::pending().await
+        }
+    }
+
+    /// Sends all accumulated records to the broker.
+    ///
+    /// If `broker_id=-1` pending promise will be returned for type system compatibility.
+    fn send_produce_request(
+        &mut self,
+        broker_id: i32,
+    ) -> Pin<Box<impl Future<Output = ProduceApiCallResult> + use<P>>> {
+        if broker_id == -1 {
+            return Box::pin(Either::Left(future::pending()));
+        }
+
+        self.produce_calls_counter = self.produce_calls_counter.overflowing_add(1).0;
+        let msg_id = self.produce_calls_counter;
+
+        let broker = self.brokers.get_mut(&broker_id).unwrap();
+
+        let produce_call = broker.active_calls.entry(msg_id).or_default();
+
+        let mut api_call = ProduceRequest {
+            acks: self.producer_options.acks.into(),
+            timeout_ms: self
+                .producer_options
+                .timeout
+                .map(|d| d.as_millis() as i32)
+                .unwrap_or(0),
+            ..Default::default()
+        };
+
+        while let Some(((topic, partition), batch)) = broker.batches_waiting.pop_first() {
+            let (records, record_appends) = batch
+                .records
+                .into_iter()
+                .map(|(record, append, tx)| (record, (append, tx)))
+                .unzip();
+
+            produce_call.entry(topic.clone()).or_default().insert(
+                partition,
+                Batch {
+                    records: record_appends,
+                },
+            );
+
+            let mut record_batch = RecordBatch {
+                records,
+                ..Default::default()
+            };
+
+            record_batch.encode(&mut self.serialization_buffer);
+            let records = Some(self.serialization_buffer.to_vec());
+            self.serialization_buffer.clear();
+
+            if api_call.topics.last().map(|topic| &topic.name) != Some(&topic) {
+                api_call.topics.push(TopicProduceData {
+                    name: topic.clone(),
+                    partitions: vec![],
+                });
+            }
+
+            api_call
+                .topics
+                .last_mut()
+                .unwrap()
+                .partitions
+                .push(PartitionProduceData {
+                    partition_index: partition,
+                    records,
+                });
+        }
+
+        let controller = self.controller.clone();
+        let no_ack = matches!(self.producer_options.acks, Acks::NoAck);
+
+        Box::pin(Either::Right(async move {
+            ProduceApiCallResult {
+                broker_id,
+                msg_id,
+                response: {
+                    if no_ack {
+                        controller
+                            .make_api_call_without_response(broker_id, api_call, None)
+                            .await
+                            .map(|_| None)
+                    } else {
+                        controller
+                            .make_api_call(broker_id, api_call, None)
+                            .await
+                            .map(Some)
+                    }
+                },
+            }
+        }))
+    }
+
+    async fn on_produce_response(
+        &mut self,
+        ProduceApiCallResult {
+            broker_id,
+            msg_id,
+            response,
+        }: ProduceApiCallResult,
+    ) {
+        let mut records_sent = self
+            .brokers
+            .get_mut(&broker_id)
+            .unwrap()
+            .active_calls
+            .remove(&msg_id)
+            .unwrap();
+
+        match response {
+            Ok(Some(ProduceResponse { responses, .. })) => {
+                let mappings = responses
+                    .into_iter()
+                    .map(|topic| (records_sent.remove(&topic.name).unwrap(), topic.partitions))
+                    .flat_map(|(mut batches, partition_responses)| {
+                        partition_responses
+                            .into_iter()
+                            .map(|partition_response| {
+                                (
+                                    batches.remove(&partition_response.partition_index).unwrap(),
+                                    partition_response,
+                                )
+                            })
+                            .collect::<Vec<_>>()
+                    });
+
+                for (partition_records, partition_resp) in mappings {
+                    match partition_resp.error_code {
+                        None => {
+                            for (i, (mut append, tx)) in
+                                partition_records.records.into_iter().enumerate()
+                            {
+                                append.offset = partition_resp.base_offset + i as i64;
+                                if partition_resp.log_append_time_ms != -1 {
+                                    append.timestamp =
+                                        SystemTime::UNIX_EPOCH.add(Duration::from_millis(
+                                            partition_resp.log_append_time_ms as u64,
+                                        ));
+                                }
+                                let _ = tx.send(Ok(append));
+                            }
+                        }
+                        Some(error_code) => {
+                            partition_records.records.into_iter().for_each(|(_, tx)| {
+                                let _ = tx.send(Err(ProduceError::ApiCallError(
+                                    ApiCallError::UnexpectedErrorCode(
+                                        ProduceResponse::get_api_key(),
+                                        error_code,
+                                        "responses.partitions.error_code",
+                                    ),
+                                )));
+                            });
+                        }
+                    }
+                }
+            }
+            Ok(None) => {
+                records_sent
+                    .into_values()
+                    .flat_map(|topic| topic.into_values())
+                    .flat_map(|batch| batch.records)
+                    .for_each(|(mut append, tx)| {
+                        append.offset = -1;
+                        let _ = tx.send(Ok(append));
+                    });
+            }
+            Err(err) => {
+                records_sent
+                    .into_values()
+                    .flat_map(|topic| topic.into_values())
+                    .flat_map(|batch| batch.records)
+                    .for_each(|(_, tx)| {
+                        let _ = tx.send(Err(ProduceError::ApiCallError(err.clone())));
+                    });
+            }
+        }
     }
 }

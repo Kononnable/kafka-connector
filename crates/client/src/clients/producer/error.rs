@@ -12,4 +12,6 @@ pub enum ProduceError {
     MetadataFetchFailed(ApiCallError),
     #[error("Kafka API returned unexpected error {0}")]
     ApiCallError(ApiCallError),
+    #[error("Kafka producer closed before message was delivered")]
+    ProducerClosed,
 }
