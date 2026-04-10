@@ -18,6 +18,12 @@ where
 
     /// Partitioner that will be used for assigning messages to specific partitions
     pub partitioner: P,
+
+    /// Amount of time to delay sending a message to a broker.
+    ///
+    /// Increasing this value can increase system throughput and its latency by lowering kafka protocol overhead.
+    #[derivative(Default(value = "Duration::from_millis(5)"))]
+    pub linger: Duration,
 }
 
 impl KafkaProducerOptions<Crc32Partitioner> {

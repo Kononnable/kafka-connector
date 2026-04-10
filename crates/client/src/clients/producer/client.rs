@@ -57,7 +57,10 @@ where
     // TODO: retries (+ backoff?)
     // TODO: should return type be Future or something hiding it? must_use may not be desired in this case + document it
     #[instrument(level = "debug", skip_all)]
-    pub fn send<R>(&self, record: R) -> impl Future<Output = Result<RecordAppend, ProduceError>>
+    pub fn send<R>(
+        &self,
+        record: R,
+    ) -> impl Future<Output = Result<RecordAppend, ProduceError>> + use<R, P>
     where
         R: Into<FutureRecord> + Debug,
     {

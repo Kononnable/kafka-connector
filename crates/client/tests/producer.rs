@@ -11,7 +11,10 @@ mod send {
     use kafka_connector_client::cluster::controller::ClusterController;
     use kafka_connector_client::cluster::options::ClusterControllerOptions;
     use kafka_connector_protocol::create_topics_request::CreatableTopic;
+    use std::pin::pin;
     use std::sync::Arc;
+    use std::task::{Context, Poll, Waker};
+    use std::time::Duration;
 
     #[test_log::test(tokio::test)]
     pub async fn returns_error_when_topic_does_not_exist() {
@@ -148,6 +151,105 @@ mod send {
         assert_eq!(result_no_ack.offset, -1);
         assert_eq!(result_leader.offset, 1);
         assert_eq!(result_all.offset, 2);
+
+        topic.delete().await;
+    }
+
+    #[test_log::test(tokio::test)]
+    pub async fn linger_groups_messages_into_batches() {
+        let _kafka_cluster = SingleNodeCluster::new().await;
+        let topic_name = "topic".to_owned();
+
+        let cluster = Arc::new(
+            ClusterController::new(ClusterControllerOptions {
+                bootstrap_servers: vec![(
+                    KAFKA_TEST_BROKER_ADDR_1_HOST.to_owned(),
+                    KAFKA_TEST_BROKER_ADDR_1_PORT,
+                )],
+                ..Default::default()
+            })
+            .await,
+        );
+        let topic = TestTopic::new(
+            cluster.clone(),
+            &topic_name,
+            Some(CreatableTopic {
+                num_partitions: 3,
+                replication_factor: 1,
+                ..Default::default()
+            }),
+        )
+        .await;
+
+        let producer = KafkaProducer::from_cluster_controller(
+            cluster.clone(),
+            KafkaProducerOptions {
+                linger: Duration::from_millis(500),
+                acks: Acks::NoAck,
+                ..KafkaProducerOptions::new()
+            },
+        );
+
+        let ctx = &mut Context::from_waker(Waker::noop());
+
+        let record = FutureRecord::new(&topic_name, vec![], vec![]);
+        let mut result_1 = pin!(producer.send(record.clone()));
+        let mut result_2 = pin!(producer.send(record.clone()));
+        tokio::time::sleep(Duration::from_millis(450)).await;
+        assert!(matches!(result_1.as_mut().poll(ctx), Poll::Pending));
+        assert!(matches!(result_2.as_mut().poll(ctx), Poll::Pending));
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        assert!(matches!(result_1.as_mut().poll(ctx), Poll::Ready(_)));
+        assert!(matches!(result_2.as_mut().poll(ctx), Poll::Ready(_)));
+        let mut result_3 = pin!(producer.send(record));
+        tokio::time::sleep(Duration::from_millis(450)).await;
+        assert!(matches!(result_3.as_mut().poll(ctx), Poll::Pending));
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        assert!(matches!(result_3.as_mut().poll(ctx), Poll::Ready(_)));
+
+        topic.delete().await;
+    }
+
+    #[test_log::test(tokio::test)]
+    pub async fn unsent_messages_on_producer_close_are_returned_with_error() {
+        let _kafka_cluster = SingleNodeCluster::new().await;
+        let topic_name = "topic".to_owned();
+
+        let cluster = Arc::new(
+            ClusterController::new(ClusterControllerOptions {
+                bootstrap_servers: vec![(
+                    KAFKA_TEST_BROKER_ADDR_1_HOST.to_owned(),
+                    KAFKA_TEST_BROKER_ADDR_1_PORT,
+                )],
+                ..Default::default()
+            })
+            .await,
+        );
+        let topic = TestTopic::new(
+            cluster.clone(),
+            &topic_name,
+            Some(CreatableTopic {
+                num_partitions: 3,
+                replication_factor: 1,
+                ..Default::default()
+            }),
+        )
+        .await;
+
+        let producer = KafkaProducer::from_cluster_controller(
+            cluster.clone(),
+            KafkaProducerOptions {
+                linger: Duration::from_millis(100),
+                acks: Acks::NoAck,
+                ..KafkaProducerOptions::new()
+            },
+        );
+
+        let record = FutureRecord::new(&topic_name, vec![], vec![]);
+        let send_fut = producer.send(record);
+        drop(producer);
+        let result = send_fut.await;
+        assert!(matches!(result, Err(ProduceError::ProducerClosed)));
 
         topic.delete().await;
     }

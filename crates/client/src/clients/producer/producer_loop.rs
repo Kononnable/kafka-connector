@@ -52,7 +52,8 @@ struct Batch {
 
 #[derive(Default, Debug)]
 struct BrokerState {
-    batches_waiting: BTreeMap<(String, i32), BatchBuilder>,
+    linger: Option<tokio::time::Instant>,
+    records_waiting: BTreeMap<(String, i32), BatchBuilder>,
     active_calls: HashMap<u32, HashMap<String, HashMap<i32, Batch>>>,
 }
 
@@ -130,7 +131,7 @@ where
         // TODO: Test cleanup
         self.brokers.into_iter().for_each(|(_, broker_data)| {
             broker_data
-                .batches_waiting
+                .records_waiting
                 .into_iter()
                 .flat_map(|(_, batch_data)| batch_data.records)
                 .for_each(|(_, _, tx)| {
@@ -257,10 +258,13 @@ where
             timestamp,
         };
 
-        self.brokers
-            .entry(broker_id)
-            .or_default()
-            .batches_waiting
+        let broker_state = self.brokers.entry(broker_id).or_default();
+        if broker_state.linger.is_none() {
+            broker_state.linger = Some(tokio::time::Instant::now() + self.producer_options.linger)
+        }
+
+        broker_state
+            .records_waiting
             .entry((record.topic.clone(), partition))
             .or_default()
             .records
@@ -271,13 +275,14 @@ where
     ///
     /// If there are no messages to be sent future will never resolve.
     fn ready_to_send_data(&mut self) -> impl Future<Output = i32> {
-        let ready_broker = self
+        let broker_with_lowest_linger_delay = self
             .brokers
             .iter()
-            .find(|x| !x.1.batches_waiting.is_empty())
-            .map(|x| *x.0);
+            .filter_map(|(&id, state)| state.linger.map(|delay| (id, delay)))
+            .min_by(|x, y| x.1.cmp(&y.1));
         async move {
-            if let Some(broker_id) = ready_broker {
+            if let Some((broker_id, delay)) = broker_with_lowest_linger_delay {
+                tokio::time::sleep_until(delay).await;
                 return broker_id;
             }
             future::pending().await
@@ -299,6 +304,7 @@ where
         let msg_id = self.produce_calls_counter;
 
         let broker = self.brokers.get_mut(&broker_id).unwrap();
+        broker.linger = None;
 
         let produce_call = broker.active_calls.entry(msg_id).or_default();
 
@@ -312,7 +318,7 @@ where
             ..Default::default()
         };
 
-        while let Some(((topic, partition), batch)) = broker.batches_waiting.pop_first() {
+        while let Some(((topic, partition), batch)) = broker.records_waiting.pop_first() {
             let (records, record_appends) = batch
                 .records
                 .into_iter()
