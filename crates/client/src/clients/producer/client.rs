@@ -12,7 +12,7 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::{mpsc, oneshot};
 use tracing::instrument;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RecordAppend {
     pub partition: i32,
     pub offset: i64,

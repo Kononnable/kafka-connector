@@ -13,6 +13,22 @@ pub struct Record {
     pub headers: VarIntVec<Header>,
 }
 
+impl Record {
+    /// Rough size estimation, without taking compression into consideration.
+    pub fn estimate_size(&self) -> u32 {
+        let headers_size = self.headers.0.iter().fold(0, |previous, header| {
+            previous + 1 + header.key.0.len() + 1 + header.value.0.len()
+        }) as u32;
+        1 // length
+            + 1 // attributes
+            + 1 // timestamp delta
+            + 1 // offset delta
+            + (1 + self.key.0.len() as u32) // key
+            + (1 + self.value.0.len() as u32) // value
+            + headers_size
+    }
+}
+
 impl FromBytes for Record {
     fn deserialize(_version: ApiVersion, bytes: &mut BytesMut) -> Self {
         let _length: VarInt = FromBytes::deserialize(ApiVersion(0), bytes);

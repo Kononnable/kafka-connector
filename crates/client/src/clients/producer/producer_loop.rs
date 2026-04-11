@@ -22,7 +22,7 @@ use kafka_connector_protocol::records::header::Header;
 use kafka_connector_protocol::records::record::Record;
 use kafka_connector_protocol::records::record_batch::RecordBatch;
 use kafka_connector_protocol::{ApiError, ApiRequest, ApiResponse};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, VecDeque};
 use std::future;
 use std::ops::Add;
 use std::pin::Pin;
@@ -40,21 +40,107 @@ struct ProduceApiCallResult {
     response: Result<Option<ProduceResponse>, ApiCallError>,
 }
 
-#[derive(Default, Debug)]
-struct BatchBuilder {
-    records: Vec<(Record, RecordAppend, RecordAppendTx)>,
+#[derive(Debug, Eq, PartialEq)]
+enum BatchBuilderState {
+    UnderConstruction { bytes_left: u32 },
+    Full,
 }
 
+#[derive(Debug)]
+struct BatchBuilder {
+    state: BatchBuilderState,
+    records: Vec<(Record, RecordAppend, RecordAppendTx)>,
+}
+impl BatchBuilder {
+    pub fn new(bytes_left: u32) -> Self {
+        BatchBuilder {
+            state: BatchBuilderState::UnderConstruction { bytes_left },
+            records: vec![],
+        }
+    }
+}
 #[derive(Default, Debug)]
 struct Batch {
     records: Vec<(RecordAppend, RecordAppendTx)>,
 }
 
-#[derive(Default, Debug)]
-struct BrokerState {
+#[derive(Debug)]
+struct BrokerState<P>
+where
+    P: Partitioner,
+{
     linger: Option<tokio::time::Instant>,
-    records_waiting: BTreeMap<(String, i32), BatchBuilder>,
+    options: Arc<KafkaProducerOptions<P>>,
+    records_waiting: BTreeMap<(String, i32), VecDeque<BatchBuilder>>,
     active_calls: HashMap<u32, HashMap<String, HashMap<i32, Batch>>>,
+}
+
+impl<P> BrokerState<P>
+where
+    P: Partitioner,
+{
+    pub fn new(options: Arc<KafkaProducerOptions<P>>) -> BrokerState<P> {
+        BrokerState {
+            linger: None,
+            options,
+            records_waiting: Default::default(),
+            active_calls: Default::default(),
+        }
+    }
+    pub fn add_record(
+        &mut self,
+        topic: String,
+        produce_record: Record,
+        record_append: RecordAppend,
+        tx: RecordAppendTx,
+    ) {
+        if self.linger.is_none() {
+            self.linger = Some(tokio::time::Instant::now() + self.options.linger)
+        }
+
+        let partition_batches = self
+            .records_waiting
+            .entry((topic, record_append.partition))
+            .or_default();
+
+        let record_estimated_size = produce_record.estimate_size();
+        let batch_builder = match partition_batches.back_mut() {
+            Some(builder) => match builder.state {
+                BatchBuilderState::UnderConstruction { bytes_left } => {
+                    if bytes_left < record_estimated_size {
+                        builder.state = BatchBuilderState::Full;
+                        partition_batches
+                            .push_back(BatchBuilder::new(self.options.batch_size_bytes));
+                        partition_batches.back_mut().unwrap()
+                    } else {
+                        builder
+                    }
+                }
+                BatchBuilderState::Full => {
+                    partition_batches.push_back(BatchBuilder::new(self.options.batch_size_bytes));
+                    partition_batches.back_mut().unwrap()
+                }
+            },
+            None => {
+                partition_batches.push_back(BatchBuilder::new(self.options.batch_size_bytes));
+                partition_batches.back_mut().unwrap()
+            }
+        };
+
+        batch_builder
+            .records
+            .push((produce_record, record_append, tx));
+        batch_builder.state = if let BatchBuilderState::UnderConstruction { bytes_left } =
+            batch_builder.state
+            && bytes_left > record_estimated_size
+        {
+            BatchBuilderState::UnderConstruction {
+                bytes_left: bytes_left - record_estimated_size,
+            }
+        } else {
+            BatchBuilderState::Full
+        };
+    }
 }
 
 pub struct ProducerLoop<P>
@@ -64,13 +150,12 @@ where
     controller: Arc<ClusterController>,
     producer_options: Arc<KafkaProducerOptions<P>>,
     serialization_buffer: BytesMut,
-    brokers: HashMap<i32, BrokerState>,
+    brokers: HashMap<i32, BrokerState<P>>,
     /// Internal counter to provide unique identifiers to track messages in flight
     produce_calls_counter: u32,
 }
 
-// TODO: add linger_ms support
-// TODO: add max_bytes support - for topic/partition, same for produce message as a whole(?) (more than one batch with same broker, topic, partition)
+// TODO: add max_request_size support
 // TODO: add multiple requests in flight support (more than one batch with same broker, topic, partition)
 // TODO: Produce call error handling
 impl<P> ProducerLoop<P>
@@ -128,12 +213,12 @@ where
             }
         }
 
-        // TODO: Test cleanup
         self.brokers.into_iter().for_each(|(_, broker_data)| {
             broker_data
                 .records_waiting
                 .into_iter()
-                .flat_map(|(_, batch_data)| batch_data.records)
+                .flat_map(|(_, batch_data)| batch_data)
+                .flat_map(|x| x.records)
                 .for_each(|(_, _, tx)| {
                     let _ = tx.send(Err(ProduceError::ProducerClosed));
                 });
@@ -258,31 +343,45 @@ where
             timestamp,
         };
 
-        let broker_state = self.brokers.entry(broker_id).or_default();
-        if broker_state.linger.is_none() {
-            broker_state.linger = Some(tokio::time::Instant::now() + self.producer_options.linger)
-        }
-
-        broker_state
-            .records_waiting
-            .entry((record.topic.clone(), partition))
-            .or_default()
-            .records
-            .push((produce_record, record_append, tx));
+        let broker_state = self
+            .brokers
+            .entry(broker_id)
+            .or_insert_with(|| BrokerState::new(self.producer_options.clone()));
+        broker_state.add_record(record.topic, produce_record, record_append, tx);
     }
 
     /// Returns id of a broker, that is able to receive new records.
     ///
     /// If there are no messages to be sent future will never resolve.
     fn ready_to_send_data(&mut self) -> impl Future<Output = i32> {
-        let broker_with_lowest_linger_delay = self
+        let (broker_id, delay) = self
             .brokers
             .iter()
-            .filter_map(|(&id, state)| state.linger.map(|delay| (id, delay)))
-            .min_by(|x, y| x.1.cmp(&y.1));
+            .find_map(|(&id, state)| {
+                state
+                    .records_waiting
+                    .iter()
+                    .find(|(_, partition_batches)| {
+                        partition_batches
+                            .iter()
+                            .any(|batch| matches!(batch.state, BatchBuilderState::Full))
+                    })
+                    .map(|_| (id, None))
+            })
+            .or_else(|| {
+                self.brokers
+                    .iter()
+                    .filter_map(|(&id, state)| state.linger.map(|delay| (id, delay)))
+                    .min_by(|(_, x), (_, y)| x.cmp(y))
+                    .map(|(broker, delay)| (broker, Some(delay)))
+            })
+            .unzip();
+
         async move {
-            if let Some((broker_id, delay)) = broker_with_lowest_linger_delay {
-                tokio::time::sleep_until(delay).await;
+            if let Some(broker_id) = broker_id {
+                if let Some(delay) = delay.flatten() {
+                    tokio::time::sleep_until(delay).await;
+                }
                 return broker_id;
             }
             future::pending().await
@@ -320,8 +419,8 @@ where
 
         while let Some(((topic, partition), batch)) = broker.records_waiting.pop_first() {
             let (records, record_appends) = batch
-                .records
                 .into_iter()
+                .flat_map(|x| x.records)
                 .map(|(record, append, tx)| (record, (append, tx)))
                 .unzip();
 
@@ -464,6 +563,143 @@ where
                     .for_each(|(_, tx)| {
                         let _ = tx.send(Err(ProduceError::ApiCallError(err.clone())));
                     });
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod broker_state {
+        use super::*;
+        mod add_record {
+            use super::*;
+
+            #[test_log::test]
+            fn sets_linger_only_on_first_record() {
+                let options = Arc::new(KafkaProducerOptions::new());
+                let mut state = BrokerState::new(options);
+
+                assert!(state.linger.is_none());
+
+                let produce_record = Record::default();
+                let record_append = RecordAppend {
+                    partition: 0,
+                    offset: 0,
+                    timestamp: SystemTime::now(),
+                };
+
+                let (tx, _) = oneshot::channel();
+                state.add_record(
+                    "topic".to_owned(),
+                    produce_record.clone(),
+                    record_append.clone(),
+                    tx,
+                );
+
+                assert!(state.linger.is_some());
+                let prev_value = state.linger.as_ref().unwrap().clone();
+
+                let (tx, _) = oneshot::channel();
+                state.add_record(
+                    "topic".to_owned(),
+                    produce_record.clone(),
+                    record_append.clone(),
+                    tx,
+                );
+                assert!(state.linger.is_some());
+                assert_eq!(state.linger.unwrap(), prev_value);
+            }
+
+            #[test_log::test]
+            fn creates_new_batch_once_batch_size_limit_is_met() {
+                let options = Arc::new(KafkaProducerOptions {
+                    batch_size_bytes: 1_000,
+                    ..KafkaProducerOptions::new()
+                });
+                let mut state = BrokerState::new(options);
+                let topic_name = "topic".to_owned();
+
+                let record_small = Record {
+                    value: VarIntBytes([0_u8; 494].into()),
+                    ..Default::default()
+                };
+                assert_eq!(record_small.estimate_size(), 500);
+
+                let record_large = Record {
+                    value: VarIntBytes([0_u8; 2_000].into()),
+                    ..Default::default()
+                };
+
+                let record_append = RecordAppend {
+                    partition: 0,
+                    offset: 0,
+                    timestamp: SystemTime::now(),
+                };
+
+                state.add_record(
+                    topic_name.clone(),
+                    record_small.clone(),
+                    record_append.clone(),
+                    oneshot::channel().0,
+                );
+                let mut batches = state.records_waiting.iter().next().unwrap().1.iter();
+                assert_eq!(
+                    batches.next().unwrap().state,
+                    BatchBuilderState::UnderConstruction { bytes_left: 500 }
+                );
+                assert!(batches.next().is_none());
+
+                state.add_record(
+                    topic_name.clone(),
+                    record_small.clone(),
+                    record_append.clone(),
+                    oneshot::channel().0,
+                );
+                let mut batches = state.records_waiting.iter().next().unwrap().1.iter();
+                assert_eq!(batches.next().unwrap().state, BatchBuilderState::Full);
+                assert!(batches.next().is_none());
+
+                state.add_record(
+                    topic_name.clone(),
+                    record_small.clone(),
+                    record_append.clone(),
+                    oneshot::channel().0,
+                );
+                let mut batches = state.records_waiting.iter().next().unwrap().1.iter();
+                assert_eq!(batches.next().unwrap().state, BatchBuilderState::Full);
+                assert_eq!(
+                    batches.next().unwrap().state,
+                    BatchBuilderState::UnderConstruction { bytes_left: 500 }
+                );
+                assert!(batches.next().is_none());
+
+                state.add_record(
+                    topic_name.clone(),
+                    record_large.clone(),
+                    record_append.clone(),
+                    oneshot::channel().0,
+                );
+                let mut batches = state.records_waiting.iter().next().unwrap().1.iter();
+                assert_eq!(batches.next().unwrap().state, BatchBuilderState::Full);
+                assert_eq!(batches.next().unwrap().state, BatchBuilderState::Full);
+                assert_eq!(batches.next().unwrap().state, BatchBuilderState::Full);
+                assert!(batches.next().is_none());
+
+                state.add_record(
+                    topic_name.clone(),
+                    record_large.clone(),
+                    record_append.clone(),
+                    oneshot::channel().0,
+                );
+                let mut batches = state.records_waiting.iter().next().unwrap().1.iter();
+                assert_eq!(batches.next().unwrap().state, BatchBuilderState::Full);
+                assert_eq!(batches.next().unwrap().state, BatchBuilderState::Full);
+                assert_eq!(batches.next().unwrap().state, BatchBuilderState::Full);
+                assert_eq!(batches.next().unwrap().state, BatchBuilderState::Full);
+                assert!(batches.next().is_none());
             }
         }
     }

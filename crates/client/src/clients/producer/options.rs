@@ -24,6 +24,14 @@ where
     /// Increasing this value can increase system throughput and its latency by lowering kafka protocol overhead.
     #[derivative(Default(value = "Duration::from_millis(5)"))]
     pub linger: Duration,
+
+    /// Maximum size of record batch that will be sent to kafka broker.
+    ///
+    /// If a single record is larger than this value, it will still be sent as a single record in a batch.
+    ///
+    /// This value takes into account only user records, before compression, with partial protocol overhead.
+    #[derivative(Default(value = "16 * 1024"))]
+    pub batch_size_bytes: u32,
 }
 
 impl KafkaProducerOptions<Crc32Partitioner> {
