@@ -32,6 +32,10 @@ where
     /// This value takes into account only user records, before compression, with partial protocol overhead.
     #[derivative(Default(value = "16 * 1024"))]
     pub batch_size_bytes: u32,
+
+    /// Maximum number of unacknowledged produce requests
+    #[derivative(Default(value = "5"))]
+    pub max_requests_in_flight: u8,
 }
 
 impl KafkaProducerOptions<Crc32Partitioner> {

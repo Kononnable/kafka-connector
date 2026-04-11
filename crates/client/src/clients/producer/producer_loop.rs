@@ -352,11 +352,16 @@ where
 
     /// Returns id of a broker, that is able to receive new records.
     ///
+    /// **Should be run only from producer main loop.**
+    ///
     /// If there are no messages to be sent future will never resolve.
     fn ready_to_send_data(&mut self) -> impl Future<Output = i32> {
         let (broker_id, delay) = self
             .brokers
             .iter()
+            .filter(|(_, state)| {
+                state.active_calls.len() < self.producer_options.max_requests_in_flight as usize
+            })
             .find_map(|(&id, state)| {
                 state
                     .records_waiting
@@ -371,6 +376,10 @@ where
             .or_else(|| {
                 self.brokers
                     .iter()
+                    .filter(|(_, state)| {
+                        state.active_calls.len()
+                            < self.producer_options.max_requests_in_flight as usize
+                    })
                     .filter_map(|(&id, state)| state.linger.map(|delay| (id, delay)))
                     .min_by(|(_, x), (_, y)| x.cmp(y))
                     .map(|(broker, delay)| (broker, Some(delay)))
@@ -700,6 +709,83 @@ mod tests {
                 assert_eq!(batches.next().unwrap().state, BatchBuilderState::Full);
                 assert_eq!(batches.next().unwrap().state, BatchBuilderState::Full);
                 assert!(batches.next().is_none());
+            }
+        }
+    }
+    mod producer_loop {
+        use super::*;
+
+        mod ready_to_send_data {
+            use super::*;
+            use std::pin::pin;
+            use std::task::{Context, Poll, Waker};
+
+            #[test_log::test]
+            fn sets_linger_only_on_first_record() {
+                let producer_options = Arc::new(KafkaProducerOptions {
+                    max_requests_in_flight: 3,
+                    batch_size_bytes: 0,
+                    ..KafkaProducerOptions::new()
+                });
+                let mut producer_loop = ProducerLoop {
+                    controller: ClusterController::fake_new(),
+                    producer_options: producer_options.clone(),
+                    serialization_buffer: Default::default(),
+                    brokers: Default::default(),
+                    produce_calls_counter: 0,
+                };
+                producer_loop
+                    .brokers
+                    .insert(0, BrokerState::new(producer_options));
+                producer_loop.brokers.get_mut(&0).unwrap().add_record(
+                    "topic".to_owned(),
+                    Record::default(),
+                    RecordAppend {
+                        partition: 0,
+                        offset: 0,
+                        timestamp: SystemTime::now(),
+                    },
+                    oneshot::channel().0,
+                );
+                let ctx = &mut Context::from_waker(Waker::noop());
+
+                assert!(matches!(
+                    pin!(producer_loop.ready_to_send_data()).as_mut().poll(ctx),
+                    Poll::Ready(0)
+                ));
+
+                producer_loop
+                    .brokers
+                    .get_mut(&0)
+                    .unwrap()
+                    .active_calls
+                    .insert(0, Default::default());
+                assert!(matches!(
+                    pin!(producer_loop.ready_to_send_data()).as_mut().poll(ctx),
+                    Poll::Ready(0)
+                ));
+
+                producer_loop
+                    .brokers
+                    .get_mut(&0)
+                    .unwrap()
+                    .active_calls
+                    .insert(1, Default::default());
+                assert!(matches!(
+                    pin!(producer_loop.ready_to_send_data()).as_mut().poll(ctx),
+                    Poll::Ready(0)
+                ));
+
+                producer_loop
+                    .brokers
+                    .get_mut(&0)
+                    .unwrap()
+                    .active_calls
+                    .insert(2, Default::default());
+                assert!(matches!(
+                    pin!(producer_loop.ready_to_send_data()).as_mut().poll(ctx),
+                    Poll::Pending
+                ));
             }
         }
     }

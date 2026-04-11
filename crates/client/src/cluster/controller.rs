@@ -343,6 +343,17 @@ impl ClusterController {
         }
         drop(refresh_timeout);
     }
+
+    /// Used only in UTs to test higher level structs without any network interaction.
+    #[cfg(test)]
+    pub(crate) fn fake_new() -> Arc<ClusterController> {
+        Arc::new(ClusterController {
+            broker_list: Default::default(),
+            options: Arc::new(ClusterControllerOptions::default()),
+            topic_metadata_cache: Mutex::new(HashMap::new()),
+            topic_metadata_refresh: Mutex::new(Instant::now()),
+        })
+    }
 }
 
 #[cfg(test)]
