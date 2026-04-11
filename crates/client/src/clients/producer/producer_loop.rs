@@ -600,7 +600,7 @@ mod tests {
                 );
 
                 assert!(state.linger.is_some());
-                let prev_value = state.linger.as_ref().unwrap().clone();
+                let prev_value = *state.linger.as_ref().unwrap();
 
                 let (tx, _) = oneshot::channel();
                 state.add_record(
