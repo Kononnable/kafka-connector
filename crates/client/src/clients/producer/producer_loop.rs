@@ -156,7 +156,6 @@ where
 }
 
 // TODO: add max_request_size support
-// TODO: add multiple requests in flight support (more than one batch with same broker, topic, partition)
 // TODO: Produce call error handling
 impl<P> ProducerLoop<P>
 where

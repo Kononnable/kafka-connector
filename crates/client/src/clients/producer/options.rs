@@ -33,7 +33,7 @@ where
     #[derivative(Default(value = "16 * 1024"))]
     pub batch_size_bytes: u32,
 
-    /// Maximum number of unacknowledged produce requests
+    /// Maximum number of unacknowledged produce requests for each broker
     #[derivative(Default(value = "5"))]
     pub max_requests_in_flight: u8,
 }
