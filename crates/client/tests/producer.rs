@@ -63,7 +63,7 @@ mod send {
         let result = producer.send(record).await;
 
         let is_error = if let ProduceError::PartitionNotFound(topic, partition) =
-            dbg!(result).err().unwrap()
+            result.err().unwrap()
             && topic == topic_name
             && partition == 10
         {

@@ -11,10 +11,12 @@ version.workspace = true
 
 [dependencies]
 bytes = "1.6.0"
+crc = "3.4.0"
 derivative = "2.2.0"
 futures = "0.3.31"
 indexmap = "2.2.5"
 kafka-connector-protocol = { version = "0.1.0", path = "./../protocol" }
+rand = "0.10.1"
 thiserror = "2.0.12"
 tokio = { version = "1.36.0", features = ["net", "io-util", "rt", "sync", "time", "macros"] }
 tracing = { version = "0.1.40", features = ["log"] }
