@@ -1,7 +1,9 @@
+use crate::clients::consumer::assignment_strategy::round_robin::RoundRobin;
 use crate::protocol_consts::ListOffsetsTimestampType;
 use derivative::Derivative;
 use std::collections::HashSet;
 use std::ops::Sub;
+use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
 #[derive(Clone, Debug, Derivative)]
@@ -33,6 +35,30 @@ pub struct KafkaConsumerOptions {
     /// Defines which offset to start consuming from if there is no previous offset stored, or if it is unavailable.
     #[derivative(Default(value = "OffsetReset::Latest"))]
     pub offset_reset: OffsetReset,
+
+    /// Consumer group identifier.
+    ///
+    /// If set to `None` consumer will act without a group, without commiting any processed offsets and ability to
+    /// resume work after restart.
+    pub group_id: Option<String>,
+
+    /// Timeout used to detect consumer failures.
+    ///
+    /// If consumer does not send a heartbeat within the timeout broker will consider consumer dead and initiate
+    /// a consumer group rebalance.
+    #[derivative(Default(value = "Duration::from_secs(45)"))]
+    pub session_timeout: Duration,
+
+    // TODO: keep separate or implement like in java client with max.poll.interval.ms; docs
+    #[derivative(Default(value = "Duration::from_secs(300)"))]
+    pub rebalance_timeout: Duration,
+
+    // TODO: docs, make sure it's not empty if group is set(?) default values
+    // note on arc - copying consumer options side effects (internal mutability of implementation + reuse same instance through arc)
+    #[derivative(Default(value = "vec![Arc::new(RoundRobin{})]"))]
+    // TODO: change to dyn trait when trait interface is defined
+    // pub assignment_strategies: Vec<Arc<dyn ConsumerAssignmentStrategy>>,
+    pub assignment_strategies: Vec<Arc<RoundRobin>>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
