@@ -25,7 +25,7 @@ impl KafkaConsumer {
         controller: Arc<ClusterController>,
         consumer_options: KafkaConsumerOptions,
     ) -> KafkaConsumer {
-        let (record_tx, record_rx) = mpsc::channel(100);
+        let (record_tx, record_rx) = mpsc::channel(1); // TODO: force 1 from consumer_loop side (?) - strict requirement from consumer_loop logic
         let (command_tx, command_rx) = mpsc::channel(1);
         tokio::spawn(ConsumerLoop::start(
             controller.clone(),

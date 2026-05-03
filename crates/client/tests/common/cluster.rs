@@ -114,6 +114,7 @@ fn kafka_container(node_id: u16, nodes_in_cluster: u32) -> ContainerRequest<Gene
         )
         .with_env_var("KAFKA_CONTROLLER_QUORUM_VOTERS", quorum_voters)
         .with_env_var("KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS", "0")
+        .with_env_var("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1")
         .with_mapped_port(node_id * 10_000 + 9_092, ContainerPort::Tcp(9092))
         .with_network("kafka-cluster");
     if let Some(rack) = rack {

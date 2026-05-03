@@ -85,7 +85,7 @@ pub struct BrokerLoop {
 }
 
 impl BrokerLoop {
-    #[instrument(level = "debug", skip(api_request_receiver, supported_api_versions))]
+    #[instrument(level = "debug", skip_all)]
     pub async fn start(
         metadata: Arc<Mutex<BrokerMetadata>>,
         api_request_receiver: mpsc::UnboundedReceiver<ApiRequestMessage>,

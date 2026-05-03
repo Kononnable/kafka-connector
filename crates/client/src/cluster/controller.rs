@@ -37,7 +37,7 @@ pub enum ForceRefresh {
 impl ClusterController {
     /// Initializes communication with Kafka cluster.
     /// Will wait for successful connection with first available broker from `bootstrap_servers`.
-    #[instrument(level = "debug")]
+    #[instrument(level = "debug", skip_all)]
     pub async fn new(options: ClusterControllerOptions) -> ClusterController {
         assert!(
             !options.bootstrap_servers.is_empty(),

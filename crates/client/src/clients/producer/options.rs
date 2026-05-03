@@ -16,6 +16,7 @@ where
     #[derivative(Default(value = "None"))]
     pub timeout: Option<Duration>,
 
+    // TODO: Consider if it's better to leave it as generic parameter, or use dyn trait (api simplicity, performance cost not observable)
     /// Partitioner that will be used for assigning messages to specific partitions
     pub partitioner: P,
 
