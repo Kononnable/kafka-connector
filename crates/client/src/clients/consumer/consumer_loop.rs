@@ -1,5 +1,7 @@
+use crate::clients::consumer::auto_commit::AutoCommit;
 use crate::clients::consumer::error::ConsumeError;
 use crate::clients::consumer::error::ConsumeError::MetadataFetchFailed;
+use crate::clients::consumer::heartbeat::Heartbeat;
 use crate::clients::consumer::options::KafkaConsumerOptions;
 use crate::clients::consumer::record::Record;
 use crate::clients::consumer::subscribed_partitions::Subscriptions;
@@ -9,13 +11,10 @@ use crate::protocol_consts::consumer_protocol_assignment::ConsumerProtocolAssign
 use crate::protocol_consts::consumer_protocol_subscription::ConsumerProtocolSubscription;
 use crate::protocol_consts::{FindCoordinatorKeyType, IsolationLevel};
 use bytes::BytesMut;
-use derivative::Derivative;
-use futures::future::{Either, SelectAll, join_all, select_all};
+use futures::future::{SelectAll, join_all, select_all};
 use kafka_connector_protocol::fetch_request::{FetchPartition, FetchRequest, FetchableTopic};
 use kafka_connector_protocol::fetch_response::FetchResponse;
 use kafka_connector_protocol::find_coordinator_request::FindCoordinatorRequest;
-use kafka_connector_protocol::heartbeat_request::HeartbeatRequest;
-use kafka_connector_protocol::heartbeat_response::HeartbeatResponse;
 use kafka_connector_protocol::join_group_request::{
     JoinGroupRequest, JoinGroupRequestProtocol, JoinGroupRequestProtocolKey,
 };
@@ -37,8 +36,7 @@ use std::task::{Context, Poll, Waker};
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::error::TryRecvError;
-use tokio::time::Sleep;
-use tracing::{debug, error, info, instrument, warn};
+use tracing::{debug, error, info, instrument, trace, warn};
 
 // TODO: remove, migrate to SUbscriberPartitions
 /// Broker -> Topic -> Partition -> (next_offset_to_fetch, current_leader_epoch)
@@ -52,7 +50,7 @@ where
     brokers_with_active_requests: HashSet<i32>,
     futures: Option<Pin<Box<SelectAll<Pin<Box<F>>>>>>,
 }
-impl<'a, F> FetchRequestsInFlight<F>
+impl<F> FetchRequestsInFlight<F>
 where
     F: Future<Output = (i32, Result<FetchResponse, ApiCallError>)>,
 {
@@ -101,69 +99,29 @@ where
     }
 }
 
-#[derive(Derivative)]
-#[derivative(Debug)]
-struct ConsumerLoopTypeGroup {
-    group_id: String,
-    coordinator: i32,
-    member_id: String,
-    generation_id: i32,
-
-    heartbeat_duration: Duration,
-    #[derivative(Debug = "ignore")]
-    heartbeat_future: Either<
-        Pin<Box<Sleep>>,
-        Pin<Box<dyn Future<Output = Result<HeartbeatResponse, ApiCallError>> + Send>>,
-    >,
-}
-
-impl ConsumerLoopTypeGroup {
-    pub fn new(options: &KafkaConsumerOptions) -> ConsumerLoopTypeGroup {
-        let heartbeat_duration = Default::default(); // TODO: from config
-        ConsumerLoopTypeGroup {
-            coordinator: -1,
-            group_id: options.group_id.clone().unwrap(),
-            member_id: "".to_string(),
-            generation_id: -1,
-            heartbeat_duration,
-            heartbeat_future: Either::Left(Box::pin(tokio::time::sleep(heartbeat_duration))),
-        }
-    }
-    pub async fn heartbeat(
-        &mut self,
-        controller: &Arc<ClusterController>,
-    ) -> Option<Result<HeartbeatResponse, ApiCallError>> {
-        // TODO docs: cancel safety
-        match &mut self.heartbeat_future {
-            Either::Left(sleep_fut) => {
-                sleep_fut.await;
-                let request = HeartbeatRequest {
-                    group_id: self.group_id.clone(),
-                    generationid: self.generation_id,
-                    member_id: self.member_id.clone(),
-                };
-                let controller = controller.clone();
-                let group_coordinator = self.coordinator;
-                self.heartbeat_future = Either::Right(Box::pin(async move {
-                    controller
-                        .make_api_call(group_coordinator, request, None)
-                        .await
-                }));
-                None
-            }
-            Either::Right(heartbeat_fut) => {
-                let resp = heartbeat_fut.await; // order is important - cancel safe
-                self.heartbeat_future =
-                    Either::Left(Box::pin(tokio::time::sleep(self.heartbeat_duration)));
-                Some(resp)
-            }
-        }
-    }
-}
 #[derive(Debug)]
-enum ConsumerLoopType {
+pub enum ConsumerLoopType {
     Single,
-    Group(ConsumerLoopTypeGroup),
+    Group {
+        group_id: String,
+        coordinator: i32,
+        member_id: String,
+        generation_id: i32,
+    },
+}
+impl ConsumerLoopType {
+    pub fn new(options: &KafkaConsumerOptions) -> ConsumerLoopType {
+        if let Some(group_id) = &options.group_id {
+            ConsumerLoopType::Group {
+                group_id: group_id.clone(),
+                coordinator: -1,
+                member_id: "".to_string(),
+                generation_id: -1,
+            }
+        } else {
+            ConsumerLoopType::Single
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -193,11 +151,7 @@ impl ConsumerLoop {
         record_sender: mpsc::Sender<Record>,
         command_receiver: mpsc::Receiver<()>,
     ) {
-        let type_ = consumer_options
-            .group_id
-            .is_some()
-            .then(|| ConsumerLoopType::Group(ConsumerLoopTypeGroup::new(&consumer_options)))
-            .unwrap_or(ConsumerLoopType::Single);
+        let type_ = ConsumerLoopType::new(&consumer_options);
         ConsumerLoop {
             controller,
             consumer_options,
@@ -218,39 +172,43 @@ impl ConsumerLoop {
         debug!("Consumer loop started.");
 
         // TODO: move to self (?)
+        // TODO: offset storage/commit
         // TODO: error handling - coordinator change error codes
         // TODO: error handling - old error handling (always reset state to Initializing may not be ok
         let mut fetch_requests_in_flight = FetchRequestsInFlight::new(HashSet::new());
         let mut graceful_shutdown_triggered = false;
 
+        let mut heartbeat = None;
+        let mut auto_commit: Option<AutoCommit> = None;
+
         loop {
             match command_receiver.try_recv() {
-                Ok(signal) => {
+                Ok(_) | Err(TryRecvError::Disconnected) => {
                     // only signal for now
                     graceful_shutdown_triggered = true;
                 }
                 Err(TryRecvError::Empty) => {}
-                Err(TryRecvError::Disconnected) => {
-                    // TODO: Ungracefull, panic?
-                    graceful_shutdown_triggered = true;
-                }
             }
             if graceful_shutdown_triggered {
-                // TODO: gracefull shutdown
-                if let ConsumerLoopType::Group(ConsumerLoopTypeGroup {
+                debug!("Consumer loop is closing");
+                // TODO: store offsets
+                if let ConsumerLoopType::Group {
                     coordinator,
                     member_id,
                     group_id,
                     ..
-                }) = self.type_
+                } = &self.type_
                 {
-                    let response = self
+                    if let Some(autocommit) = &mut auto_commit {
+                        autocommit.force_store_current_offsets().await;
+                    }
+                    let _response = self
                         .controller
                         .make_api_call(
-                            coordinator,
+                            *coordinator,
                             LeaveGroupRequest {
                                 group_id: group_id.clone(),
-                                member_id,
+                                member_id: member_id.clone(),
                             },
                             None,
                         )
@@ -277,6 +235,14 @@ impl ConsumerLoop {
 
                     self.state = ConsumerLoopState::Consuming;
 
+                    if matches!(self.type_, ConsumerLoopType::Group { .. }) {
+                        let heartbeat_duration = Default::default(); // TODO: from config
+                        let auto_commit_duration = Default::default(); // TODO: from config
+                        heartbeat = Some(Heartbeat::new(heartbeat_duration));
+                        // TODO: if enabled
+                        auto_commit = Some(AutoCommit::new(auto_commit_duration));
+                    }
+
                     fetch_requests_in_flight = FetchRequestsInFlight::new(
                         self.partitions_to_consume
                             .keys()
@@ -301,6 +267,9 @@ impl ConsumerLoop {
                     if let Ok(permit) = self.record_sender.try_reserve() {
                         if let Some(r) = self.record_currently_being_processed.take() {
                             // TODO: record processed, mark offset as read etc.
+                            if let Some(x) = &mut auto_commit {
+                                x.mark_commit_as_procesed(r.topic, r.partition, r.offset);
+                            }
                         }
                         if let Some(record) = self.fetched_records.pop_front() {
                             permit.send(record);
@@ -308,7 +277,7 @@ impl ConsumerLoop {
                     }
                     tokio::select! {
                         biased;
-                        x = command_receiver.recv() => {
+                        _ = command_receiver.recv() => {
                             // TODO: signal handling - same as on start of the loop
                           graceful_shutdown_triggered=true;
                           continue;
@@ -350,27 +319,28 @@ impl ConsumerLoop {
                           fetch_requests_in_flight.on_fetch_response(processed_brokers, new_in_progress);
                       }
 
-                        x = async {
-                            if let ConsumerLoopType::Group(typegroup) =&mut self.type_ {
-                                typegroup.heartbeat(&self.controller).await
-                            } else {
-                                std::future::pending().await
+                        x = async { if let Some(heartbeat) = &mut heartbeat {
+                            if matches!(&self.type_, ConsumerLoopType::Group{..} ){
+                                heartbeat.heartbeat(&self.controller, &self.type_).await
                             }
-                        }, if matches!(self.type_, ConsumerLoopType::Group {..}) => {
+                            else {
+                                panic!();
+                            }
+                        } else {
+                                std::future::pending().await
+                        }} => {
+                                    // TODO:
                             match x {
 
-                            None => {
-                                    // timeout done, request send
-                                    }
-                                Some(response) => {
-                                    // TODO:
-                                    if let Some(x) = response.map(|x|x.error_code).ok().flatten() {
+                            None => {}
+                                Some(x) => {
+                                   if let Some(x) = x.map(|x|x.error_code).ok().flatten() {
 
                                     dbg!(&x);
                                         match x {
                                             ApiError::RebalanceInProgress => {
                                                 self.state = ConsumerLoopState::Initializing
-                                            // TODO: commit offset, clear fetched data
+                                            // TODO: commit offset, clear fetched data, wait for record being currently processed
                                                  },
                                             ApiError::UnknownMemberId => {self.state = ConsumerLoopState::Initializing
                                             // TODO: rebalance happened, client slept through it
@@ -378,23 +348,40 @@ impl ConsumerLoop {
                                             _ => {}
                                         };
                                     }
-                                    }
-                                }
+                                }}
+
                         }
+                        x = async { if let Some(auto_commit) = &mut auto_commit {
+                            if matches!(&self.type_, ConsumerLoopType::Group{..} ){
+                                auto_commit.autocommit(&self.controller, &self.type_).await
+                            }
+                            else {
+                                panic!();
+                            }
+                        } else {
+                                std::future::pending().await
+                        }} => {
+                                    // TODO:
+                                let x= x.unwrap();
+
+                                    dbg!(&x);
+                        }
+
+
 
                     }
                 }
             }
         }
 
-        debug!("Consumer loop is closing");
+        trace!("Consumer loop closed");
     }
 
     #[instrument(level = "debug", skip(self))]
     async fn get_topic_assignments(&mut self) -> Result<(), ConsumeError> {
-        if let ConsumerLoopType::Group(ConsumerLoopTypeGroup {
+        if let ConsumerLoopType::Group {
             coordinator: -1, ..
-        }) = self.type_
+        } = &self.type_
         {
             // TODO: Magic number, handle initialization + coordinator change (error code)
             self.find_group_coordinator().await?;
@@ -407,11 +394,11 @@ impl ConsumerLoop {
         self.get_next_offsets_to_consume(assignment).await
     }
     async fn find_group_coordinator(&mut self) -> Result<(), ConsumeError> {
-        let ConsumerLoopType::Group(ConsumerLoopTypeGroup {
+        let ConsumerLoopType::Group {
             group_id,
             coordinator,
             ..
-        }) = &mut self.type_
+        } = &mut self.type_
         else {
             panic!("Group coordinator exists only for group consumers");
         };
@@ -446,13 +433,13 @@ impl ConsumerLoop {
     async fn join_and_sync_consumer_group(
         &mut self,
     ) -> Result<Option<ConsumerProtocolAssignment>, ConsumeError> {
-        let &mut ConsumerLoopType::Group(ConsumerLoopTypeGroup {
+        let &mut ConsumerLoopType::Group {
             ref mut group_id,
             ref mut coordinator,
             ref mut member_id,
             ref mut generation_id,
             ..
-        }) = &mut self.type_
+        } = &mut self.type_
         else {
             panic!("Group coordinator exists only for group consumers");
         };
@@ -519,15 +506,74 @@ impl ConsumerLoop {
         *member_id = response.member_id;
 
         let assignments = if *member_id == response.leader {
+            let members = response
+                .members
+                .into_iter()
+                .map(|x| {
+                    let mut metadata = BytesMut::from(x.metadata.as_slice());
+                    let metadata_version = i16::deserialize(ApiVersion(0), &mut metadata); // TODO: Version
+                    let metadata = ConsumerProtocolSubscription::deserialize(
+                        ApiVersion(metadata_version),
+                        &mut metadata,
+                    );
+                    (x.member_id, metadata)
+                })
+                .collect::<Vec<_>>();
+
+            let mut all_topics = members
+                .iter()
+                .flat_map(|x| x.1.topics.clone())
+                .map(|x| (x, 0))
+                .collect::<HashMap<_, _>>();
+
+            // TODO: error handling
+            for (topic, topic_metadata) in self
+                .controller
+                .get_metadata(all_topics.keys().cloned().collect(), ForceRefresh::Yes)
+                .await
+                .map_err(MetadataFetchFailed)?
+                .into_iter()
+            {
+                if let Some(error_code) = topic_metadata.error_code {
+                    match error_code {
+                        ApiError::UnknownTopicOrPartition => {
+                            // TODO: ?
+                        }
+                        ApiError::InvalidTopicException => {
+                            error!("{} is not a valid name for a Kafka Topic", topic);
+                        }
+                        _ => Err(ApiCallError::UnexpectedErrorCode(
+                            MetadataRequest::get_api_key(),
+                            error_code,
+                            "topics.error_code",
+                        ))?,
+                    }
+                }
+
+                *all_topics.get_mut(&topic).unwrap() = topic_metadata.partitions.len() as i32;
+
+                for partition_metadata in topic_metadata.partitions {
+                    if let Some(error_code) = partition_metadata.error_code {
+                        Err(ConsumeError::ApiCallError(
+                            ApiCallError::UnexpectedErrorCode(
+                                MetadataRequest::get_api_key(),
+                                error_code,
+                                "topics.partitions.error_code",
+                            ),
+                        ))?
+                    }
+                }
+            }
+
             let strategy = self
                 .consumer_options
                 .assignment_strategies
                 .iter()
                 .find(|strategy| strategy.name() == response.protocol_name)
                 .unwrap(); // TODO: unwrap?
-            let assignments = strategy
-                .assign_partitions(response.members, &self.controller)
-                .await?;
+
+            // TODO: pass all_topics so it doesn't have to be reconstructed again(?)
+            let assignments = strategy.assign_partitions(members, all_topics);
 
             assignments
                 .into_iter()
