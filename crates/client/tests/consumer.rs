@@ -248,7 +248,6 @@ mod consumer_group {
         assert!(consumer_1.try_recv().is_none());
         assert!(consumer_2.try_recv().is_none());
         assert!(consumer_3.try_recv().is_none());
-
         topic.delete().await;
     }
 }

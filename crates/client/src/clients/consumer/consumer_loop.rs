@@ -234,10 +234,10 @@ impl ConsumerLoop {
 
                     if matches!(self.type_, ConsumerLoopType::Group { .. }) {
                         let heartbeat_duration = Default::default(); // TODO: from config
-                        let auto_commit_duration = Default::default(); // TODO: from config
+                        // let auto_commit_duration = Default::default(); // TODO: from config
                         heartbeat = Some(Heartbeat::new(heartbeat_duration));
-                        // TODO: if enabled
-                        auto_commit = Some(AutoCommit::new(auto_commit_duration));
+                        // TODO: finish auto_commit  Some(AutoCommit::new(auto_commit_duration));
+                        auto_commit = None;
                     }
 
                     fetch_requests_in_flight = FetchRequestsInFlight::new(

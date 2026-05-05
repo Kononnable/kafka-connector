@@ -24,6 +24,6 @@ jobs:
       - name: Clippy
         run: cargo clippy --all-targets -- -D warnings
       - name: Unit tests
-        run: cargo test --lib --bins
+        run: RUST_LOG=trace cargo test --lib --bins
       - name: E2E tests
-        run: cargo test --test '*' -- --test-threads=1
+        run: RUST_LOG=trace cargo test --test '*' -- --test-threads=1
