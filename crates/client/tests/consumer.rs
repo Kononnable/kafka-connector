@@ -141,14 +141,14 @@ mod consumer_group {
         create_single_node_with_single_topic,
     };
     use kafka_connector_client::clients::consumer::client::KafkaConsumer;
-    use kafka_connector_client::clients::consumer::options::{KafkaConsumerOptions, OffsetReset};
+    use kafka_connector_client::clients::consumer::options::KafkaConsumerOptions;
     use kafka_connector_client::clients::producer::client::KafkaProducer;
     use kafka_connector_client::clients::producer::future_record::FutureRecord;
-    use kafka_connector_client::clients::producer::options::{Acks, KafkaProducerOptions};
+    use kafka_connector_client::clients::producer::options::KafkaProducerOptions;
     use kafka_connector_client::cluster::controller::ClusterController;
     use kafka_connector_client::cluster::options::ClusterControllerOptions;
     use std::sync::Arc;
-    use std::time::{Duration, SystemTime};
+    use std::time::Duration;
 
     #[test_log::test(tokio::test)]
     pub async fn consumers_share_partitions() {
@@ -227,9 +227,10 @@ mod consumer_group {
         // Wait for consumer group to be fully created, rebalanced (multiple consumers)
         tokio::time::sleep(Duration::from_millis(10_000)).await;
 
-        let _ = producer.send(record_1);
-        let _ = producer.send(record_2);
-        let _ = producer.send(record_3);
+        // TODO: allow _ binding in produce (don't return future directly)
+        drop(producer.send(record_1));
+        drop(producer.send(record_2));
+        drop(producer.send(record_3));
 
         let mut records = Vec::with_capacity(3);
         records.push(consumer_1.recv().await);
