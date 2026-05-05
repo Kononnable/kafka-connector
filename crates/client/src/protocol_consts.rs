@@ -86,7 +86,7 @@ pub mod consumer_protocol_assignment {
     /// The current implementation assumes that future versions will not break compatibility. When
     /// it encounters a newer version, it parses it using the current format. This basically means
     /// that new versions cannot remove or reorder any of the existing fields.
-    #[derive(Clone, Debug, PartialEq)]
+    #[derive(Clone, Debug, Default, PartialEq)]
     pub struct ConsumerProtocolAssignment {
         pub assigned_partitions: Vec<TopicPartition>,
 
@@ -141,15 +141,6 @@ pub mod consumer_protocol_assignment {
         }
     }
 
-    impl Default for ConsumerProtocolAssignment {
-        fn default() -> Self {
-            Self {
-                assigned_partitions: Default::default(),
-                user_data: None,
-            }
-        }
-    }
-
     impl ToBytes for TopicPartition {
         fn serialize(&self, version: ApiVersion, _bytes: &mut BytesMut) {
             self.topic.serialize(version, _bytes);
@@ -180,7 +171,7 @@ pub mod consumer_protocol_subscription {
     /// The current implementation assumes that future versions will not break compatibility. When
     /// it encounters a newer version, it parses it using the current format. This basically means
     /// that new versions cannot remove or reorder any of the existing fields.
-    #[derive(Clone, Debug, PartialEq)]
+    #[derive(Clone, Debug, Default, PartialEq)]
     pub struct ConsumerProtocolSubscription {
         pub topics: Vec<String>,
 
@@ -243,16 +234,6 @@ pub mod consumer_protocol_subscription {
                 item.validate_fields(_version)?;
             }
             Ok(())
-        }
-    }
-
-    impl Default for ConsumerProtocolSubscription {
-        fn default() -> Self {
-            Self {
-                topics: Default::default(),
-                user_data: None,
-                owned_partitions: Default::default(),
-            }
         }
     }
 

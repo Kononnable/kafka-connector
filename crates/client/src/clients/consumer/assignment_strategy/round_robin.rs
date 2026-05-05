@@ -1,3 +1,4 @@
+use crate::clients::consumer::assignment_strategy::ConsumerAssignmentStrategy;
 use crate::protocol_consts::consumer_protocol_assignment::{
     ConsumerProtocolAssignment, TopicPartition,
 };
@@ -7,29 +8,26 @@ use std::collections::HashMap;
 #[derive(Debug)]
 pub struct RoundRobin {}
 
-// impl ConsumerAssignmentStrategy for RoundRobin {
-impl RoundRobin {
-    pub fn name(&self) -> &'static str {
+impl ConsumerAssignmentStrategy for RoundRobin {
+    fn name(&self) -> &'static str {
         "roundrobin"
     }
 
-    pub fn subscription_userdata(&self) -> Option<Vec<u8>> {
+    fn subscription_userdata(&self) -> Option<Vec<u8>> {
         None
     }
 
-    pub fn assign_partitions(
+    fn assign_partitions(
         &self,
         members: Vec<(String, ConsumerProtocolSubscription)>,
         topics_config: HashMap<String, i32>,
     ) -> Vec<(String, ConsumerProtocolAssignment)> {
-        // TODO: refresh metadata before calling an assigner - remove controller from parameters, and async + (result return type, add metadata as parameter)?
         let mut assignment: HashMap<String, HashMap<String, Vec<i32>>> = HashMap::new();
 
         let mut sorted_topics = topics_config
             .into_iter()
             .map(|(x, y)| (x, 0..y))
             .collect::<Vec<_>>();
-
         sorted_topics.sort_by_key(|x| x.0.clone()); // TODO: Clone
 
         let mut members_iter = members.into_iter().cycle();

@@ -10,15 +10,14 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::Sleep;
 
+type HeartbeatCall = dyn Future<Output = Result<HeartbeatResponse, ApiCallError>> + Send;
+
 #[derive(Derivative)]
 #[derivative(Debug)]
 pub struct Heartbeat {
     heartbeat_duration: Duration,
     #[derivative(Debug = "ignore")]
-    heartbeat_future: Either<
-        Pin<Box<Sleep>>,
-        Pin<Box<dyn Future<Output = Result<HeartbeatResponse, ApiCallError>> + Send>>,
-    >,
+    heartbeat_future: Either<Pin<Box<Sleep>>, Pin<Box<HeartbeatCall>>>,
 }
 impl Heartbeat {
     pub fn new(heartbeat_duration: Duration) -> Heartbeat {

@@ -42,23 +42,20 @@ use tracing::{debug, error, info, instrument, trace, warn};
 /// Broker -> Topic -> Partition -> (next_offset_to_fetch, current_leader_epoch)
 pub type Assignments = HashMap<i32, HashMap<String, HashMap<i32, (i64, i32)>>>;
 
-struct FetchRequestsInFlight<F>
-where
-    F: Future<Output = (i32, Result<FetchResponse, ApiCallError>)>,
-{
+type FetchApiCall =
+    Pin<Box<dyn Future<Output = (i32, Result<FetchResponse, ApiCallError>)> + Send>>;
+type FetchApiCalls = Pin<Box<SelectAll<FetchApiCall>>>;
+struct FetchRequestsInFlight {
     brokers: HashSet<i32>,
     brokers_with_active_requests: HashSet<i32>,
-    futures: Option<Pin<Box<SelectAll<Pin<Box<F>>>>>>,
+    futures: Option<FetchApiCalls>,
 }
-impl<F> FetchRequestsInFlight<F>
-where
-    F: Future<Output = (i32, Result<FetchResponse, ApiCallError>)>,
-{
+impl FetchRequestsInFlight {
     // TODO: add some form of persistent iterator, so consuming messages from different brokers is fair
     pub fn new(
         // only brokers used in consumer(that have partitions that consumer is consuming from)
         broker_list: HashSet<i32>,
-    ) -> FetchRequestsInFlight<F> {
+    ) -> FetchRequestsInFlight {
         FetchRequestsInFlight {
             brokers: broker_list.clone(),
             brokers_with_active_requests: HashSet::new(),
@@ -72,7 +69,7 @@ where
             .cloned()
             .collect()
     }
-    pub fn send_requests_to_brokers(&mut self, requests: Vec<(i32, Pin<Box<F>>)>) {
+    pub fn send_requests_to_brokers(&mut self, requests: Vec<(i32, FetchApiCall)>) {
         let mut futures = self
             .futures
             .take()
@@ -85,10 +82,10 @@ where
         self.futures = Some(Box::pin(select_all(futures)));
     }
 
-    pub fn future(&mut self) -> &mut Option<Pin<Box<SelectAll<Pin<Box<F>>>>>> {
+    pub fn future(&mut self) -> &mut Option<FetchApiCalls> {
         &mut self.futures
     }
-    pub fn on_fetch_response(&mut self, broker_ids: Vec<i32>, futures: Vec<Pin<Box<F>>>) {
+    pub fn on_fetch_response(&mut self, broker_ids: Vec<i32>, futures: Vec<FetchApiCall>) {
         for broker_id in broker_ids {
             self.brokers_with_active_requests.remove(&broker_id);
         }
@@ -256,7 +253,7 @@ impl ConsumerLoop {
                         let brokers_to_send_new_fetch_requests_to =
                             fetch_requests_in_flight.get_brokers_to_send_requests_to();
                         // TODO: add new fetch requests only if there is enough space in the record queue (backpressure)
-                        if !brokers_to_send_new_fetch_requests_to.is_empty() && true {
+                        if !brokers_to_send_new_fetch_requests_to.is_empty() {
                             let x = brokers_to_send_new_fetch_requests_to
                                 .into_iter()
                                 .map(|x| (x, self.fetch_data(x)));
@@ -494,7 +491,10 @@ impl ConsumerLoop {
 
         if let Some(error_code) = response.error_code {
             match error_code {
-                // TODO:
+                // TODO: error handling
+                ApiError::FencedLeaderEpoch => {
+                    // TODO:
+                }
                 _ => Err(ApiCallError::UnexpectedErrorCode(
                     JoinGroupRequest::get_api_key(),
                     error_code,
@@ -609,7 +609,10 @@ impl ConsumerLoop {
 
         if let Some(error_code) = response.error_code {
             match error_code {
-                // TODO:
+                // TODO: error handling
+                ApiError::FencedLeaderEpoch => {
+                    // TODO:
+                }
                 _ => Err(ApiCallError::UnexpectedErrorCode(
                     SyncGroupRequest::get_api_key(),
                     error_code,
@@ -720,7 +723,7 @@ impl ConsumerLoop {
                                 .iter()
                                 .map(|(topic, partitions)| OffsetFetchRequestTopic {
                                     name: topic.to_owned(),
-                                    partition_indexes: partitions.keys().map(|x| *x).collect(),
+                                    partition_indexes: partitions.keys().cloned().collect(),
                                 })
                                 .collect(),
                         ),
@@ -829,10 +832,7 @@ impl ConsumerLoop {
     }
 
     #[instrument(level = "debug", skip(self))]
-    fn fetch_data(
-        &self,
-        broker_id: i32,
-    ) -> Pin<Box<impl Future<Output = (i32, Result<FetchResponse, ApiCallError>)> + use<>>> {
+    fn fetch_data(&self, broker_id: i32) -> FetchApiCall {
         let assignments = self.partitions_to_consume.get(&broker_id).unwrap();
         let request = FetchRequest {
             replica_id: -1,

@@ -1,10 +1,11 @@
 use crate::protocol_consts::consumer_protocol_assignment::ConsumerProtocolAssignment;
-use kafka_connector_protocol::join_group_response::JoinGroupResponseMember;
+use crate::protocol_consts::consumer_protocol_subscription::ConsumerProtocolSubscription;
+use std::collections::HashMap;
 use std::fmt::Debug;
 
 pub mod round_robin;
 
-pub trait ConsumerAssignmentStrategy: Debug {
+pub trait ConsumerAssignmentStrategy: Debug + Send + Sync {
     fn name(&self) -> &'static str;
 
     // TODO: add parameter for consumer(?) ability to set userdata without knowledge of consumer/client state may be worthless
@@ -12,6 +13,7 @@ pub trait ConsumerAssignmentStrategy: Debug {
 
     fn assign_partitions(
         &self,
-        members: Vec<JoinGroupResponseMember>,
+        members: Vec<(String, ConsumerProtocolSubscription)>,
+        topics_config: HashMap<String, i32>,
     ) -> Vec<(String, ConsumerProtocolAssignment)>;
 }

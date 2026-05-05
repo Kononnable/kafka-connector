@@ -11,6 +11,8 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::Sleep;
 
+type OffsetCommitCall = dyn Future<Output = Result<OffsetCommitResponse, ApiCallError>> + Send;
+
 #[derive(Derivative)]
 #[derivative(Debug)]
 pub struct AutoCommit {
@@ -18,10 +20,7 @@ pub struct AutoCommit {
     offset_in_current_offset_commit_request: Option<HashMap<(String, i32), i64>>,
     auto_commit_duration: Duration,
     #[derivative(Debug = "ignore")]
-    auto_commit_future: Either<
-        Pin<Box<Sleep>>,
-        Pin<Box<dyn Future<Output = Result<OffsetCommitResponse, ApiCallError>> + Send>>,
-    >,
+    auto_commit_future: Either<Pin<Box<Sleep>>, Pin<Box<OffsetCommitCall>>>,
 }
 impl AutoCommit {
     pub fn new(auto_commit_duration: Duration) -> AutoCommit {
