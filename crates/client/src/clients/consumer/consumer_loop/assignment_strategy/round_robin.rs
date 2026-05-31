@@ -1,4 +1,4 @@
-use crate::clients::consumer::assignment_strategy::ConsumerAssignmentStrategy;
+use crate::clients::consumer::consumer_loop::assignment_strategy::ConsumerAssignmentStrategy;
 use crate::protocol_consts::consumer_protocol_assignment::{
     ConsumerProtocolAssignment, TopicPartition,
 };

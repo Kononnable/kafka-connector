@@ -1,10 +1,10 @@
-use crate::clients::consumer::auto_commit::AutoCommit;
+use crate::clients::consumer::consumer_loop::fetch_requests_in_flight::{
+    FetchApiCall, FetchRequestsInFlight,
+};
 use crate::clients::consumer::error::ConsumeError;
 use crate::clients::consumer::error::ConsumeError::MetadataFetchFailed;
-use crate::clients::consumer::heartbeat::Heartbeat;
 use crate::clients::consumer::options::KafkaConsumerOptions;
 use crate::clients::consumer::record::Record;
-use crate::clients::consumer::subscribed_partitions::Subscriptions;
 use crate::cluster::controller::{ClusterController, ForceRefresh};
 use crate::cluster::error::ApiCallError;
 use crate::protocol_consts::consumer_protocol_assignment::ConsumerProtocolAssignment;
@@ -12,8 +12,10 @@ use crate::protocol_consts::consumer_protocol_subscription::ConsumerProtocolSubs
 use crate::protocol_consts::{
     Broker, Epoch, FindCoordinatorKeyType, IsolationLevel, Offset, Partition,
 };
+use auto_commit::AutoCommit;
 use bytes::BytesMut;
-use futures::future::{SelectAll, join_all, select_all};
+use futures::future::join_all;
+use heartbeat::Heartbeat;
 use kafka_connector_protocol::fetch_request::{FetchPartition, FetchRequest, FetchableTopic};
 use kafka_connector_protocol::fetch_response::FetchResponse;
 use kafka_connector_protocol::find_coordinator_request::FindCoordinatorRequest;
@@ -31,71 +33,34 @@ use kafka_connector_protocol::sync_group_request::{SyncGroupRequest, SyncGroupRe
 use kafka_connector_protocol::{ApiError, ApiRequest, ApiVersion, FromBytes, ToBytes};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::Debug;
-use std::ops::{Add, Not};
-use std::pin::Pin;
+use std::ops::Add;
 use std::sync::Arc;
 use std::task::{Context, Poll, Waker};
 use std::time::Duration;
+use subscribed_partitions::Subscriptions;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::error::TryRecvError;
 use tokio::time::sleep;
 use tracing::{debug, error, info, instrument, trace, warn};
 
+pub mod assignment_strategy;
+pub mod auto_commit;
+pub mod fetch_requests_in_flight;
+pub mod heartbeat;
+pub mod subscribed_partitions;
+
 // TODO: remove, migrate to SUbscriberPartitions
 /// Broker -> Topic -> Partition -> (next_offset_to_fetch, current_leader_epoch)
 pub type Assignments = HashMap<Broker, HashMap<String, HashMap<Partition, (Offset, Epoch)>>>;
 
-type FetchApiCall =
-    Pin<Box<dyn Future<Output = (Broker, Result<FetchResponse, ApiCallError>)> + Send>>;
-type FetchApiCalls = Pin<Box<SelectAll<FetchApiCall>>>;
-struct FetchRequestsInFlight {
-    brokers: HashSet<Broker>,
-    brokers_with_active_requests: HashSet<Broker>,
-    futures: Option<FetchApiCalls>,
-}
-impl FetchRequestsInFlight {
-    // TODO: add some form of persistent iterator, so consuming messages from different brokers is fair
-    pub fn new(
-        // only brokers used in consumer(that have partitions that consumer is consuming from)
-        broker_list: HashSet<Broker>,
-    ) -> FetchRequestsInFlight {
-        FetchRequestsInFlight {
-            brokers: broker_list.clone(),
-            brokers_with_active_requests: HashSet::new(),
-            futures: None,
-        }
-    }
-    pub fn get_brokers_to_send_requests_to(&self) -> Vec<Broker> {
-        self.brokers
-            .iter()
-            .filter(|x| !self.brokers_with_active_requests.contains(*x))
-            .cloned()
-            .collect()
-    }
-    pub fn send_requests_to_brokers(&mut self, requests: Vec<(Broker, FetchApiCall)>) {
-        let mut futures = self
-            .futures
-            .take()
-            .map(|x| Pin::into_inner(x).into_inner())
-            .unwrap_or_default();
-        for (broker_id, future) in requests {
-            self.brokers_with_active_requests.insert(broker_id);
-            futures.push(future);
-        }
-        self.futures = Some(Box::pin(select_all(futures)));
-    }
-
-    pub fn future(&mut self) -> &mut Option<FetchApiCalls> {
-        &mut self.futures
-    }
-    pub fn on_fetch_response(&mut self, broker_ids: Vec<Broker>, futures: Vec<FetchApiCall>) {
-        for broker_id in broker_ids {
-            self.brokers_with_active_requests.remove(&broker_id);
-        }
-        self.futures = futures
-            .is_empty()
-            .not()
-            .then(|| Box::pin(select_all(futures)));
+async fn conditional_future<F, O>(future: Option<F>) -> O
+where
+    F: Future<Output = O>,
+{
+    if let Some(fut) = future {
+        fut.await
+    } else {
+        std::future::pending().await
     }
 }
 
@@ -141,6 +106,10 @@ pub struct ConsumerLoop {
     type_: ConsumerLoopType,
     record_currently_being_processed: Option<Record>,
     fetched_records: VecDeque<Record>,
+    fetch_requests_in_flight: FetchRequestsInFlight,
+    graceful_shutdown_triggered: bool,
+    heartbeat: Option<Heartbeat>,
+    auto_commit: Option<AutoCommit>,
 }
 
 impl ConsumerLoop {
@@ -162,6 +131,10 @@ impl ConsumerLoop {
             state: ConsumerLoopState::Initializing,
             record_currently_being_processed: None,
             fetched_records: VecDeque::with_capacity(0), // TODO:
+            fetch_requests_in_flight: FetchRequestsInFlight::new(HashSet::new()),
+            graceful_shutdown_triggered: false,
+            heartbeat: None,
+            auto_commit: None,
         }
         .run(command_receiver)
         .await;
@@ -171,25 +144,19 @@ impl ConsumerLoop {
     async fn run(mut self, mut command_receiver: mpsc::Receiver<()>) {
         debug!("Consumer loop started.");
 
-        // TODO: move to self (?)
         // TODO: offset storage/commit
         // TODO: error handling - coordinator change error codes
         // TODO: error handling - old error handling (always reset state to Initializing may not be ok
-        let mut fetch_requests_in_flight = FetchRequestsInFlight::new(HashSet::new());
-        let mut graceful_shutdown_triggered = false;
-
-        let mut heartbeat = None;
-        let mut auto_commit: Option<AutoCommit> = None;
 
         loop {
             match command_receiver.try_recv() {
                 Ok(_) | Err(TryRecvError::Disconnected) => {
                     // only signal for now
-                    graceful_shutdown_triggered = true;
+                    self.graceful_shutdown_triggered = true;
                 }
                 Err(TryRecvError::Empty) => {}
             }
-            if graceful_shutdown_triggered {
+            if self.graceful_shutdown_triggered {
                 debug!("Consumer loop is closing");
                 // TODO: store offsets
                 if let ConsumerLoopType::Group {
@@ -200,7 +167,7 @@ impl ConsumerLoop {
                 } = &self.type_
                 {
                     // TODO: handle coordinator =-1 (different amounts of retries) - or change it to be a shutdown timeout (if gracefull does not happen in x seconds, force it)
-                    if let Some(autocommit) = &mut auto_commit {
+                    if let Some(autocommit) = &mut self.auto_commit {
                         autocommit.force_store_current_offsets().await;
                     }
                     let _response = self
@@ -251,12 +218,12 @@ impl ConsumerLoop {
                     if matches!(self.type_, ConsumerLoopType::Group { .. }) {
                         let heartbeat_duration = Default::default(); // TODO: from config
                         // let auto_commit_duration = Default::default(); // TODO: from config
-                        heartbeat = Some(Heartbeat::new(heartbeat_duration));
+                        self.heartbeat = Some(Heartbeat::new(heartbeat_duration));
                         // TODO: finish auto_commit  Some(AutoCommit::new(auto_commit_duration));
-                        auto_commit = None;
+                        self.auto_commit = None;
                     }
 
-                    fetch_requests_in_flight = FetchRequestsInFlight::new(
+                    self.fetch_requests_in_flight = FetchRequestsInFlight::new(
                         self.partitions_to_consume
                             .keys()
                             .cloned()
@@ -266,114 +233,52 @@ impl ConsumerLoop {
                 ConsumerLoopState::Consuming => {
                     {
                         // trigger new fetch if there is broker without one and there is enough space in internal queue
-                        let brokers_to_send_new_fetch_requests_to =
-                            fetch_requests_in_flight.get_brokers_to_send_requests_to();
+                        let brokers_to_send_new_fetch_requests_to = self
+                            .fetch_requests_in_flight
+                            .get_brokers_to_send_requests_to();
                         // TODO: add new fetch requests only if there is enough space in the record queue (backpressure)
                         if !brokers_to_send_new_fetch_requests_to.is_empty() {
                             let x = brokers_to_send_new_fetch_requests_to
                                 .into_iter()
                                 .map(|x| (x, self.fetch_data(x)));
-                            fetch_requests_in_flight.send_requests_to_brokers(x.collect()); // TODO: change so function input is iter
+                            self.fetch_requests_in_flight
+                                .send_requests_to_brokers(x.collect()); // TODO: change so function input is iter
                         }
                     }
 
                     if let Ok(permit) = self.record_sender.try_reserve() {
                         if let Some(r) = self.record_currently_being_processed.take() {
                             // TODO: record processed, mark offset as read etc.
-                            if let Some(x) = &mut auto_commit {
-                                x.mark_commit_as_procesed(r.topic, r.partition, r.offset);
+                            if let Some(x) = &mut self.auto_commit {
+                                x.mark_commit_as_processed(r.topic, r.partition, r.offset);
                             }
                         }
                         if let Some(record) = self.fetched_records.pop_front() {
                             permit.send(record);
                         }
                     }
+
                     tokio::select! {
                         biased;
                         _ = command_receiver.recv() => {
                             // TODO: signal handling - same as on start of the loop
-                          graceful_shutdown_triggered=true;
+                          self.graceful_shutdown_triggered=true;
                           continue;
                         }
-                      _ = async {
-                            let _ = self.record_sender.reserve().await;
-                        }, if !self.fetched_records.is_empty() => {
-                          // record processed, new one will be sent on next iteration
-                          continue;
-                      }
-
-
-                      ((broker_id, response), _, in_progress)  =  async {
-                          if let Some(x) =  fetch_requests_in_flight.future() {
-                              x.await
-                          } else {
-                              std::future::pending().await
-                          }
-                      } => {
-                          let mut processed_brokers = vec![broker_id];
-                          self.process_fetch_response(broker_id, response);
-
-                          // Manually pool all remaining futures before scheduling new ones - makes consumption from multiple brokers fair
-                          let mut new_in_progress = vec![];
-                          for mut future in in_progress.into_iter() {
-                              let pool_result = future
-                                  .as_mut()
-                                  .poll(&mut Context::from_waker(Waker::noop()));
-                              match pool_result {
-                                  Poll::Ready((broker_id, response)) => {
-                                      processed_brokers.push(broker_id);
-                                      self.process_fetch_response(broker_id, response);
-                                  }
-                                  Poll::Pending => {
-                                      new_in_progress.push(future);
-                                  }
-                              }
-                          }
-                          fetch_requests_in_flight.on_fetch_response(processed_brokers, new_in_progress);
-                      }
-
-                        x = async { if let Some(heartbeat) = &mut heartbeat {
-                            if matches!(&self.type_, ConsumerLoopType::Group{..} ){
-                                heartbeat.heartbeat(&self.controller, &self.type_).await
-                            }
-                            else {
-                                panic!();
-                            }
-                        } else {
-                                std::future::pending().await
-                        }} => {
-                                    // TODO:
-                            match x {
-                            None => {}
-                                Some(x) => {
-                                   if let Some(x) = x.map(|x|x.error_code).ok().flatten() {
-
-                                        match x {
-                                            ApiError::RebalanceInProgress => {
-                                                self.state = ConsumerLoopState::Initializing
-                                            // TODO: commit offset, clear fetched data, wait for record being currently processed
-                                                 },
-                                            ApiError::UnknownMemberId => {self.state = ConsumerLoopState::Initializing
-                                            // TODO: rebalance happened, client slept through it
-                                            },
-                                            _ => {}
-                                        };
-                                    }
-                                }}
-
+                        _ = async {
+                              let _ = self.record_sender.reserve().await;
+                          }, if !self.fetched_records.is_empty() => {
+                            // record processed, new one will be sent on next iteration
+                            continue;
                         }
-                        x = async { if let Some(auto_commit) = &mut auto_commit {
-                            if matches!(&self.type_, ConsumerLoopType::Group{..} ){
-                                auto_commit.autocommit(&self.controller, &self.type_).await
-                            }
-                            else {
-                                panic!();
-                            }
-                        } else {
-                                std::future::pending().await
-                        }} => {
-                                    // TODO:
-                                let x= x.unwrap();
+                        ((broker_id, response), _, in_progress)  = self.fetch_requests_in_flight.future() => {
+                            self.on_fetch_response(broker_id, response, in_progress);
+                        }
+                        Some(hb) =conditional_future( self.heartbeat.as_mut().map(|hb| hb.heartbeat(&self.controller, &self.type_)) )=> {
+                            self.on_heartbeat_response(hb)
+                        }
+                        Some(oc) = conditional_future( self.auto_commit.as_mut().map(|ac|ac.autocommit(&self.controller, &self.type_))) => {
+                            self.on_offset_commit_response(oc)
                         }
                     }
                 }
@@ -383,6 +288,34 @@ impl ConsumerLoop {
         trace!("Consumer loop closed");
     }
 
+    fn on_fetch_response(
+        &mut self,
+        broker_id: Broker,
+        response: Result<FetchResponse, ApiCallError>,
+        in_progress: Vec<FetchApiCall>,
+    ) {
+        let mut processed_brokers = vec![broker_id];
+        self.process_fetch_response(broker_id, response);
+
+        // Manually pool all remaining futures before scheduling new ones - makes consumption from multiple brokers fair
+        let mut new_in_progress = vec![];
+        for mut future in in_progress.into_iter() {
+            let pool_result = future
+                .as_mut()
+                .poll(&mut Context::from_waker(Waker::noop()));
+            match pool_result {
+                Poll::Ready((broker_id, response)) => {
+                    processed_brokers.push(broker_id);
+                    self.process_fetch_response(broker_id, response);
+                }
+                Poll::Pending => {
+                    new_in_progress.push(future);
+                }
+            }
+        }
+        self.fetch_requests_in_flight
+            .process_fetch_response(processed_brokers, new_in_progress);
+    }
     #[instrument(level = "debug", skip(self))]
     async fn get_topic_assignments(&mut self) -> Result<(), ConsumeError> {
         let assignment = match matches!(self.type_, ConsumerLoopType::Group { .. }) {
@@ -451,19 +384,19 @@ impl ConsumerLoop {
                     user_data: strategy.subscription_userdata(),
                     owned_partitions: vec![], // TODO: Sticky partitioner
                 };
-                let mut subscription_bytes = BytesMut::new(); // TODO: reuse some buffer(?)
+
                 let max_supported_version =
                     ConsumerProtocolSubscription::get_max_supported_version();
-                max_supported_version.serialize(ApiVersion(0), &mut subscription_bytes); // Version
+                max_supported_version.serialize(ApiVersion(0), &mut self.deserialization_buffer); // Version
                 subscription
-                    .serialize(max_supported_version, &mut subscription_bytes)
+                    .serialize(max_supported_version, &mut self.deserialization_buffer)
                     .unwrap();
                 (
                     JoinGroupRequestProtocolKey {
                         name: strategy.name().to_owned(),
                     },
                     JoinGroupRequestProtocol {
-                        metadata: subscription_bytes.to_vec(),
+                        metadata: self.deserialization_buffer.split().to_vec(),
                     },
                 )
             })
@@ -512,7 +445,7 @@ impl ConsumerLoop {
                 .into_iter()
                 .map(|x| {
                     let mut metadata = BytesMut::from(x.metadata.as_slice());
-                    let metadata_version = i16::deserialize(ApiVersion(0), &mut metadata); // TODO: Version
+                    let metadata_version = i16::deserialize(ApiVersion(0), &mut metadata);
                     let metadata = ConsumerProtocolSubscription::deserialize(
                         ApiVersion(metadata_version),
                         &mut metadata,
@@ -579,16 +512,16 @@ impl ConsumerLoop {
             assignments
                 .into_iter()
                 .map(|(member_id, assignment)| {
-                    let mut assignment_bytes = BytesMut::new(); // TODO: reuse buffer
                     let max_supported_version =
                         ConsumerProtocolAssignment::get_max_supported_version();
-                    max_supported_version.serialize(ApiVersion(0), &mut assignment_bytes); // Version
+                    max_supported_version
+                        .serialize(ApiVersion(0), &mut self.deserialization_buffer); // Version
                     assignment
-                        .serialize(max_supported_version, &mut assignment_bytes)
+                        .serialize(max_supported_version, &mut self.deserialization_buffer)
                         .unwrap();
                     SyncGroupRequestAssignment {
                         member_id,
-                        assignment: assignment_bytes.to_vec(),
+                        assignment: self.deserialization_buffer.split().to_vec(),
                     }
                 })
                 .collect()
@@ -623,7 +556,7 @@ impl ConsumerLoop {
         }
 
         let mut assignment = BytesMut::from(response.assignment.as_slice()); // TODO: reuse buffer(?)
-        let assignment_version = i16::deserialize(ApiVersion(0), &mut assignment); // TODO: version
+        let assignment_version = i16::deserialize(ApiVersion(0), &mut assignment);
         let assignment = ConsumerProtocolAssignment::deserialize(
             ApiVersion(assignment_version),
             &mut assignment,
@@ -828,7 +761,7 @@ impl ConsumerLoop {
             }
         }
 
-        self.partitions_to_consume = partitions_to_consume.to_assignments();
+        self.partitions_to_consume = partitions_to_consume.into_assignments();
         Ok(())
     }
 

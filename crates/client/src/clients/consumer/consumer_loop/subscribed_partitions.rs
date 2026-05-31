@@ -69,7 +69,7 @@ impl Subscriptions {
         result
     }
 
-    pub fn to_assignments(self) -> Assignments {
+    pub fn into_assignments(self) -> Assignments {
         let mut result: Assignments = HashMap::new();
         for (topic_name, topic) in self.inner {
             for (partition_idx, partition) in topic.partitions {

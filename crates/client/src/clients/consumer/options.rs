@@ -1,5 +1,5 @@
-use crate::clients::consumer::assignment_strategy::ConsumerAssignmentStrategy;
-use crate::clients::consumer::assignment_strategy::round_robin::RoundRobin;
+use crate::clients::consumer::consumer_loop::assignment_strategy::ConsumerAssignmentStrategy;
+use crate::clients::consumer::consumer_loop::assignment_strategy::round_robin::RoundRobin;
 use crate::protocol_consts::ListOffsetsTimestampType;
 use derivative::Derivative;
 use std::collections::HashSet;

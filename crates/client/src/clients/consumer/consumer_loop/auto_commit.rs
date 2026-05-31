@@ -1,4 +1,4 @@
-use crate::clients::consumer::consumer_loop::ConsumerLoopType;
+use crate::clients::consumer::consumer_loop::{ConsumerLoop, ConsumerLoopType};
 use crate::cluster::controller::ClusterController;
 use crate::cluster::error::ApiCallError;
 use derivative::Derivative;
@@ -23,6 +23,7 @@ pub struct AutoCommit {
     auto_commit_future: Either<Pin<Box<Sleep>>, Pin<Box<OffsetCommitCall>>>,
 }
 impl AutoCommit {
+    #[allow(dead_code)]
     pub fn new(auto_commit_duration: Duration) -> AutoCommit {
         AutoCommit {
             offset_to_commit: HashMap::new(),
@@ -72,11 +73,21 @@ impl AutoCommit {
             }
         }
     }
-    pub fn mark_commit_as_procesed(&mut self, topic: String, partition: i32, offset: i64) {
+    pub fn mark_commit_as_processed(&mut self, topic: String, partition: i32, offset: i64) {
         self.offset_to_commit.insert((topic, partition), offset);
     }
     pub async fn force_store_current_offsets(&mut self) {
         // TODO: wait for current request(if one is in progress)
         // TODO: send new request if there are new offsets to commit and wait for it
+    }
+}
+
+impl ConsumerLoop {
+    pub(super) fn on_offset_commit_response(
+        &mut self,
+        x: Result<OffsetCommitResponse, ApiCallError>,
+    ) {
+        // TODO:
+        let _x = x.unwrap();
     }
 }

@@ -1,8 +1,9 @@
-use crate::clients::consumer::consumer_loop::ConsumerLoopType;
+use crate::clients::consumer::consumer_loop::{ConsumerLoop, ConsumerLoopState, ConsumerLoopType};
 use crate::cluster::controller::ClusterController;
 use crate::cluster::error::ApiCallError;
 use derivative::Derivative;
 use futures::future::Either;
+use kafka_connector_protocol::ApiError;
 use kafka_connector_protocol::heartbeat_request::HeartbeatRequest;
 use kafka_connector_protocol::heartbeat_response::HeartbeatResponse;
 use std::pin::Pin;
@@ -65,6 +66,24 @@ impl Heartbeat {
                     Either::Left(Box::pin(tokio::time::sleep(self.heartbeat_duration)));
                 Some(resp)
             }
+        }
+    }
+}
+
+impl ConsumerLoop {
+    pub(super) fn on_heartbeat_response(&mut self, x: Result<HeartbeatResponse, ApiCallError>) {
+        if let Some(x) = x.map(|x| x.error_code).ok().flatten() {
+            match x {
+                ApiError::RebalanceInProgress => {
+                    self.state = ConsumerLoopState::Initializing
+                    // TODO: commit offset, clear fetched data, wait for record being currently processed
+                }
+                ApiError::UnknownMemberId => {
+                    self.state = ConsumerLoopState::Initializing
+                    // TODO: rebalance happened, client slept through it
+                }
+                _ => {}
+            };
         }
     }
 }
