@@ -1,5 +1,6 @@
 use crate::broker::broker_metadata::BrokerMetadata;
 use crate::cluster::error::ApiCallError;
+use crate::protocol_consts::Broker;
 use crate::{
     broker::controller::{BrokerController, BrokerControllerStatus},
     cluster::options::ClusterControllerOptions,
@@ -18,7 +19,7 @@ use std::{fmt::Debug, sync::Arc};
 use tokio::time::{sleep, timeout};
 use tracing::{debug, instrument};
 
-pub type BrokerList = Mutex<HashMap<i32, (BrokerController, Arc<Mutex<BrokerMetadata>>)>>;
+pub type BrokerList = Mutex<HashMap<Broker, (BrokerController, Arc<Mutex<BrokerMetadata>>)>>;
 
 /// Main entrypoint for communication with Kafka cluster.
 pub struct ClusterController {
@@ -53,13 +54,13 @@ impl ClusterController {
                 .map(|(enumerator, (host, port))| {
                     let fake_broker_id = -(enumerator as i32) - 1;
                     let metadata = Arc::new(Mutex::new(BrokerMetadata {
-                        broker_id: fake_broker_id,
+                        broker_id: Broker(fake_broker_id),
                         host: host.clone(),
                         port: *port as i32,
                         rack: None,
                     }));
                     (
-                        fake_broker_id,
+                        Broker(fake_broker_id),
                         (
                             BrokerController::new(metadata.clone(), options.clone()),
                             metadata,
@@ -89,7 +90,7 @@ impl ClusterController {
         controller
     }
 
-    pub fn get_broker_list(&self) -> HashMap<i32, (BrokerMetadata, BrokerControllerStatus)> {
+    pub fn get_broker_list(&self) -> HashMap<Broker, (BrokerMetadata, BrokerControllerStatus)> {
         self.broker_list
             .lock()
             .unwrap()
@@ -104,7 +105,7 @@ impl ClusterController {
     }
 
     #[instrument(level = "debug", skip_all)]
-    pub async fn make_api_call<R: ApiRequest, I: Into<Option<i32>>>(
+    pub async fn make_api_call<R: ApiRequest, I: Into<Option<Broker>>>(
         &self,
         broker_id: I,
         request: R,
@@ -115,7 +116,7 @@ impl ClusterController {
             .map(|response| response.unwrap())
     }
     #[instrument(level = "debug", skip_all)]
-    pub async fn make_api_call_without_response<R: ApiRequest, I: Into<Option<i32>>>(
+    pub async fn make_api_call_without_response<R: ApiRequest, I: Into<Option<Broker>>>(
         &self,
         broker_id: I,
         request: R,
@@ -128,7 +129,7 @@ impl ClusterController {
 
     async fn make_api_call_internal<R: ApiRequest>(
         &self,
-        broker_id: Option<i32>,
+        broker_id: Option<Broker>,
         request: R,
         version: Option<ApiVersion>,
         wait_for_response: bool,
@@ -173,7 +174,7 @@ impl ClusterController {
         api_call.await
     }
 
-    async fn get_any_connected_broker_id(&self) -> Result<i32, ApiCallError> {
+    async fn get_any_connected_broker_id(&self) -> Result<Broker, ApiCallError> {
         timeout(self.options.request_timeout, async {
             loop {
                 let broker_id = self
@@ -186,7 +187,7 @@ impl ClusterController {
                     })
                     .map(|(id, _)| *id);
                 if let Some(broker_id) = broker_id {
-                    return Ok::<i32, ApiCallError>(broker_id);
+                    return Ok::<Broker, ApiCallError>(broker_id);
                 }
                 sleep(Duration::from_millis(10)).await
             }
@@ -257,11 +258,12 @@ impl ClusterController {
         let mut broker_list = self.broker_list.lock().unwrap();
         let response_keys = response
             .iter()
-            .map(|(&MetadataResponseBrokerKey { node_id }, _)| node_id)
+            .map(|(&MetadataResponseBrokerKey { node_id }, _)| Broker(node_id))
             .collect::<Vec<_>>();
         for (MetadataResponseBrokerKey { node_id }, MetadataResponseBroker { host, port, rack }) in
             response
         {
+            let node_id = Broker(node_id);
             if let Some((_, stored_metadata)) = broker_list.get_mut(&node_id) {
                 let mut stored_metadata = stored_metadata.lock().unwrap();
                 if stored_metadata.host == host && stored_metadata.port == port {
@@ -284,12 +286,12 @@ impl ClusterController {
                 .iter()
                 .find(|&(&id, (_, metadata))| {
                     let metadata = metadata.lock().unwrap();
-                    id < 0 && metadata.host == host && metadata.port == port
+                    id.0 < 0 && metadata.host == host && metadata.port == port
                 })
                 .map(|(&fake_broker_id, _)| fake_broker_id)
             {
                 debug!(
-                    "Connected to Kafka cluster. Assigning broker_id: {fake_broker_id} => {node_id}, rack: {rack:?}",
+                    "Connected to Kafka cluster. Assigning broker_id: {fake_broker_id:?} => {node_id:?}, rack: {rack:?}",
                 );
                 let (broker, metadata) = broker_list.remove(&fake_broker_id).unwrap();
                 {
@@ -394,6 +396,7 @@ mod tests {
         use crate::broker::broker_metadata::BrokerMetadata;
         use crate::broker::controller::BrokerController;
         use crate::cluster::controller::ClusterController;
+        use crate::protocol_consts::Broker;
         use kafka_connector_protocol::metadata_response::{
             MetadataResponseBroker, MetadataResponseBrokerKey,
         };
@@ -422,7 +425,7 @@ mod tests {
         #[test_log::test(tokio::test)]
         async fn broker_address_change() {
             let old_broker_metadata = vec![Arc::new(Mutex::new(BrokerMetadata {
-                broker_id: 1,
+                broker_id: Broker(1),
                 host: "127.0.0.2".to_string(),
                 port: 1234,
                 rack: None,
@@ -444,8 +447,8 @@ mod tests {
 
             let broker_list = cluster.broker_list.lock().unwrap();
             assert_eq!(broker_list.len(), 1);
-            let new_broker_metadata = broker_list.get(&1).unwrap().1.lock().unwrap();
-            assert_eq!(new_broker_metadata.broker_id, 1);
+            let new_broker_metadata = broker_list.get(&Broker(1)).unwrap().1.lock().unwrap();
+            assert_eq!(new_broker_metadata.broker_id, Broker(1));
             assert_eq!(new_broker_metadata.host, "127.0.0.3");
             assert_eq!(new_broker_metadata.port, 1234);
             assert_eq!(new_broker_metadata.rack, None);
@@ -459,7 +462,7 @@ mod tests {
         #[test_log::test(tokio::test)]
         async fn broker_rack_change() {
             let old_broker_metadata = vec![Arc::new(Mutex::new(BrokerMetadata {
-                broker_id: 1,
+                broker_id: Broker(1),
                 host: "127.0.0.2".to_string(),
                 port: 1234,
                 rack: None,
@@ -481,8 +484,8 @@ mod tests {
 
             let broker_list = cluster.broker_list.lock().unwrap();
             assert_eq!(broker_list.len(), 1);
-            let new_broker_metadata = broker_list.get(&1).unwrap().1.lock().unwrap();
-            assert_eq!(new_broker_metadata.broker_id, 1);
+            let new_broker_metadata = broker_list.get(&Broker(1)).unwrap().1.lock().unwrap();
+            assert_eq!(new_broker_metadata.broker_id, Broker(1));
             assert_eq!(new_broker_metadata.host, "127.0.0.2");
             assert_eq!(new_broker_metadata.port, 1234);
             assert_eq!(new_broker_metadata.rack, Some("rack".to_owned()));
@@ -495,7 +498,7 @@ mod tests {
         #[test_log::test(tokio::test)]
         async fn broker_added() {
             let old_broker_metadata = vec![Arc::new(Mutex::new(BrokerMetadata {
-                broker_id: 1,
+                broker_id: Broker(1),
                 host: "127.0.0.2".to_string(),
                 port: 1234,
                 rack: None,
@@ -532,13 +535,13 @@ mod tests {
         async fn broker_removed() {
             let old_broker_metadata = vec![
                 Arc::new(Mutex::new(BrokerMetadata {
-                    broker_id: 1,
+                    broker_id: Broker(1),
                     host: "127.0.0.2".to_string(),
                     port: 1234,
                     rack: None,
                 })),
                 Arc::new(Mutex::new(BrokerMetadata {
-                    broker_id: 2,
+                    broker_id: Broker(2),
                     host: "127.0.0.3".to_string(),
                     port: 1234,
                     rack: None,
@@ -561,8 +564,8 @@ mod tests {
 
             let broker_list = cluster.broker_list.lock().unwrap();
             assert_eq!(broker_list.len(), 1);
-            let new_broker_metadata = broker_list.get(&2).unwrap().1.lock().unwrap();
-            assert_eq!(new_broker_metadata.broker_id, 2);
+            let new_broker_metadata = broker_list.get(&Broker(2)).unwrap().1.lock().unwrap();
+            assert_eq!(new_broker_metadata.broker_id, Broker(2));
             assert_eq!(new_broker_metadata.host, "127.0.0.3");
             assert_eq!(new_broker_metadata.port, 1234);
             assert_eq!(new_broker_metadata.rack, None);
@@ -571,7 +574,7 @@ mod tests {
         #[test_log::test(tokio::test)]
         async fn cluster_initialization_fake_id_handling() {
             let old_broker_metadata = vec![Arc::new(Mutex::new(BrokerMetadata {
-                broker_id: -2,
+                broker_id: Broker(-2),
                 host: "127.0.0.2".to_string(),
                 port: 1234,
                 rack: None,
@@ -593,8 +596,8 @@ mod tests {
 
             let broker_list = cluster.broker_list.lock().unwrap();
             assert_eq!(broker_list.len(), 1);
-            let new_broker_metadata = broker_list.get(&1).unwrap().1.lock().unwrap();
-            assert_eq!(new_broker_metadata.broker_id, 1);
+            let new_broker_metadata = broker_list.get(&Broker(1)).unwrap().1.lock().unwrap();
+            assert_eq!(new_broker_metadata.broker_id, Broker(1));
             assert_eq!(new_broker_metadata.host, "127.0.0.2");
             assert_eq!(new_broker_metadata.port, 1234);
             assert_eq!(new_broker_metadata.rack, None);

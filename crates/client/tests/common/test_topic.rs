@@ -1,4 +1,5 @@
 use kafka_connector_client::cluster::controller::ClusterController;
+use kafka_connector_client::protocol_consts::Broker;
 use kafka_connector_protocol::create_topics_request::{CreatableTopic, CreateTopicsRequest};
 use kafka_connector_protocol::delete_topics_request::DeleteTopicsRequest;
 use std::sync::Arc;
@@ -57,7 +58,7 @@ impl TestTopic {
         let resp = self
             .cluster
             .make_api_call(
-                1,
+                Broker(1),
                 DeleteTopicsRequest {
                     topic_names: vec![self.name.clone()],
                     timeout_ms: TIMEOUT_MS,

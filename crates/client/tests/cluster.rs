@@ -9,6 +9,7 @@ use kafka_connector_client::cluster::controller::{ClusterController, ForceRefres
 use kafka_connector_client::cluster::options::{
     ClusterControllerAdvancedOptions, ClusterControllerOptions,
 };
+use kafka_connector_client::protocol_consts::Broker;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -26,7 +27,7 @@ pub async fn bootstrap_with_single_address_connects_with_all_from_metadata() {
     let broker_list = cluster.get_broker_list();
     assert_eq!(broker_list.len(), 3);
 
-    let metadata = &broker_list.get(&1).unwrap().0;
+    let metadata = &broker_list.get(&Broker(1)).unwrap().0;
     assert_eq!(metadata.host, KAFKA_TEST_BROKER_ADDR_1_HOST);
     assert_eq!(metadata.port, KAFKA_TEST_BROKER_ADDR_1_PORT as i32);
     assert_eq!(
@@ -34,7 +35,7 @@ pub async fn bootstrap_with_single_address_connects_with_all_from_metadata() {
         KAFKA_TEST_BROKER_1_RACK.map(ToOwned::to_owned)
     );
 
-    let metadata = &broker_list.get(&2).unwrap().0;
+    let metadata = &broker_list.get(&Broker(2)).unwrap().0;
     assert_eq!(metadata.host, KAFKA_TEST_BROKER_ADDR_2_HOST);
     assert_eq!(metadata.port, KAFKA_TEST_BROKER_ADDR_2_PORT as i32);
     assert_eq!(
@@ -42,7 +43,7 @@ pub async fn bootstrap_with_single_address_connects_with_all_from_metadata() {
         KAFKA_TEST_BROKER_2_RACK.map(ToOwned::to_owned)
     );
 
-    let metadata = &broker_list.get(&3).unwrap().0;
+    let metadata = &broker_list.get(&Broker(3)).unwrap().0;
     assert_eq!(metadata.host, KAFKA_TEST_BROKER_ADDR_3_HOST);
     assert_eq!(metadata.port, KAFKA_TEST_BROKER_ADDR_3_PORT as i32);
     assert_eq!(

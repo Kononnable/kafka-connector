@@ -1,3 +1,4 @@
+use crate::protocol_consts::Broker;
 use kafka_connector_protocol::{ApiError, ApiKey};
 use std::sync::Arc;
 use thiserror::Error as DeriveError;
@@ -7,8 +8,8 @@ use thiserror::Error as DeriveError;
 pub enum ApiCallError {
     #[error("Broker connection closed before api response was received")]
     BrokerConnectionClosed,
-    #[error("No broker with id {0} found")]
-    BrokerNotFound(i32),
+    #[error("No broker {0:?} found")]
+    BrokerNotFound(Broker),
     #[error("Error encountered during network communication. {0}")]
     IoError(Arc<std::io::Error>),
     #[error("Serialization error {0}")]

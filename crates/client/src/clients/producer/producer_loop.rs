@@ -5,6 +5,7 @@ use crate::clients::producer::options::{Acks, KafkaProducerOptions};
 use crate::clients::producer::partitioner::Partitioner;
 use crate::cluster::controller::{ClusterController, ForceRefresh};
 use crate::cluster::error::ApiCallError;
+use crate::protocol_consts::Broker;
 use bytes::BytesMut;
 use futures::future::{Either, select_all};
 use kafka_connector_protocol::metadata_request::MetadataRequest;
@@ -476,12 +477,12 @@ where
                 response: {
                     if no_ack {
                         controller
-                            .make_api_call_without_response(broker_id, api_call, None)
+                            .make_api_call_without_response(Broker(broker_id), api_call, None)
                             .await
                             .map(|_| None)
                     } else {
                         controller
-                            .make_api_call(broker_id, api_call, None)
+                            .make_api_call(Broker(broker_id), api_call, None)
                             .await
                             .map(Some)
                     }

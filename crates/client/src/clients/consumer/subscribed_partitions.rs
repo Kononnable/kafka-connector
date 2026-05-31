@@ -1,22 +1,18 @@
 use crate::clients::consumer::consumer_loop::Assignments;
+use crate::protocol_consts::{Broker, Epoch, Offset, Partition};
 use std::collections::HashMap;
 // TODO: pub(crate) or similar - internal use only(panics)
-// TODO: use newtypes - too many numeric parameters in functions
-// struct Partition(i32);
-// struct Broker(i32);
-// struct Epoch(i32);
-// struct Offset(i64);
 
 #[derive(Debug, Default)]
 struct SubscribedPartition {
     // TODO: allow reads from non-leader
-    leader_broker: i32,
-    next_offset_to_fetch: Option<i64>,
-    leader_epoch: i32,
+    leader_broker: Broker,
+    next_offset_to_fetch: Option<Offset>,
+    leader_epoch: Epoch,
 }
 #[derive(Debug, Default)]
 struct SubscribedTopic {
-    partitions: HashMap<i32, SubscribedPartition>,
+    partitions: HashMap<Partition, SubscribedPartition>,
 }
 #[derive(Debug, Default)]
 pub struct Subscriptions {
@@ -26,9 +22,9 @@ impl Subscriptions {
     pub fn add_partition(
         &mut self,
         topic: &str,
-        partition: i32,
-        leader_broker: i32,
-        leader_epoch: i32,
+        partition: Partition,
+        leader_broker: Broker,
+        leader_epoch: Epoch,
     ) {
         self.inner
             .entry(topic.to_owned())
@@ -43,7 +39,7 @@ impl Subscriptions {
                 },
             );
     }
-    pub fn set_offset_for_partition(&mut self, topic: &str, partition: i32, offset: i64) {
+    pub fn set_offset_for_partition(&mut self, topic: &str, partition: Partition, offset: Offset) {
         self.inner
             .entry(topic.to_owned())
             .or_default()
@@ -54,8 +50,8 @@ impl Subscriptions {
     }
     pub fn get_partitions_without_offset_by_broker(
         &self,
-    ) -> HashMap<i32, HashMap<String, Vec<(i32, i32)>>> {
-        let mut result: HashMap<i32, HashMap<String, Vec<(i32, i32)>>> = HashMap::new();
+    ) -> HashMap<Broker, HashMap<String, Vec<(Partition, Epoch)>>> {
+        let mut result: HashMap<Broker, HashMap<String, Vec<(Partition, Epoch)>>> = HashMap::new();
         for (topic_name, topic) in self.inner.iter() {
             for (partition_idx, partition) in topic
                 .partitions

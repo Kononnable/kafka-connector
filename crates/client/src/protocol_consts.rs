@@ -2,6 +2,18 @@ use crate::protocol_consts::ListOffsetsTimestampType::Specific;
 
 // TODO: Split, move to better location (?)
 
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
+pub struct Partition(pub i32);
+
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
+pub struct Broker(pub i32);
+
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
+pub struct Epoch(pub i32);
+
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
+pub struct Offset(pub i64);
+
 pub enum IsolationLevel {
     ReadUncommited = 0,
     ReadCommited = 1,

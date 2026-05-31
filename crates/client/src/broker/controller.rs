@@ -131,11 +131,13 @@ impl BrokerController {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::protocol_consts::Broker;
     use std::time::Duration;
+
     #[test_log::test(tokio::test)]
     async fn loop_closes_after_controller_drops() {
         let metadata = Arc::new(Mutex::new(BrokerMetadata {
-            broker_id: 1,
+            broker_id: Broker(1),
             host: "".to_string(),
             port: 0,
             rack: None,

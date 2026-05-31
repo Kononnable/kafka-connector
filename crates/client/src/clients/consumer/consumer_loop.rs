@@ -9,7 +9,9 @@ use crate::cluster::controller::{ClusterController, ForceRefresh};
 use crate::cluster::error::ApiCallError;
 use crate::protocol_consts::consumer_protocol_assignment::ConsumerProtocolAssignment;
 use crate::protocol_consts::consumer_protocol_subscription::ConsumerProtocolSubscription;
-use crate::protocol_consts::{FindCoordinatorKeyType, IsolationLevel};
+use crate::protocol_consts::{
+    Broker, Epoch, FindCoordinatorKeyType, IsolationLevel, Offset, Partition,
+};
 use bytes::BytesMut;
 use futures::future::{SelectAll, join_all, select_all};
 use kafka_connector_protocol::fetch_request::{FetchPartition, FetchRequest, FetchableTopic};
@@ -36,25 +38,26 @@ use std::task::{Context, Poll, Waker};
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::error::TryRecvError;
+use tokio::time::sleep;
 use tracing::{debug, error, info, instrument, trace, warn};
 
 // TODO: remove, migrate to SUbscriberPartitions
 /// Broker -> Topic -> Partition -> (next_offset_to_fetch, current_leader_epoch)
-pub type Assignments = HashMap<i32, HashMap<String, HashMap<i32, (i64, i32)>>>;
+pub type Assignments = HashMap<Broker, HashMap<String, HashMap<Partition, (Offset, Epoch)>>>;
 
 type FetchApiCall =
-    Pin<Box<dyn Future<Output = (i32, Result<FetchResponse, ApiCallError>)> + Send>>;
+    Pin<Box<dyn Future<Output = (Broker, Result<FetchResponse, ApiCallError>)> + Send>>;
 type FetchApiCalls = Pin<Box<SelectAll<FetchApiCall>>>;
 struct FetchRequestsInFlight {
-    brokers: HashSet<i32>,
-    brokers_with_active_requests: HashSet<i32>,
+    brokers: HashSet<Broker>,
+    brokers_with_active_requests: HashSet<Broker>,
     futures: Option<FetchApiCalls>,
 }
 impl FetchRequestsInFlight {
     // TODO: add some form of persistent iterator, so consuming messages from different brokers is fair
     pub fn new(
         // only brokers used in consumer(that have partitions that consumer is consuming from)
-        broker_list: HashSet<i32>,
+        broker_list: HashSet<Broker>,
     ) -> FetchRequestsInFlight {
         FetchRequestsInFlight {
             brokers: broker_list.clone(),
@@ -62,14 +65,14 @@ impl FetchRequestsInFlight {
             futures: None,
         }
     }
-    pub fn get_brokers_to_send_requests_to(&self) -> Vec<i32> {
+    pub fn get_brokers_to_send_requests_to(&self) -> Vec<Broker> {
         self.brokers
             .iter()
             .filter(|x| !self.brokers_with_active_requests.contains(*x))
             .cloned()
             .collect()
     }
-    pub fn send_requests_to_brokers(&mut self, requests: Vec<(i32, FetchApiCall)>) {
+    pub fn send_requests_to_brokers(&mut self, requests: Vec<(Broker, FetchApiCall)>) {
         let mut futures = self
             .futures
             .take()
@@ -85,7 +88,7 @@ impl FetchRequestsInFlight {
     pub fn future(&mut self) -> &mut Option<FetchApiCalls> {
         &mut self.futures
     }
-    pub fn on_fetch_response(&mut self, broker_ids: Vec<i32>, futures: Vec<FetchApiCall>) {
+    pub fn on_fetch_response(&mut self, broker_ids: Vec<Broker>, futures: Vec<FetchApiCall>) {
         for broker_id in broker_ids {
             self.brokers_with_active_requests.remove(&broker_id);
         }
@@ -101,7 +104,7 @@ pub enum ConsumerLoopType {
     Single,
     Group {
         group_id: String,
-        coordinator: i32,
+        coordinator: Broker,
         member_id: String,
         generation_id: i32,
     },
@@ -111,7 +114,7 @@ impl ConsumerLoopType {
         if let Some(group_id) = &options.group_id {
             ConsumerLoopType::Group {
                 group_id: group_id.clone(),
-                coordinator: -1,
+                coordinator: Broker(-1),
                 member_id: "".to_string(),
                 generation_id: -1,
             }
@@ -196,6 +199,7 @@ impl ConsumerLoop {
                     ..
                 } = &self.type_
                 {
+                    // TODO: handle coordinator =-1 (different amounts of retries) - or change it to be a shutdown timeout (if gracefull does not happen in x seconds, force it)
                     if let Some(autocommit) = &mut auto_commit {
                         autocommit.force_store_current_offsets().await;
                     }
@@ -215,6 +219,20 @@ impl ConsumerLoop {
 
                 break;
             }
+            dbg!("A", &self.type_);
+            if let ConsumerLoopType::Group {
+                coordinator: Broker(-1),
+                ..
+            } = &self.type_
+            {
+                dbg!("B", &self.type_);
+                // TODO: Magic number, handle initialization + coordinator change (error code)
+                while let Err(_err) = self.find_group_coordinator().await {
+                    // TODO: Log error, retry with delay (configurable?)
+                    sleep(Duration::from_millis(100)).await;
+                }
+            }
+
             match self.state {
                 ConsumerLoopState::Initializing => {
                     if let Err(err) = self.get_topic_assignments().await {
@@ -376,14 +394,7 @@ impl ConsumerLoop {
 
     #[instrument(level = "debug", skip(self))]
     async fn get_topic_assignments(&mut self) -> Result<(), ConsumeError> {
-        if let ConsumerLoopType::Group {
-            coordinator: -1, ..
-        } = &self.type_
-        {
-            // TODO: Magic number, handle initialization + coordinator change (error code)
-            self.find_group_coordinator().await?;
-        }
-
+        dbg!(&self.type_);
         let assignment = match matches!(self.type_, ConsumerLoopType::Group { .. }) {
             false => None,
             true => self.join_and_sync_consumer_group().await?,
@@ -403,8 +414,10 @@ impl ConsumerLoop {
             key: group_id.clone(),
             key_type: FindCoordinatorKeyType::Group.into(),
         };
+        dbg!("C");
         let response = self.controller.make_api_call(None, request, None).await?;
 
+        dbg!("D", response.node_id, response.error_code);
         if let Some(error_code) = response.error_code {
             match error_code {
                 ApiError::CoordinatorLoadInProgress | ApiError::CoordinatorNotAvailable => {
@@ -423,7 +436,8 @@ impl ConsumerLoop {
                 ))?,
             }
         }
-        *coordinator = response.node_id;
+        dbg!(&coordinator, &response.node_id);
+        *coordinator = Broker(response.node_id);
         Ok(())
     }
 
@@ -697,9 +711,9 @@ impl ConsumerLoop {
                 }
                 partitions_to_consume.add_partition(
                     &topic,
-                    partition_metadata.partition_index,
-                    partition_metadata.leader_id,
-                    partition_metadata.leader_epoch,
+                    Partition(partition_metadata.partition_index),
+                    Broker(partition_metadata.leader_id),
+                    Epoch(partition_metadata.leader_epoch),
                 );
             }
         }
@@ -723,7 +737,7 @@ impl ConsumerLoop {
                                 .iter()
                                 .map(|(topic, partitions)| OffsetFetchRequestTopic {
                                     name: topic.to_owned(),
-                                    partition_indexes: partitions.keys().cloned().collect(),
+                                    partition_indexes: partitions.keys().map(|x| x.0).collect(),
                                 })
                                 .collect(),
                         ),
@@ -758,8 +772,8 @@ impl ConsumerLoop {
                             // -1 offset not commited
                             partitions_to_consume.set_offset_for_partition(
                                 &topic.name,
-                                partition.partition_index,
-                                partition.committed_offset,
+                                Partition(partition.partition_index),
+                                Offset(partition.committed_offset),
                             );
                         }
                     }
@@ -783,8 +797,8 @@ impl ConsumerLoop {
                                     .into_iter()
                                     .map(|(partition_index, current_leader_epoch)| {
                                         ListOffsetPartition {
-                                            partition_index,
-                                            current_leader_epoch,
+                                            partition_index: partition_index.0,
+                                            current_leader_epoch: current_leader_epoch.0,
                                             timestamp: self.consumer_options.offset_reset.into(),
                                             max_num_offsets: 0,
                                         }
@@ -819,8 +833,8 @@ impl ConsumerLoop {
                         }
                         partitions_to_consume.set_offset_for_partition(
                             &topic.name,
-                            partition.partition_index,
-                            partition.offset,
+                            Partition(partition.partition_index),
+                            Offset(partition.offset),
                         );
                     }
                 }
@@ -832,7 +846,7 @@ impl ConsumerLoop {
     }
 
     #[instrument(level = "debug", skip(self))]
-    fn fetch_data(&self, broker_id: i32) -> FetchApiCall {
+    fn fetch_data(&self, broker_id: Broker) -> FetchApiCall {
         let assignments = self.partitions_to_consume.get(&broker_id).unwrap();
         let request = FetchRequest {
             replica_id: -1,
@@ -849,9 +863,9 @@ impl ConsumerLoop {
                     fetch_partitions: partitions
                         .iter()
                         .map(|(partition_index, &(offset, epoch))| FetchPartition {
-                            partition_index: *partition_index,
-                            current_leader_epoch: epoch,
-                            fetch_offset: offset,
+                            partition_index: partition_index.0,
+                            current_leader_epoch: epoch.0,
+                            fetch_offset: offset.0,
                             log_start_offset: -1,
                             max_bytes: self.consumer_options.max_bytes_per_partition,
                         })
@@ -873,7 +887,7 @@ impl ConsumerLoop {
     #[instrument(level = "debug", skip(self, response))]
     fn process_fetch_response(
         &mut self,
-        broker: i32,
+        broker: Broker,
         response: Result<FetchResponse, ApiCallError>,
     ) {
         let Ok(response) = response else {
@@ -910,9 +924,9 @@ impl ConsumerLoop {
                                 .unwrap()
                                 .get_mut(topic)
                                 .unwrap()
-                                .get_mut(&partition_response.partition_index)
+                                .get_mut(&Partition(partition_response.partition_index))
                                 .unwrap()
-                                .0 = -1;
+                                .0 = Offset(-1);
                         }
                         _ => {
                             let err = ApiCallError::UnexpectedErrorCode(
@@ -926,7 +940,7 @@ impl ConsumerLoop {
                     }
                 }
                 if let Some(records) = partition_response.records {
-                    let partition = partition_response.partition_index;
+                    let partition = Partition(partition_response.partition_index);
                     self.process_partition_records(broker, topic, partition, records);
                 }
             }
@@ -936,9 +950,9 @@ impl ConsumerLoop {
     #[instrument(level = "debug", skip(self, records))]
     fn process_partition_records(
         &mut self,
-        broker: i32,
+        broker: Broker,
         topic: &str,
-        partition: i32,
+        partition: Partition,
         records: Vec<u8>,
     ) {
         let mut last_processed_offset = None;
@@ -968,16 +982,10 @@ impl ConsumerLoop {
                         .into_iter()
                         .map(|header| (header.key.0, header.value.0))
                         .collect(),
-                    partition,
+                    partition: partition.0,
                     offset,
                 };
 
-                // TODO: change mechanism so it does not hang here if buffer is full
-                //       or explicitly block here, so we know exactly which messages were processed by consumer
-                //       for auto commit offsets and rebalance
-                // TODO: support for heartbeats and rebalances triggered by heartbeat response
-                //      can this happen mid batch, or should batch be fully processed
-                // let _ = self.record_sender.send(record).await;
                 self.fetched_records.push_back(record);
             }
         }
@@ -989,7 +997,7 @@ impl ConsumerLoop {
                 .unwrap()
                 .get_mut(&partition)
                 .unwrap()
-                .0 = offset + 1;
+                .0 = Offset(offset + 1);
         }
     }
 }

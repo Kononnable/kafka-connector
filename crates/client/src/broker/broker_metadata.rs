@@ -1,9 +1,11 @@
 // TODO: split to two structs? (one with id for internal usage - Vec<BrokerMetadata>, one without id for public api - HashMap<id, BrokerMetadata>
 
+use crate::protocol_consts::Broker;
+
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct BrokerMetadata {
     /// Broker id
-    pub(crate) broker_id: i32,
+    pub(crate) broker_id: Broker,
 
     /// The broker hostname.
     pub host: String,

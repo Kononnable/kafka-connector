@@ -3,6 +3,7 @@ use crate::common::{KAFKA_TEST_BROKER_ADDR_1_HOST, KAFKA_TEST_BROKER_ADDR_1_PORT
 use kafka_connector_client::cluster::controller::ClusterController;
 use kafka_connector_client::cluster::error::ApiCallError;
 use kafka_connector_client::cluster::options::ClusterControllerOptions;
+use kafka_connector_client::protocol_consts::Broker;
 use kafka_connector_protocol::metadata_request::MetadataRequest;
 use std::sync::Arc;
 use std::time::Duration;
@@ -29,7 +30,7 @@ pub async fn fails_api_call_when_broker_offline_and_succeeds_when_broker_gets_ba
 
     let result = cluster
         .make_api_call(
-            2,
+            Broker(2),
             MetadataRequest {
                 topics: Some([].into()),
                 allow_auto_topic_creation: true,
@@ -42,7 +43,7 @@ pub async fn fails_api_call_when_broker_offline_and_succeeds_when_broker_gets_ba
     kafka_cluster.broker_2.unpause().await.unwrap();
     let result = cluster
         .make_api_call(
-            2,
+            Broker(2),
             MetadataRequest {
                 topics: Some([].into()),
                 allow_auto_topic_creation: true,
