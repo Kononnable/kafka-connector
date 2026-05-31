@@ -219,13 +219,11 @@ impl ConsumerLoop {
 
                 break;
             }
-            dbg!("A", &self.type_);
             if let ConsumerLoopType::Group {
                 coordinator: Broker(-1),
                 ..
             } = &self.type_
             {
-                dbg!("B", &self.type_);
                 // TODO: Magic number, handle initialization + coordinator change (error code)
                 while let Err(_err) = self.find_group_coordinator().await {
                     // TODO: Log error, retry with delay (configurable?)
@@ -346,12 +344,10 @@ impl ConsumerLoop {
                         }} => {
                                     // TODO:
                             match x {
-
                             None => {}
                                 Some(x) => {
                                    if let Some(x) = x.map(|x|x.error_code).ok().flatten() {
 
-                                    dbg!(&x);
                                         match x {
                                             ApiError::RebalanceInProgress => {
                                                 self.state = ConsumerLoopState::Initializing
@@ -378,12 +374,7 @@ impl ConsumerLoop {
                         }} => {
                                     // TODO:
                                 let x= x.unwrap();
-
-                                    dbg!(&x);
                         }
-
-
-
                     }
                 }
             }
@@ -394,7 +385,6 @@ impl ConsumerLoop {
 
     #[instrument(level = "debug", skip(self))]
     async fn get_topic_assignments(&mut self) -> Result<(), ConsumeError> {
-        dbg!(&self.type_);
         let assignment = match matches!(self.type_, ConsumerLoopType::Group { .. }) {
             false => None,
             true => self.join_and_sync_consumer_group().await?,
@@ -414,10 +404,8 @@ impl ConsumerLoop {
             key: group_id.clone(),
             key_type: FindCoordinatorKeyType::Group.into(),
         };
-        dbg!("C");
         let response = self.controller.make_api_call(None, request, None).await?;
 
-        dbg!("D", response.node_id, response.error_code);
         if let Some(error_code) = response.error_code {
             match error_code {
                 ApiError::CoordinatorLoadInProgress | ApiError::CoordinatorNotAvailable => {
@@ -436,7 +424,6 @@ impl ConsumerLoop {
                 ))?,
             }
         }
-        dbg!(&coordinator, &response.node_id);
         *coordinator = Broker(response.node_id);
         Ok(())
     }
